@@ -14,6 +14,7 @@ write_probe=0
 feature_edit_probe=0
 app_code_probe=0
 integrated_app_code_probe=0
+multi_file_app_code_probe=0
 build_tmp=""
 task_text="Plan a bounded real-repo fix without writing files"
 
@@ -21,7 +22,7 @@ trap 'rm -f "$repos_file"; if [ -n "$build_tmp" ]; then rm -rf "$build_tmp"; fi'
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--task text] [--timeout-ms n] [--repeat n] [--output-dir path] [--copy-workspace] [--write-probe] [--feature-edit-probe] [--app-code-probe] [--integrated-app-code-probe]
+Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--task text] [--timeout-ms n] [--repeat n] [--output-dir path] [--copy-workspace] [--write-probe] [--feature-edit-probe] [--app-code-probe] [--integrated-app-code-probe] [--multi-file-app-code-probe]
 
 Creates durable dogfood evidence under .omo/evidence/dogfood-real.
 
@@ -39,6 +40,8 @@ Options:
   --app-code-probe   In live copied-workspace mode, preview and approve a source-code module edit.
   --integrated-app-code-probe
                      In live copied-workspace mode, preview and approve an edit to an existing source file.
+  --multi-file-app-code-probe
+                     In live copied-workspace mode, preview and approve edits to two existing source files.
   --help             Show this help.
 USAGE
 }
@@ -145,6 +148,10 @@ while [ "$#" -gt 0 ]; do
       integrated_app_code_probe=1
       shift
       ;;
+    --multi-file-app-code-probe)
+      multi_file_app_code_probe=1
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
@@ -193,6 +200,11 @@ fi
 
 if [ "$integrated_app_code_probe" -eq 1 ] && [ "$copy_workspace" -eq 0 ]; then
   printf '%s\n' "dogfood-real: --integrated-app-code-probe requires --copy-workspace" >&2
+  exit 2
+fi
+
+if [ "$multi_file_app_code_probe" -eq 1 ] && [ "$copy_workspace" -eq 0 ]; then
+  printf '%s\n' "dogfood-real: --multi-file-app-code-probe requires --copy-workspace" >&2
   exit 2
 fi
 
@@ -386,6 +398,11 @@ write_index_header() {
     else
       printf '%s\n' "- Integrated app-code probe: disabled"
     fi
+    if [ "$multi_file_app_code_probe" -eq 1 ]; then
+      printf '%s\n' "- Multi-file app-code probe: enabled"
+    else
+      printf '%s\n' "- Multi-file app-code probe: disabled"
+    fi
     printf '%s\n' "- Runner: scripts/dogfood-real.sh"
     printf '%s\n' "- Evidence root: $(evidence_display_path)"
     printf '%s\n' "- Secret API keys: not required for smoke path"
@@ -404,6 +421,7 @@ write_index_header() {
     printf '%s\n' "| scenario-07-feature-edit-probe | Prove a repo-specific feature note can be previewed and approved in a copied workspace | listed only | feature file, preview digest, after-state git status |"
     printf '%s\n' "| scenario-08-app-code-probe | Prove a source-code module can be previewed and approved in a copied workspace | listed only | app-code file, preview digest, after-state git status |"
     printf '%s\n' "| scenario-09-integrated-app-code-probe | Prove an existing source file can be previewed and approved in a copied workspace | listed only | target path, modified source file, preview digest, after-state git status |"
+    printf '%s\n' "| scenario-10-multi-file-app-code-probe | Prove two existing source files can be previewed and approved in a copied workspace | listed only | target paths, modified source files, preview digests, after-state git status |"
     printf '\n'
     printf '%s\n' "## Repo Results"
     printf '\n'
@@ -447,6 +465,10 @@ write_dry_run_plan() {
     fi
     if [ "$integrated_app_code_probe" -eq 1 ]; then
       printf '%s\n' "9. ceo-packet --workspace <copied-workspace> --write-policy approved-write --approve-preview <digest> --replace <existing-source-file> <old> <old-plus-export> --format json \"Apply copied workspace integrated app-code probe\""
+    fi
+    if [ "$multi_file_app_code_probe" -eq 1 ]; then
+      printf '%s\n' "10. ceo-packet --workspace <copied-workspace> --write-policy approved-write --approve-preview <digest> --replace <existing-source-file-a> <old> <old-plus-export> --format json \"Apply copied workspace multi-file app-code probe\""
+      printf '%s\n' "11. ceo-packet --workspace <copied-workspace> --write-policy approved-write --approve-preview <digest> --replace <existing-source-file-b> <old> <old-plus-export> --format json \"Apply copied workspace multi-file app-code probe\""
     fi
   } >"$plan_repo_dir/plan.md"
   printf '%s\n' "planned" >"$plan_repo_dir/status.txt"
@@ -740,6 +762,119 @@ run_integrated_app_code_probe() {
   return 0
 }
 
+select_multi_file_source_files() {
+  multi_repo_path="$1"
+  {
+    for candidate in \
+      "$multi_repo_path/src/App.jsx" \
+      "$multi_repo_path/src/main.jsx" \
+      "$multi_repo_path/src/App.tsx" \
+      "$multi_repo_path/src/main.tsx" \
+      "$multi_repo_path/src/App.js" \
+      "$multi_repo_path/src/main.js" \
+      "$multi_repo_path/src/App.ts" \
+      "$multi_repo_path/src/main.ts"; do
+      if [ -f "$candidate" ]; then
+        printf '%s\n' "$candidate"
+      fi
+    done
+    if [ -d "$multi_repo_path/src" ]; then
+      find "$multi_repo_path/src" -type f \( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' \) \
+        | grep -Ev '/(__tests__|test)/|[._](test|spec)\.' \
+        | sort
+    fi
+  } | awk '!seen[$0]++' | sed -n '1,2p'
+}
+
+artifact_name_for_relpath() {
+  printf '%s' "$1" | tr '/ ' '--' | tr -c 'A-Za-z0-9._-' '-'
+}
+
+run_multi_file_single_app_code_edit() {
+  multi_repo_name="$1"
+  multi_task_text="$2"
+  multi_repo_path="$3"
+  multi_dir="$4"
+  multi_bin="$5"
+  target_file="$6"
+  variable_name="$7"
+  label="$8"
+  target_rel=${target_file#"$multi_repo_path"/}
+  old_content=$(cat "$target_file")
+  repo_js=$(js_string_escape "$multi_repo_name")
+  task_js=$(js_string_escape "$multi_task_text")
+  marker=$(printf '%s\n' \
+    "export const $variable_name = {" \
+    "  repo: \"$repo_js\"," \
+    "  task: \"$task_js\"," \
+    "  result: \"approved multi-file copied-workspace app-code edit\"" \
+    "};")
+  new_content=$(printf '%s\n\n%s' "$old_content" "$marker")
+
+  if ! run_capture "$multi_dir/preview-$label" "$multi_bin" --workspace "$multi_repo_path" --dry-run --replace "$target_rel" "$old_content" "$new_content" --format json "Preview copied workspace multi-file app-code probe"; then
+    printf '%s\n' "multi-file app-code probe preview failed for $target_rel" >"$multi_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  digest=$(preview_digest_from_stdout "$multi_dir/preview-$label/stdout.txt")
+  if [ -z "$digest" ]; then
+    printf '%s\n' "missing preview digest for $target_rel" >"$multi_dir/pass-fail-note.txt"
+    return 1
+  fi
+  printf '%s %s\n' "$target_rel" "$digest" >>"$multi_dir/preview-digests.txt"
+
+  if ! run_capture "$multi_dir/apply-$label" "$multi_bin" --workspace "$multi_repo_path" --write-policy approved-write --approve-preview "$digest" --replace "$target_rel" "$old_content" "$new_content" --format json "Apply copied workspace multi-file app-code probe"; then
+    printf '%s\n' "multi-file app-code probe approved apply failed for $target_rel" >"$multi_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  if ! grep -F -q "$variable_name" "$target_file" || ! grep -F -q "approved multi-file copied-workspace app-code edit" "$target_file"; then
+    printf '%s\n' "multi-file app-code target file did not include expected marker for $target_rel" >"$multi_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  artifact_name=$(artifact_name_for_relpath "$target_rel")
+  cp "$target_file" "$multi_dir/modified-source-files/$artifact_name.txt"
+  return 0
+}
+
+run_multi_file_app_code_probe() {
+  multi_repo_name="$1"
+  multi_task_text="$2"
+  multi_repo_path="$3"
+  multi_dir="$4"
+  multi_bin="$5"
+  mkdir -p "$multi_dir/modified-source-files"
+  targets_tmp="$multi_dir/selected-targets.txt"
+  select_multi_file_source_files "$multi_repo_path" >"$targets_tmp"
+  target_count=$(wc -l <"$targets_tmp" | tr -d ' ')
+  if [ "$target_count" -lt 2 ]; then
+    printf '%s\n' "fewer than two source files found under src for multi-file app-code probe" >"$multi_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  target_one=$(sed -n '1p' "$targets_tmp")
+  target_two=$(sed -n '2p' "$targets_tmp")
+  target_one_rel=${target_one#"$multi_repo_path"/}
+  target_two_rel=${target_two#"$multi_repo_path"/}
+  {
+    printf '%s\n' "$target_one_rel"
+    printf '%s\n' "$target_two_rel"
+  } >"$multi_dir/target-files.txt"
+  : >"$multi_dir/preview-digests.txt"
+
+  if ! run_multi_file_single_app_code_edit "$multi_repo_name" "$multi_task_text" "$multi_repo_path" "$multi_dir" "$multi_bin" "$target_one" "ceoDogfoodMultiFileProbeApp" "one"; then
+    return 1
+  fi
+  if ! run_multi_file_single_app_code_edit "$multi_repo_name" "$multi_task_text" "$multi_repo_path" "$multi_dir" "$multi_bin" "$target_two" "ceoDogfoodMultiFileProbeEntry" "two"; then
+    return 1
+  fi
+
+  capture_git_status_only "$multi_repo_path" "$multi_dir/git-status-after.txt"
+  printf '%s\n' "approved multi-file app-code edit changed copied workspace only" >"$multi_dir/pass-fail-note.txt"
+  return 0
+}
+
 run_live_repo() {
   live_repo_name="$1"
   live_repo_path="$2"
@@ -838,6 +973,16 @@ run_live_repo() {
     fi
   fi
 
+  scenario_10="skipped_disabled"
+  if [ "$multi_file_app_code_probe" -eq 1 ]; then
+    if run_multi_file_app_code_probe "$live_repo_name" "$task_text" "$live_repo_path" "$live_repo_dir/scenario-10-multi-file-app-code-probe" "$live_bin"; then
+      scenario_10="pass"
+    else
+      scenario_10="fail"
+      overall="fail"
+    fi
+  fi
+
   {
     printf '%s\n' "# Live Dogfood Summary: $live_repo_name"
     printf '\n'
@@ -863,6 +1008,9 @@ run_live_repo() {
     fi
     if [ "$integrated_app_code_probe" -eq 1 ]; then
       printf '%s\n' "| scenario-09-integrated-app-code-probe | $scenario_09 | scenario-09-integrated-app-code-probe/pass-fail-note.txt |"
+    fi
+    if [ "$multi_file_app_code_probe" -eq 1 ]; then
+      printf '%s\n' "| scenario-10-multi-file-app-code-probe | $scenario_10 | scenario-10-multi-file-app-code-probe/pass-fail-note.txt |"
     fi
   } >"$live_repo_dir/summary.md"
   printf '%s\n' "$overall" >"$live_repo_dir/status.txt"

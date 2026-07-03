@@ -76,6 +76,9 @@ Status date: 2026-07-03
 - Latest copied-workspace integrated app-code dogfood:
   - `sh scripts/dogfood-real.sh --copy-workspace --integrated-app-code-probe --repo chemcheck:/Users/jakedom/Documents/chemcheck-main --repo axis-health:'/Users/jakedom/Documents/Axis health' --task 'Wire a copied-workspace app-code marker into an existing source file without touching source checkouts' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-integrated-app-code-r1`
   - Result: ChemCheck pass and Axis Health pass; both previewed, approved, and applied `ceoDogfoodIntegratedProbe` to copied `src/App.jsx`, saved the target path plus modified source file and after-state git status, and left source checkouts without the marker.
+- Latest copied-workspace multi-file app-code dogfood:
+  - `sh scripts/dogfood-real.sh --copy-workspace --multi-file-app-code-probe --repo chemcheck:/Users/jakedom/Documents/chemcheck-main --repo axis-health:'/Users/jakedom/Documents/Axis health' --task 'Wire a copied-workspace app-code marker across two existing source files without touching source checkouts' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-multi-file-app-code-r1`
+  - Result: ChemCheck pass and Axis Health pass; both previewed, approved, and applied `ceoDogfoodMultiFileProbe*` markers to copied `src/App.jsx` and `src/main.jsx`, saved target paths plus modified source files and after-state git status, and left source checkouts without the marker.
 - Nightly eval task:
   - `make eval-nightly`
   - `/Users/jakedom/go/bin/task eval:nightly`

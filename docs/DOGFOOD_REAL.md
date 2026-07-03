@@ -90,6 +90,19 @@ sh scripts/dogfood-real.sh \
 
 The integrated app-code probe picks an existing `src/App.*` or `src/main.*` file when available, previews the replacement, applies it only with the matching approval digest, saves the target file path, saves the modified source file, and records after-state git status.
 
+To prove coordinated app-code edits across two existing source files in a copied workspace, use `--multi-file-app-code-probe`:
+
+```sh
+sh scripts/dogfood-real.sh \
+  --copy-workspace \
+  --multi-file-app-code-probe \
+  --repo "ceo-harness:/path/to/repo" \
+  --task "Wire a copied-workspace app-code marker across two existing source files" \
+  --output-dir .omo/evidence/dogfood-real-multi-file-app-code
+```
+
+The multi-file app-code probe picks two existing non-test files under `src`, previews each replacement, applies each only with its matching approval digest, saves both target file paths, saves both modified source files, and records after-state git status.
+
 Repeat a real-repo dogfood pass and keep it isolated from the default evidence folder:
 
 ```sh
@@ -125,6 +138,9 @@ Evidence is saved under `.omo/evidence/dogfood-real/`:
 - `repos/<name>/scenario-09-integrated-app-code-probe/target-file.txt`: copied-workspace source file selected for the integrated app-code probe.
 - `repos/<name>/scenario-09-integrated-app-code-probe/integrated-source-file.txt`: copied-workspace source file after the approved integrated app-code probe.
 - `repos/<name>/scenario-09-integrated-app-code-probe/git-status-after.txt`: copied-workspace after-state for the integrated app-code probe.
+- `repos/<name>/scenario-10-multi-file-app-code-probe/target-files.txt`: copied-workspace source files selected for the multi-file app-code probe.
+- `repos/<name>/scenario-10-multi-file-app-code-probe/modified-source-files/`: copied-workspace source files after the approved multi-file app-code probe.
+- `repos/<name>/scenario-10-multi-file-app-code-probe/git-status-after.txt`: copied-workspace after-state for the multi-file app-code probe.
 - `_archive/<run>/`: previous run evidence preserved before the latest run is written.
 
 Real-provider runs are intentionally skipped by default. The smoke path stays local and keyless.
