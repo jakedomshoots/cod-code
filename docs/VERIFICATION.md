@@ -91,6 +91,9 @@ Status date: 2026-07-03
 - Broadened copied-workspace multi-file app-code dogfood:
   - `sh scripts/dogfood-real.sh --copy-workspace --multi-file-app-code-probe --repo janus:/Users/jakedom/Documents/janus-code --task 'Wire a copied-workspace app-code marker across two existing source files without touching the Janus source checkout' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-multi-file-janus-r1`
   - Result: Janus pass; previewed, approved, and applied `ceoDogfoodMultiFileProbe*` markers to copied `src/cli/args.ts` and `src/cli/base64-payload-byte-count.ts`, saved target paths plus modified source files and after-state git status, and left the Janus source checkout without the marker.
+- Broader app-shaped copied-workspace dogfood:
+  - `sh scripts/dogfood-real.sh --copy-workspace --multi-file-app-code-probe --repo family-os:/Users/jakedom/Documents/family-os --repo pools:/Users/jakedom/Documents/jakedompools--main --repo dps-frontend:/Users/jakedom/Documents/DPS-internal-coms-main/frontend --repo janus-mobile:/Users/jakedom/Documents/janus-code/mobile --task 'Wire a copied-workspace app-code marker across two existing source files in broader app repos without touching source checkouts' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-broader-apps-r1`
+  - Result: Family OS, Pools, DPS frontend, and Janus Mobile pass; each previewed, approved, and applied two source-file markers inside copied workspaces, saved target paths plus modified source files and after-state git status, and left all source checkouts without the marker.
 - Nightly eval task:
   - `make eval-nightly`
   - `/Users/jakedom/go/bin/task eval:nightly`

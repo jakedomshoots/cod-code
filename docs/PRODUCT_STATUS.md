@@ -50,7 +50,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 ## Current Weak Spots
 
 - No public remote repository is configured yet.
-- The real proof still needs broader app-shaped repo coverage and additional key-backed HTTP provider proof beyond the current ChemCheck, Axis Health, Janus, Kimi, and Codex proofs.
+- The real proof still needs public release setup and additional key-backed HTTP provider proof beyond the current copied-app, Kimi, and Codex proofs.
 - External/provider gauntlets can still be blocked or incomplete when a provider key, CLI login, timeout log, git status snapshot, or scorer artifact is missing.
 
 ## Market Roadmap Result 2026-07-03
@@ -100,6 +100,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Copied-workspace integrated app-code dogfood result: ChemCheck and Axis Health both passed existing-source-file edits through preview plus approved write at `.omo/evidence/dogfood-real-integrated-app-code-r1/index.md`; source checkouts stayed without `ceoDogfoodIntegratedProbe`.
 - Copied-workspace multi-file app-code dogfood result: ChemCheck and Axis Health both passed two existing-source-file edits through preview plus approved write at `.omo/evidence/dogfood-real-multi-file-app-code-r1/index.md`; source checkouts stayed without `ceoDogfoodMultiFileProbe`.
 - Broadened copied-workspace multi-file app-code dogfood result: Janus passed two existing-source-file edits through preview plus approved write at `.omo/evidence/dogfood-real-multi-file-janus-r1/index.md`; the Janus source checkout stayed without `ceoDogfoodMultiFileProbe`.
+- Broader app-shaped copied-workspace dogfood result: Family OS, Pools, DPS frontend, and Janus Mobile all passed two existing-source-file edits through preview plus approved write at `.omo/evidence/dogfood-real-broader-apps-r1/index.md`; all source checkouts stayed without `ceoDogfoodMultiFileProbe`.
 - Added no-key nightly eval automation through `make eval-nightly` and `.github/workflows/nightly-evals.yml`.
 - Added endurance eval runner through `scripts/endurance.sh`, `make eval-endurance`, and `task eval:endurance`; short local proof produced 3/3 passing iterations at `.omo/evidence/endurance-local-r1/index.md`.
 - Longer local endurance proof produced 10/10 passing iterations, each running build, 28-task fixture scoring, cross-language gauntlet, and real-repo dogfood, at `.omo/evidence/endurance-local-r2/index.md`.
