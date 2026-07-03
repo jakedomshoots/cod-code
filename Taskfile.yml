@@ -65,6 +65,11 @@ tasks:
     cmds:
       - sh scripts/release-preflight.sh dist
 
+  release:readiness:
+    desc: Write a public release readiness evidence packet without publishing
+    cmds:
+      - sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
+
   eval:nightly:
     desc: Run the no-key nightly eval proof suite
     cmds:

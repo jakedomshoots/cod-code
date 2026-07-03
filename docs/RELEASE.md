@@ -29,6 +29,7 @@ make test-race
 VERSION=0.1.0 make release-local
 sh scripts/verify-release.sh dist
 sh scripts/release-preflight.sh dist
+sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
 ```
 
 If `task` is installed, the equivalent commands are:
@@ -50,6 +51,8 @@ sed -n '1,80p' dist/homebrew/ceo-packet.rb
 `scripts/verify-release.sh` checks `checksums.txt`, verifies every archive hash and size against `release-manifest.json`, and fails if any artifact is missing or mismatched.
 
 `scripts/release-preflight.sh` checks whether a release can honestly be called public. It verifies local artifacts, then blocks until a git remote, public release URL, remote Homebrew archive URL, and archive signatures or explicit checksum-only release notes are handled. It does not tag, push, upload, or publish anything.
+
+`scripts/release-readiness.sh` writes the durable evidence packet for that decision: `index.md`, `summary.json`, `preflight.md`, `verify-release.txt`, `git-remote.txt`, and `github-auth.txt`. It exits non-zero while public release blockers remain, but still writes the evidence folder so the next action is obvious.
 
 For an unsigned checksum-only first release, the preflight must be explicit:
 

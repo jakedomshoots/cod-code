@@ -124,6 +124,7 @@ Status date: 2026-07-03
 - `VERSION=0.1.0-dev sh scripts/release-local.sh`
 - `sh scripts/verify-release.sh dist`
 - `sh scripts/release-preflight.sh dist` blocks public release claims when remote URL, public release URL, Homebrew URL, and signature or checksum-only notes are missing.
+- `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1` writes a blocked/pass public-release evidence packet without publishing anything.
 - `shasum -a 256 -c checksums.txt` from `dist/`
 - Temporary install QA via `scripts/install-local.sh`
 - Local markdown link check from [Trust Surface](TRUST.md)

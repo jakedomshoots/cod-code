@@ -123,3 +123,70 @@ func Test_ReleasePreflight_acceptsExplicitChecksumOnlyReleaseNotes(t *testing.T)
 		t.Fatalf("preflight did not accept explicit checksum-only release notes:\n%s", body)
 	}
 }
+
+func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	tmp := t.TempDir()
+	dist := filepath.Join(tmp, "dist")
+	outputDir := filepath.Join(tmp, "release-readiness")
+
+	release := exec.Command("sh", filepath.Join(root, "scripts", "release-local.sh"))
+	release.Dir = root
+	release.Env = append(release.Environ(), "DIST="+dist, "VERSION=0.2.0-test", "COMMIT=abc123")
+	output, err := release.CombinedOutput()
+	if err != nil {
+		t.Fatalf("release-local failed: %v\n%s", err, string(output))
+	}
+
+	readiness := exec.Command("sh", filepath.Join(root, "scripts", "release-readiness.sh"), "--dist", dist, "--output-dir", outputDir)
+	readiness.Dir = root
+	readinessOutput, err := readiness.CombinedOutput()
+	if err == nil {
+		t.Fatalf("release-readiness unexpectedly passed without public release metadata:\n%s", string(readinessOutput))
+	}
+	if strings.Contains(string(readinessOutput), "command not found") {
+		t.Fatalf("release-readiness output contains a shell quoting error:\n%s", string(readinessOutput))
+	}
+
+	for _, path := range []string{
+		filepath.Join(outputDir, "index.md"),
+		filepath.Join(outputDir, "summary.json"),
+		filepath.Join(outputDir, "preflight.md"),
+		filepath.Join(outputDir, "git-remote.txt"),
+		filepath.Join(outputDir, "github-auth.txt"),
+	} {
+		if _, err := os.Stat(path); err != nil {
+			t.Fatalf("expected evidence file %s: %v\nscript output:\n%s", path, err, string(readinessOutput))
+		}
+	}
+
+	summary, err := os.ReadFile(filepath.Join(outputDir, "summary.json"))
+	if err != nil {
+		t.Fatalf("read readiness summary: %v", err)
+	}
+	body := string(summary)
+	for _, want := range []string{
+		`"public_release_ready": false`,
+		`"release_artifacts_verified": true`,
+		`"preflight_exit_code": 1`,
+		`"blocked_checks": [`,
+		`"remote_release_url"`,
+		`"homebrew_formula_url"`,
+		`"artifact_signatures"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("readiness summary missing %q:\n%s", want, body)
+		}
+	}
+
+	index, err := os.ReadFile(filepath.Join(outputDir, "index.md"))
+	if err != nil {
+		t.Fatalf("read readiness index: %v", err)
+	}
+	if !strings.Contains(string(index), "release readiness: blocked") {
+		t.Fatalf("readiness index did not record blocked status:\n%s", string(index))
+	}
+}

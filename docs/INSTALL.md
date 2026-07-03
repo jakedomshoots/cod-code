@@ -106,5 +106,6 @@ If optional tools are missing, use the documented fallback commands in [Verifica
 
 - No remote install URL or Homebrew tap is published yet.
 - Local archives are checksum-only; they are not signed.
+- Public release readiness is tracked with `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness`.
 - External provider quality depends on the configured provider, model, login, and key.
 - Current market comparison evidence is useful but still narrow. Do not describe prototype areas as proven unless the saved command logs and artifacts show it.

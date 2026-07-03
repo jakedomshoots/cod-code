@@ -39,6 +39,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - Real Kimi JS app-code evidence: `.omo/evidence/provider-kimi-js-state-reducer-r2/summary.json`
 - First-class Kimi provider proof evidence: `.omo/evidence/provider-proof-kimi-r2/index.md`
 - First-class Codex provider proof evidence: `.omo/evidence/provider-proof-codex-r1/index.md`
+- Public release readiness evidence: `.omo/evidence/release-readiness-r1/index.md`
 - Endurance eval evidence: `.omo/evidence/endurance-local-r1/index.md`
 - Longer endurance eval evidence: `.omo/evidence/endurance-local-r2/index.md`
 - Extended endurance eval evidence: `.omo/evidence/endurance-local-r3/index.md`
@@ -55,6 +56,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 | Go LOC ceiling | `awk` pure-LOC scan over `internal/eval/*.go` | Every Go file is <=250 pure LOC; `benchmark.go` is 124 | `.omo/evidence/task-14-ceo-harness-10-out-of-10/pure-loc-task14-fix.log` |
 | Race/shuffle | `go test -race -shuffle=on -count=1 ./...` | Exit 0 on fresh 2026-07-02 rerun after adapter timeout-proof stabilization | `.omo/evidence/final-adapter-version-timeout-fix/go-test-race-shuffle-all.log` |
 | Release + manifest verification | `VERSION=0.1.0-dev sh scripts/release-local.sh && sh scripts/verify-release.sh dist` | All three archives verified against `checksums.txt` and `release-manifest.json` | `.omo/evidence/task-14-ceo-harness-10-out-of-10/release-local-checksums.log`, `dist/checksums.txt`, `dist/release-manifest.json` |
+| Public release readiness packet | `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1` | Local artifacts verified and GitHub auth passed; public release remains blocked by missing origin remote, release URL, remote Homebrew URL, and signatures/checksum-only notes | `.omo/evidence/release-readiness-r1/index.md`, `.omo/evidence/release-readiness-r1/summary.json` |
 | Eval catalog | `go run ./cmd/ceo-eval --list` | 28 task IDs listed | `.omo/evidence/benchmark-fixtures-28-r1/summary.json` |
 | Eval rubric | `go run ./cmd/ceo-eval --rubric` | `rubric_valid=true` | `.omo/evidence/task-14-ceo-harness-10-out-of-10/eval-rubric.txt` |
 | Benchmark scoring pass | `go run ./cmd/ceo-eval --task bugfix-cli-timeout --report internal/eval/testdata/dirty-worktree/happy/report.json --workspace <temp>` | Verdict `pass`, 8/8 checks | `.omo/evidence/task-14-ceo-harness-10-out-of-10/eval-score-dirty-happy.json` |

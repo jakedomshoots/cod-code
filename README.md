@@ -118,9 +118,10 @@ Build local release archives:
 ```sh
 VERSION=0.1.0 sh scripts/release-local.sh
 (cd dist && shasum -a 256 -c checksums.txt)
+sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
 ```
 
-The release script writes tarballs, checksums, and a local Homebrew formula draft under `dist/homebrew/ceo-packet.rb`. It does not publish, tag, push, or create a remote release.
+The release script writes tarballs, checksums, and a local Homebrew formula draft under `dist/homebrew/ceo-packet.rb`. The readiness script writes a pass/blocked evidence packet without publishing, tagging, pushing, or creating a remote release.
 
 Create a working example workspace config:
 
