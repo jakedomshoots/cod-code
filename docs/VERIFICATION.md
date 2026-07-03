@@ -42,6 +42,9 @@ Status date: 2026-07-03
 - Latest copied-workspace dogfood:
   - `sh scripts/dogfood-real.sh --copy-workspace --repo ceo-harness-copy:/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-copy-self-r1`
   - Result: pass; all five scenarios ran against `workspace-mode=copied`, with source and workspace paths recorded separately.
+- Latest independent copied-workspace dogfood:
+  - `sh scripts/dogfood-real.sh --copy-workspace --repo chemcheck:/Users/jakedom/Documents/chemcheck-main --repo axis-health:'/Users/jakedom/Documents/Axis health' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-independent-r1`
+  - Result: ChemCheck pass and Axis Health pass; each ran doctor, plan-only, observe, patch-preview, and timeout-guard scenarios in copied workspaces.
 - Nightly eval task:
   - `make eval-nightly`
   - `/Users/jakedom/go/bin/task eval:nightly`
