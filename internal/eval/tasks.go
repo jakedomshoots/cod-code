@@ -13,6 +13,7 @@ import (
 
 var allowedCategories = map[string]struct{}{
 	"bug_fix":         {},
+	"cross_language":  {},
 	"refactor":        {},
 	"test_repair":     {},
 	"docs":            {},

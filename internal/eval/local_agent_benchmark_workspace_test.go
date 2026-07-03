@@ -111,6 +111,72 @@ func Test_PrepareLocalAgentBenchmarkWorkspace_requires_multi_file_go_fixes(t *te
 	}
 }
 
+func Test_PrepareLocalAgentBenchmarkWorkspace_writes_js_fixture_with_failing_baseline(t *testing.T) {
+	// Given
+	workspaceDir := filepath.Join(t.TempDir(), "workspace")
+	task := Task{
+		ID:                   "cross-language-js-state-reducer",
+		Category:             "cross_language",
+		Title:                "JS state reducer preserves rollback metadata",
+		Objective:            "Repair JavaScript state reducer fixture so optimistic updates keep rollback evidence.",
+		RequiredChangedFiles: []string{"frontend/state.js"},
+		RequiredCommands:     []string{"node frontend/state.test.js"},
+		RequiredArtifacts:    []string{".omo/evidence/cross-language-js-state-reducer.md"},
+		RequiredDiffTerms:    []string{"optimistic update", "rollback"},
+	}
+
+	// When
+	err := prepareLocalAgentBenchmarkWorkspace(context.Background(), workspaceDir, task, nil)
+	// Then
+	if err != nil {
+		t.Fatalf("prepareLocalAgentBenchmarkWorkspace returned error: %v", err)
+	}
+	baselineRun := runLocalAgentCommand(context.Background(), []string{"node", "frontend/state.test.js"}, workspaceDir, nil, localAgentTimeout(5))
+	if baselineRun.exitCode == 0 {
+		t.Fatalf("baseline JS fixture unexpectedly passed: stdout=%q stderr=%q", baselineRun.stdout, baselineRun.stderr)
+	}
+	if err := os.WriteFile(filepath.Join(workspaceDir, "frontend/state.js"), []byte(benchmarkExpectedText(task, "frontend/state.js")), 0o644); err != nil {
+		t.Fatalf("write expected JS fixture: %v", err)
+	}
+	fixedRun := runLocalAgentCommand(context.Background(), []string{"node", "frontend/state.test.js"}, workspaceDir, nil, localAgentTimeout(5))
+	if fixedRun.exitCode != 0 || fixedRun.errText != "" {
+		t.Fatalf("fixed JS fixture failed: exit=%d err=%q stdout=%q stderr=%q", fixedRun.exitCode, fixedRun.errText, fixedRun.stdout, fixedRun.stderr)
+	}
+}
+
+func Test_PrepareLocalAgentBenchmarkWorkspace_writes_python_fixture_with_failing_baseline(t *testing.T) {
+	// Given
+	workspaceDir := filepath.Join(t.TempDir(), "workspace")
+	task := Task{
+		ID:                   "cross-language-python-retry-policy",
+		Category:             "cross_language",
+		Title:                "Python retry policy records jittered timeout backoff",
+		Objective:            "Repair Python retry policy fixture so timeout retries include exponential backoff and jitter evidence.",
+		RequiredChangedFiles: []string{"scripts/retry_policy.py"},
+		RequiredCommands:     []string{"python3 scripts/test_retry_policy.py"},
+		RequiredArtifacts:    []string{".omo/evidence/cross-language-python-retry-policy.md"},
+		RequiredDiffTerms:    []string{"exponential backoff", "jitter", "timeout"},
+	}
+
+	// When
+	err := prepareLocalAgentBenchmarkWorkspace(context.Background(), workspaceDir, task, nil)
+	// Then
+	if err != nil {
+		t.Fatalf("prepareLocalAgentBenchmarkWorkspace returned error: %v", err)
+	}
+	baselineRun := runLocalAgentCommand(context.Background(), []string{"python3", "scripts/test_retry_policy.py"}, workspaceDir, nil, localAgentTimeout(5))
+	if baselineRun.exitCode == 0 {
+		t.Fatalf("baseline Python fixture unexpectedly passed: stdout=%q stderr=%q", baselineRun.stdout, baselineRun.stderr)
+	}
+	if err := os.WriteFile(filepath.Join(workspaceDir, "scripts/retry_policy.py"), []byte(benchmarkExpectedText(task, "scripts/retry_policy.py")), 0o644); err != nil {
+		t.Fatalf("write expected Python fixture: %v", err)
+	}
+	fixedRun := runLocalAgentCommand(context.Background(), []string{"python3", "scripts/test_retry_policy.py"}, workspaceDir, nil, localAgentTimeout(5))
+	if fixedRun.exitCode != 0 || fixedRun.errText != "" {
+		t.Fatalf("fixed Python fixture failed: exit=%d err=%q stdout=%q stderr=%q", fixedRun.exitCode, fixedRun.errText, fixedRun.stdout, fixedRun.stderr)
+	}
+}
+
 func Test_PrepareLocalAgentBenchmarkWorkspace_writes_real_path_escape_fixture(t *testing.T) {
 	// Given
 	workspaceDir := filepath.Join(t.TempDir(), "workspace")

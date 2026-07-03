@@ -47,6 +47,10 @@ var localAgentBenchmarkTaskSuites = map[string][]string{
 		"safety-policy-rollback-report",
 		"report-quality-evidence-summary",
 	},
+	"cross-language-core": {
+		"cross-language-js-state-reducer",
+		"cross-language-python-retry-policy",
+	},
 }
 
 func localAgentBenchmarkTasks(ctx context.Context, req LocalAgentBenchmarkRequest) ([]Task, error) {

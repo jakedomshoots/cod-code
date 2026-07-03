@@ -2,6 +2,7 @@ package eval
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -56,8 +57,13 @@ func benchmarkBaselineText(task Task, path string) string {
 	if task.ID == "safety-policy-path-escape" && filepath.Clean(path) == filepath.Join("internal", "workspace", "workspace.go") {
 		return safetyPathEscapeBaselineFixture()
 	}
-	if filepath.Ext(path) == ".go" {
+	switch filepath.Ext(path) {
+	case ".go":
 		return benchmarkGoFixture(path, "TODO: update this benchmark fixture")
+	case ".js":
+		return benchmarkJSFixture("TODO: update this benchmark fixture")
+	case ".py":
+		return benchmarkPythonFixture("TODO: update this benchmark fixture")
 	}
 	if task.ID == defaultLocalAgentBenchmarkID {
 		return "# Roadmap\n\nGUI work is first.\n"
@@ -69,13 +75,19 @@ func benchmarkExpectedText(task Task, path string) string {
 	if task.ID == "safety-policy-path-escape" && filepath.Clean(path) == filepath.Join("internal", "workspace", "workspace.go") {
 		return safetyPathEscapeExpectedFixture()
 	}
-	if filepath.Ext(path) == ".go" {
-		return benchmarkGoFixture(path, benchmarkExpectedTerms(task))
+	expectedTerms := benchmarkExpectedTerms(task)
+	switch filepath.Ext(path) {
+	case ".go":
+		return benchmarkGoFixture(path, expectedTerms)
+	case ".js":
+		return benchmarkJSFixture(expectedTerms)
+	case ".py":
+		return benchmarkPythonFixture(expectedTerms)
 	}
 	if task.ID == defaultLocalAgentBenchmarkID {
 		return "# Roadmap\n\nCLI-first dogfood and recovery come before GUI work.\n"
 	}
-	return "# Benchmark Fixture\n\n" + benchmarkExpectedTerms(task) + "\n"
+	return "# Benchmark Fixture\n\n" + expectedTerms + "\n"
 }
 
 func benchmarkExpectedTerms(task Task) string {
@@ -88,6 +100,14 @@ func benchmarkExpectedTerms(task Task) string {
 
 func benchmarkGoFixture(path string, value string) string {
 	return fmt.Sprintf("package %s\n\nconst benchmarkFixture = %q\n", benchmarkGoPackageName(path), value)
+}
+
+func benchmarkJSFixture(value string) string {
+	return fmt.Sprintf("module.exports = { benchmarkFixture: %q };\n", value)
+}
+
+func benchmarkPythonFixture(value string) string {
+	return fmt.Sprintf("benchmark_fixture = %q\n", value)
 }
 
 func benchmarkGoPackageName(path string) string {
@@ -146,19 +166,31 @@ func benchmarkEvidenceContent(task Task, result LocalAgentBenchmarkResult, check
 
 func writeBenchmarkFixtureSupportFiles(workspaceDir string, task Task) error {
 	if task.ID != "safety-policy-path-escape" {
-		return writeGenericGoBenchmarkTests(workspaceDir, task)
+		return writeGenericBenchmarkTests(workspaceDir, task)
 	}
 	return writeRelativeFile(workspaceDir, "internal/workspace/workspace_test.go", safetyPathEscapeTestFixture())
 }
 
-func writeGenericGoBenchmarkTests(workspaceDir string, task Task) error {
+func writeGenericBenchmarkTests(workspaceDir string, task Task) error {
 	for _, path := range task.RequiredChangedFiles {
-		if filepath.Ext(path) != ".go" {
+		switch filepath.Ext(path) {
+		case ".go":
+			testPath := filepath.Join(filepath.Dir(filepath.Clean(path)), "benchmark_fixture_test.go")
+			if err := writeRelativeFile(workspaceDir, testPath, benchmarkGoTestFixture(task, path)); err != nil {
+				return err
+			}
+		case ".js":
+			testPath := filepath.Join(filepath.Dir(filepath.Clean(path)), strings.TrimSuffix(filepath.Base(path), ".js")+".test.js")
+			if err := writeRelativeFile(workspaceDir, testPath, benchmarkJSTestFixture(task, path)); err != nil {
+				return err
+			}
+		case ".py":
+			testPath := filepath.Join(filepath.Dir(filepath.Clean(path)), "test_"+filepath.Base(path))
+			if err := writeRelativeFile(workspaceDir, testPath, benchmarkPythonTestFixture(task, path)); err != nil {
+				return err
+			}
+		default:
 			continue
-		}
-		testPath := filepath.Join(filepath.Dir(filepath.Clean(path)), "benchmark_fixture_test.go")
-		if err := writeRelativeFile(workspaceDir, testPath, benchmarkGoTestFixture(task, path)); err != nil {
-			return err
 		}
 	}
 	return nil
@@ -185,6 +217,49 @@ func %s(t *testing.T) {
 	}
 }
 `, benchmarkGoPackageName(path), benchmarkTestName(task), requiredTerms)
+}
+
+func benchmarkJSTestFixture(task Task, path string) string {
+	requiredTerms := task.RequiredDiffTerms
+	if len(requiredTerms) == 0 {
+		requiredTerms = []string{task.Objective}
+	}
+	moduleName := "./" + strings.TrimSuffix(filepath.Base(path), ".js")
+	return fmt.Sprintf(`const assert = require("assert");
+const { benchmarkFixture } = require(%q);
+
+for (const required of %s) {
+  assert(
+    benchmarkFixture.includes(required),
+    "benchmarkFixture should include " + required + ", got " + benchmarkFixture,
+  );
+}
+`, moduleName, benchmarkTermListLiteral(requiredTerms))
+}
+
+func benchmarkPythonTestFixture(task Task, path string) string {
+	requiredTerms := task.RequiredDiffTerms
+	if len(requiredTerms) == 0 {
+		requiredTerms = []string{task.Objective}
+	}
+	moduleName := strings.TrimSuffix(filepath.Base(path), ".py")
+	return fmt.Sprintf(`import importlib
+
+module = importlib.import_module(%q)
+
+for required in %s:
+    assert required in module.benchmark_fixture, (
+        f"benchmark_fixture should include {required!r}, got {module.benchmark_fixture!r}"
+    )
+`, moduleName, benchmarkTermListLiteral(requiredTerms))
+}
+
+func benchmarkTermListLiteral(requiredTerms []string) string {
+	payload, err := json.Marshal(requiredTerms)
+	if err != nil {
+		return "[]"
+	}
+	return string(payload)
 }
 
 func benchmarkTestName(task Task) string {

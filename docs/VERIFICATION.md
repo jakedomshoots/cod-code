@@ -27,6 +27,9 @@ Status date: 2026-07-03
 - Latest concurrent production-core CEO comparison:
   - `go run ./cmd/ceo-packet gauntlet --suite production-core --agents ceo_harness --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/production-core-25-ceo-concurrency-r1 --timeout-seconds 120 --concurrency 4 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 25 tasks / concurrency 4 / 25 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
+- Latest cross-language CEO comparison:
+  - `go run ./cmd/ceo-packet gauntlet --suite cross-language-core --agents ceo_harness --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/cross-language-core-ceo-r1 --timeout-seconds 120 --concurrency 2 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
+  - Result: 2 tasks / concurrency 2 / 2 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
 - Latest focused multi-file task proof:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task multi-file-provider-fallback-reporting --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/multi-file-provider-fallback-ceo-r2 --timeout-seconds 120 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 1 run / 1 pass / 9 scored checks / 0 incomplete evidence.

@@ -276,5 +276,27 @@
     "required_artifacts": [".omo/evidence/report-quality-evidence-summary.md"],
     "required_diff_terms": ["evidence completeness", "missing evidence"],
     "required_report_fields": ["evidence_paths", "run_ledger.changed_files"]
+  },
+  {
+    "id": "cross-language-js-state-reducer",
+    "category": "cross_language",
+    "title": "JS state reducer preserves rollback metadata",
+    "objective": "Repair JavaScript state reducer fixture so optimistic updates keep rollback evidence.",
+    "required_changed_files": ["frontend/state.js"],
+    "required_commands": ["node frontend/state.test.js"],
+    "required_artifacts": [".omo/evidence/cross-language-js-state-reducer.md"],
+    "required_diff_terms": ["optimistic update", "rollback"],
+    "required_report_fields": ["changed_files"]
+  },
+  {
+    "id": "cross-language-python-retry-policy",
+    "category": "cross_language",
+    "title": "Python retry policy records jittered timeout backoff",
+    "objective": "Repair Python retry policy fixture so timeout retries include exponential backoff and jitter evidence.",
+    "required_changed_files": ["scripts/retry_policy.py"],
+    "required_commands": ["python3 scripts/test_retry_policy.py"],
+    "required_artifacts": [".omo/evidence/cross-language-python-retry-policy.md"],
+    "required_diff_terms": ["exponential backoff", "jitter", "timeout"],
+    "required_report_fields": ["changed_files"]
   }
 ]

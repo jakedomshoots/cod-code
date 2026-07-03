@@ -101,6 +101,25 @@ Latest production-core all-agent result:
 
 Use `--concurrency N` on long comparisons to shard independent task/agent runs while keeping the final summary in planned task order.
 
+Run the focused cross-language suite against CEO Harness:
+
+```sh
+go run ./cmd/ceo-packet gauntlet \
+  --suite cross-language-core \
+  --agents ceo_harness \
+  --ceo-binary ./bin/ceo-packet \
+  --tasks evals/tasks \
+  --output-dir .omo/evidence/cross-language-core-ceo-r1 \
+  --concurrency 2 \
+  --timeout-seconds 120
+```
+
+Latest cross-language result:
+
+| Benchmark | CEO Harness | Evidence |
+| --- | --- | --- |
+| 2-task `cross-language-core` | 2/2 pass, 0 incomplete evidence | `.omo/evidence/cross-language-core-ceo-r1/summary.json` |
+
 Latest saved benchmark result:
 
 | Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |

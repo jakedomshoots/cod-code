@@ -131,6 +131,33 @@ func Test_LocalAgentBenchmarkTasks_expands_production_core_suite(t *testing.T) {
 	}
 }
 
+func Test_LocalAgentBenchmarkTasks_expands_cross_language_core_suite(t *testing.T) {
+	// Given
+	root := t.TempDir()
+	tasksDir := filepath.Join(root, "tasks")
+	payload, err := os.ReadFile(filepath.Join("..", "..", "evals", "tasks", "benchmark_tasks.json"))
+	if err != nil {
+		t.Fatalf("read benchmark tasks: %v", err)
+	}
+	writeTaskSpec(t, tasksDir, string(payload))
+
+	// When
+	tasks, err := localAgentBenchmarkTasks(context.Background(), LocalAgentBenchmarkRequest{
+		TasksDir:        tasksDir,
+		BenchmarkTaskID: "cross-language-core",
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("localAgentBenchmarkTasks returned error: %v", err)
+	}
+	if len(tasks) != 2 {
+		t.Fatalf("tasks length = %d, want 2 cross-language tasks", len(tasks))
+	}
+	if tasks[0].ID != "cross-language-js-state-reducer" || tasks[1].ID != "cross-language-python-retry-policy" {
+		t.Fatalf("suite task ids = %+v, want stable cross-language core order", localAgentBenchmarkTaskIDs(tasks))
+	}
+}
+
 func Test_Benchmark_records_failed_score_checks_when_agent_misses_requirement(t *testing.T) {
 	// Given
 	binDir := t.TempDir()

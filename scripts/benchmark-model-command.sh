@@ -77,6 +77,10 @@ func CleanRelativePath(path string) (string, error) {
 """
     if path.endswith(".go"):
         return f"package {go_package(path)}\n\nconst benchmarkFixture = {json.dumps(diff_terms)}\n"
+    if path.endswith(".js"):
+        return f"module.exports = {{ benchmarkFixture: {json.dumps(diff_terms)} }};\n"
+    if path.endswith(".py"):
+        return f"benchmark_fixture = {json.dumps(diff_terms)}\n"
     return f"# Benchmark Fixture\n\n{diff_terms}\n"
 
 patches = []
