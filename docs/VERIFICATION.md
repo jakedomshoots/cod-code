@@ -34,8 +34,8 @@ Status date: 2026-07-03
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task multi-file-provider-fallback-reporting --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/multi-file-provider-fallback-ceo-r2 --timeout-seconds 120 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 1 run / 1 pass / 9 scored checks / 0 incomplete evidence.
 - Latest real-repo dogfood:
-  - `sh scripts/dogfood-real.sh --repo ceo-harness:<repo> --timeout-ms 250`
-  - Result: pass, including expected timeout failure evidence.
+  - `sh scripts/dogfood-real.sh --repo ceo-harness-repeat:/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1`
+  - Result: 3 live passes / 0 fails, including expected timeout failure evidence in each run.
 
 - Focused additions test:
   - `go test ./internal/cli -run 'Test_Run_(start|inbox|provider_wizard|init_demo_repo|tui|write_policy|init_config_uses_external_adapter|prints_help)' -count=1`

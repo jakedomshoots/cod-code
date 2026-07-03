@@ -141,6 +141,7 @@ Market gauntlet and recovery commands:
 ceo-packet gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
 ceo-packet gauntlet --suite production-core --agents ceo_harness --concurrency 4 --output-dir .omo/evidence/production-gauntlet
 ceo-packet gauntlet --suite cross-language-core --agents ceo_harness --concurrency 2 --output-dir .omo/evidence/cross-language-gauntlet
+sh scripts/dogfood-real.sh --repo "ceo-harness:$PWD" --repeat 3 --output-dir .omo/evidence/dogfood-real-repeat
 ceo-packet explain-failure latest --workspace .
 ceo-packet retry latest --workspace .
 ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .

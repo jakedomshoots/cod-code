@@ -8,13 +8,14 @@ evidence_dir="$root/.omo/evidence/dogfood-real"
 repos_file=$(mktemp)
 dry_run=0
 timeout_ms=250
+repeat_count=1
 build_tmp=""
 
 trap 'rm -f "$repos_file"; if [ -n "$build_tmp" ]; then rm -rf "$build_tmp"; fi' EXIT
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--timeout-ms n]
+Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--timeout-ms n] [--repeat n] [--output-dir path]
 
 Creates durable dogfood evidence under .omo/evidence/dogfood-real.
 
@@ -22,6 +23,8 @@ Options:
   --dry-run          List scenarios and write evidence without running commands or touching repos.
   --repo value       Repo to include. Use name:/path/to/repo or just /path/to/repo.
   --timeout-ms n     Timeout used by the hung-command probe in live mode. Default: 250.
+  --repeat n         Repeat each repo scenario set n times. Default: 1.
+  --output-dir path  Evidence directory. Default: .omo/evidence/dogfood-real.
   --help             Show this help.
 USAGE
 }
@@ -65,6 +68,32 @@ while [ "$#" -gt 0 ]; do
       timeout_ms="${1#--timeout-ms=}"
       shift
       ;;
+    --repeat)
+      shift
+      if [ "$#" -eq 0 ]; then
+        printf '%s\n' "dogfood-real: --repeat requires a value" >&2
+        exit 2
+      fi
+      repeat_count="${1:-}"
+      shift
+      ;;
+    --repeat=*)
+      repeat_count="${1#--repeat=}"
+      shift
+      ;;
+    --output-dir)
+      shift
+      if [ "$#" -eq 0 ]; then
+        printf '%s\n' "dogfood-real: --output-dir requires a value" >&2
+        exit 2
+      fi
+      evidence_dir="${1:-}"
+      shift
+      ;;
+    --output-dir=*)
+      evidence_dir="${1#--output-dir=}"
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
@@ -82,6 +111,18 @@ case "$timeout_ms" in
     printf '%s\n' "dogfood-real: --timeout-ms must be a non-negative integer" >&2
     exit 2
     ;;
+esac
+
+case "$repeat_count" in
+  ''|*[!0-9]*|0)
+    printf '%s\n' "dogfood-real: --repeat must be a positive integer" >&2
+    exit 2
+    ;;
+esac
+
+case "$evidence_dir" in
+  /*) ;;
+  *) evidence_dir="$invocation_dir/$evidence_dir" ;;
 esac
 
 if [ ! -s "$repos_file" ]; then
@@ -121,6 +162,24 @@ slugify() {
     slug="repo"
   fi
   printf '%s' "$slug"
+}
+
+attempt_slug() {
+  printf 'run-%02d' "$1"
+}
+
+evidence_rel_path() {
+  case "$1" in
+    "$evidence_dir"/*) printf '%s' "${1#"$evidence_dir"/}" ;;
+    *) basename "$1" ;;
+  esac
+}
+
+evidence_display_path() {
+  case "$evidence_dir" in
+    "$root"/*) printf '%s' "${evidence_dir#"$root"/}" ;;
+    *) printf '%s' "$evidence_dir" ;;
+  esac
 }
 
 repo_name_from_spec() {
@@ -189,8 +248,9 @@ write_index_header() {
     printf '\n'
     printf '%s\n' "- Generated: $generated_at"
     printf '%s\n' "- Mode: $mode"
+    printf '%s\n' "- Repeat count: $repeat_count"
     printf '%s\n' "- Runner: scripts/dogfood-real.sh"
-    printf '%s\n' "- Evidence root: .omo/evidence/dogfood-real"
+    printf '%s\n' "- Evidence root: $(evidence_display_path)"
     printf '%s\n' "- Secret API keys: not required for smoke path"
     printf '%s\n' "- Real-provider path: skipped by default; this runner uses local command/dry-run surfaces unless a repo config routes providers itself"
     printf '\n'
@@ -216,98 +276,131 @@ append_repo_row() {
 }
 
 write_dry_run_plan() {
-  repo_dir="$1"
-  repo_name="$2"
-  repo_path="$3"
-  mkdir -p "$repo_dir"
+  plan_repo_dir="$1"
+  plan_repo_name="$2"
+  plan_repo_path="$3"
+  mkdir -p "$plan_repo_dir"
   {
-    printf '%s\n' "# Dry-run Plan: $repo_name"
+    printf '%s\n' "# Dry-run Plan: $plan_repo_name"
     printf '\n'
-    printf '%s\n' "- Repo path: $repo_path"
+    printf '%s\n' "- Repo path: $plan_repo_path"
     printf '%s\n' "- Status: planned"
     printf '%s\n' "- External repo writes: none"
     printf '\n'
     printf '%s\n' "## Planned Commands"
     printf '\n'
     printf '%s\n' "1. ceo-packet --doctor --format json"
-    printf '%s\n' "2. ceo-packet --workspace \"$repo_path\" --plan-only --format json \"Plan a bounded real-repo fix\""
-    printf '%s\n' "3. ceo-packet --workspace \"$repo_path\" --write-policy observe --format json --model-command sh examples/command-model.sh -- \"Inspect repo with local model\""
+    printf '%s\n' "2. ceo-packet --workspace \"$plan_repo_path\" --plan-only --format json \"Plan a bounded real-repo fix\""
+    printf '%s\n' "3. ceo-packet --workspace \"$plan_repo_path\" --write-policy observe --format json --model-command sh examples/command-model.sh -- \"Inspect repo with local model\""
     printf '%s\n' "4. ceo-packet --workspace <controlled-fixture> --dry-run --replace app.txt old new --format json \"Preview patch approval digest\""
-    printf '%s\n' "5. ceo-packet --workspace \"$repo_path\" --write-policy observe --model-command-timeout-ms $timeout_ms --model-command sh -c 'sleep 5' -- \"Probe timeout guard\""
-  } >"$repo_dir/plan.md"
+    printf '%s\n' "5. ceo-packet --workspace \"$plan_repo_path\" --write-policy observe --model-command-timeout-ms $timeout_ms --model-command sh -c 'sleep 5' -- \"Probe timeout guard\""
+  } >"$plan_repo_dir/plan.md"
+  printf '%s\n' "planned" >"$plan_repo_dir/status.txt"
 }
 
 write_skipped_repo() {
-  repo_dir="$1"
-  repo_name="$2"
-  repo_path="$3"
-  mkdir -p "$repo_dir"
+  skipped_repo_dir="$1"
+  skipped_repo_name="$2"
+  skipped_repo_path="$3"
+  mkdir -p "$skipped_repo_dir"
   {
-    printf '%s\n' "# Skipped Repo: $repo_name"
+    printf '%s\n' "# Skipped Repo: $skipped_repo_name"
     printf '\n'
-    printf '%s\n' "- Repo path: $repo_path"
+    printf '%s\n' "- Repo path: $skipped_repo_path"
     printf '%s\n' "- Status: skipped_missing_repo"
     printf '%s\n' "- Reason: path does not exist or is not a directory"
     printf '%s\n' "- False-success guard: this is recorded as skipped, not pass"
-  } >"$repo_dir/skipped.md"
+  } >"$skipped_repo_dir/skipped.md"
+  printf '%s\n' "skipped_missing_repo" >"$skipped_repo_dir/status.txt"
+}
+
+write_repeat_summary() {
+  summary_repo_dir="$1"
+  summary_repo_name="$2"
+  summary_repo_path="$3"
+  mkdir -p "$summary_repo_dir"
+  {
+    printf '%s\n' "# Repeated Dogfood Summary: $summary_repo_name"
+    printf '\n'
+    printf '%s\n' "- Repo path: $summary_repo_path"
+    printf '%s\n' "- Repeat count: $repeat_count"
+    printf '\n'
+    printf '%s\n' "| Run | Status | Evidence |"
+    printf '%s\n' "| --- | --- | --- |"
+    attempt=1
+    while [ "$attempt" -le "$repeat_count" ]; do
+      run_slug=$(attempt_slug "$attempt")
+      summary_run_dir="$summary_repo_dir/$run_slug"
+      status="missing"
+      if [ -f "$summary_run_dir/status.txt" ]; then
+        status=$(sed -n '1p' "$summary_run_dir/status.txt")
+      fi
+      evidence="plan.md"
+      if [ -f "$summary_run_dir/summary.md" ]; then
+        evidence="summary.md"
+      fi
+      printf '| %s | %s | %s/%s |\n' "$run_slug" "$status" "$run_slug" "$evidence"
+      attempt=$((attempt + 1))
+    done
+  } >"$summary_repo_dir/summary.md"
 }
 
 capture_git_state() {
-  repo_path="$1"
-  repo_dir="$2"
-  if [ -d "$repo_path/.git" ] || git -C "$repo_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git_repo_path="$1"
+  git_repo_dir="$2"
+  if [ -d "$git_repo_path/.git" ] || git -C "$git_repo_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     set +e
-    git -C "$repo_path" rev-parse HEAD >"$repo_dir/git-head.txt" 2>"$repo_dir/git-head.stderr"
-    git -C "$repo_path" status --short >"$repo_dir/git-status.txt" 2>"$repo_dir/git-status.stderr"
+    git -C "$git_repo_path" rev-parse HEAD >"$git_repo_dir/git-head.txt" 2>"$git_repo_dir/git-head.stderr"
+    git -C "$git_repo_path" status --short >"$git_repo_dir/git-status.txt" 2>"$git_repo_dir/git-status.stderr"
     set -e
-    write_hash "$repo_dir/git-status.txt" "$repo_dir/git-status.sha256"
+    write_hash "$git_repo_dir/git-status.txt" "$git_repo_dir/git-status.sha256"
   else
-    printf '%s\n' "not a git worktree" >"$repo_dir/git-status.txt"
-    write_hash "$repo_dir/git-status.txt" "$repo_dir/git-status.sha256"
+    printf '%s\n' "not a git worktree" >"$git_repo_dir/git-status.txt"
+    write_hash "$git_repo_dir/git-status.txt" "$git_repo_dir/git-status.sha256"
   fi
 }
 
 run_live_repo() {
-  repo_name="$1"
-  repo_path="$2"
-  repo_dir="$3"
-  bin="$4"
-  mkdir -p "$repo_dir"
-  capture_git_state "$repo_path" "$repo_dir"
+  live_repo_name="$1"
+  live_repo_path="$2"
+  live_repo_dir="$3"
+  live_bin="$4"
+  mkdir -p "$live_repo_dir"
+  capture_git_state "$live_repo_path" "$live_repo_dir"
 
   overall="pass"
 
-  if run_capture "$repo_dir/scenario-01-doctor" "$bin" --doctor --format json; then
+  if run_capture "$live_repo_dir/scenario-01-doctor" "$live_bin" --doctor --format json; then
     scenario_01="pass"
   else
     scenario_01="fail"
     overall="fail"
   fi
 
-  if run_capture "$repo_dir/scenario-02-plan-only" "$bin" --workspace "$repo_path" --plan-only --format json "Plan a bounded real-repo fix without writing files"; then
+  if run_capture "$live_repo_dir/scenario-02-plan-only" "$live_bin" --workspace "$live_repo_path" --plan-only --format json "Plan a bounded real-repo fix without writing files"; then
     scenario_02="pass"
   else
     scenario_02="fail"
     overall="fail"
   fi
 
-  if run_capture "$repo_dir/scenario-03-observe-run" "$bin" --workspace "$repo_path" --write-policy observe --format json --model-command sh "$root/examples/command-model.sh" -- "Inspect the repo with a local deterministic model and no writes"; then
+  if run_capture "$live_repo_dir/scenario-03-observe-run" "$live_bin" --workspace "$live_repo_path" --write-policy observe --format json --model-command sh "$root/examples/command-model.sh" -- "Inspect the repo with a local deterministic model and no writes"; then
     scenario_03="pass"
   else
     scenario_03="fail"
     overall="fail"
   fi
 
-  fixture="$repo_dir/patch-preview-workspace"
+  fixture="$live_repo_dir/patch-preview-workspace"
   mkdir -p "$fixture"
   printf '%s\n' "old" >"$fixture/app.txt"
-  if run_capture "$repo_dir/scenario-04-patch-preview" "$bin" --workspace "$fixture" --dry-run --replace app.txt old new --format json "Preview controlled patch approval digest"; then
-    digest=$(preview_digest_from_stdout "$repo_dir/scenario-04-patch-preview/stdout.txt")
+  if run_capture "$live_repo_dir/scenario-04-patch-preview" "$live_bin" --workspace "$fixture" --dry-run --replace app.txt old new --format json "Preview controlled patch approval digest"; then
+    digest=$(preview_digest_from_stdout "$live_repo_dir/scenario-04-patch-preview/stdout.txt")
     if [ -n "$digest" ]; then
-      printf '%s\n' "$digest" >"$repo_dir/scenario-04-patch-preview/preview-digest.txt"
+      printf '%s\n' "$digest" >"$live_repo_dir/scenario-04-patch-preview/preview-digest.txt"
       scenario_04="pass"
     else
-      printf '%s\n' "missing preview digest" >"$repo_dir/scenario-04-patch-preview/pass-fail-note.txt"
+      printf '%s\n' "missing preview digest" >"$live_repo_dir/scenario-04-patch-preview/pass-fail-note.txt"
       scenario_04="fail"
       overall="fail"
     fi
@@ -316,19 +409,19 @@ run_live_repo() {
     overall="fail"
   fi
 
-  if run_capture "$repo_dir/scenario-05-timeout-guard" "$bin" --workspace "$repo_path" --write-policy observe --format json --model-command-timeout-ms "$timeout_ms" --model-command sh -c 'sleep 5' -- "Probe hung model command timeout guard"; then
+  if run_capture "$live_repo_dir/scenario-05-timeout-guard" "$live_bin" --workspace "$live_repo_path" --write-policy observe --format json --model-command-timeout-ms "$timeout_ms" --model-command sh -c 'sleep 5' -- "Probe hung model command timeout guard"; then
     scenario_05="fail"
     overall="fail"
-    printf '%s\n' "timeout probe unexpectedly exited zero" >"$repo_dir/scenario-05-timeout-guard/pass-fail-note.txt"
+    printf '%s\n' "timeout probe unexpectedly exited zero" >"$live_repo_dir/scenario-05-timeout-guard/pass-fail-note.txt"
   else
     scenario_05="pass_expected_failure"
-    printf '%s\n' "timeout probe exited non-zero as expected" >"$repo_dir/scenario-05-timeout-guard/pass-fail-note.txt"
+    printf '%s\n' "timeout probe exited non-zero as expected" >"$live_repo_dir/scenario-05-timeout-guard/pass-fail-note.txt"
   fi
 
   {
-    printf '%s\n' "# Live Dogfood Summary: $repo_name"
+    printf '%s\n' "# Live Dogfood Summary: $live_repo_name"
     printf '\n'
-    printf '%s\n' "- Repo path: $repo_path"
+    printf '%s\n' "- Repo path: $live_repo_path"
     printf '%s\n' "- Overall: $overall"
     printf '%s\n' "- Git status evidence: git-status.txt"
     printf '\n'
@@ -339,9 +432,10 @@ run_live_repo() {
     printf '%s\n' "| scenario-03-observe-run | $scenario_03 | scenario-03-observe-run/stdout.txt |"
     printf '%s\n' "| scenario-04-patch-preview | $scenario_04 | scenario-04-patch-preview/preview-digest.txt |"
     printf '%s\n' "| scenario-05-timeout-guard | $scenario_05 | scenario-05-timeout-guard/pass-fail-note.txt |"
-  } >"$repo_dir/summary.md"
+  } >"$live_repo_dir/summary.md"
+  printf '%s\n' "$overall" >"$live_repo_dir/status.txt"
 
-  append_repo_row "$repo_name" "$overall" "$repo_path" "see repos/$(basename "$repo_dir")/summary.md"
+  append_repo_row "$live_repo_name" "$overall" "$live_repo_path" "see $(evidence_rel_path "$live_repo_dir")/summary.md"
 }
 
 write_index_header
@@ -371,11 +465,28 @@ while IFS= read -r repo_spec; do
     continue
   fi
 
-  if [ "$dry_run" -eq 1 ]; then
-    write_dry_run_plan "$repo_dir" "$repo_name" "$repo_path"
-    append_repo_row "$repo_name" "planned" "$repo_path" "dry-run only; no commands run"
+  if [ "$repeat_count" -eq 1 ]; then
+    if [ "$dry_run" -eq 1 ]; then
+      write_dry_run_plan "$repo_dir" "$repo_name" "$repo_path"
+      append_repo_row "$repo_name" "planned" "$repo_path" "dry-run only; no commands run"
+    else
+      run_live_repo "$repo_name" "$repo_path" "$repo_dir" "$bin"
+    fi
   else
-    run_live_repo "$repo_name" "$repo_path" "$repo_dir" "$bin"
+    attempt=1
+    while [ "$attempt" -le "$repeat_count" ]; do
+      run_slug=$(attempt_slug "$attempt")
+      run_dir="$repo_dir/$run_slug"
+      run_name="$repo_name $run_slug"
+      if [ "$dry_run" -eq 1 ]; then
+        write_dry_run_plan "$run_dir" "$run_name" "$repo_path"
+        append_repo_row "$run_name" "planned" "$repo_path" "see $(evidence_rel_path "$run_dir")/plan.md"
+      else
+        run_live_repo "$run_name" "$repo_path" "$run_dir" "$bin"
+      fi
+      attempt=$((attempt + 1))
+    done
+    write_repeat_summary "$repo_dir" "$repo_name" "$repo_path"
   fi
 done <"$repos_file"
 

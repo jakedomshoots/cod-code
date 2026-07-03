@@ -20,12 +20,24 @@ Live mode builds a local `ceo-packet` binary, records command transcripts, hashe
 
 Missing repos are recorded as `skipped_missing_repo`, not pass.
 
+Repeat a real-repo dogfood pass and keep it isolated from the default evidence folder:
+
+```sh
+sh scripts/dogfood-real.sh \
+  --repo "ceo-harness:/path/to/repo" \
+  --repeat 3 \
+  --output-dir .omo/evidence/dogfood-real-repeat-self-r1
+```
+
+With `--repeat`, each attempt gets its own `run-XX` folder and the repo summary shows every pass/fail row.
+
 ## Evidence
 
 Evidence is saved under `.omo/evidence/dogfood-real/`:
 
 - `index.md`: run summary, scenario catalog, repo status, adversarial notes.
 - `repos/<name>/summary.md`: per-repo pass/fail notes.
+- `repos/<name>/run-XX/summary.md`: per-attempt notes when `--repeat` is greater than 1.
 - `repos/<name>/scenario-*/command.argv`: exact argv.
 - `repos/<name>/scenario-*/stdout.txt`: report output.
 - `repos/<name>/scenario-*/stdout.sha256`: report digest.
