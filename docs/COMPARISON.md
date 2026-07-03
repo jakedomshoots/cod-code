@@ -80,7 +80,7 @@ go run ./cmd/ceo-eval \
   --timeout-seconds 240
 ```
 
-Run the full 24-task production suite against CEO Harness:
+Run the full 25-task production suite against CEO Harness:
 
 ```sh
 go run ./cmd/ceo-packet gauntlet \

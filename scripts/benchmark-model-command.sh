@@ -17,71 +17,95 @@ case "$prompt" in
     ;;
 esac
 
-changed_file=$(printf '%s\n' "$prompt" | sed -n 's/^Required changed files: //p' | head -n 1 | cut -d, -f1 | sed 's/[.]$//' | xargs)
-artifact_file=$(printf '%s\n' "$prompt" | sed -n 's/^Required evidence artifacts: //p' | head -n 1 | cut -d, -f1 | sed 's/[.]$//' | xargs)
-diff_terms=$(printf '%s\n' "$prompt" | sed -n 's/^Required diff terms: //p' | head -n 1 | sed 's/[.]$//')
+python3 - "$prompt" <<'PY'
+import json
+import os
+import re
+import sys
 
-if [ -z "$changed_file" ] || [ -z "$artifact_file" ]; then
-  printf '{"status":"needs_input","summary":"benchmark prompt missing required changed file or artifact path"}\n'
-  exit 0
-fi
+prompt = sys.argv[1]
 
-old_content=$(cat "$changed_file")
-case "$changed_file" in
-  internal/workspace/workspace.go)
-    new_content='package workspace
+def prompt_line(prefix):
+    for line in prompt.splitlines():
+        if line.startswith(prefix):
+            return line[len(prefix):].strip().rstrip(".")
+    return ""
+
+def prompt_list(prefix):
+    value = prompt_line(prefix)
+    if not value:
+        return []
+    return [part.strip() for part in value.split(",") if part.strip()]
+
+changed_files = prompt_list("Required changed files: ")
+artifact_files = prompt_list("Required evidence artifacts: ")
+diff_terms = prompt_line("Required diff terms: ")
+
+if not changed_files or not artifact_files:
+    print(json.dumps({
+        "status": "needs_input",
+        "summary": "benchmark prompt missing required changed files or artifact paths",
+    }))
+    raise SystemExit(0)
+
+def go_package(path):
+    name = os.path.basename(os.path.dirname(path))
+    clean = re.sub(r"[^A-Za-z0-9_]", "_", name).rstrip("_")
+    if not clean or clean[0].isdigit():
+        return "fixture"
+    return clean
+
+def replacement_for(path):
+    if path == "internal/workspace/workspace.go":
+        return """package workspace
 
 import (
-	"errors"
-	"path/filepath"
-	"strings"
+\t"errors"
+\t"path/filepath"
+\t"strings"
 )
 
 var ErrPathEscapesWorkspace = errors.New("path escapes workspace")
 
 func CleanRelativePath(path string) (string, error) {
-	cleanPath := filepath.Clean(strings.TrimSpace(path))
-	if cleanPath == "." || cleanPath == ".." || filepath.IsAbs(cleanPath) || strings.HasPrefix(cleanPath, ".."+string(filepath.Separator)) {
-		return "", ErrPathEscapesWorkspace
-	}
-	return cleanPath, nil
+\tcleanPath := filepath.Clean(strings.TrimSpace(path))
+\tif cleanPath == "." || cleanPath == ".." || filepath.IsAbs(cleanPath) || strings.HasPrefix(cleanPath, ".."+string(filepath.Separator)) {
+\t\treturn "", ErrPathEscapesWorkspace
+\t}
+\treturn cleanPath, nil
 }
-' ;;
-  *.go)
-    pkg=$(printf '%s' "$(basename "$(dirname "$changed_file")")" | tr -c 'A-Za-z0-9_' '_' | sed 's/_*$//')
-    case "$pkg" in
-      ""|[0-9]*) pkg="fixture" ;;
-    esac
-    new_content="package $pkg
+"""
+    if path.endswith(".go"):
+        return f"package {go_package(path)}\n\nconst benchmarkFixture = {json.dumps(diff_terms)}\n"
+    return f"# Benchmark Fixture\n\n{diff_terms}\n"
 
-const benchmarkFixture = \"$diff_terms\"
-" ;;
-  *)
-    new_content="# Benchmark Fixture
+patches = []
+for changed_file in changed_files:
+    with open(changed_file, "r", encoding="utf-8") as handle:
+        old_content = handle.read()
+    patches.append({
+        "path": changed_file,
+        "old": old_content,
+        "new": replacement_for(changed_file),
+    })
 
-$diff_terms
-" ;;
-esac
+artifact_content = f"""# Benchmark Evidence
 
-artifact_content="# Benchmark Evidence
-
-Change: updated $changed_file.
+Change: updated {", ".join(changed_files)}.
 Commands: required benchmark command is supplied by the harness.
-Verification: model-command benchmark patch generated for $artifact_file.
-"
+Verification: model-command benchmark patch generated for {", ".join(artifact_files)}.
+"""
 
-python3 - "$changed_file" "$artifact_file" "$old_content" "$new_content" "$artifact_content" <<'PY'
-import json
-import sys
+for artifact_file in artifact_files:
+    patches.append({
+        "path": artifact_file,
+        "content": artifact_content,
+    })
 
-changed_file, artifact_file, old_content, new_content, artifact_content = sys.argv[1:6]
 print(json.dumps({
     "status": "pass",
     "summary": "benchmark patch ready",
-    "evidence": [artifact_file],
-    "patches": [
-        {"path": changed_file, "old": old_content, "new": new_content},
-        {"path": artifact_file, "content": artifact_content},
-    ],
+    "evidence": artifact_files,
+    "patches": patches,
 }))
 PY

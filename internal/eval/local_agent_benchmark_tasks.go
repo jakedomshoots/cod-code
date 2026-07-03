@@ -29,6 +29,7 @@ var localAgentBenchmarkTaskSuites = map[string][]string{
 		"refactor-text-report-sections",
 		"refactor-check-fix-prompt",
 		"refactor-workspace-brief-excludes",
+		"multi-file-provider-fallback-reporting",
 		"test-repair-require-checks",
 		"test-repair-provider-policy",
 		"test-repair-run-events",

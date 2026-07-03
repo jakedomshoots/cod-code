@@ -73,6 +73,44 @@ func Test_PrepareLocalAgentBenchmarkWorkspace_writes_task_specific_go_test(t *te
 	}
 }
 
+func Test_PrepareLocalAgentBenchmarkWorkspace_requires_multi_file_go_fixes(t *testing.T) {
+	// Given
+	workspaceDir := filepath.Join(t.TempDir(), "workspace")
+	task := Task{
+		ID:        "multi-file-provider-fallback-reporting",
+		Category:  "provider_config",
+		Title:     "Provider fallback reporting spans CLI and config",
+		Objective: "Update provider fallback reporting across CLI and config packages so retry and fallback evidence stay aligned.",
+		RequiredChangedFiles: []string{
+			"internal/cli/provider_fallback_report.go",
+			"internal/config/provider_fallback_policy.go",
+		},
+		RequiredCommands:  []string{"go test ./internal/cli ./internal/config -run Test_ProviderBenchmark -count=1"},
+		RequiredArtifacts: []string{".omo/evidence/multi-file-provider-fallback-reporting.md"},
+		RequiredDiffTerms: []string{"provider", "fallback", "retry"},
+	}
+
+	// When
+	err := prepareLocalAgentBenchmarkWorkspace(context.Background(), workspaceDir, task, nil)
+	// Then
+	if err != nil {
+		t.Fatalf("prepareLocalAgentBenchmarkWorkspace returned error: %v", err)
+	}
+	baselineRun := runLocalAgentCommand(context.Background(), []string{"go", "test", "./internal/cli", "./internal/config", "-run", "Test_ProviderBenchmark", "-count=1"}, workspaceDir, nil, localAgentTimeout(5))
+	if baselineRun.exitCode == 0 {
+		t.Fatalf("baseline multi-file fixture unexpectedly passed: stdout=%q stderr=%q", baselineRun.stdout, baselineRun.stderr)
+	}
+	for _, path := range task.RequiredChangedFiles {
+		if err := os.WriteFile(filepath.Join(workspaceDir, path), []byte(benchmarkExpectedText(task, path)), 0o644); err != nil {
+			t.Fatalf("write expected fixture %s: %v", path, err)
+		}
+	}
+	fixedRun := runLocalAgentCommand(context.Background(), []string{"go", "test", "./internal/cli", "./internal/config", "-run", "Test_ProviderBenchmark", "-count=1"}, workspaceDir, nil, localAgentTimeout(5))
+	if fixedRun.exitCode != 0 || fixedRun.errText != "" {
+		t.Fatalf("fixed multi-file fixture failed: exit=%d err=%q stdout=%q stderr=%q", fixedRun.exitCode, fixedRun.errText, fixedRun.stdout, fixedRun.stderr)
+	}
+}
+
 func Test_PrepareLocalAgentBenchmarkWorkspace_writes_real_path_escape_fixture(t *testing.T) {
 	// Given
 	workspaceDir := filepath.Join(t.TempDir(), "workspace")

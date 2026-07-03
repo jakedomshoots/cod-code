@@ -89,6 +89,17 @@
     "required_report_fields": ["workspace_brief.files"]
   },
   {
+    "id": "multi-file-provider-fallback-reporting",
+    "category": "provider_config",
+    "title": "Provider fallback reporting spans CLI and config",
+    "objective": "Update provider fallback reporting across CLI and config packages so retry and fallback evidence stay aligned.",
+    "required_changed_files": ["internal/cli/provider_fallback_report.go", "internal/config/provider_fallback_policy.go"],
+    "required_commands": ["go test ./internal/cli ./internal/config -run Test_ProviderBenchmark -count=1"],
+    "required_artifacts": [".omo/evidence/multi-file-provider-fallback-reporting.md"],
+    "required_diff_terms": ["provider", "fallback", "retry"],
+    "required_report_fields": ["provider_route_decisions", "run_manifest.changed_file_count"]
+  },
+  {
     "id": "test-repair-require-checks",
     "category": "test_repair",
     "title": "Repair require-checks coverage",

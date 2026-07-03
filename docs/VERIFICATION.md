@@ -21,6 +21,12 @@ Status date: 2026-07-03
   - Result: 96 runs / 91 pass / 3 partial / 0 fail / 2 timed out / 0 skipped / 3 incomplete evidence.
   - CEO Harness result: 24 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
   - Agent totals: Codex CLI 24 pass; OpenCode 23 pass and 1 partial; Pi 20 pass, 2 partial, and 2 timed out.
+- Latest expanded production-core CEO comparison:
+  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/production-core-25-ceo-r1 --timeout-seconds 120 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
+  - Result: 25 tasks / 25 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
+- Latest focused multi-file task proof:
+  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task multi-file-provider-fallback-reporting --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/multi-file-provider-fallback-ceo-r2 --timeout-seconds 120 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
+  - Result: 1 run / 1 pass / 9 scored checks / 0 incomplete evidence.
 - Latest real-repo dogfood:
   - `sh scripts/dogfood-real.sh --repo ceo-harness:<repo> --timeout-ms 250`
   - Result: pass, including expected timeout failure evidence.
