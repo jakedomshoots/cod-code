@@ -410,6 +410,91 @@ func Test_DogfoodRealScript_appCodeProbeRequiresCopyWorkspace(t *testing.T) {
 	}
 }
 
+func Test_DogfoodRealScript_copyWorkspaceIntegratedAppCodeProbeEditsExistingSourceOnlyInCopy(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	repoDir := filepath.Join(t.TempDir(), "repo")
+	srcDir := filepath.Join(repoDir, "src")
+	if err := os.MkdirAll(srcDir, 0o755); err != nil {
+		t.Fatalf("create temp src repo: %v", err)
+	}
+	originalApp := "export default function App() { return null }\n"
+	if err := os.WriteFile(filepath.Join(srcDir, "App.jsx"), []byte(originalApp), 0o644); err != nil {
+		t.Fatalf("write source App.jsx: %v", err)
+	}
+	initGitRepo(t, repoDir)
+	outputDir := filepath.Join(t.TempDir(), "dogfood-real")
+	task := "Wire copied app-code proof into existing source"
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "dogfood-real.sh"),
+		"--copy-workspace",
+		"--integrated-app-code-probe",
+		"--task", task,
+		"--output-dir", outputDir,
+		"--timeout-ms", "50",
+		"--repo", "sample:"+repoDir,
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("dogfood-real integrated app-code probe failed: %v\n%s", err, string(output))
+	}
+
+	if got := readTextFile(t, filepath.Join(srcDir, "App.jsx")); got != originalApp {
+		t.Fatalf("source App.jsx changed to %q", got)
+	}
+	workspacePath := strings.TrimSpace(readTextFile(t, filepath.Join(outputDir, "repos", "sample", "workspace-path.txt")))
+	copiedApp := readTextFile(t, filepath.Join(workspacePath, "src", "App.jsx"))
+	for _, want := range []string{
+		"ceoDogfoodIntegratedProbe",
+		`repo: "sample"`,
+		`task: "Wire copied app-code proof into existing source"`,
+		`result: "approved integrated copied-workspace app-code edit"`,
+	} {
+		if !strings.Contains(copiedApp, want) {
+			t.Fatalf("integrated app-code probe missing %q:\n%s", want, copiedApp)
+		}
+	}
+	summary := readTextFile(t, filepath.Join(outputDir, "repos", "sample", "summary.md"))
+	if !strings.Contains(summary, "| scenario-09-integrated-app-code-probe | pass |") {
+		t.Fatalf("summary missing passing integrated app-code probe:\n%s", summary)
+	}
+	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "scenario-09-integrated-app-code-probe", "target-file.txt"))
+	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "scenario-09-integrated-app-code-probe", "integrated-source-file.txt"))
+	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "scenario-09-integrated-app-code-probe", "git-status-after.txt"))
+}
+
+func Test_DogfoodRealScript_integratedAppCodeProbeRequiresCopyWorkspace(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	repoDir := filepath.Join(t.TempDir(), "repo")
+	if err := os.MkdirAll(repoDir, 0o755); err != nil {
+		t.Fatalf("create temp repo: %v", err)
+	}
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "dogfood-real.sh"),
+		"--dry-run",
+		"--integrated-app-code-probe",
+		"--repo", "sample:"+repoDir,
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("dogfood-real integrated app-code probe without copy unexpectedly passed:\n%s", string(output))
+	}
+	if !strings.Contains(string(output), "--integrated-app-code-probe requires --copy-workspace") {
+		t.Fatalf("error missing copy-workspace guidance:\n%s", string(output))
+	}
+}
+
 func initGitRepo(t *testing.T, repoDir string) {
 	t.Helper()
 	for _, args := range [][]string{
