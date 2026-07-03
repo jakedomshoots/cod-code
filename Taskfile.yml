@@ -79,6 +79,11 @@ tasks:
     cmds:
       - sh scripts/endurance.sh --iterations 3 --output-dir .omo/evidence/endurance-local-r1
 
+  eval:provider:kimi:
+    desc: Run the Kimi-backed real-provider proof suite
+    cmds:
+      - sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi
+
   ci:
     desc: Run the productization gate used before handoff
     cmds:

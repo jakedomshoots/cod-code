@@ -50,7 +50,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 ## Current Weak Spots
 
 - No public remote repository is configured yet.
-- The real proof still needs more provider families and broader app-shaped repo coverage beyond the current ChemCheck, Axis Health, Janus, and Kimi-backed JS reducer proofs.
+- The real proof still needs more provider families and broader app-shaped repo coverage beyond the current ChemCheck, Axis Health, Janus, and Kimi-backed cross-language provider proofs.
 - External/provider gauntlets can still be blocked or incomplete when a provider key, CLI login, timeout log, git status snapshot, or scorer artifact is missing.
 
 ## Market Roadmap Result 2026-07-03
@@ -75,6 +75,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Cross-language-core CEO result after adding JavaScript and Python benchmark fixtures: 2 tasks / concurrency 2 / 2 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/cross-language-core-ceo-r1/summary.json`.
 - Repeated real Kimi provider path-safety result: 3 attempts / 3 pass / 18 scored checks / 0 partial / 0 fail / 0 incomplete evidence at `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json`.
 - Real Kimi provider JS app-code result: `cross-language-js-state-reducer` passed 6/6 scored checks with complete evidence at `.omo/evidence/provider-kimi-js-state-reducer-r2/summary.json` after the Kimi bridge was fixed to include JS/TS sibling tests in its compact context.
+- First-class Kimi provider proof gate: `scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi-r2` passed both cross-language real-code tasks: JS state reducer 6/6 and Python retry policy 7/7 with complete evidence.
 - Bounded external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` with complete evidence at `.omo/evidence/external-agent-one-r1/summary.json`.
 - Two-task external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` and `bugfix-cli-timeout` with complete evidence at `.omo/evidence/external-agent-2task-r1/summary.json`.
 - Four-task external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first`, `bugfix-cli-timeout`, `safety-policy-path-escape`, and `recovery-resume-retry` with complete evidence at `.omo/evidence/external-agent-4task-r2/summary.json`.

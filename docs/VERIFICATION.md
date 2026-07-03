@@ -52,6 +52,9 @@ Status date: 2026-07-03
 - Latest real Kimi provider JS app-code proof:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task cross-language-js-state-reducer --local-agent-benchmark-repeat 1 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/provider-kimi-js-state-reducer-r2 --timeout-seconds 600 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/kimi-model-command.sh"]'`
   - Result: 1 run / 1 pass / 6 scored checks / 0 incomplete evidence. Kimi changed `frontend/state.js`, created `.omo/evidence/cross-language-js-state-reducer.md`, and passed `node frontend/state.test.js`.
+- Latest first-class Kimi provider proof gate:
+  - `sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi-r2`
+  - Result: pass. JS reducer scored 6/6 and Python retry policy scored 7/7; both changed required source files, created required evidence artifacts, and passed their task commands through Kimi-backed CEO Harness.
 - Latest real-repo dogfood:
   - `sh scripts/dogfood-real.sh --repo ceo-harness-repeat:/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1`
   - Result: 3 live passes / 0 fails, including expected timeout failure evidence in each run.
