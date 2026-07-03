@@ -92,11 +92,12 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Independent copied-workspace dogfood result: ChemCheck and Axis Health both passed all five no-key scenarios in copied workspaces at `.omo/evidence/dogfood-real-independent-r1/index.md`.
 - Added no-key nightly eval automation through `make eval-nightly` and `.github/workflows/nightly-evals.yml`.
 - Added endurance eval runner through `scripts/endurance.sh`, `make eval-endurance`, and `task eval:endurance`; short local proof produced 3/3 passing iterations at `.omo/evidence/endurance-local-r1/index.md`.
+- Longer local endurance proof produced 10/10 passing iterations, each running build, 28-task fixture scoring, cross-language gauntlet, and real-repo dogfood, at `.omo/evidence/endurance-local-r2/index.md`.
 - Added release manifest and verifier through `dist/release-manifest.json` and `scripts/verify-release.sh`.
 - Rollback now covers created-file model patches as well as normal replacement patches; created-file rollback refuses to delete if the file content changed after creation.
 - Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, `sh scripts/dogfood.sh`, `sh scripts/release-local.sh`, `task ci`, `golangci-lint run ./...`, `nilaway ./...`, and `sh scripts/strict-checks.sh`.
 - First product baseline commit: `8509a4b Initial CEO Harness production baseline`.
-- Remaining evidence gap: add more independent real repos beyond the first two, harder multi-file jobs, and truly long-duration endurance runs before making broad market-win claims.
+- Remaining evidence gap: add more independent real repos beyond the first two, harder multi-file jobs, and overnight or truly long-duration endurance runs before making broad market-win claims.
 
 ## Additions Completed 2026-07-02
 

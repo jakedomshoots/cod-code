@@ -58,6 +58,9 @@ Status date: 2026-07-03
 - Endurance eval task:
   - `sh scripts/endurance.sh --iterations 3 --output-dir .omo/evidence/endurance-local-r1`
   - Result: 3 iterations / 3 pass / 0 fail / elapsed 8 seconds, with per-iteration command logs and summary rows.
+- Longer endurance eval task:
+  - `sh scripts/endurance.sh --iterations 10 --output-dir .omo/evidence/endurance-local-r2`
+  - Result: 10 iterations / 10 pass / 0 fail / elapsed 30 seconds, with each iteration running build, 28-task fixture scoring, cross-language gauntlet, and real-repo dogfood.
 
 - Focused additions test:
   - `go test ./internal/cli -run 'Test_Run_(start|inbox|provider_wizard|init_demo_repo|tui|write_policy|init_config_uses_external_adapter|prints_help)' -count=1`
