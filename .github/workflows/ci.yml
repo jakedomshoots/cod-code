@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Format check
+        run: |
+          gofmt -w ./cmd ./internal
+          git diff --exit-code
+
+      - name: Test
+        run: go test ./... -count=1
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Smoke
+        run: sh scripts/smoke.sh
+
+      - name: Dogfood
+        run: sh scripts/dogfood.sh
+
+      - name: Race
+        run: go test -race -shuffle=on -count=1 ./...
+
+      - name: Build
+        run: go build -trimpath -o bin/ceo-packet ./cmd/ceo-packet

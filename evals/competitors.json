@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "competitors": [
+    {
+      "id": "codex_cli",
+      "name": "OpenAI Codex CLI",
+      "binary": "codex",
+      "homepage": "https://developers.openai.com/codex/cli",
+      "setup_hint": "Install and authenticate Codex CLI before real comparison runs.",
+      "version_args": ["--version"],
+      "dry_run_args": ["--version"],
+      "timeout_seconds": 1800,
+      "comparison_dimensions": [
+        "task_success",
+        "time_to_complete",
+        "files_changed",
+        "safety_prompts",
+        "cost_provider_used",
+        "evidence_quality"
+      ]
+    },
+    {
+      "id": "claude_code",
+      "name": "Claude Code",
+      "binary": "claude",
+      "homepage": "https://github.com/anthropics/claude-code",
+      "setup_hint": "Install and authenticate Claude Code before real comparison runs.",
+      "version_args": ["--version"],
+      "dry_run_args": ["--version"],
+      "timeout_seconds": 1800,
+      "comparison_dimensions": [
+        "task_success",
+        "time_to_complete",
+        "files_changed",
+        "safety_prompts",
+        "cost_provider_used",
+        "evidence_quality"
+      ]
+    },
+    {
+      "id": "aider",
+      "name": "Aider",
+      "binary": "aider",
+      "homepage": "https://github.com/Aider-AI/aider",
+      "setup_hint": "Install Aider and configure its provider before real comparison runs.",
+      "version_args": ["--version"],
+      "dry_run_args": ["--version"],
+      "timeout_seconds": 1800,
+      "comparison_dimensions": [
+        "task_success",
+        "time_to_complete",
+        "files_changed",
+        "safety_prompts",
+        "cost_provider_used",
+        "evidence_quality"
+      ]
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "binary": "opencode",
+      "homepage": "https://opencode.ai/docs/",
+      "setup_hint": "Install OpenCode and configure its provider before real comparison runs.",
+      "version_args": ["--version"],
+      "dry_run_args": ["--version"],
+      "timeout_seconds": 1800,
+      "comparison_dimensions": [
+        "task_success",
+        "time_to_complete",
+        "files_changed",
+        "safety_prompts",
+        "cost_provider_used",
+        "evidence_quality"
+      ]
+    },
+    {
+      "id": "goose",
+      "name": "Goose",
+      "binary": "goose",
+      "homepage": "https://goose-docs.ai/",
+      "setup_hint": "Install Goose and configure its provider before real comparison runs.",
+      "version_args": ["--version"],
+      "dry_run_args": ["--version"],
+      "timeout_seconds": 1800,
+      "comparison_dimensions": [
+        "task_success",
+        "time_to_complete",
+        "files_changed",
+        "safety_prompts",
+        "cost_provider_used",
+        "evidence_quality"
+      ]
+    }
+  ]
+}

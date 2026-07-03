@@ -1,0 +1,224 @@
+package eval
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+func prepareLocalAgentBenchmarkWorkspace(ctx context.Context, workspaceDir string, task Task, workspaceConfig []byte) error {
+	if err := os.RemoveAll(workspaceDir); err != nil {
+		return fmt.Errorf("reset benchmark workspace: %w", err)
+	}
+	if err := os.MkdirAll(workspaceDir, 0o755); err != nil {
+		return fmt.Errorf("create benchmark workspace: %w", err)
+	}
+	if err := writeRelativeFile(workspaceDir, "go.mod", "module localagentbench\n\ngo 1.23\n"); err != nil {
+		return err
+	}
+	if err := writeRelativeFile(workspaceDir, "internal/cli/doc.go", "package cli\n"); err != nil {
+		return err
+	}
+	for _, path := range task.RequiredChangedFiles {
+		if err := writeRelativeFile(workspaceDir, path, benchmarkBaselineText(task, path)); err != nil {
+			return err
+		}
+	}
+	if err := writeBenchmarkFixtureSupportFiles(workspaceDir, task); err != nil {
+		return err
+	}
+	if len(workspaceConfig) > 0 {
+		if err := writeRelativeFile(workspaceDir, ".ceo-harness.json", string(workspaceConfig)); err != nil {
+			return err
+		}
+	}
+	if err := runGitCommand(ctx, workspaceDir, "init"); err != nil {
+		return err
+	}
+	if err := runGitCommand(ctx, workspaceDir, "config", "user.email", "eval@example.com"); err != nil {
+		return err
+	}
+	if err := runGitCommand(ctx, workspaceDir, "config", "user.name", "Eval Fixture"); err != nil {
+		return err
+	}
+	if err := runGitCommand(ctx, workspaceDir, "add", "."); err != nil {
+		return err
+	}
+	if err := runGitCommand(ctx, workspaceDir, "commit", "-m", "benchmark baseline"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func benchmarkBaselineText(task Task, path string) string {
+	if task.ID == "safety-policy-path-escape" && filepath.Clean(path) == filepath.Join("internal", "workspace", "workspace.go") {
+		return safetyPathEscapeBaselineFixture()
+	}
+	if filepath.Ext(path) == ".go" {
+		return benchmarkGoFixture(path, "TODO: update this benchmark fixture")
+	}
+	if task.ID == defaultLocalAgentBenchmarkID {
+		return "# Roadmap\n\nGUI work is first.\n"
+	}
+	return "# Benchmark Fixture\n\nTODO: update this benchmark fixture.\n"
+}
+
+func benchmarkExpectedText(task Task, path string) string {
+	if task.ID == "safety-policy-path-escape" && filepath.Clean(path) == filepath.Join("internal", "workspace", "workspace.go") {
+		return safetyPathEscapeExpectedFixture()
+	}
+	if filepath.Ext(path) == ".go" {
+		return benchmarkGoFixture(path, benchmarkExpectedTerms(task))
+	}
+	if task.ID == defaultLocalAgentBenchmarkID {
+		return "# Roadmap\n\nCLI-first dogfood and recovery come before GUI work.\n"
+	}
+	return "# Benchmark Fixture\n\n" + benchmarkExpectedTerms(task) + "\n"
+}
+
+func benchmarkExpectedTerms(task Task) string {
+	terms := strings.Join(task.RequiredDiffTerms, " ")
+	if strings.TrimSpace(terms) == "" {
+		return task.Objective
+	}
+	return terms
+}
+
+func benchmarkGoFixture(path string, value string) string {
+	return fmt.Sprintf("package %s\n\nconst benchmarkFixture = %q\n", benchmarkGoPackageName(path), value)
+}
+
+func benchmarkGoPackageName(path string) string {
+	name := filepath.Base(filepath.Dir(filepath.Clean(path)))
+	var builder strings.Builder
+	for _, char := range name {
+		if (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '_' {
+			builder.WriteRune(char)
+			continue
+		}
+		builder.WriteByte('_')
+	}
+	clean := builder.String()
+	if clean == "" || (clean[0] >= '0' && clean[0] <= '9') {
+		return "fixture"
+	}
+	return clean
+}
+
+func writeBenchmarkStatusFile(ctx context.Context, path string, workspaceDir string) error {
+	status, err := captureGitStatus(ctx, workspaceDir)
+	if err != nil {
+		return err
+	}
+	return writeTextFile(path, status)
+}
+
+func benchmarkChangedFiles(ctx context.Context, workspaceDir string) ([]string, string, error) {
+	status, err := captureGitStatus(ctx, workspaceDir)
+	if err != nil {
+		return nil, "", err
+	}
+	files := dirtyPathsFromPorcelain(status)
+	return files, status, nil
+}
+
+func writeBenchmarkArtifactsInWorkspace(workspaceDir string, task Task, content string) error {
+	for _, artifact := range task.RequiredArtifacts {
+		if err := writeRelativeFile(workspaceDir, artifact, content); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func benchmarkEvidenceContent(task Task, result LocalAgentBenchmarkResult, checks []commandResult) string {
+	var builder strings.Builder
+	fmt.Fprintf(&builder, "# Benchmark Evidence\n\n")
+	fmt.Fprintf(&builder, "Task: %s\n", task.ID)
+	fmt.Fprintf(&builder, "Agent: %s\n", result.Name)
+	for _, check := range checks {
+		fmt.Fprintf(&builder, "- `%s`: %s exit=%d\n", strings.Join(check.Argv, " "), check.Status, check.ExitCode)
+	}
+	return builder.String()
+}
+
+func writeBenchmarkFixtureSupportFiles(workspaceDir string, task Task) error {
+	if task.ID != "safety-policy-path-escape" {
+		return nil
+	}
+	return writeRelativeFile(workspaceDir, "internal/workspace/workspace_test.go", safetyPathEscapeTestFixture())
+}
+
+func safetyPathEscapeBaselineFixture() string {
+	return `package workspace
+
+import (
+	"errors"
+	"path/filepath"
+	"strings"
+)
+
+var ErrPathEscapesWorkspace = errors.New("unsafe path accepted")
+
+func CleanRelativePath(path string) (string, error) {
+	return filepath.Clean(strings.TrimSpace(path)), nil
+}
+`
+}
+
+func safetyPathEscapeExpectedFixture() string {
+	return `package workspace
+
+import (
+	"errors"
+	"path/filepath"
+	"strings"
+)
+
+var ErrPathEscapesWorkspace = errors.New("path escapes workspace")
+
+func CleanRelativePath(path string) (string, error) {
+	cleanPath := filepath.Clean(strings.TrimSpace(path))
+	if cleanPath == "." || cleanPath == ".." || filepath.IsAbs(cleanPath) || strings.HasPrefix(cleanPath, ".."+string(filepath.Separator)) {
+		return "", ErrPathEscapesWorkspace
+	}
+	return cleanPath, nil
+}
+`
+}
+
+func safetyPathEscapeTestFixture() string {
+	return `package workspace
+
+import (
+	"errors"
+	"testing"
+)
+
+func Test_CleanRelativePath_rejects_parent_path_escape(t *testing.T) {
+	_, err := CleanRelativePath("../outside.txt")
+	if !errors.Is(err, ErrPathEscapesWorkspace) {
+		t.Fatalf("error = %v, want path escapes workspace", err)
+	}
+}
+
+func Test_CleanRelativePath_rejects_absolute_path(t *testing.T) {
+	_, err := CleanRelativePath("/tmp/outside.txt")
+	if !errors.Is(err, ErrPathEscapesWorkspace) {
+		t.Fatalf("error = %v, want path escapes workspace", err)
+	}
+}
+
+func Test_CleanRelativePath_accepts_nested_relative_path(t *testing.T) {
+	path, err := CleanRelativePath("internal/workspace/workspace.go")
+	if err != nil {
+		t.Fatalf("CleanRelativePath returned error: %v", err)
+	}
+	if path != "internal/workspace/workspace.go" {
+		t.Fatalf("path = %q, want internal/workspace/workspace.go", path)
+	}
+}
+`
+}

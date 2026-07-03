@@ -1,0 +1,32 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    - gofumpt
+    - goimports
+    - misspell
+    - errorlint
+    - errcheck
+    - staticcheck
+    - govet
+    - ineffassign
+    - unused
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+
+linters-settings:
+  goimports:
+    local-prefixes:
+      - ceoharness
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

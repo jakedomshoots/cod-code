@@ -1,0 +1,66 @@
+version: '3'
+
+vars:
+  BINARY: ceo-packet
+  PKG: ./cmd/ceo-packet
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || printf dev
+  COMMIT:
+    sh: git rev-parse --short HEAD 2>/dev/null || printf local
+
+tasks:
+  default:
+    desc: Run the standard local verification gate
+    cmds:
+      - task: ci
+
+  fmt:
+    desc: Format Go files with gofmt
+    cmds:
+      - gofmt -w ./cmd ./internal
+
+  test:
+    desc: Run the unit and integration test suite
+    cmds:
+      - go test ./... -count=1
+
+  test:race:
+    desc: Run tests with the race detector and shuffled order
+    cmds:
+      - go test -race -shuffle=on -count=1 ./...
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  smoke:
+    desc: Run the local CLI smoke check
+    cmds:
+      - sh scripts/smoke.sh
+
+  dogfood:
+    desc: Drive the real CLI through happy, failed-check, patch, and needs-input paths
+    cmds:
+      - sh scripts/dogfood.sh
+
+  build:
+    desc: Build the local binary
+    cmds:
+      - mkdir -p bin
+      - go build -trimpath -ldflags="-X ceoharness/internal/cli.Version={{.VERSION}} -X ceoharness/internal/cli.Commit={{.COMMIT}}" -o bin/{{.BINARY}} {{.PKG}}
+
+  release:local:
+    desc: Build local release archives and checksums
+    cmds:
+      - sh scripts/release-local.sh
+
+  ci:
+    desc: Run the productization gate used before handoff
+    cmds:
+      - task: fmt
+      - task: test
+      - task: vet
+      - task: smoke
+      - task: dogfood
+      - task: build

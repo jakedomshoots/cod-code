@@ -1,0 +1,33 @@
+{
+  "task_id": "bugfix-cli-timeout",
+  "verdict": "pass",
+  "changed_files": [
+    "internal/cli/run.go"
+  ],
+  "check_results": [
+    {
+      "argv": ["go", "test", "./internal/cli", "-count=1"],
+      "status": "pass",
+      "exit_code": 0,
+      "stdout": "ok ceoharness/internal/cli"
+    }
+  ],
+  "patch_results": [
+    {
+      "path": "internal/cli/run.go",
+      "diff": "@@\n+timeout handling returns a failed check result"
+    }
+  ],
+  "evidence_paths": [
+    ".omo/evidence/bugfix-cli-timeout.md"
+  ],
+  "verification_contract": {
+    "status": "pass"
+  },
+  "worktree_status": {
+    "source": "git",
+    "command": ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+    "payload": " M internal/cli/run.go\n?? internal/cli/run_test.go\n",
+    "sha256": "d1992ce2e6609381604d2d06938a2defc02179b8da44dba2e1a904abf98c93ad"
+  }
+}

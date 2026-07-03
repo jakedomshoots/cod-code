@@ -1,0 +1,110 @@
+package eval
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func Test_LocalAgentBenchmarkTasks_market_parity_core_covers_required_categories(t *testing.T) {
+	// Given
+	want := []string{
+		"bugfix-cli-timeout",
+		"docs-roadmap-cli-first",
+		"refactor-model-selection-split",
+		"test-repair-require-checks",
+		"provider-config-openai-compatible",
+		"safety-policy-observe-no-write",
+		"safety-policy-path-escape",
+		"recovery-resume-retry",
+		"safety-policy-rollback-report",
+		"report-quality-evidence-summary",
+	}
+
+	// When
+	got := requestedLocalAgentBenchmarkTaskIDs("market-parity-core")
+
+	// Then
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Fatalf("market-parity-core = %v, want %v", got, want)
+	}
+}
+
+func Test_WriteLocalAgentComparisonReport_includes_artifact_derived_details(t *testing.T) {
+	// Given
+	path := filepath.Join(t.TempDir(), "comparison-report.md")
+	summary := LocalAgentBenchmarkSummary{
+		Mode:               "local_agent_benchmark",
+		TaskCount:          1,
+		RunCount:           2,
+		Passed:             1,
+		Partial:            1,
+		IncompleteEvidence: 1,
+		Results: []LocalAgentBenchmarkResult{
+			{
+				ID:             "ceo_harness",
+				Name:           "CEO Harness",
+				TaskID:         "docs-roadmap-cli-first",
+				Attempt:        1,
+				Status:         localAgentStatusPass,
+				EvidenceStatus: localAgentEvidenceComplete,
+				PassedChecks:   5,
+				TotalChecks:    5,
+				ChangedFiles:   []string{"docs/ROADMAP.md"},
+				DurationMS:     42,
+				TimingPath:     "run-01/timing.txt",
+				ScorePath:      "run-01/score.json",
+				ReportPath:     "run-01/report.json",
+			},
+			{
+				ID:             "ceo_harness",
+				Name:           "CEO Harness",
+				TaskID:         "docs-roadmap-cli-first",
+				Attempt:        2,
+				Status:         localAgentStatusPartial,
+				EvidenceStatus: localAgentEvidenceIncomplete,
+				PassedChecks:   4,
+				TotalChecks:    5,
+				FailedScoreChecks: []CheckResult{
+					{Name: "artifact:.omo/evidence/docs-roadmap-cli-first.md", Status: "fail"},
+				},
+				ChangedFiles:      []string{"docs/ROADMAP.md"},
+				ExtraChangedFiles: []string{"tmp.txt"},
+				DurationMS:        55,
+				TimingPath:        "run-02/timing.txt",
+				ScorePath:         "run-02/score.json",
+				ReportPath:        "run-02/report.json",
+			},
+		},
+	}
+
+	// When
+	if err := writeLocalAgentComparisonReport(path, summary); err != nil {
+		t.Fatalf("writeLocalAgentComparisonReport returned error: %v", err)
+	}
+
+	// Then
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read report: %v", err)
+	}
+	text := string(content)
+	for _, want := range []string{
+		"## Aggregate Counts",
+		"Passed: 1",
+		"Partial: 1",
+		"## Per-Agent Status",
+		"CEO Harness",
+		"## Run Artifact Detail",
+		"artifact:.omo/evidence/docs-roadmap-cli-first.md",
+		"docs/ROADMAP.md",
+		"tmp.txt",
+		"run-02/timing.txt",
+		"run-02/report.json",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("comparison report missing %q:\n%s", want, text)
+		}
+	}
+}
