@@ -25,6 +25,9 @@ Status date: 2026-07-03
 - Latest focused external-agent comparison for the newest multi-file task:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task multi-file-operator-safety-flow --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-operator-safety-flow-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 4 runs / 4 pass / 0 partial / 0 fail / 0 timed out / 0 skipped / 0 incomplete evidence.
+- Latest market-parity-core CEO comparison:
+  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task market-parity-core --local-agent-benchmark-repeat 1 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/market-parity-core-ceo-r2 --timeout-seconds 180 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
+  - Result: 10 tasks / 10 pass / 0 partial / 0 fail / 0 timed out / 0 skipped / 0 incomplete evidence.
 - Latest expanded production-core CEO comparison:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/production-core-26-ceo-r1 --timeout-seconds 180 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 26 tasks / 26 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.

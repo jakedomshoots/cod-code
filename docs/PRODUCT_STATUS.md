@@ -51,22 +51,22 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 
 - No public remote repository is configured yet.
 - The real proof still needs repeated dogfooding on more independent non-demo coding repos.
-- Market gauntlet evidence can still be partial/incomplete when a provider key, CLI login, timeout log, git status snapshot, or scorer artifact is missing.
+- External/provider gauntlets can still be blocked or incomplete when a provider key, CLI login, timeout log, git status snapshot, or scorer artifact is missing.
 - The CLI still has many advanced flags, but the common help surface now starts with the primary operator flow.
 
 ## Market Roadmap Result 2026-07-03
 
 - Completed the market CLI roadmap implementation through doctor, release, docs, recovery UX, gauntlet/reporting, and local proof gates.
 - Full repo gates passed: `go test ./... -count=1`, `go vet ./...`, `go test -race -shuffle=on -count=1 ./...`, smoke, dogfood, release-local, and doctor.
-- The 10-task `market-parity-core` CEO Harness gauntlet ran and produced 10 partial results because required task evidence artifacts were intentionally enforced instead of silently created.
-- A bounded cross-agent comparison ran on `docs-roadmap-cli-first` across CEO Harness, Codex CLI, OpenCode, and Pi. All four were partial because required evidence artifacts were incomplete.
-- Real Codex and Kimi model-command path-safety proofs ran. Both passed the code/test/path-safety parts but remained partial because the required task evidence file was missing.
+- The first 10-task `market-parity-core` CEO Harness gauntlet produced partial results while required task evidence artifacts were being enforced. The current rerun passes 10/10 with complete evidence at `.omo/evidence/market-parity-core-ceo-r2/summary.json`.
+- Early bounded cross-agent and real-model path-safety comparisons exposed missing-evidence gaps. Later runs now have complete saved evidence for focused, four-task, production-core, Kimi, and current multi-file comparisons.
 - This is local-release ready with honest limitations; it is not yet a public market-win claim.
 
 ## Production Hardening Progress 2026-07-03
 
 - Benchmark runner now writes a complete artifact packet for missing-agent-binary and terminal benchmark errors instead of leaving summary rows without evidence files.
 - Added regression coverage for missing CEO binary evidence: command, stdout, stderr, report, score, diff, changed-files, git-status, and timing artifacts must all exist and be non-empty.
+- Current `market-parity-core` CEO result: 10 tasks / 10 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/market-parity-core-ceo-r2/summary.json`.
 - Added `production-core`, now a 26-task gauntlet suite, available through `ceo-packet gauntlet --suite production-core`.
 - Synthetic CEO benchmark mode now creates task-specific required evidence artifacts, so the runner can prove a clean pass instead of stopping at partial.
 - Production-core smoke result: 24 tasks / 24 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-smoke-r2/summary.json`.
