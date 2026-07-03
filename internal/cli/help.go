@@ -24,6 +24,7 @@ Usage:
   ceo-packet run [flags] <task>
   ceo-packet gauntlet [flags]
   ceo-packet gauntlet --suite production-core [flags]
+  ceo-packet gauntlet --suite production-core --concurrency 4 [flags]
   ceo-packet doctor [flags]
   ceo-packet inbox [flags]
   ceo-packet status [flags]

@@ -49,6 +49,38 @@ func Test_RunLocalAgentBenchmark_runs_selected_tasks_for_each_repeat(t *testing.
 	}
 }
 
+func Test_RunLocalAgentBenchmark_runs_jobs_in_parallel_when_concurrency_is_set(t *testing.T) {
+	// Given
+	binDir := t.TempDir()
+	barrierDir := filepath.Join(t.TempDir(), "barrier")
+	writeExecutableContent(t, filepath.Join(binDir, "codex"), concurrentMultiTaskAgentScript())
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	t.Setenv("BENCHMARK_CONCURRENCY_DIR", barrierDir)
+	root := t.TempDir()
+	tasksDir := filepath.Join(root, "tasks")
+	writeTaskSpec(t, tasksDir, multiTaskSpec())
+
+	// When
+	summary, err := RunLocalAgentBenchmark(context.Background(), LocalAgentBenchmarkRequest{
+		TasksDir:        tasksDir,
+		OutputDir:       filepath.Join(root, "benchmark"),
+		TimeoutSeconds:  10,
+		Agents:          []string{"codex_cli"},
+		BenchmarkTaskID: "docs-one,docs-two",
+		Concurrency:     2,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
+	}
+	if summary.Concurrency != 2 || summary.Passed != 2 || len(summary.Results) != 2 {
+		t.Fatalf("summary = %+v, want two passing concurrent results", summary)
+	}
+	if summary.Results[0].TaskID != "docs-one" || summary.Results[1].TaskID != "docs-two" {
+		t.Fatalf("result order = %s, %s; want planned task order", summary.Results[0].TaskID, summary.Results[1].TaskID)
+	}
+}
+
 func Test_LocalAgentBenchmarkTasks_expands_market_parity_core_suite(t *testing.T) {
 	// Given
 	root := t.TempDir()
@@ -205,6 +237,7 @@ func Test_RunCLI_runs_local_agent_benchmark_with_repeat_flag(t *testing.T) {
 		"--local-agents", "codex_cli",
 		"--local-agent-benchmark-task", "docs-one",
 		"--local-agent-benchmark-repeat", "2",
+		"--local-agent-benchmark-concurrency", "2",
 		"--tasks", tasksDir,
 		"--output-dir", outputDir,
 		"--timeout-seconds", "5",
@@ -221,13 +254,41 @@ func Test_RunCLI_runs_local_agent_benchmark_with_repeat_flag(t *testing.T) {
 	if err := json.Unmarshal(payload, &summary); err != nil {
 		t.Fatalf("decode summary: %v", err)
 	}
-	if summary.RepeatCount != 2 || summary.RunCount != 2 || summary.Passed != 2 {
+	if summary.RepeatCount != 2 || summary.Concurrency != 2 || summary.RunCount != 2 || summary.Passed != 2 {
 		t.Fatalf("summary = %+v, want repeat count applied", summary)
 	}
 }
 
 func multiTaskAgentScript() string {
 	return `#!/bin/sh
+if [ -f docs/ONE.md ]; then
+  printf '# Benchmark Fixture\n\none-term\n' > docs/ONE.md
+  mkdir -p .omo/evidence
+  printf 'agent evidence\n' > .omo/evidence/docs-one.md
+fi
+if [ -f docs/TWO.md ]; then
+  printf '# Benchmark Fixture\n\ntwo-term\n' > docs/TWO.md
+  mkdir -p .omo/evidence
+  printf 'agent evidence\n' > .omo/evidence/docs-two.md
+fi
+printf 'done\n'
+`
+}
+
+func concurrentMultiTaskAgentScript() string {
+	return `#!/bin/sh
+set -eu
+barrier="${BENCHMARK_CONCURRENCY_DIR:?}"
+mkdir -p "$barrier"
+: > "$barrier/started-$$"
+deadline=$(( $(date +%s) + 5 ))
+while [ "$(find "$barrier" -name 'started-*' -type f | wc -l | tr -d ' ')" -lt 2 ]; do
+  if [ "$(date +%s)" -ge "$deadline" ]; then
+    echo "concurrency barrier timed out" >&2
+    exit 2
+  fi
+  sleep 0.1
+done
 if [ -f docs/ONE.md ]; then
   printf '# Benchmark Fixture\n\none-term\n' > docs/ONE.md
   mkdir -p .omo/evidence

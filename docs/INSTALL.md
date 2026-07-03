@@ -71,7 +71,7 @@ ceo-packet gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
 Use the stricter 25-task production suite when you want production-readiness evidence instead of the faster 10-task market smoke:
 
 ```sh
-ceo-packet gauntlet --suite production-core --agents ceo_harness --output-dir .omo/evidence/production-gauntlet
+ceo-packet gauntlet --suite production-core --agents ceo_harness --concurrency 4 --output-dir .omo/evidence/production-gauntlet
 ```
 
 The gauntlet can report partial/incomplete evidence when an agent, key, login, timeout log, git status, or scorer artifact is missing. Treat that as a setup or evidence gap until the raw artifacts prove a pass or fail.

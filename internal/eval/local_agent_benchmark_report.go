@@ -109,6 +109,7 @@ func writeLocalAgentBenchmarkMarkdown(path string, summary LocalAgentBenchmarkSu
 	fmt.Fprintf(&builder, "Mode: `%s`\n\n", summary.Mode)
 	fmt.Fprintf(&builder, "Tasks: %d\n", summary.TaskCount)
 	fmt.Fprintf(&builder, "Repeats: %d\n", summary.RepeatCount)
+	fmt.Fprintf(&builder, "Concurrency: %d\n", summary.Concurrency)
 	fmt.Fprintf(&builder, "Runs: %d\n\n", summary.RunCount)
 	fmt.Fprintf(&builder, "| Task | Run | Agent | Status | Score | Exit | Duration ms | Extra files | Changed files | Evidence |\n")
 	fmt.Fprintf(&builder, "| --- | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | --- |\n")

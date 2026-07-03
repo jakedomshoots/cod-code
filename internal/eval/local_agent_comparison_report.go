@@ -10,6 +10,7 @@ func writeLocalAgentComparisonReport(path string, summary LocalAgentBenchmarkSum
 	fmt.Fprintf(&builder, "# Market Parity Comparison Report\n\n")
 	fmt.Fprintf(&builder, "Mode: `%s`\n\n", summary.Mode)
 	fmt.Fprintf(&builder, "Tasks: %d\n", summary.TaskCount)
+	fmt.Fprintf(&builder, "Concurrency: %d\n", summary.Concurrency)
 	fmt.Fprintf(&builder, "Runs: %d\n", summary.RunCount)
 	fmt.Fprintf(&builder, "Incomplete evidence: %d\n\n", summary.IncompleteEvidence)
 	fmt.Fprintf(&builder, "## Aggregate Counts\n\n")

@@ -281,6 +281,26 @@ func Test_GauntletEvalArgs_accepts_production_suite_alias(t *testing.T) {
 	}
 }
 
+func Test_GauntletEvalArgs_accepts_concurrency_alias(t *testing.T) {
+	// Given
+	args := []string{"--suite", "production-core", "--agents", "ceo_harness,codex_cli", "--concurrency", "4"}
+
+	// When
+	normalized := gauntletEvalArgs(args)
+
+	// Then
+	body := strings.Join(normalized, " ")
+	for _, want := range []string{
+		"--local-agent-benchmark-task production-core",
+		"--local-agents ceo_harness,codex_cli",
+		"--local-agent-benchmark-concurrency 4",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("gauntlet args = %q, want %q", body, want)
+		}
+	}
+}
+
 func Test_ParseArgs_unknown_config_subcommand_returns_actionable_guidance(t *testing.T) {
 	// Given
 	args := []string{"config", "nope"}

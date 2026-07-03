@@ -37,6 +37,7 @@ func Test_WriteLocalAgentComparisonReport_includes_artifact_derived_details(t *t
 	summary := LocalAgentBenchmarkSummary{
 		Mode:               "local_agent_benchmark",
 		TaskCount:          1,
+		Concurrency:        2,
 		RunCount:           2,
 		Passed:             1,
 		Partial:            1,
@@ -92,6 +93,7 @@ func Test_WriteLocalAgentComparisonReport_includes_artifact_derived_details(t *t
 	text := string(content)
 	for _, want := range []string{
 		"## Aggregate Counts",
+		"Concurrency: 2",
 		"Passed: 1",
 		"Partial: 1",
 		"## Per-Agent Status",
@@ -106,5 +108,45 @@ func Test_WriteLocalAgentComparisonReport_includes_artifact_derived_details(t *t
 		if !strings.Contains(text, want) {
 			t.Fatalf("comparison report missing %q:\n%s", want, text)
 		}
+	}
+}
+
+func Test_WriteLocalAgentBenchmarkMarkdown_includes_concurrency(t *testing.T) {
+	// Given
+	path := filepath.Join(t.TempDir(), "summary.md")
+	summary := LocalAgentBenchmarkSummary{
+		Mode:        localAgentBenchmarkMode,
+		TaskCount:   2,
+		RepeatCount: 1,
+		Concurrency: 4,
+		RunCount:    2,
+		Passed:      2,
+		Results: []LocalAgentBenchmarkResult{
+			{
+				Name:           "CEO Harness",
+				TaskID:         "docs-one",
+				Attempt:        1,
+				Status:         localAgentStatusPass,
+				PassedChecks:   5,
+				TotalChecks:    5,
+				ChangedFiles:   []string{"docs/ONE.md"},
+				EvidenceStatus: localAgentEvidenceComplete,
+				ScorePath:      "docs-one/score.json",
+			},
+		},
+	}
+
+	// When
+	if err := writeLocalAgentBenchmarkMarkdown(path, summary); err != nil {
+		t.Fatalf("writeLocalAgentBenchmarkMarkdown returned error: %v", err)
+	}
+
+	// Then
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read summary: %v", err)
+	}
+	if !strings.Contains(string(content), "Concurrency: 4") {
+		t.Fatalf("summary missing concurrency:\n%s", string(content))
 	}
 }

@@ -12,6 +12,7 @@ func registerLocalAgentFlags(flags *flag.FlagSet, opts *cliOptions) {
 	flags.StringVar(&opts.localAgentTask, "local-agent-task", "readiness", "local-agent suite task: readiness or edit-file")
 	flags.StringVar(&opts.localAgentBenchmarkTask, "local-agent-benchmark-task", defaultLocalAgentBenchmarkID, "benchmark task id for --local-agent-benchmark")
 	flags.IntVar(&opts.localAgentBenchmarkRepeat, "local-agent-benchmark-repeat", 1, "repeat count for each local-agent benchmark task")
+	flags.IntVar(&opts.localAgentBenchmarkConcurrency, "local-agent-benchmark-concurrency", 1, "max parallel local-agent benchmark runs")
 	flags.StringVar(&opts.ceoHarnessBinary, "ceo-binary", filepath.Join(".", "bin", "ceo-packet"), "CEO Harness binary for local-agent suite")
 	flags.StringVar(&opts.ceoBenchmarkMode, "ceo-benchmark-mode", ceoBenchmarkModeSynthetic, "CEO Harness benchmark mode: synthetic, model-command, or http-provider")
 	flags.StringVar(&opts.ceoBenchmarkModelCommand, "ceo-benchmark-model-command-json", "", "JSON argv array for CEO Harness model-command benchmark mode")

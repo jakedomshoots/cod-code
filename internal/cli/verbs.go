@@ -156,6 +156,8 @@ func gauntletEvalArgs(args []string) []string {
 			normalized = append(normalized, "--local-agents")
 		case "--task", "--suite":
 			normalized = append(normalized, "--local-agent-benchmark-task")
+		case "--concurrency":
+			normalized = append(normalized, "--local-agent-benchmark-concurrency")
 		default:
 			normalized = append(normalized, args[index])
 		}

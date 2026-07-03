@@ -15,6 +15,7 @@ type LocalAgentBenchmarkRequest struct {
 	CEOBenchmarkProviderMaxOutputToks int
 	BenchmarkTaskID                   string
 	RepeatCount                       int
+	Concurrency                       int
 }
 
 type LocalAgentBenchmarkSummary struct {
@@ -25,6 +26,7 @@ type LocalAgentBenchmarkSummary struct {
 	TaskIDs            []string                    `json:"task_ids,omitempty"`
 	TaskCount          int                         `json:"task_count"`
 	RepeatCount        int                         `json:"repeat_count"`
+	Concurrency        int                         `json:"concurrency"`
 	RunCount           int                         `json:"run_count"`
 	AgentCount         int                         `json:"agent_count"`
 	Passed             int                         `json:"passed"`

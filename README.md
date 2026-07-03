@@ -139,7 +139,7 @@ Market gauntlet and recovery commands:
 
 ```sh
 ceo-packet gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
-ceo-packet gauntlet --suite production-core --agents ceo_harness --output-dir .omo/evidence/production-gauntlet
+ceo-packet gauntlet --suite production-core --agents ceo_harness --concurrency 4 --output-dir .omo/evidence/production-gauntlet
 ceo-packet explain-failure latest --workspace .
 ceo-packet retry latest --workspace .
 ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .

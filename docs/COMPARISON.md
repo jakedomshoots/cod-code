@@ -89,8 +89,17 @@ go run ./cmd/ceo-packet gauntlet \
   --ceo-binary ./bin/ceo-packet \
   --tasks evals/tasks \
   --output-dir .omo/evidence/production-gauntlet \
+  --concurrency 4 \
   --timeout-seconds 240
 ```
+
+Latest production-core all-agent result:
+
+| Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| 25-task `production-core` | 25/25 pass | 25/25 pass | 25/25 pass | 24/25 pass, 1 timeout | `.omo/evidence/external-agent-production-core-25-r1/summary.json` |
+
+Use `--concurrency N` on long comparisons to shard independent task/agent runs while keeping the final summary in planned task order.
 
 Latest saved benchmark result:
 

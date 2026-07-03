@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"sync"
 )
 
 const (
@@ -29,6 +31,7 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 	}
 	agentIDs := normalizeLocalAgentIDs(req.Agents)
 	repeatCount := normalizeLocalAgentBenchmarkRepeat(req.RepeatCount)
+	concurrency := normalizeLocalAgentBenchmarkConcurrency(req.Concurrency)
 	multiRun := len(tasks) > 1 || repeatCount > 1
 	summary := LocalAgentBenchmarkSummary{
 		SchemaVersion: localAgentSchemaVersion,
@@ -38,33 +41,161 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 		TaskIDs:       localAgentBenchmarkTaskIDs(tasks),
 		TaskCount:     len(tasks),
 		RepeatCount:   repeatCount,
+		Concurrency:   concurrency,
 		RunCount:      len(tasks) * repeatCount * len(agentIDs),
 		AgentCount:    len(agentIDs),
 		Results:       make([]LocalAgentBenchmarkResult, 0, len(tasks)*repeatCount*len(agentIDs)),
 	}
+	jobs, err := buildLocalAgentBenchmarkJobs(tasks, agentIDs, req, repeatCount, multiRun)
+	if err != nil {
+		return LocalAgentBenchmarkSummary{}, err
+	}
+	if concurrency > len(jobs) {
+		concurrency = len(jobs)
+		summary.Concurrency = concurrency
+	}
+	if concurrency <= 1 {
+		for _, job := range jobs {
+			result := runLocalAgentBenchmark(ctx, req, job.task, job.spec, job.attempt, job.multiRun)
+			summary.Results = append(summary.Results, result)
+			accumulateLocalAgentBenchmarkStatus(&summary, result.Status)
+			accumulateLocalAgentBenchmarkEvidence(&summary, result.EvidenceStatus)
+			summary.IterationBacklog = buildLocalAgentBenchmarkIterations(summary.Results)
+			if err := writeLocalAgentBenchmarkSummaryArtifacts(req.OutputDir, summary); err != nil {
+				return LocalAgentBenchmarkSummary{}, err
+			}
+		}
+		summary.IterationBacklog = buildLocalAgentBenchmarkIterations(summary.Results)
+		if err := writeLocalAgentBenchmarkSummaryArtifacts(req.OutputDir, summary); err != nil {
+			return LocalAgentBenchmarkSummary{}, err
+		}
+		return summary, nil
+	}
+	return runLocalAgentBenchmarkParallel(ctx, req, summary, jobs, concurrency)
+}
+
+type localAgentBenchmarkJob struct {
+	index    int
+	task     Task
+	spec     localAgentSpec
+	attempt  int
+	multiRun bool
+}
+
+type localAgentBenchmarkJobResult struct {
+	index  int
+	result LocalAgentBenchmarkResult
+}
+
+func buildLocalAgentBenchmarkJobs(tasks []Task, agentIDs []string, req LocalAgentBenchmarkRequest, repeatCount int, multiRun bool) ([]localAgentBenchmarkJob, error) {
+	jobs := make([]localAgentBenchmarkJob, 0, len(tasks)*repeatCount*len(agentIDs))
 	for attempt := 1; attempt <= repeatCount; attempt++ {
 		for _, task := range tasks {
 			for _, agentID := range agentIDs {
 				spec, err := buildLocalAgentBenchmarkSpec(agentID, req, task)
 				if err != nil {
-					return LocalAgentBenchmarkSummary{}, err
+					return nil, err
 				}
-				result := runLocalAgentBenchmark(ctx, req, task, spec, attempt, multiRun)
-				summary.Results = append(summary.Results, result)
-				accumulateLocalAgentBenchmarkStatus(&summary, result.Status)
-				accumulateLocalAgentBenchmarkEvidence(&summary, result.EvidenceStatus)
-				summary.IterationBacklog = buildLocalAgentBenchmarkIterations(summary.Results)
-				if err := writeLocalAgentBenchmarkSummaryArtifacts(req.OutputDir, summary); err != nil {
-					return LocalAgentBenchmarkSummary{}, err
-				}
+				jobs = append(jobs, localAgentBenchmarkJob{
+					index:    len(jobs),
+					task:     task,
+					spec:     spec,
+					attempt:  attempt,
+					multiRun: multiRun,
+				})
 			}
 		}
 	}
-	summary.IterationBacklog = buildLocalAgentBenchmarkIterations(summary.Results)
+	return jobs, nil
+}
+
+func runLocalAgentBenchmarkParallel(ctx context.Context, req LocalAgentBenchmarkRequest, summary LocalAgentBenchmarkSummary, jobs []localAgentBenchmarkJob, concurrency int) (LocalAgentBenchmarkSummary, error) {
+	runCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	jobCh := make(chan localAgentBenchmarkJob)
+	resultCh := make(chan localAgentBenchmarkJobResult)
+	var workers sync.WaitGroup
+	for worker := 0; worker < concurrency; worker++ {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			for job := range jobCh {
+				result := runLocalAgentBenchmark(runCtx, req, job.task, job.spec, job.attempt, job.multiRun)
+				select {
+				case resultCh <- localAgentBenchmarkJobResult{index: job.index, result: result}:
+				case <-runCtx.Done():
+					return
+				}
+			}
+		}()
+	}
+	go func() {
+		defer close(jobCh)
+		for _, job := range jobs {
+			select {
+			case jobCh <- job:
+			case <-runCtx.Done():
+				return
+			}
+		}
+	}()
+	go func() {
+		workers.Wait()
+		close(resultCh)
+	}()
+
+	completed := make([]localAgentBenchmarkJobResult, 0, len(jobs))
+	for jobResult := range resultCh {
+		completed = append(completed, jobResult)
+		summary.Results = orderedLocalAgentBenchmarkResults(completed)
+		recountLocalAgentBenchmarkSummary(&summary)
+		if err := writeLocalAgentBenchmarkSummaryArtifacts(req.OutputDir, summary); err != nil {
+			cancel()
+			return LocalAgentBenchmarkSummary{}, err
+		}
+	}
+	if err := runCtx.Err(); err != nil && ctx.Err() != nil {
+		return LocalAgentBenchmarkSummary{}, err
+	}
+	summary.Results = orderedLocalAgentBenchmarkResults(completed)
+	recountLocalAgentBenchmarkSummary(&summary)
 	if err := writeLocalAgentBenchmarkSummaryArtifacts(req.OutputDir, summary); err != nil {
 		return LocalAgentBenchmarkSummary{}, err
 	}
 	return summary, nil
+}
+
+func orderedLocalAgentBenchmarkResults(completed []localAgentBenchmarkJobResult) []LocalAgentBenchmarkResult {
+	ordered := append([]localAgentBenchmarkJobResult(nil), completed...)
+	sort.SliceStable(ordered, func(left int, right int) bool {
+		return ordered[left].index < ordered[right].index
+	})
+	results := make([]LocalAgentBenchmarkResult, 0, len(ordered))
+	for _, item := range ordered {
+		results = append(results, item.result)
+	}
+	return results
+}
+
+func recountLocalAgentBenchmarkSummary(summary *LocalAgentBenchmarkSummary) {
+	summary.Passed = 0
+	summary.Partial = 0
+	summary.Failed = 0
+	summary.TimedOut = 0
+	summary.Skipped = 0
+	summary.IncompleteEvidence = 0
+	for _, result := range summary.Results {
+		accumulateLocalAgentBenchmarkStatus(summary, result.Status)
+		accumulateLocalAgentBenchmarkEvidence(summary, result.EvidenceStatus)
+	}
+	summary.IterationBacklog = buildLocalAgentBenchmarkIterations(summary.Results)
+}
+
+func normalizeLocalAgentBenchmarkConcurrency(concurrency int) int {
+	if concurrency <= 0 {
+		return 1
+	}
+	return concurrency
 }
 
 func runLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest, task Task, spec localAgentSpec, attempt int, multiRun bool) LocalAgentBenchmarkResult {
