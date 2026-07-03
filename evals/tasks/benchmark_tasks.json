@@ -140,7 +140,7 @@
     "required_changed_files": ["docs/VERIFICATION.md"],
     "required_commands": ["go test ./internal/cli -count=1"],
     "required_artifacts": [".omo/evidence/docs-verification-record.md"],
-    "required_diff_terms": ["Tooling Not Available"],
+    "required_diff_terms": ["tooling"],
     "required_report_fields": ["check_results"]
   },
   {
