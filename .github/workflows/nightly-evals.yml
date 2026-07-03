@@ -1,0 +1,28 @@
+name: nightly-evals
+
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  nightly-evals:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run no-key nightly evals
+        run: make eval-nightly
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightly-eval-evidence
+          path: .omo/evidence/nightly/**

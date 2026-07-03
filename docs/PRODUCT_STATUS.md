@@ -86,6 +86,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Benchmark gauntlets now support bounded parallelism with `--local-agent-benchmark-concurrency` and the product alias `ceo-packet gauntlet --concurrency`.
 - Live real-repo dogfood result: `scripts/dogfood-real.sh --repo ceo-harness:<repo> --timeout-ms 250` passed all five scenarios, including expected timeout failure evidence, at `.omo/evidence/dogfood-real/index.md`.
 - Repeated real-repo dogfood result: `scripts/dogfood-real.sh --repo ceo-harness-repeat:<repo> --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1` produced 3 live passes / 0 fails.
+- Added no-key nightly eval automation through `make eval-nightly` and `.github/workflows/nightly-evals.yml`.
 - Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, `sh scripts/dogfood.sh`, `sh scripts/release-local.sh`, `task ci`, `golangci-lint run ./...`, `nilaway ./...`, and `sh scripts/strict-checks.sh`.
 - First product baseline commit: `8509a4b Initial CEO Harness production baseline`.
 - Remaining evidence gap: add more independent real repos, larger multi-file jobs, and long-horizon tasks before making broad market-win claims.

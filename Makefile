@@ -3,7 +3,7 @@ PKG := ./cmd/ceo-packet
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || printf dev)
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || printf local)
 
-.PHONY: ci fmt test test-race vet smoke dogfood build release-local
+.PHONY: ci fmt test test-race vet smoke dogfood build release-local eval-nightly
 
 ci: fmt test vet smoke dogfood build
 
@@ -31,3 +31,10 @@ build:
 
 release-local:
 	sh scripts/release-local.sh
+
+eval-nightly:
+	mkdir -p bin
+	go build -trimpath -o bin/$(BINARY) $(PKG)
+	go run ./cmd/ceo-eval --benchmark-fixtures --tasks evals/tasks --output-dir .omo/evidence/nightly/benchmark-fixtures
+	go run ./cmd/ceo-packet gauntlet --suite cross-language-core --agents ceo_harness --ceo-binary ./bin/$(BINARY) --tasks evals/tasks --output-dir .omo/evidence/nightly/cross-language-core --timeout-seconds 120 --concurrency 2 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","$(CURDIR)/scripts/benchmark-model-command.sh"]'
+	sh scripts/dogfood-real.sh --repo "ceo-harness:$(CURDIR)" --repeat 2 --timeout-ms 250 --output-dir .omo/evidence/nightly/dogfood-real

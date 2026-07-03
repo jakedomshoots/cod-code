@@ -60,6 +60,15 @@ tasks:
     cmds:
       - sh scripts/release-local.sh
 
+  eval:nightly:
+    desc: Run the no-key nightly eval proof suite
+    cmds:
+      - mkdir -p bin
+      - go build -trimpath -o bin/ceo-packet ./cmd/ceo-packet
+      - go run ./cmd/ceo-eval --benchmark-fixtures --tasks evals/tasks --output-dir .omo/evidence/nightly/benchmark-fixtures
+      - go run ./cmd/ceo-packet gauntlet --suite cross-language-core --agents ceo_harness --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/nightly/cross-language-core --timeout-seconds 120 --concurrency 2 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","{{.ROOT_DIR}}/scripts/benchmark-model-command.sh"]'
+      - sh scripts/dogfood-real.sh --repo "ceo-harness:{{.ROOT_DIR}}" --repeat 2 --timeout-ms 250 --output-dir .omo/evidence/nightly/dogfood-real
+
   ci:
     desc: Run the productization gate used before handoff
     cmds:

@@ -109,6 +109,7 @@ Run the full local gate:
 ```sh
 make ci
 make test-race
+make eval-nightly
 ```
 
 Build local release archives:

@@ -23,6 +23,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - Concurrent 25-task CEO evidence: `.omo/evidence/production-core-25-ceo-concurrency-r1/summary.json`
 - Cross-language CEO evidence: `.omo/evidence/cross-language-core-ceo-r1/summary.json`
 - Repeated real-repo dogfood evidence: `.omo/evidence/dogfood-real-repeat-self-r1/index.md`
+- Nightly eval workflow: `.github/workflows/nightly-evals.yml`
 - Focused multi-file CEO evidence: `.omo/evidence/multi-file-provider-fallback-ceo-r2/summary.json`
 - User report: `outputs/ceo-harness-10-out-of-10-report.md`
 
