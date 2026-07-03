@@ -31,6 +31,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - Repeated real Kimi provider evidence: `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json`
 - Endurance eval evidence: `.omo/evidence/endurance-local-r1/index.md`
 - Longer endurance eval evidence: `.omo/evidence/endurance-local-r2/index.md`
+- Extended endurance eval evidence: `.omo/evidence/endurance-local-r3/index.md`
 - Nightly eval workflow: `.github/workflows/nightly-evals.yml`
 - Focused multi-file CEO evidence: `.omo/evidence/multi-file-provider-fallback-ceo-r2/summary.json`, `.omo/evidence/multi-file-operator-safety-flow-ceo-r1/summary.json`
 - User report: `outputs/ceo-harness-10-out-of-10-report.md`
@@ -65,6 +66,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 | Copied-workspace dogfood | `sh scripts/dogfood-real.sh --copy-workspace --repo ceo-harness-copy:<repo> --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-copy-self-r1` | Source path and copied workspace path recorded separately; all five scenarios passed against the copy | `.omo/evidence/dogfood-real-copy-self-r1/index.md` |
 | Short endurance smoke | `sh scripts/endurance.sh --iterations 3 --output-dir .omo/evidence/endurance-local-r1` | 3 iterations; 3 pass; 0 fail; each iteration ran fixture scoring, cross-language gauntlet, and real-repo dogfood | `.omo/evidence/endurance-local-r1/index.md` |
 | Longer local endurance run | `sh scripts/endurance.sh --iterations 10 --output-dir .omo/evidence/endurance-local-r2` | 10 iterations; 10 pass; 0 fail; elapsed 30 seconds; each iteration ran build, 28-task fixture scoring, cross-language gauntlet, and real-repo dogfood | `.omo/evidence/endurance-local-r2/index.md` |
+| Extended local endurance run | `sh scripts/endurance.sh --iterations 30 --output-dir .omo/evidence/endurance-local-r3` | 30 iterations; 30 pass; 0 fail; elapsed 102 seconds | `.omo/evidence/endurance-local-r3/index.md` |
 | Manual binary QA | `bin/ceo-packet` driven through start/config/provider/demo/write/TUI/history paths, then `cd .omo/evidence/task-14-ceo-harness-10-out-of-10/manual-qa && shasum -a 256 -c SHA256SUMS.txt` | Exit 0; per-surface artifacts hashed and every listed file verifies `OK` | `.omo/evidence/task-14-ceo-harness-10-out-of-10/manual-binary-qa.log`, `.omo/evidence/task-14-ceo-harness-10-out-of-10/manual-qa/SHA256SUMS.txt`, `.omo/evidence/task-14-ceo-harness-10-out-of-10/manual-qa-sha256-verify-task14-fix.log` |
 | Final timeout/doc recheck | `go test -race -shuffle=on -count=20 ./internal/adapter`, `go test ./internal/checkrunner -run Test_Runner_Run_cancels_shell_process_group_when_timeout_expires -count=50 -v`, `go test ./internal/model -run Test_CommandClient_Complete_kills_shell_process_group_when_timeout_expires -count=20 -v`, and `go run ./cmd/ceo-packet --model-command-timeout-ms 50 ... sleep 5` | Adapter version retry proof stable; checkrunner/model process-tree proofs still pass; CLI timeout returns `provider_error_kind: command_timeout` in about 0.18s; no leftover sleep/ceo timeout processes | `.omo/evidence/final-adapter-version-timeout-fix/` |
 
@@ -181,7 +183,7 @@ Cross-language follow-up:
 ## Blockers / Risks
 
 - Public "10/10 beats competitors" claim is still unsupported because Codex CLI and OpenCode matched CEO Harness at 25/25 on the controlled suite.
-- The expanded 26/26 CEO Harness live result, focused 4/4 external-agent multi-file result, 2/2 cross-language result, 3-pass real-repo dogfood result, six-repo copied-workspace dogfood result, two-repo task-specific dogfood result, 10-iteration local endurance run, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. Deeper task-specific real-repo jobs with real writes, additional provider families, and overnight or truly long-duration tasks are still needed.
+- The expanded 26/26 CEO Harness live result, focused 4/4 external-agent multi-file result, 2/2 cross-language result, 3-pass real-repo dogfood result, six-repo copied-workspace dogfood result, two-repo task-specific dogfood result, 30-iteration local endurance run, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. Deeper task-specific real-repo jobs with real writes, additional provider families, and overnight or truly long-duration tasks are still needed.
 - Provider doctor correctly fails without `OPENAI_API_KEY`; this is setup guidance, not a product pass against a real provider.
 - Rollback QA now covers normal replacements, trailing-newline replacements, and created-file model patches. Arbitrary hand-edited diff rollback is still not claimed.
 
