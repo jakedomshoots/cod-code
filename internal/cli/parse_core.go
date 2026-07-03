@@ -189,6 +189,9 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 	case "--help", "-h":
 		opts.showHelp = true
 		return true, index, nil
+	case "--help-advanced":
+		opts.showAdvancedHelp = true
+		return true, index, nil
 	case "--version":
 		opts.showVersion = true
 		return true, index, nil

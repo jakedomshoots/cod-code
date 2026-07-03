@@ -80,6 +80,7 @@ type options struct {
 	adapterName                               string
 	quickstartDir                             string
 	showHelp                                  bool
+	showAdvancedHelp                          bool
 	showVersion                               bool
 	interactive                               bool
 	reportFormat                              reportFormat

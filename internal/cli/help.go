@@ -34,6 +34,72 @@ Usage:
   ceo-packet explain-failure <job>
   ceo-packet [flags] <task>
 
+Common flags:
+  --workspace <path>              Use a workspace directory
+  --quickstart <path>             Create example config and run doctor
+  --start <path>                  Guided setup/check/doctor start flow
+  --doctor                       Run harness health checks
+  --demo                         Run the built-in golden coding demo
+  --inbox                        Review queue alias with text details
+  --init-demo-repo <path>         Create a tiny golden demo repo
+  --check <command...> --         Add a verification command
+  --plan-only                     Preview packet/routes/checks without model calls
+  --write-policy <policy>         observe, preview, dry-run, approved-write, or trusted-local
+  --dry-run                       Preview patch writes without workspace artifacts/history; write intent previews by default
+  --provider-wizard <preset>      Create a main provider for openai, openrouter, kimi, or moonshot
+  --adapter <name>                Use external worker adapter: codex, kimi, claude, opencode, aider, goose
+  --format <json|text>            Print JSON or compact text
+  --version                       Print version
+  --help, -h                      Print this compact help
+  --help-advanced                 Print all commands, provider flags, model flags, and history tools
+
+Provider quick start:
+  Codex CLI: ceo-packet config init --adapter codex
+  Kimi CLI: ceo-packet config init --adapter kimi
+  OpenRouter: use --provider-wizard openrouter; missing OPENROUTER_API_KEY is blocked setup, not a failed benchmark
+
+Examples:
+  ceo-packet start .
+  ceo-packet run --workspace . --check go test ./... -- "Fix retry bug"
+  ceo-packet gauntlet --suite production-core --agents ceo_harness --output-dir .omo/evidence/production-gauntlet
+  ceo-packet inbox --workspace .
+  ceo-packet retry latest --workspace .
+  ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
+  ceo-packet config check --workspace .
+  ceo-packet --init-demo-repo /tmp/ceo-demo
+
+Advanced: run ceo-packet --help-advanced for the full reference.
+`
+
+const advancedHelpText = `ceo-packet
+
+Primary flow:
+  start <path>                    Guided setup/check/doctor start flow
+  run [flags] <task>              Run the CEO packet loop
+  gauntlet [flags]                Run market or production benchmark gauntlets
+  doctor [flags]                  Run harness health checks
+  inbox [flags]                   Review queue alias with text details
+  status [flags]                  Print summary job history
+  resume <job> --answer <text>    Resume a needs_input job
+  retry <job>                     Rerun a saved job with current config
+  rollback <report>               Roll back supported patches from a saved JSON report
+  explain-failure <job>           Explain a failed job in plain language
+
+Usage:
+  ceo-packet start <path>
+  ceo-packet run [flags] <task>
+  ceo-packet gauntlet [flags]
+  ceo-packet gauntlet --suite production-core [flags]
+  ceo-packet gauntlet --suite production-core --concurrency 4 [flags]
+  ceo-packet doctor [flags]
+  ceo-packet inbox [flags]
+  ceo-packet status [flags]
+  ceo-packet resume <job> --answer <text>
+  ceo-packet retry <job>
+  ceo-packet rollback <report>
+  ceo-packet explain-failure <job>
+  ceo-packet [flags] <task>
+
 Advanced commands:
   review [flags]                  Print review queue with details
   context [flags] <job>            Print per-agent context trace
@@ -192,5 +258,10 @@ Examples:
 
 func runHelp(out io.Writer) error {
 	_, err := fmt.Fprint(out, helpText)
+	return err
+}
+
+func runAdvancedHelp(out io.Writer) error {
+	_, err := fmt.Fprint(out, advancedHelpText)
 	return err
 }

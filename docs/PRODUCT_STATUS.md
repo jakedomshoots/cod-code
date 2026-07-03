@@ -52,7 +52,6 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - No public remote repository is configured yet.
 - The real proof still needs repeated dogfooding on more independent non-demo coding repos.
 - External/provider gauntlets can still be blocked or incomplete when a provider key, CLI login, timeout log, git status snapshot, or scorer artifact is missing.
-- The CLI still has many advanced flags, but the common help surface now starts with the primary operator flow.
 
 ## Market Roadmap Result 2026-07-03
 
@@ -100,6 +99,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Added public release preflight through `scripts/release-preflight.sh`; it blocks public claims until remote URL, Homebrew URL, and signature/checksum posture are explicit.
 - Strict checks now run `sh -n` across shell scripts even when ShellCheck is not installed; ShellCheck remains an optional deeper lint layer.
 - Rollback now covers created-file model patches as well as normal replacement patches; created-file rollback refuses to delete if the file content changed after creation.
+- Default `--help` is now compact and points advanced users to `--help-advanced`; the full reference remains available without loading the first screen with every flag.
 - Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, `sh scripts/dogfood.sh`, `sh scripts/release-local.sh`, `task ci`, `golangci-lint run ./...`, `nilaway ./...`, and `sh scripts/strict-checks.sh`.
 - First product baseline commit: `8509a4b Initial CEO Harness production baseline`.
 - Remaining evidence gap: add deeper task-specific real-repo jobs with real writes, more provider families, and overnight or truly long-duration endurance runs before making broad market-win claims.

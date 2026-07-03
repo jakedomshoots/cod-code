@@ -36,6 +36,9 @@ func RunWithIO(ctx context.Context, in io.Reader, out io.Writer, args []string) 
 	if opts.showHelp {
 		return runHelp(out)
 	}
+	if opts.showAdvancedHelp {
+		return runAdvancedHelp(out)
+	}
 	if opts.showVersion {
 		return runVersion(out)
 	}
