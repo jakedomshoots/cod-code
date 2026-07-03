@@ -24,6 +24,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - Cross-language CEO evidence: `.omo/evidence/cross-language-core-ceo-r1/summary.json`
 - Repeated real-repo dogfood evidence: `.omo/evidence/dogfood-real-repeat-self-r1/index.md`
 - Real Kimi provider evidence: `.omo/evidence/provider-kimi-path-safety-r1/summary.json`
+- Endurance eval evidence: `.omo/evidence/endurance-local-r1/index.md`
 - Nightly eval workflow: `.github/workflows/nightly-evals.yml`
 - Focused multi-file CEO evidence: `.omo/evidence/multi-file-provider-fallback-ceo-r2/summary.json`
 - User report: `outputs/ceo-harness-10-out-of-10-report.md`
@@ -52,6 +53,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 | Multi-file provider/config benchmark | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task multi-file-provider-fallback-reporting --timeout-seconds 120 ...` | Required two files across `internal/cli` and `internal/config`; 9/9 scored checks passed | `.omo/evidence/multi-file-provider-fallback-ceo-r2/summary.json` |
 | Real repo dogfood | `sh scripts/dogfood-real.sh --repo temp-real:<temp-git-repo> --timeout-ms 250` | Temp external git repo row `pass`; 5 scenarios captured | `.omo/evidence/dogfood-real/index.md` |
 | Repeated real-repo dogfood | `sh scripts/dogfood-real.sh --repo ceo-harness-repeat:<repo> --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1` | 3 live passes; 0 fails; each run captured doctor, plan-only, observe, patch-preview, and timeout-guard evidence | `.omo/evidence/dogfood-real-repeat-self-r1/index.md` |
+| Short endurance smoke | `sh scripts/endurance.sh --iterations 3 --output-dir .omo/evidence/endurance-local-r1` | 3 iterations; 3 pass; 0 fail; each iteration ran fixture scoring, cross-language gauntlet, and real-repo dogfood | `.omo/evidence/endurance-local-r1/index.md` |
 | Manual binary QA | `bin/ceo-packet` driven through start/config/provider/demo/write/TUI/history paths, then `cd .omo/evidence/task-14-ceo-harness-10-out-of-10/manual-qa && shasum -a 256 -c SHA256SUMS.txt` | Exit 0; per-surface artifacts hashed and every listed file verifies `OK` | `.omo/evidence/task-14-ceo-harness-10-out-of-10/manual-binary-qa.log`, `.omo/evidence/task-14-ceo-harness-10-out-of-10/manual-qa/SHA256SUMS.txt`, `.omo/evidence/task-14-ceo-harness-10-out-of-10/manual-qa-sha256-verify-task14-fix.log` |
 | Final timeout/doc recheck | `go test -race -shuffle=on -count=20 ./internal/adapter`, `go test ./internal/checkrunner -run Test_Runner_Run_cancels_shell_process_group_when_timeout_expires -count=50 -v`, `go test ./internal/model -run Test_CommandClient_Complete_kills_shell_process_group_when_timeout_expires -count=20 -v`, and `go run ./cmd/ceo-packet --model-command-timeout-ms 50 ... sleep 5` | Adapter version retry proof stable; checkrunner/model process-tree proofs still pass; CLI timeout returns `provider_error_kind: command_timeout` in about 0.18s; no leftover sleep/ceo timeout processes | `.omo/evidence/final-adapter-version-timeout-fix/` |
 
@@ -138,7 +140,7 @@ Cross-language follow-up:
 ## Blockers / Risks
 
 - Public "10/10 beats competitors" claim is still unsupported because Codex CLI and OpenCode matched CEO Harness at 25/25 on the controlled suite.
-- The expanded 25/25 CEO Harness live result, 2/2 cross-language result, 3-pass real-repo dogfood result, and one real Kimi provider pass are still not enough for a broad production-market claim. More independent real repositories, larger multi-file jobs, more provider repeats, and longer-running tasks are still needed.
+- The expanded 25/25 CEO Harness live result, 2/2 cross-language result, 3-pass real-repo dogfood result, short 3-iteration endurance smoke, and one real Kimi provider pass are still not enough for a broad production-market claim. More independent real repositories, larger multi-file jobs, more provider repeats, and truly long-duration tasks are still needed.
 - Provider doctor correctly fails without `OPENAI_API_KEY`; this is setup guidance, not a product pass against a real provider.
 - Rollback QA passed for the supported simple replace path. Multiline/trailing-newline rollback remains a limitation.
 

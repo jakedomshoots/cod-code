@@ -69,6 +69,11 @@ tasks:
       - go run ./cmd/ceo-packet gauntlet --suite cross-language-core --agents ceo_harness --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/nightly/cross-language-core --timeout-seconds 120 --concurrency 2 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","{{.ROOT_DIR}}/scripts/benchmark-model-command.sh"]'
       - sh scripts/dogfood-real.sh --repo "ceo-harness:{{.ROOT_DIR}}" --repeat 2 --timeout-ms 250 --output-dir .omo/evidence/nightly/dogfood-real
 
+  eval:endurance:
+    desc: Run repeated no-key eval loops for endurance evidence
+    cmds:
+      - sh scripts/endurance.sh --iterations 3 --output-dir .omo/evidence/endurance-local-r1
+
   ci:
     desc: Run the productization gate used before handoff
     cmds:

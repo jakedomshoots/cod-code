@@ -110,6 +110,7 @@ Run the full local gate:
 make ci
 make test-race
 make eval-nightly
+make eval-endurance
 ```
 
 Build local release archives:
