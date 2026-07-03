@@ -9,13 +9,14 @@ repos_file=$(mktemp)
 dry_run=0
 timeout_ms=250
 repeat_count=1
+copy_workspace=0
 build_tmp=""
 
 trap 'rm -f "$repos_file"; if [ -n "$build_tmp" ]; then rm -rf "$build_tmp"; fi' EXIT
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--timeout-ms n] [--repeat n] [--output-dir path]
+Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--timeout-ms n] [--repeat n] [--output-dir path] [--copy-workspace]
 
 Creates durable dogfood evidence under .omo/evidence/dogfood-real.
 
@@ -25,6 +26,7 @@ Options:
   --timeout-ms n     Timeout used by the hung-command probe in live mode. Default: 250.
   --repeat n         Repeat each repo scenario set n times. Default: 1.
   --output-dir path  Evidence directory. Default: .omo/evidence/dogfood-real.
+  --copy-workspace   Run live scenarios against a copied workspace instead of the source repo.
   --help             Show this help.
 USAGE
 }
@@ -92,6 +94,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --output-dir=*)
       evidence_dir="${1#--output-dir=}"
+      shift
+      ;;
+    --copy-workspace)
+      copy_workspace=1
       shift
       ;;
     --help|-h)
@@ -182,6 +188,14 @@ evidence_display_path() {
   esac
 }
 
+workspace_mode() {
+  if [ "$copy_workspace" -eq 1 ]; then
+    printf '%s' "copied"
+  else
+    printf '%s' "source"
+  fi
+}
+
 repo_name_from_spec() {
   case "$1" in
     *:*) printf '%s' "${1%%:*}" ;;
@@ -242,6 +256,42 @@ preview_digest_from_stdout() {
   sed -n 's/.*"preview_digest": "\([^"]*\)".*/\1/p' "$1" | head -n 1
 }
 
+prepare_repo_workspace() {
+  source_path="$1"
+  evidence_repo_dir="$2"
+  mkdir -p "$evidence_repo_dir"
+  printf '%s\n' "$source_path" >"$evidence_repo_dir/source-path.txt"
+  if [ "$copy_workspace" -eq 0 ]; then
+    printf '%s\n' "source" >"$evidence_repo_dir/workspace-mode.txt"
+    printf '%s\n' "$source_path" >"$evidence_repo_dir/workspace-path.txt"
+    printf '%s\n' "$source_path"
+    return 0
+  fi
+
+  copy_path="$evidence_repo_dir/workspace-copy"
+  rm -rf "$copy_path"
+  if git -C "$source_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    source_top=$(git -C "$source_path" rev-parse --show-toplevel)
+    source_prefix=$(git -C "$source_path" rev-parse --show-prefix)
+    git clone --quiet --no-hardlinks "$source_top" "$copy_path"
+    if [ -n "$source_prefix" ]; then
+      copy_path="$copy_path/${source_prefix%/}"
+    fi
+  else
+    case "$evidence_repo_dir" in
+      "$source_path"/*)
+        printf '%s\n' "dogfood-real: --copy-workspace for non-git repos needs --output-dir outside the source path" >&2
+        return 1
+        ;;
+    esac
+    mkdir -p "$copy_path"
+    cp -R "$source_path/." "$copy_path"
+  fi
+  printf '%s\n' "copied" >"$evidence_repo_dir/workspace-mode.txt"
+  printf '%s\n' "$copy_path" >"$evidence_repo_dir/workspace-path.txt"
+  printf '%s\n' "$copy_path"
+}
+
 write_index_header() {
   {
     printf '%s\n' "# Real Repo Dogfood Evidence"
@@ -249,6 +299,7 @@ write_index_header() {
     printf '%s\n' "- Generated: $generated_at"
     printf '%s\n' "- Mode: $mode"
     printf '%s\n' "- Repeat count: $repeat_count"
+    printf '%s\n' "- Workspace mode: $(workspace_mode)"
     printf '%s\n' "- Runner: scripts/dogfood-real.sh"
     printf '%s\n' "- Evidence root: $(evidence_display_path)"
     printf '%s\n' "- Secret API keys: not required for smoke path"
@@ -285,6 +336,7 @@ write_dry_run_plan() {
     printf '\n'
     printf '%s\n' "- Repo path: $plan_repo_path"
     printf '%s\n' "- Status: planned"
+    printf '%s\n' "- Workspace mode: $(workspace_mode)"
     printf '%s\n' "- External repo writes: none"
     printf '\n'
     printf '%s\n' "## Planned Commands"
@@ -470,7 +522,8 @@ while IFS= read -r repo_spec; do
       write_dry_run_plan "$repo_dir" "$repo_name" "$repo_path"
       append_repo_row "$repo_name" "planned" "$repo_path" "dry-run only; no commands run"
     else
-      run_live_repo "$repo_name" "$repo_path" "$repo_dir" "$bin"
+      workspace_path=$(prepare_repo_workspace "$repo_path" "$repo_dir")
+      run_live_repo "$repo_name" "$workspace_path" "$repo_dir" "$bin"
     fi
   else
     attempt=1
@@ -482,7 +535,8 @@ while IFS= read -r repo_spec; do
         write_dry_run_plan "$run_dir" "$run_name" "$repo_path"
         append_repo_row "$run_name" "planned" "$repo_path" "see $(evidence_rel_path "$run_dir")/plan.md"
       else
-        run_live_repo "$run_name" "$repo_path" "$run_dir" "$bin"
+        workspace_path=$(prepare_repo_workspace "$repo_path" "$run_dir")
+        run_live_repo "$run_name" "$workspace_path" "$run_dir" "$bin"
       fi
       attempt=$((attempt + 1))
     done

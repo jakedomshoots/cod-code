@@ -39,6 +39,9 @@ Status date: 2026-07-03
 - Latest real-repo dogfood:
   - `sh scripts/dogfood-real.sh --repo ceo-harness-repeat:/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1`
   - Result: 3 live passes / 0 fails, including expected timeout failure evidence in each run.
+- Latest copied-workspace dogfood:
+  - `sh scripts/dogfood-real.sh --copy-workspace --repo ceo-harness-copy:/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-copy-self-r1`
+  - Result: pass; all five scenarios ran against `workspace-mode=copied`, with source and workspace paths recorded separately.
 - Nightly eval task:
   - `make eval-nightly`
   - `/Users/jakedom/go/bin/task eval:nightly`

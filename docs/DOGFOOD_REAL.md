@@ -20,6 +20,17 @@ Live mode builds a local `ceo-packet` binary, records command transcripts, hashe
 
 Missing repos are recorded as `skipped_missing_repo`, not pass.
 
+To avoid touching the original checkout, run against a copied workspace:
+
+```sh
+sh scripts/dogfood-real.sh \
+  --copy-workspace \
+  --repo "ceo-harness:/path/to/repo" \
+  --output-dir .omo/evidence/dogfood-real-copy
+```
+
+For git repos, copy mode clones a local snapshot into the evidence folder, records `source-path.txt`, `workspace-path.txt`, and `workspace-mode.txt`, then runs all live scenarios against the copy.
+
 Repeat a real-repo dogfood pass and keep it isolated from the default evidence folder:
 
 ```sh
@@ -38,6 +49,9 @@ Evidence is saved under `.omo/evidence/dogfood-real/`:
 - `index.md`: run summary, scenario catalog, repo status, adversarial notes.
 - `repos/<name>/summary.md`: per-repo pass/fail notes.
 - `repos/<name>/run-XX/summary.md`: per-attempt notes when `--repeat` is greater than 1.
+- `repos/<name>/workspace-mode.txt`: `source` or `copied`.
+- `repos/<name>/workspace-path.txt`: actual workspace path used for live commands.
+- `repos/<name>/source-path.txt`: original repo path from `--repo`.
 - `repos/<name>/scenario-*/command.argv`: exact argv.
 - `repos/<name>/scenario-*/stdout.txt`: report output.
 - `repos/<name>/scenario-*/stdout.sha256`: report digest.
