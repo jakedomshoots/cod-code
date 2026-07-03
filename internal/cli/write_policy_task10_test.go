@@ -218,6 +218,42 @@ func Test_Run_rollback_report_restores_approved_patch(t *testing.T) {
 	requireRollbackCount(t, rollbackOut.Bytes(), 1)
 }
 
+func Test_Run_rollback_report_removes_created_model_patch_file(t *testing.T) {
+	// Given
+	root := t.TempDir()
+	target := filepath.Join(root, "docs", "notes.md")
+	var applyOut bytes.Buffer
+	t.Setenv("GO_WANT_CLI_MODEL_CREATE_FILE_PATCH", "1")
+	err := Run(context.Background(), &applyOut, []string{
+		"--workspace", root,
+		"--write-policy", "trusted-local",
+		"--apply-model-patches",
+		"--model-command", os.Args[0], "-test.run=Test_HelperProcess_cli_model_create_file_patch",
+		"--",
+		"Create notes",
+	})
+	requireRunSuccess(t, err, applyOut.String())
+	requireFileContent(t, target, "# Notes\n")
+	reportPath := filepath.Join(root, "create-report.json")
+	if err := os.WriteFile(reportPath, applyOut.Bytes(), 0o644); err != nil {
+		t.Fatalf("write report fixture: %v", err)
+	}
+	var rollbackOut bytes.Buffer
+
+	// When
+	err = Run(context.Background(), &rollbackOut, []string{
+		"--workspace", root,
+		"--rollback-report", reportPath,
+	})
+
+	// Then
+	requireRunSuccess(t, err, rollbackOut.String())
+	if _, err := os.Stat(target); !os.IsNotExist(err) {
+		t.Fatalf("created model patch file still exists after rollback: %v", err)
+	}
+	requireRollbackCount(t, rollbackOut.Bytes(), 1)
+}
+
 func Test_Run_rollback_report_errors_clearly_when_report_is_missing(t *testing.T) {
 	// Given
 	root, _ := writePolicyFixture(t)

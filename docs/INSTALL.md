@@ -85,7 +85,7 @@ ceo-packet retry latest --workspace /path/to/repo
 ceo-packet rollback .ceo-harness/history/job-000001.json --workspace /path/to/repo
 ```
 
-`rollback` only supports saved JSON reports with supported patch shapes. For anything more complex, inspect the saved report and git diff before trusting the rollback.
+`rollback` supports saved JSON reports for normal replacements and created files produced by CEO Harness. It refuses to remove a created file if the file content no longer matches the saved report.
 
 ## Requirements
 

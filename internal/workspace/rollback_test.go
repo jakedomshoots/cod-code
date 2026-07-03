@@ -80,6 +80,36 @@ func Test_Workspace_RollbackReplaceText_restores_trailing_newline_result(t *test
 	}
 }
 
+func Test_Workspace_RollbackReplaceText_removes_created_file_result(t *testing.T) {
+	// Given
+	root := t.TempDir()
+	target := filepath.Join(root, "docs", "notes.md")
+	space, err := New(root)
+	if err != nil {
+		t.Fatalf("New returned error: %v", err)
+	}
+	result, err := space.CreateText(context.Background(), CreateTextRequest{
+		Path:    "docs/notes.md",
+		Content: "# Notes\ncreated by model\n",
+	})
+	if err != nil {
+		t.Fatalf("CreateText returned error: %v", err)
+	}
+
+	// When
+	rollback, err := space.RollbackReplaceText(context.Background(), result)
+	// Then
+	if err != nil {
+		t.Fatalf("RollbackReplaceText returned error: %v", err)
+	}
+	if rollback.Path != "docs/notes.md" || rollback.Diff == "" {
+		t.Fatalf("rollback result = %+v, want created-file rollback diff", rollback)
+	}
+	if _, err := os.Stat(target); !os.IsNotExist(err) {
+		t.Fatalf("created file still exists after rollback: %v", err)
+	}
+}
+
 func Test_Workspace_RollbackReplaceText_rejects_unsupported_diff(t *testing.T) {
 	// Given
 	space, err := New(t.TempDir())

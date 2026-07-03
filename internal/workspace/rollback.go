@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -23,6 +24,9 @@ func (w Workspace) RollbackReplaceText(ctx context.Context, result ReplaceTextRe
 			New:  result.Old,
 		})
 	}
+	if result.Path != "" && result.Old == "" && result.New != "" {
+		return w.removeCreatedText(ctx, result)
+	}
 	parsed, err := parseRollbackDiff(result)
 	if err != nil {
 		return ReplaceTextResult{}, err
@@ -32,6 +36,36 @@ func (w Workspace) RollbackReplaceText(ctx context.Context, result ReplaceTextRe
 		Old:  parsed.After,
 		New:  parsed.Before,
 	})
+}
+
+func (w Workspace) removeCreatedText(ctx context.Context, result ReplaceTextResult) (ReplaceTextResult, error) {
+	if err := ctx.Err(); err != nil {
+		return ReplaceTextResult{}, err
+	}
+	cleanPath, err := cleanRelativePath(result.Path)
+	if err != nil {
+		return ReplaceTextResult{}, err
+	}
+	target, err := w.existingTarget(cleanPath)
+	if err != nil {
+		return ReplaceTextResult{}, err
+	}
+	content, err := os.ReadFile(target)
+	if err != nil {
+		return ReplaceTextResult{}, fmt.Errorf("read file: %w", err)
+	}
+	current := string(content)
+	if current != result.New {
+		return ReplaceTextResult{}, ErrTextNotFound
+	}
+	if err := os.Remove(target); err != nil {
+		return ReplaceTextResult{}, fmt.Errorf("remove created file: %w", err)
+	}
+	return ReplaceTextResult{
+		Path: cleanPath,
+		Diff: renderDiff(cleanPath, current, ""),
+		Old:  result.New,
+	}, nil
 }
 
 func parseRollbackDiff(result ReplaceTextResult) (rollbackDiff, error) {

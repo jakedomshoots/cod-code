@@ -144,7 +144,7 @@ Cross-language follow-up:
 - Public "10/10 beats competitors" claim is still unsupported because Codex CLI and OpenCode matched CEO Harness at 25/25 on the controlled suite.
 - The expanded 25/25 CEO Harness live result, 2/2 cross-language result, 3-pass real-repo dogfood result, short 3-iteration endurance smoke, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. More independent real repositories, larger multi-file jobs, additional provider families, and truly long-duration tasks are still needed.
 - Provider doctor correctly fails without `OPENAI_API_KEY`; this is setup guidance, not a product pass against a real provider.
-- Rollback QA passed for the supported simple replace path. Multiline/trailing-newline rollback remains a limitation.
+- Rollback QA now covers normal replacements, trailing-newline replacements, and created-file model patches. Arbitrary hand-edited diff rollback is still not claimed.
 
 ## Cleanup
 

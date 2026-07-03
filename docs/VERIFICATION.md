@@ -52,6 +52,9 @@ Status date: 2026-07-03
 
 - Focused additions test:
   - `go test ./internal/cli -run 'Test_Run_(start|inbox|provider_wizard|init_demo_repo|tui|write_policy|init_config_uses_external_adapter|prints_help)' -count=1`
+- Focused rollback test:
+  - `go test ./internal/workspace -run Test_Workspace_RollbackReplaceText -count=1`
+  - `go test ./internal/cli -run 'Test_Run_rollback_report|Test_HelperProcess_cli_model_create_file_patch' -count=1`
 - `make ci`
   - `gofmt -w ./cmd ./internal`
   - `go test ./... -count=1`
