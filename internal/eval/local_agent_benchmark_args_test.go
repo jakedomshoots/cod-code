@@ -88,6 +88,12 @@ func Test_BuildLocalAgentBenchmarkSpec_uses_model_command_mode(t *testing.T) {
 	if !slices.Contains(spec.args, "--apply-model-patches") {
 		t.Fatalf("args = %+v, want --apply-model-patches", spec.args)
 	}
+	if got := commandFlagValue(spec.args, "--subagent-attempts"); got != "2" {
+		t.Fatalf("args = %+v, want --subagent-attempts 2, got %q", spec.args, got)
+	}
+	if got := commandFlagValue(spec.args, "--no-progress-stop"); got != "2" {
+		t.Fatalf("args = %+v, want --no-progress-stop 2, got %q", spec.args, got)
+	}
 	if slices.Contains(spec.args, "--replace") {
 		t.Fatalf("args = %+v, model-command mode must not use synthetic --replace", spec.args)
 	}

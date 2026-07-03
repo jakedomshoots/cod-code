@@ -24,7 +24,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - Cross-language CEO evidence: `.omo/evidence/cross-language-core-ceo-r1/summary.json`
 - Repeated real-repo dogfood evidence: `.omo/evidence/dogfood-real-repeat-self-r1/index.md`
 - Copied-workspace dogfood evidence: `.omo/evidence/dogfood-real-copy-self-r1/index.md`
-- Real Kimi provider evidence: `.omo/evidence/provider-kimi-path-safety-r1/summary.json`
+- Repeated real Kimi provider evidence: `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json`
 - Endurance eval evidence: `.omo/evidence/endurance-local-r1/index.md`
 - Nightly eval workflow: `.github/workflows/nightly-evals.yml`
 - Focused multi-file CEO evidence: `.omo/evidence/multi-file-provider-fallback-ceo-r2/summary.json`
@@ -50,7 +50,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 | Expanded production-core CEO comparison | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task production-core --timeout-seconds 120 ...` | 25 runs; CEO Harness 25/25 pass; 0 partial; 0 timeout; 0 incomplete evidence | `.omo/evidence/production-core-25-ceo-r1/summary.json` |
 | Concurrent production-core CEO comparison | `go run ./cmd/ceo-packet gauntlet --suite production-core --agents ceo_harness --concurrency 4 --timeout-seconds 120 ...` | 25 runs; concurrency 4; CEO Harness 25/25 pass; planned result order preserved | `.omo/evidence/production-core-25-ceo-concurrency-r1/summary.json` |
 | Cross-language CEO comparison | `go run ./cmd/ceo-packet gauntlet --suite cross-language-core --agents ceo_harness --concurrency 2 --timeout-seconds 120 ...` | 2 runs across JavaScript and Python fixtures; CEO Harness 2/2 pass; 0 incomplete evidence | `.omo/evidence/cross-language-core-ceo-r1/summary.json` |
-| Real Kimi provider path-safety proof | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task safety-policy-path-escape --timeout-seconds 600 ... scripts/kimi-model-command.sh` | 1 run; CEO Harness 1/1 pass; 6/6 scored checks; 0 incomplete evidence; duration 109078ms | `.omo/evidence/provider-kimi-path-safety-r1/summary.json` |
+| Repeated real Kimi provider path-safety proof | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task safety-policy-path-escape --local-agent-benchmark-repeat 3 --timeout-seconds 600 ... scripts/kimi-model-command.sh` | 3 runs; CEO Harness 3/3 pass; 18/18 scored checks; 0 partial; 0 fail; 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json` |
 | Multi-file provider/config benchmark | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task multi-file-provider-fallback-reporting --timeout-seconds 120 ...` | Required two files across `internal/cli` and `internal/config`; 9/9 scored checks passed | `.omo/evidence/multi-file-provider-fallback-ceo-r2/summary.json` |
 | Real repo dogfood | `sh scripts/dogfood-real.sh --repo temp-real:<temp-git-repo> --timeout-ms 250` | Temp external git repo row `pass`; 5 scenarios captured | `.omo/evidence/dogfood-real/index.md` |
 | Repeated real-repo dogfood | `sh scripts/dogfood-real.sh --repo ceo-harness-repeat:<repo> --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1` | 3 live passes; 0 fails; each run captured doctor, plan-only, observe, patch-preview, and timeout-guard evidence | `.omo/evidence/dogfood-real-repeat-self-r1/index.md` |
@@ -142,7 +142,7 @@ Cross-language follow-up:
 ## Blockers / Risks
 
 - Public "10/10 beats competitors" claim is still unsupported because Codex CLI and OpenCode matched CEO Harness at 25/25 on the controlled suite.
-- The expanded 25/25 CEO Harness live result, 2/2 cross-language result, 3-pass real-repo dogfood result, short 3-iteration endurance smoke, and one real Kimi provider pass are still not enough for a broad production-market claim. More independent real repositories, larger multi-file jobs, more provider repeats, and truly long-duration tasks are still needed.
+- The expanded 25/25 CEO Harness live result, 2/2 cross-language result, 3-pass real-repo dogfood result, short 3-iteration endurance smoke, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. More independent real repositories, larger multi-file jobs, additional provider families, and truly long-duration tasks are still needed.
 - Provider doctor correctly fails without `OPENAI_API_KEY`; this is setup guidance, not a product pass against a real provider.
 - Rollback QA passed for the supported simple replace path. Multiline/trailing-newline rollback remains a limitation.
 

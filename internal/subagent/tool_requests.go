@@ -16,6 +16,21 @@ type ToolRequest struct {
 	MaxMatches int    `json:"max_matches,omitempty"`
 }
 
+func (r *ToolRequest) UnmarshalJSON(data []byte) error {
+	var path string
+	if err := json.Unmarshal(data, &path); err == nil {
+		*r = ToolRequest{Path: path}
+		return nil
+	}
+	type toolRequestAlias ToolRequest
+	var decoded toolRequestAlias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*r = ToolRequest(decoded)
+	return nil
+}
+
 type ToolMatch struct {
 	Path string `json:"path"`
 	Line int    `json:"line"`
@@ -98,7 +113,8 @@ func parseModelOutput(text string, requireStructured bool) (ModelOutput, error) 
 	if err := json.Unmarshal([]byte(payload), &envelope); err != nil {
 		return ModelOutput{}, fmt.Errorf("parse model output: %w", err)
 	}
-	if err := validateToolRequests(envelope.ToolRequests); err != nil {
+	toolRequests := cleanToolRequests(envelope.ToolRequests)
+	if err := validateToolRequests(toolRequests); err != nil {
 		return ModelOutput{}, err
 	}
 	if envelope.Confidence != nil && (*envelope.Confidence < 0 || *envelope.Confidence > 1) {
@@ -114,7 +130,7 @@ func parseModelOutput(text string, requireStructured bool) (ModelOutput, error) 
 		Confidence:     envelope.Confidence,
 		Evidence:       cleanEvidence(envelope.Evidence),
 		Questions:      cleanQuestions(envelope.Questions),
-		ToolRequests:   append([]ToolRequest(nil), envelope.ToolRequests...),
+		ToolRequests:   toolRequests,
 		PatchProposals: append([]PatchProposal(nil), envelope.Patches...),
 		Structured:     true,
 	}, nil
@@ -184,6 +200,40 @@ func validateToolRequests(requests []ToolRequest) error {
 		}
 	}
 	return nil
+}
+
+func cleanToolRequests(requests []ToolRequest) []ToolRequest {
+	cleaned := make([]ToolRequest, 0, len(requests))
+	for _, request := range requests {
+		if isEmptyToolRequest(request) {
+			continue
+		}
+		request.Action = normalizedToolRequestAction(request)
+		cleaned = append(cleaned, request)
+	}
+	return cleaned
+}
+
+func normalizedToolRequestAction(request ToolRequest) string {
+	action := strings.TrimSpace(request.Action)
+	if action != "" {
+		return action
+	}
+	if strings.TrimSpace(request.Path) != "" {
+		return "read_workspace"
+	}
+	if strings.TrimSpace(request.Query) != "" {
+		return "search_workspace"
+	}
+	return ""
+}
+
+func isEmptyToolRequest(request ToolRequest) bool {
+	return strings.TrimSpace(request.Action) == "" &&
+		strings.TrimSpace(request.Path) == "" &&
+		strings.TrimSpace(request.Query) == "" &&
+		request.MaxBytes == 0 &&
+		request.MaxMatches == 0
 }
 
 func cleanEvidence(evidence []string) []string {

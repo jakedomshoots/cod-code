@@ -62,7 +62,7 @@ func buildCEOBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, task Task,
 		if len(req.CEOBenchmarkModelCommand) == 0 {
 			return localAgentSpec{}, fmt.Errorf("%w: --ceo-benchmark-mode model-command requires --ceo-benchmark-model-command-json", ErrInvalidCompetitor)
 		}
-		args := []string{"--write-policy", "trusted-local", "--apply-model-patches", "--format", "json", "--model-command"}
+		args := []string{"--write-policy", "trusted-local", "--apply-model-patches", "--subagent-attempts", "2", "--no-progress-stop", "2", "--format", "json", "--model-command"}
 		args = append(args, req.CEOBenchmarkModelCommand...)
 		args = append(args, "--")
 		args = append(args, "--ceo-model-command")

@@ -133,6 +133,114 @@ func Test_Runner_Run_parses_structured_model_output_when_model_returns_full_json
 	}
 }
 
+type emptyToolRequestWithPatchClient struct{}
+
+func (c emptyToolRequestWithPatchClient) Complete(ctx context.Context, req model.Request) (model.Response, error) {
+	if err := ctx.Err(); err != nil {
+		return model.Response{}, err
+	}
+	return model.Response{
+		Text: `{"summary":"patch ready","tool_requests":[{}],"patches":[{"path":"app.txt","old":"old","new":"new"}]}`,
+	}, nil
+}
+
+func Test_Runner_Run_ignores_empty_tool_request_entries(t *testing.T) {
+	// Given
+	runner := NewRunnerWithModel(emptyToolRequestWithPatchClient{})
+
+	// When
+	result, err := runner.Run(context.Background(), TaskPacket{
+		Task:            "Patch file",
+		AgentName:       "coder",
+		Role:            "apply bounded changes",
+		ContextMode:     "lean",
+		AllowedActions:  []string{"propose_patch"},
+		MaxContextBytes: 512,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	if len(result.ToolRequests) != 0 {
+		t.Fatalf("ToolRequests = %+v, want empty entries ignored", result.ToolRequests)
+	}
+	if len(result.PatchProposals) != 1 || result.PatchProposals[0].Path != "app.txt" {
+		t.Fatalf("PatchProposals = %+v, want parsed patch", result.PatchProposals)
+	}
+}
+
+type shorthandToolRequestClient struct{}
+
+func (c shorthandToolRequestClient) Complete(ctx context.Context, req model.Request) (model.Response, error) {
+	if err := ctx.Err(); err != nil {
+		return model.Response{}, err
+	}
+	return model.Response{
+		Text: `{"summary":"need context","tool_requests":[{"path":"app.txt"},{"query":"TODO"}]}`,
+	}, nil
+}
+
+func Test_Runner_Run_normalizes_tool_request_shorthand(t *testing.T) {
+	// Given
+	runner := NewRunnerWithModel(shorthandToolRequestClient{})
+
+	// When
+	result, err := runner.Run(context.Background(), TaskPacket{
+		Task:            "Inspect file",
+		AgentName:       "coder",
+		Role:            "apply bounded changes",
+		ContextMode:     "lean",
+		AllowedActions:  []string{"read_workspace", "search_workspace"},
+		MaxContextBytes: 512,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	if len(result.ToolRequests) != 2 {
+		t.Fatalf("ToolRequests = %+v, want two normalized requests", result.ToolRequests)
+	}
+	if result.ToolRequests[0].Action != "read_workspace" || result.ToolRequests[0].Path != "app.txt" {
+		t.Fatalf("ToolRequests[0] = %+v, want read_workspace app.txt", result.ToolRequests[0])
+	}
+	if result.ToolRequests[1].Action != "search_workspace" || result.ToolRequests[1].Query != "TODO" {
+		t.Fatalf("ToolRequests[1] = %+v, want search_workspace TODO", result.ToolRequests[1])
+	}
+}
+
+type stringToolRequestClient struct{}
+
+func (c stringToolRequestClient) Complete(ctx context.Context, req model.Request) (model.Response, error) {
+	if err := ctx.Err(); err != nil {
+		return model.Response{}, err
+	}
+	return model.Response{
+		Text: `{"summary":"need file","tool_requests":["app.txt"]}`,
+	}, nil
+}
+
+func Test_Runner_Run_normalizes_string_tool_requests(t *testing.T) {
+	// Given
+	runner := NewRunnerWithModel(stringToolRequestClient{})
+
+	// When
+	result, err := runner.Run(context.Background(), TaskPacket{
+		Task:            "Inspect file",
+		AgentName:       "coder",
+		Role:            "apply bounded changes",
+		ContextMode:     "lean",
+		AllowedActions:  []string{"read_workspace"},
+		MaxContextBytes: 512,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	if len(result.ToolRequests) != 1 || result.ToolRequests[0].Action != "read_workspace" || result.ToolRequests[0].Path != "app.txt" {
+		t.Fatalf("ToolRequests = %+v, want string request normalized to read_workspace app.txt", result.ToolRequests)
+	}
+}
+
 type createFileModelClient struct{}
 
 func (c createFileModelClient) Complete(ctx context.Context, req model.Request) (model.Response, error) {

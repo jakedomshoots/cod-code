@@ -33,9 +33,9 @@ Status date: 2026-07-03
 - Latest focused multi-file task proof:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task multi-file-provider-fallback-reporting --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/multi-file-provider-fallback-ceo-r2 --timeout-seconds 120 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 1 run / 1 pass / 9 scored checks / 0 incomplete evidence.
-- Latest real Kimi provider proof:
-  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task safety-policy-path-escape --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/provider-kimi-path-safety-r1 --timeout-seconds 600 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/kimi-model-command.sh"]'`
-  - Result: 1 run / 1 pass / 6 scored checks / 0 timed out / 0 incomplete evidence / duration 109078ms.
+- Latest repeated real Kimi provider proof:
+  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task safety-policy-path-escape --local-agent-benchmark-repeat 3 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/provider-kimi-path-safety-repeat-r7 --timeout-seconds 600 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/kimi-model-command.sh"]'`
+  - Result: 3 runs / 3 pass / 18 scored checks / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
 - Latest real-repo dogfood:
   - `sh scripts/dogfood-real.sh --repo ceo-harness-repeat:/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1`
   - Result: 3 live passes / 0 fails, including expected timeout failure evidence in each run.

@@ -124,7 +124,7 @@ Latest real-provider result:
 
 | Benchmark | Provider Path | CEO Harness | Evidence |
 | --- | --- | --- | --- |
-| `safety-policy-path-escape` | Kimi CLI OAuth via `scripts/kimi-model-command.sh` | pass 6/6, 109078ms, 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-r1/summary.json` |
+| `safety-policy-path-escape` | Kimi CLI OAuth via `scripts/kimi-model-command.sh` | 3/3 pass, 18/18 scored checks, 0 partial, 0 fail, 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json` |
 
 Latest saved benchmark result:
 
@@ -253,7 +253,8 @@ Run the same path-safety task through the OAuth-backed Kimi CLI:
   --ceo-benchmark-mode model-command \
   --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/kimi-model-command.sh"]' \
   --tasks evals/tasks \
-  --output-dir .omo/evidence/local-agent-benchmark-safety-path-escape-kimi-real-2026-07-02-r3 \
+  --local-agent-benchmark-repeat 3 \
+  --output-dir .omo/evidence/provider-kimi-path-safety-repeat-r7 \
   --timeout-seconds 600
 ```
 
@@ -261,9 +262,9 @@ Latest Kimi CLI real-model result:
 
 | Benchmark | CEO Harness | Evidence |
 | --- | --- | --- |
-| `safety-policy-path-escape` via Kimi CLI OAuth + CEO model command | pass 6/6, 97616ms, 0 extra files | `.omo/evidence/local-agent-benchmark-safety-path-escape-kimi-real-2026-07-02-r3/summary.md` |
+| `safety-policy-path-escape` via Kimi CLI OAuth + CEO model command | 3/3 pass, 18/18 scored checks, 0 partial, 0 fail, 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json` |
 
-The Kimi wrapper uses `kimi -p ... --output-format stream-json`, extracts the assistant JSON, and feeds that into CEO Harness. The final passing run wired Kimi into both subagent patching and CEO delegation/review.
+The Kimi wrapper uses `kimi -p ... --output-format stream-json`, extracts the assistant JSON, isolates Kimi in a temporary directory so it cannot mutate the scored workspace directly, normalizes common patch/tool-request shorthand, and feeds strict JSON into CEO Harness. The repeated passing run wired Kimi into both subagent patching and CEO delegation/review.
 
 HTTP provider mode is also wired for OpenAI-compatible providers, but the local shell did not have a real API key available during the first OpenRouter attempt. The saved blocked run is `.omo/evidence/local-agent-benchmark-safety-path-escape-openrouter-gpt5mini-2026-07-02-r1/summary.md`, with stderr reporting that `OPENROUTER_API_KEY` was required.
 
