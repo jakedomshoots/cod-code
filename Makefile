@@ -3,7 +3,7 @@ PKG := ./cmd/ceo-packet
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || printf dev)
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || printf local)
 
-.PHONY: ci fmt test test-race vet smoke dogfood build release-local release-preflight release-readiness eval-nightly eval-endurance eval-provider-kimi eval-provider-codex
+.PHONY: ci fmt test test-race vet smoke dogfood build release-local release-preflight release-readiness eval-nightly eval-endurance eval-provider-kimi eval-provider-codex eval-provider-openai eval-provider-openrouter eval-provider-moonshot
 
 ci: fmt test vet smoke dogfood build
 
@@ -53,3 +53,12 @@ eval-provider-kimi:
 
 eval-provider-codex:
 	sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex
+
+eval-provider-openai:
+	sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai
+
+eval-provider-openrouter:
+	sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter
+
+eval-provider-moonshot:
+	sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot

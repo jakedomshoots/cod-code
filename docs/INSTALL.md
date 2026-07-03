@@ -60,6 +60,18 @@ ceo-packet config doctor --workspace /path/to/repo --format text
 
 Codex/Kimi/OpenRouter missing key or missing login states are blocked setup, not proof that the harness failed a benchmark. Save the exact command output before scoring the run.
 
+Provider proof gates are available for both CLI-backed and HTTP-backed providers:
+
+```sh
+sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi
+sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex
+sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai
+sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter
+sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot
+```
+
+HTTP proof gates require `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, or `MOONSHOT_API_KEY`. Missing keys are recorded as `blocked_missing_key`.
+
 ## Market Gauntlet
 
 Use the gauntlet command to create market evidence:

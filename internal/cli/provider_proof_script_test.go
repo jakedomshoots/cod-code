@@ -79,6 +79,81 @@ func Test_ProviderProofScript_dryRunWritesCodexPlan(t *testing.T) {
 	}
 }
 
+func Test_ProviderProofScript_dryRunWritesOpenAIHTTPPlan(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "provider-proof")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "provider-proof.sh"),
+		"--dry-run",
+		"--provider", "openai",
+		"--output-dir", outputDir,
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("provider proof openai dry-run failed: %v\n%s", err, string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"# Provider Proof Evidence",
+		"- Provider: openai",
+		"- Provider mode: http-provider",
+		"- HTTP preset: openai",
+		"- API key env: OPENAI_API_KEY",
+		"| cross-language-js-state-reducer | planned |",
+		"| cross-language-python-retry-policy | planned |",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+}
+
+func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "provider-proof")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "provider-proof.sh"),
+		"--provider", "openrouter",
+		"--output-dir", outputDir,
+	)
+	cmd.Dir = root
+	cmd.Env = withoutEnv(os.Environ(), "OPENROUTER_API_KEY")
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("provider proof unexpectedly passed without OPENROUTER_API_KEY:\n%s", string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"- Provider: openrouter",
+		"- Provider mode: http-provider",
+		"- API key env: OPENROUTER_API_KEY",
+		"| provider_setup | blocked_missing_key | blocked.md |",
+		"- Overall: blocked",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+
+	blocked := readTextFile(t, filepath.Join(outputDir, "blocked.md"))
+	if !strings.Contains(blocked, "OPENROUTER_API_KEY") {
+		t.Fatalf("blocked.md missing key guidance:\n%s", blocked)
+	}
+}
+
 func Test_ProviderProofScript_liveFailsWhenBenchmarkSummaryFails(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {
@@ -133,4 +208,16 @@ exit 1
 	if !strings.Contains(index, "| cross-language-js-state-reducer | fail |") {
 		t.Fatalf("index.md missing failing benchmark row:\n%s", index)
 	}
+}
+
+func withoutEnv(env []string, key string) []string {
+	prefix := key + "="
+	next := make([]string, 0, len(env))
+	for _, entry := range env {
+		if strings.HasPrefix(entry, prefix) {
+			continue
+		}
+		next = append(next, entry)
+	}
+	return next
 }

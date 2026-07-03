@@ -9,16 +9,21 @@ dry_run=0
 provider="kimi"
 timeout_seconds=600
 output_dir=""
+http_model=""
+api_key_env=""
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/provider-proof.sh [--dry-run] [--provider kimi|codex] [--timeout-seconds n] [--output-dir path]
+Usage: sh scripts/provider-proof.sh [--dry-run] [--provider kimi|codex|openai|openrouter|moonshot] [--timeout-seconds n] [--output-dir path]
 
 Runs real-provider benchmark proofs and writes durable evidence.
 
 Options:
   --dry-run            Write the provider proof plan without running commands.
-  --provider name      Provider bridge to use. Supported: kimi, codex.
+  --provider name      Provider bridge to use. Supported: kimi, codex, openai,
+                       openrouter, moonshot.
+  --http-model name    Override the default HTTP provider model.
+  --api-key-env name   Override the default HTTP provider API key env var.
   --timeout-seconds n  Timeout for each benchmark command. Default: 600.
   --output-dir path    Evidence directory. Default: .omo/evidence/provider-proof-kimi.
   --help               Show this help.
@@ -42,6 +47,32 @@ while [ "$#" -gt 0 ]; do
       ;;
     --provider=*)
       provider="${1#--provider=}"
+      shift
+      ;;
+    --http-model)
+      shift
+      if [ "$#" -eq 0 ]; then
+        printf '%s\n' "provider-proof: --http-model requires a value" >&2
+        exit 2
+      fi
+      http_model="${1:-}"
+      shift
+      ;;
+    --http-model=*)
+      http_model="${1#--http-model=}"
+      shift
+      ;;
+    --api-key-env)
+      shift
+      if [ "$#" -eq 0 ]; then
+        printf '%s\n' "provider-proof: --api-key-env requires a value" >&2
+        exit 2
+      fi
+      api_key_env="${1:-}"
+      shift
+      ;;
+    --api-key-env=*)
+      api_key_env="${1#--api-key-env=}"
       shift
       ;;
     --timeout-seconds)
@@ -91,20 +122,55 @@ esac
 
 case "$provider" in
   kimi)
+    provider_mode="cli-model-command"
     provider_cli="kimi"
     model_command_script="$root/scripts/kimi-model-command.sh"
     model_command_display="scripts/kimi-model-command.sh"
     ;;
   codex)
+    provider_mode="cli-model-command"
     provider_cli="codex"
     model_command_script="$root/scripts/codex-model-command.sh"
     model_command_display="scripts/codex-model-command.sh"
+    ;;
+  openai)
+    provider_mode="http-provider"
+    http_preset="openai"
+    default_http_model="${CEO_PROVIDER_PROOF_OPENAI_MODEL:-gpt-5}"
+    default_api_key_env="OPENAI_API_KEY"
+    ;;
+  openrouter)
+    provider_mode="http-provider"
+    http_preset="openrouter"
+    default_http_model="${CEO_PROVIDER_PROOF_OPENROUTER_MODEL:-openai/gpt-5-mini}"
+    default_api_key_env="OPENROUTER_API_KEY"
+    ;;
+  moonshot)
+    provider_mode="http-provider"
+    http_preset="moonshot"
+    default_http_model="${CEO_PROVIDER_PROOF_MOONSHOT_MODEL:-moonshot-v1-128k}"
+    default_api_key_env="MOONSHOT_API_KEY"
     ;;
   *)
     printf '%s\n' "provider-proof: unsupported provider: $provider" >&2
     exit 2
     ;;
 esac
+
+if [ "$provider_mode" = "http-provider" ]; then
+  if [ -z "$http_model" ]; then
+    http_model="$default_http_model"
+  fi
+  if [ -z "$api_key_env" ]; then
+    api_key_env="$default_api_key_env"
+  fi
+  case "$api_key_env" in
+    ''|*[!A-Za-z0-9_]*|[0-9]*)
+      printf '%s\n' "provider-proof: --api-key-env must be a valid environment variable name" >&2
+      exit 2
+      ;;
+  esac
+fi
 
 if [ -z "$output_dir" ]; then
   output_dir="$root/.omo/evidence/provider-proof-$provider"
@@ -121,10 +187,12 @@ if [ "$dry_run" -eq 1 ]; then
 fi
 
 mkdir -p "$output_dir"
-rm -rf "$output_dir"/index.md "$output_dir"/build "$output_dir"/cross-language-js-state-reducer "$output_dir"/cross-language-python-retry-policy
+rm -rf "$output_dir"/index.md "$output_dir"/blocked.md "$output_dir"/build "$output_dir"/cross-language-js-state-reducer "$output_dir"/cross-language-python-retry-policy
 index="$output_dir/index.md"
 generated_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-model_command_json=$(printf '["sh","%s"]' "$model_command_script")
+if [ "$provider_mode" = "cli-model-command" ]; then
+  model_command_json=$(printf '["sh","%s"]' "$model_command_script")
+fi
 
 display_path() {
   case "$output_dir" in
@@ -172,8 +240,15 @@ write_index_header() {
     printf '%s\n' "- Generated: $generated_at"
     printf '%s\n' "- Mode: $mode"
     printf '%s\n' "- Provider: $provider"
+    printf '%s\n' "- Provider mode: $provider_mode"
     printf '%s\n' "- Evidence root: $(display_path)"
-    printf '%s\n' "- Model command: $model_command_display"
+    if [ "$provider_mode" = "cli-model-command" ]; then
+      printf '%s\n' "- Model command: $model_command_display"
+    else
+      printf '%s\n' "- HTTP preset: $http_preset"
+      printf '%s\n' "- HTTP model: $http_model"
+      printf '%s\n' "- API key env: $api_key_env"
+    fi
     printf '%s\n' "- Timeout seconds: $timeout_seconds"
     printf '\n'
     printf '%s\n' "## Task Results"
@@ -194,10 +269,15 @@ write_plan() {
   {
     printf '%s\n' "# Provider Proof Plan: $task_id"
     printf '\n'
-    printf '%s\n' "1. Build `bin/ceo-packet`."
-    printf '%s\n' "2. Run `ceo-eval --local-agent-benchmark` for `$task_id`."
-    printf '%s\n' "3. Route CEO Harness subagent and CEO review through `$model_command_display`."
-    printf '%s\n' "4. Save command output, score JSON, report JSON, diff, and changed-files evidence."
+    printf '%s\n' '1. Build `bin/ceo-packet`.'
+    printf '%s\n' "2. Run \`ceo-eval --local-agent-benchmark\` for \`$task_id\`."
+    if [ "$provider_mode" = "cli-model-command" ]; then
+      printf '%s\n' "3. Route CEO Harness subagent and CEO review through \`$model_command_display\`."
+    else
+      printf '%s\n' "3. Route CEO Harness subagent and CEO review through \`$http_preset\` HTTP provider model \`$http_model\`."
+      printf '%s\n' "4. Require \`$api_key_env\` to be present without printing the key value."
+    fi
+    printf '%s\n' "5. Save command output, score JSON, report JSON, diff, and changed-files evidence."
   } >"$task_dir/plan.md"
   append_result "$task_id" "planned" "$task_id/plan.md"
 }
@@ -205,17 +285,42 @@ write_plan() {
 run_task() {
   task_id="$1"
   task_dir="$output_dir/$task_id"
-  if run_capture "$task_dir/command" go run ./cmd/ceo-eval \
-    --local-agent-benchmark \
-    --local-agents ceo_harness \
-    --local-agent-benchmark-task "$task_id" \
-    --local-agent-benchmark-repeat 1 \
-    --ceo-binary ./bin/ceo-packet \
-    --tasks evals/tasks \
-    --output-dir "$task_dir/run" \
-    --timeout-seconds "$timeout_seconds" \
-    --ceo-benchmark-mode model-command \
-    --ceo-benchmark-model-command-json "$model_command_json"; then
+  if [ "$provider_mode" = "cli-model-command" ]; then
+    if run_capture "$task_dir/command" go run ./cmd/ceo-eval \
+      --local-agent-benchmark \
+      --local-agents ceo_harness \
+      --local-agent-benchmark-task "$task_id" \
+      --local-agent-benchmark-repeat 1 \
+      --ceo-binary ./bin/ceo-packet \
+      --tasks evals/tasks \
+      --output-dir "$task_dir/run" \
+      --timeout-seconds "$timeout_seconds" \
+      --ceo-benchmark-mode model-command \
+      --ceo-benchmark-model-command-json "$model_command_json"; then
+      task_command_passed=1
+    else
+      task_command_passed=0
+    fi
+  else
+    if run_capture "$task_dir/command" go run ./cmd/ceo-eval \
+      --local-agent-benchmark \
+      --local-agents ceo_harness \
+      --local-agent-benchmark-task "$task_id" \
+      --local-agent-benchmark-repeat 1 \
+      --ceo-binary ./bin/ceo-packet \
+      --tasks evals/tasks \
+      --output-dir "$task_dir/run" \
+      --timeout-seconds "$timeout_seconds" \
+      --ceo-benchmark-mode http-provider \
+      --ceo-benchmark-provider-preset "$http_preset" \
+      --ceo-benchmark-provider-model "$http_model" \
+      --ceo-benchmark-provider-api-key-env "$api_key_env"; then
+      task_command_passed=1
+    else
+      task_command_passed=0
+    fi
+  fi
+  if [ "$task_command_passed" -eq 1 ]; then
     if python3 - "$task_dir/run/summary.json" <<'PY'
 import json
 import sys
@@ -249,20 +354,36 @@ if [ "$dry_run" -eq 1 ]; then
   write_plan "cross-language-python-retry-policy"
   overall="planned"
 else
-  if ! command -v "$provider_cli" >/dev/null 2>&1; then
-    printf '%s\n' "provider-proof: $provider_cli CLI not found on PATH" >&2
-    exit 1
+  if [ "$provider_mode" = "cli-model-command" ]; then
+    if ! command -v "$provider_cli" >/dev/null 2>&1; then
+      printf '%s\n' "provider-proof: $provider_cli CLI not found on PATH" >&2
+      exit 1
+    fi
+  else
+    eval "configured_api_key=\${$api_key_env:-}"
+    if [ -z "$configured_api_key" ]; then
+      {
+        printf '%s\n' "# Provider Proof Blocked"
+        printf '\n'
+        printf '%s\n' "Provider \`$provider\` requires \`$api_key_env\` for HTTP benchmark mode."
+        printf '%s\n' "Set the environment variable, then rerun this command. The key value is not printed or saved."
+      } >"$output_dir/blocked.md"
+      append_result "provider_setup" "blocked_missing_key" "blocked.md"
+      overall="blocked"
+    fi
   fi
-  overall="pass"
-  if ! run_capture "$output_dir/build" go build -trimpath -o bin/ceo-packet ./cmd/ceo-packet; then
-    append_result "build" "fail" "build/stderr.txt"
-    overall="fail"
-  fi
-  if [ "$overall" = "pass" ] && ! run_task "cross-language-js-state-reducer"; then
-    overall="fail"
-  fi
-  if [ "$overall" = "pass" ] && ! run_task "cross-language-python-retry-policy"; then
-    overall="fail"
+  if [ "${overall:-}" != "blocked" ]; then
+    overall="pass"
+    if ! run_capture "$output_dir/build" go build -trimpath -o bin/ceo-packet ./cmd/ceo-packet; then
+      append_result "build" "fail" "build/stderr.txt"
+      overall="fail"
+    fi
+    if [ "$overall" = "pass" ] && ! run_task "cross-language-js-state-reducer"; then
+      overall="fail"
+    fi
+    if [ "$overall" = "pass" ] && ! run_task "cross-language-python-retry-policy"; then
+      overall="fail"
+    fi
   fi
 fi
 
@@ -276,6 +397,6 @@ fi
 printf '%s\n' "provider-proof: mode=$mode"
 printf '%s\n' "provider-proof: evidence=$index"
 
-if [ "$overall" = "fail" ]; then
+if [ "$overall" = "fail" ] || [ "$overall" = "blocked" ]; then
   exit 1
 fi

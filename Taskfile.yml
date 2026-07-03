@@ -94,6 +94,21 @@ tasks:
     cmds:
       - sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex
 
+  eval:provider:openai:
+    desc: Run the OpenAI HTTP-provider proof suite
+    cmds:
+      - sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai
+
+  eval:provider:openrouter:
+    desc: Run the OpenRouter HTTP-provider proof suite
+    cmds:
+      - sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter
+
+  eval:provider:moonshot:
+    desc: Run the Moonshot HTTP-provider proof suite
+    cmds:
+      - sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot
+
   ci:
     desc: Run the productization gate used before handoff
     cmds:
