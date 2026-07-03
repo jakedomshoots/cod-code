@@ -132,6 +132,79 @@ func Test_DogfoodRealScript_copyWorkspaceLeavesSourceUntouched(t *testing.T) {
 	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "workspace-copy", "README.md"))
 }
 
+func Test_DogfoodRealScript_copyWorkspaceWriteProbeMutatesOnlyCopy(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	repoDir := filepath.Join(t.TempDir(), "repo")
+	if err := os.MkdirAll(repoDir, 0o755); err != nil {
+		t.Fatalf("create temp repo: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(repoDir, "README.md"), []byte("# Source\n"), 0o644); err != nil {
+		t.Fatalf("write source README: %v", err)
+	}
+	initGitRepo(t, repoDir)
+	outputDir := filepath.Join(t.TempDir(), "dogfood-real")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "dogfood-real.sh"),
+		"--copy-workspace",
+		"--write-probe",
+		"--output-dir", outputDir,
+		"--timeout-ms", "50",
+		"--repo", "sample:"+repoDir,
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("dogfood-real write probe failed: %v\n%s", err, string(output))
+	}
+
+	if _, err := os.Stat(filepath.Join(repoDir, "ceo-dogfood-write-probe.txt")); !os.IsNotExist(err) {
+		t.Fatalf("source repo was touched by write probe; stat err=%v", err)
+	}
+	workspacePath := strings.TrimSpace(readTextFile(t, filepath.Join(outputDir, "repos", "sample", "workspace-path.txt")))
+	probePath := filepath.Join(workspacePath, "ceo-dogfood-write-probe.txt")
+	if got := readTextFile(t, probePath); got != "new\n" {
+		t.Fatalf("write probe copy content = %q, want new", got)
+	}
+	summary := readTextFile(t, filepath.Join(outputDir, "repos", "sample", "summary.md"))
+	if !strings.Contains(summary, "| scenario-06-write-probe | pass |") {
+		t.Fatalf("summary missing passing write probe:\n%s", summary)
+	}
+	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "scenario-06-write-probe", "preview-digest.txt"))
+	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "scenario-06-write-probe", "git-status-after.txt"))
+}
+
+func Test_DogfoodRealScript_writeProbeRequiresCopyWorkspace(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	repoDir := filepath.Join(t.TempDir(), "repo")
+	if err := os.MkdirAll(repoDir, 0o755); err != nil {
+		t.Fatalf("create temp repo: %v", err)
+	}
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "dogfood-real.sh"),
+		"--dry-run",
+		"--write-probe",
+		"--repo", "sample:"+repoDir,
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("dogfood-real write probe without copy unexpectedly passed:\n%s", string(output))
+	}
+	if !strings.Contains(string(output), "--write-probe requires --copy-workspace") {
+		t.Fatalf("error missing copy-workspace guidance:\n%s", string(output))
+	}
+}
+
 func initGitRepo(t *testing.T, repoDir string) {
 	t.Helper()
 	for _, args := range [][]string{

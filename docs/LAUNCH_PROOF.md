@@ -28,6 +28,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - Copied-workspace dogfood evidence: `.omo/evidence/dogfood-real-copy-self-r1/index.md`
 - Independent copied-workspace dogfood evidence: `.omo/evidence/dogfood-real-independent-r1/index.md`
 - Expanded independent copied-workspace dogfood evidence: `.omo/evidence/dogfood-real-independent-r2/index.md`
+- Copied-workspace write-probe dogfood evidence: `.omo/evidence/dogfood-real-write-probe-r1/index.md`
 - Repeated real Kimi provider evidence: `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json`
 - Endurance eval evidence: `.omo/evidence/endurance-local-r1/index.md`
 - Longer endurance eval evidence: `.omo/evidence/endurance-local-r2/index.md`
@@ -64,6 +65,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 | Real repo dogfood | `sh scripts/dogfood-real.sh --repo temp-real:<temp-git-repo> --timeout-ms 250` | Temp external git repo row `pass`; 5 scenarios captured | `.omo/evidence/dogfood-real/index.md` |
 | Repeated real-repo dogfood | `sh scripts/dogfood-real.sh --repo ceo-harness-repeat:<repo> --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1` | 3 live passes; 0 fails; each run captured doctor, plan-only, observe, patch-preview, and timeout-guard evidence | `.omo/evidence/dogfood-real-repeat-self-r1/index.md` |
 | Copied-workspace dogfood | `sh scripts/dogfood-real.sh --copy-workspace --repo ceo-harness-copy:<repo> --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-copy-self-r1` | Source path and copied workspace path recorded separately; all five scenarios passed against the copy | `.omo/evidence/dogfood-real-copy-self-r1/index.md` |
+| Copied-workspace write-probe dogfood | `sh scripts/dogfood-real.sh --copy-workspace --write-probe --repo chemcheck:<repo> --repo axis-health:<repo> --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-write-probe-r1` | Both copied workspaces passed six scenarios, including preview plus approved write; source checkouts stayed without `ceo-dogfood-write-probe.txt` | `.omo/evidence/dogfood-real-write-probe-r1/index.md` |
 | Short endurance smoke | `sh scripts/endurance.sh --iterations 3 --output-dir .omo/evidence/endurance-local-r1` | 3 iterations; 3 pass; 0 fail; each iteration ran fixture scoring, cross-language gauntlet, and real-repo dogfood | `.omo/evidence/endurance-local-r1/index.md` |
 | Longer local endurance run | `sh scripts/endurance.sh --iterations 10 --output-dir .omo/evidence/endurance-local-r2` | 10 iterations; 10 pass; 0 fail; elapsed 30 seconds; each iteration ran build, 28-task fixture scoring, cross-language gauntlet, and real-repo dogfood | `.omo/evidence/endurance-local-r2/index.md` |
 | Extended local endurance run | `sh scripts/endurance.sh --iterations 30 --output-dir .omo/evidence/endurance-local-r3` | 30 iterations; 30 pass; 0 fail; elapsed 102 seconds | `.omo/evidence/endurance-local-r3/index.md` |
@@ -113,6 +115,13 @@ The expanded independent copied-workspace dogfood run added four more local repo
 - Radian: pass, copied workspace, five scenarios.
 
 Artifact: `.omo/evidence/dogfood-real-independent-r2/index.md`
+
+The latest copied-workspace write-probe dogfood run added real approved-write proof without touching the source checkouts:
+
+- ChemCheck: pass, copied workspace, six scenarios, write probe applied only inside the copy.
+- Axis Health: pass, copied workspace, six scenarios, write probe applied only inside the copy.
+
+Artifact: `.omo/evidence/dogfood-real-write-probe-r1/index.md`
 
 ## Benchmark Summary
 

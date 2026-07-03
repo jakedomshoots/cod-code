@@ -64,6 +64,9 @@ Status date: 2026-07-03
 - Latest task-specific copied-workspace dogfood:
   - `sh scripts/dogfood-real.sh --copy-workspace --repo chemcheck:/Users/jakedom/Documents/chemcheck-main --repo axis-health:'/Users/jakedom/Documents/Axis health' --task 'Plan a repo-specific onboarding docs cleanup and inspect the safest first patch without writing source files' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-task-specific-r1`
   - Result: ChemCheck pass and Axis Health pass; both saved the custom task text, copied workspace path, git status evidence, plan-only output, observe-mode output, patch-preview digest, and expected timeout failure evidence.
+- Latest copied-workspace write-probe dogfood:
+  - `sh scripts/dogfood-real.sh --copy-workspace --write-probe --repo chemcheck:/Users/jakedom/Documents/chemcheck-main --repo axis-health:'/Users/jakedom/Documents/Axis health' --task 'Apply and prove a copied-workspace write probe without touching source checkouts' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-write-probe-r1`
+  - Result: ChemCheck pass and Axis Health pass; both previewed, approved, and applied `ceo-dogfood-write-probe.txt` inside copied workspaces, saved after-state git status, and left the source checkouts without the marker file.
 - Nightly eval task:
   - `make eval-nightly`
   - `/Users/jakedom/go/bin/task eval:nightly`

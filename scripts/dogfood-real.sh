@@ -10,6 +10,7 @@ dry_run=0
 timeout_ms=250
 repeat_count=1
 copy_workspace=0
+write_probe=0
 build_tmp=""
 task_text="Plan a bounded real-repo fix without writing files"
 
@@ -17,7 +18,7 @@ trap 'rm -f "$repos_file"; if [ -n "$build_tmp" ]; then rm -rf "$build_tmp"; fi'
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--task text] [--timeout-ms n] [--repeat n] [--output-dir path] [--copy-workspace]
+Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--task text] [--timeout-ms n] [--repeat n] [--output-dir path] [--copy-workspace] [--write-probe]
 
 Creates durable dogfood evidence under .omo/evidence/dogfood-real.
 
@@ -29,6 +30,7 @@ Options:
   --repeat n         Repeat each repo scenario set n times. Default: 1.
   --output-dir path  Evidence directory. Default: .omo/evidence/dogfood-real.
   --copy-workspace   Run live scenarios against a copied workspace instead of the source repo.
+  --write-probe      In live copied-workspace mode, preview and approve one real write against the copy.
   --help             Show this help.
 USAGE
 }
@@ -119,6 +121,10 @@ while [ "$#" -gt 0 ]; do
       copy_workspace=1
       shift
       ;;
+    --write-probe)
+      write_probe=1
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
@@ -149,6 +155,11 @@ case "$evidence_dir" in
   /*) ;;
   *) evidence_dir="$invocation_dir/$evidence_dir" ;;
 esac
+
+if [ "$write_probe" -eq 1 ] && [ "$copy_workspace" -eq 0 ]; then
+  printf '%s\n' "dogfood-real: --write-probe requires --copy-workspace" >&2
+  exit 2
+fi
 
 if [ ! -s "$repos_file" ]; then
   add_repo "self:$root"
@@ -320,6 +331,11 @@ write_index_header() {
     printf '%s\n' "- Repeat count: $repeat_count"
     printf '%s\n' "- Workspace mode: $(workspace_mode)"
     printf '%s\n' "- Task: $task_text"
+    if [ "$write_probe" -eq 1 ]; then
+      printf '%s\n' "- Write probe: enabled"
+    else
+      printf '%s\n' "- Write probe: disabled"
+    fi
     printf '%s\n' "- Runner: scripts/dogfood-real.sh"
     printf '%s\n' "- Evidence root: $(evidence_display_path)"
     printf '%s\n' "- Secret API keys: not required for smoke path"
@@ -334,6 +350,7 @@ write_index_header() {
     printf '%s\n' "| scenario-03-observe-run | Run CEO Harness with a local deterministic model in observe mode | listed only | JSON report, pass/fail note |"
     printf '%s\n' "| scenario-04-patch-preview | Capture a patch approval digest on a controlled fixture | listed only | preview report and digest |"
     printf '%s\n' "| scenario-05-timeout-guard | Prove hung model commands do not look successful | listed only | expected-failure transcript |"
+    printf '%s\n' "| scenario-06-write-probe | Prove preview plus approved write mutates only the copied workspace | listed only | preview digest, apply report, after-state git status |"
     printf '\n'
     printf '%s\n' "## Repo Results"
     printf '\n'
@@ -366,6 +383,9 @@ write_dry_run_plan() {
     printf '%s\n' "3. ceo-packet --workspace \"$plan_repo_path\" --write-policy observe --format json --model-command sh examples/command-model.sh -- \"$task_text\""
     printf '%s\n' "4. ceo-packet --workspace <controlled-fixture> --dry-run --replace app.txt old new --format json \"Preview patch approval digest\""
     printf '%s\n' "5. ceo-packet --workspace \"$plan_repo_path\" --write-policy observe --model-command-timeout-ms $timeout_ms --model-command sh -c 'sleep 5' -- \"Probe timeout guard\""
+    if [ "$write_probe" -eq 1 ]; then
+      printf '%s\n' "6. ceo-packet --workspace <copied-workspace> --write-policy approved-write --approve-preview <digest> --replace ceo-dogfood-write-probe.txt old new --format json \"Apply copied workspace write probe\""
+    fi
   } >"$plan_repo_dir/plan.md"
   printf '%s\n' "planned" >"$plan_repo_dir/status.txt"
 }
@@ -432,6 +452,52 @@ capture_git_state() {
   fi
 }
 
+capture_git_status_only() {
+  git_repo_path="$1"
+  target_file="$2"
+  if [ -d "$git_repo_path/.git" ] || git -C "$git_repo_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git -C "$git_repo_path" status --short >"$target_file" 2>"$target_file.stderr"
+  else
+    printf '%s\n' "not a git worktree" >"$target_file"
+  fi
+  write_hash "$target_file" "$target_file.sha256"
+}
+
+run_write_probe() {
+  probe_repo_path="$1"
+  probe_dir="$2"
+  probe_bin="$3"
+  mkdir -p "$probe_dir"
+  probe_file="$probe_repo_path/ceo-dogfood-write-probe.txt"
+  printf '%s\n' "old" >"$probe_file"
+
+  if ! run_capture "$probe_dir/preview" "$probe_bin" --workspace "$probe_repo_path" --dry-run --replace ceo-dogfood-write-probe.txt old new --format json "Preview copied workspace write probe"; then
+    printf '%s\n' "write probe preview failed" >"$probe_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  digest=$(preview_digest_from_stdout "$probe_dir/preview/stdout.txt")
+  if [ -z "$digest" ]; then
+    printf '%s\n' "missing preview digest" >"$probe_dir/pass-fail-note.txt"
+    return 1
+  fi
+  printf '%s\n' "$digest" >"$probe_dir/preview-digest.txt"
+
+  if ! run_capture "$probe_dir/apply" "$probe_bin" --workspace "$probe_repo_path" --write-policy approved-write --approve-preview "$digest" --replace ceo-dogfood-write-probe.txt old new --format json "Apply copied workspace write probe"; then
+    printf '%s\n' "write probe approved apply failed" >"$probe_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  if [ "$(cat "$probe_file")" != "new" ]; then
+    printf '%s\n' "write probe file content did not change to expected value" >"$probe_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  capture_git_status_only "$probe_repo_path" "$probe_dir/git-status-after.txt"
+  printf '%s\n' "approved write changed copied workspace only" >"$probe_dir/pass-fail-note.txt"
+  return 0
+}
+
 run_live_repo() {
   live_repo_name="$1"
   live_repo_path="$2"
@@ -490,6 +556,16 @@ run_live_repo() {
     printf '%s\n' "timeout probe exited non-zero as expected" >"$live_repo_dir/scenario-05-timeout-guard/pass-fail-note.txt"
   fi
 
+  scenario_06="skipped_disabled"
+  if [ "$write_probe" -eq 1 ]; then
+    if run_write_probe "$live_repo_path" "$live_repo_dir/scenario-06-write-probe" "$live_bin"; then
+      scenario_06="pass"
+    else
+      scenario_06="fail"
+      overall="fail"
+    fi
+  fi
+
   {
     printf '%s\n' "# Live Dogfood Summary: $live_repo_name"
     printf '\n'
@@ -504,6 +580,9 @@ run_live_repo() {
     printf '%s\n' "| scenario-03-observe-run | $scenario_03 | scenario-03-observe-run/stdout.txt |"
     printf '%s\n' "| scenario-04-patch-preview | $scenario_04 | scenario-04-patch-preview/preview-digest.txt |"
     printf '%s\n' "| scenario-05-timeout-guard | $scenario_05 | scenario-05-timeout-guard/pass-fail-note.txt |"
+    if [ "$write_probe" -eq 1 ]; then
+      printf '%s\n' "| scenario-06-write-probe | $scenario_06 | scenario-06-write-probe/pass-fail-note.txt |"
+    fi
   } >"$live_repo_dir/summary.md"
   printf '%s\n' "$overall" >"$live_repo_dir/status.txt"
 

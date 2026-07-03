@@ -8,7 +8,7 @@
 sh scripts/dogfood-real.sh --dry-run
 ```
 
-Dry-run writes `.omo/evidence/dogfood-real/index.md`, lists five scenarios, and does not run commands against external repos.
+Dry-run writes `.omo/evidence/dogfood-real/index.md`, lists the scenario catalog, and does not run commands against external repos.
 
 ## Selected Repos
 
@@ -39,6 +39,18 @@ sh scripts/dogfood-real.sh \
 
 For git repos, copy mode clones a local snapshot into the evidence folder, records `source-path.txt`, `workspace-path.txt`, and `workspace-mode.txt`, then runs all live scenarios against the copy.
 
+To prove actual write behavior without touching the source checkout, add `--write-probe` with copy mode:
+
+```sh
+sh scripts/dogfood-real.sh \
+  --copy-workspace \
+  --write-probe \
+  --repo "ceo-harness:/path/to/repo" \
+  --output-dir .omo/evidence/dogfood-real-write-probe
+```
+
+The write probe previews a patch first, applies it only with the matching approval digest, writes `ceo-dogfood-write-probe.txt` inside the copied workspace, and records after-state git status.
+
 Repeat a real-repo dogfood pass and keep it isolated from the default evidence folder:
 
 ```sh
@@ -65,6 +77,8 @@ Evidence is saved under `.omo/evidence/dogfood-real/`:
 - `repos/<name>/scenario-*/stdout.txt`: report output.
 - `repos/<name>/scenario-*/stdout.sha256`: report digest.
 - `repos/<name>/scenario-04-patch-preview/preview-digest.txt`: patch approval digest.
+- `repos/<name>/scenario-06-write-probe/preview-digest.txt`: approval digest for the copied-workspace write probe when `--write-probe` is enabled.
+- `repos/<name>/scenario-06-write-probe/git-status-after.txt`: copied-workspace after-state for the write probe.
 - `_archive/<run>/`: previous run evidence preserved before the latest run is written.
 
 Real-provider runs are intentionally skipped by default. The smoke path stays local and keyless.
