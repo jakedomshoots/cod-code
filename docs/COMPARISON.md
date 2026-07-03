@@ -120,6 +120,12 @@ Latest cross-language result:
 | --- | --- | --- |
 | 2-task `cross-language-core` | 2/2 pass, 0 incomplete evidence | `.omo/evidence/cross-language-core-ceo-r1/summary.json` |
 
+Latest real-provider result:
+
+| Benchmark | Provider Path | CEO Harness | Evidence |
+| --- | --- | --- | --- |
+| `safety-policy-path-escape` | Kimi CLI OAuth via `scripts/kimi-model-command.sh` | pass 6/6, 109078ms, 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-r1/summary.json` |
+
 Latest saved benchmark result:
 
 | Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
