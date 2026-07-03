@@ -71,6 +71,61 @@ JSON
 	}
 }
 
+func Test_KimiModelCommandScript_includesJavaScriptSiblingTestContents(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	workspace := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(workspace, "frontend"), 0o755); err != nil {
+		t.Fatalf("create frontend dir: %v", err)
+	}
+	requiredPath := filepath.Join(workspace, "frontend", "state.js")
+	if err := os.WriteFile(requiredPath, []byte("module.exports = { benchmarkFixture: \"TODO\" };\n"), 0o644); err != nil {
+		t.Fatalf("write required JS file: %v", err)
+	}
+	testPath := filepath.Join(workspace, "frontend", "state.test.js")
+	if err := os.WriteFile(testPath, []byte("assert(benchmarkFixture.includes('optimistic update'));\n"), 0o644); err != nil {
+		t.Fatalf("write sibling JS test file: %v", err)
+	}
+	binDir := t.TempDir()
+	capturedPrompt := filepath.Join(t.TempDir(), "prompt.txt")
+	writeExecutableScript(t, filepath.Join(binDir, "kimi"), `#!/bin/sh
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -p)
+      shift
+      printf '%s\n' "$1" > "$CAPTURED_PROMPT"
+      ;;
+  esac
+  shift || true
+done
+cat <<'JSON'
+{"role":"assistant","content":"{\"status\":\"needs_input\",\"summary\":\"captured\"}"}
+JSON
+`)
+
+	cmd := exec.Command("sh", filepath.Join(root, "scripts", "kimi-model-command.sh"))
+	cmd.Dir = workspace
+	cmd.Env = append(cmd.Environ(), "PATH="+binDir+string(os.PathListSeparator)+os.Getenv("PATH"), "CAPTURED_PROMPT="+capturedPrompt)
+	cmd.Stdin = strings.NewReader("Required changed files: frontend/state.js.\nRequired evidence artifacts: .omo/evidence/cross-language-js-state-reducer.md.\n")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("kimi model command failed: %v\n%s", err, string(output))
+	}
+	prompt := readTextFile(t, capturedPrompt)
+	for _, want := range []string{
+		"File: frontend/state.js",
+		"benchmarkFixture",
+		"File: frontend/state.test.js",
+		"optimistic update",
+	} {
+		if !strings.Contains(prompt, want) {
+			t.Fatalf("captured prompt missing %q:\n%s", want, prompt)
+		}
+	}
+}
+
 func Test_KimiModelCommandScript_runsKimiOutsideWorkspace(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {

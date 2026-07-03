@@ -52,13 +52,19 @@ def sibling_context_files(paths):
     seen = set(paths)
     for raw_path in paths:
         rel = safe_relative(raw_path)
-        if rel is None or rel.suffix != ".go" or rel.name.endswith("_test.go"):
+        if rel is None:
             continue
-        test_name = rel.with_name(rel.stem + "_test.go")
-        test_raw = test_name.as_posix()
-        if test_raw not in seen and test_name.exists():
-            extras.append(test_raw)
-            seen.add(test_raw)
+        candidates = []
+        if rel.suffix == ".go" and not rel.name.endswith("_test.go"):
+            candidates.append(rel.with_name(rel.stem + "_test.go"))
+        if rel.suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"} and not any(part in rel.stem for part in [".test", ".spec"]):
+            candidates.append(rel.with_name(rel.stem + ".test" + rel.suffix))
+            candidates.append(rel.with_name(rel.stem + ".spec" + rel.suffix))
+        for test_name in candidates:
+            test_raw = test_name.as_posix()
+            if test_raw not in seen and test_name.exists():
+                extras.append(test_raw)
+                seen.add(test_raw)
     return extras
 
 context_files = changed_files + sibling_context_files(changed_files)
