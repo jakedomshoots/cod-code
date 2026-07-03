@@ -165,6 +165,10 @@ func writeGenericGoBenchmarkTests(workspaceDir string, task Task) error {
 }
 
 func benchmarkGoTestFixture(task Task, path string) string {
+	requiredTerms := task.RequiredDiffTerms
+	if len(requiredTerms) == 0 {
+		requiredTerms = []string{task.Objective}
+	}
 	return fmt.Sprintf(`package %s
 
 import (
@@ -173,12 +177,14 @@ import (
 )
 
 func %s(t *testing.T) {
-	required := %q
-	if !strings.Contains(benchmarkFixture, required) {
-		t.Fatalf("benchmarkFixture = %%q, want term %%q", benchmarkFixture, required)
+	requiredTerms := %#v
+	for _, required := range requiredTerms {
+		if !strings.Contains(benchmarkFixture, required) {
+			t.Fatalf("benchmarkFixture = %%q, want term %%q", benchmarkFixture, required)
+		}
 	}
 }
-`, benchmarkGoPackageName(path), benchmarkTestName(task), benchmarkExpectedTerms(task))
+`, benchmarkGoPackageName(path), benchmarkTestName(task), requiredTerms)
 }
 
 func benchmarkTestName(task Task) string {
