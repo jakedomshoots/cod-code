@@ -84,6 +84,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
   - OpenCode: 25 pass / 0 partial / 0 timeout / 0 fail / 0 incomplete evidence.
   - Pi: 24 pass / 0 partial / 1 timeout / 0 fail / 1 incomplete evidence.
   - Overall: 99 pass / 0 partial / 1 timeout / 0 fail / 1 incomplete evidence.
+- Focused current-suite external-agent comparison for the 26th multi-file operator safety task: CEO Harness, Codex CLI, OpenCode, and Pi all passed with complete evidence at `.omo/evidence/external-agent-operator-safety-flow-r1/summary.json`.
 - Benchmark gauntlets now support bounded parallelism with `--local-agent-benchmark-concurrency` and the product alias `ceo-packet gauntlet --concurrency`.
 - Live real-repo dogfood result: `scripts/dogfood-real.sh --repo ceo-harness:<repo> --timeout-ms 250` passed all five scenarios, including expected timeout failure evidence, at `.omo/evidence/dogfood-real/index.md`.
 - Repeated real-repo dogfood result: `scripts/dogfood-real.sh --repo ceo-harness-repeat:<repo> --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1` produced 3 live passes / 0 fails.

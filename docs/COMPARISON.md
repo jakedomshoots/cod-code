@@ -132,6 +132,12 @@ Latest real-provider result:
 | --- | --- | --- | --- |
 | `safety-policy-path-escape` | Kimi CLI OAuth via `scripts/kimi-model-command.sh` | 3/3 pass, 18/18 scored checks, 0 partial, 0 fail, 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json` |
 
+Latest focused multi-file external result:
+
+| Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| `multi-file-operator-safety-flow` | pass 13/13 | pass 13/13 | pass 13/13 | pass 13/13 | `.omo/evidence/external-agent-operator-safety-flow-r1/summary.json` |
+
 Latest saved benchmark result:
 
 | Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |

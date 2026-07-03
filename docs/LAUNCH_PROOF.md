@@ -156,6 +156,13 @@ Larger multi-file follow-up:
 - Result: CEO Harness 26 pass, 0 partial, 0 fail, 0 timed out, 0 incomplete evidence.
 - Artifact: `.omo/evidence/production-core-26-ceo-r1/summary.json`
 
+Focused external-agent follow-up for the newest multi-file task:
+
+- Scope: `multi-file-operator-safety-flow` x 4 agents = 4 live runs with concurrency 4.
+- Agents: CEO Harness, Codex CLI, OpenCode, Pi.
+- Result: 4 pass, 0 partial, 0 fail, 0 timed out, 0 skipped, 0 incomplete evidence.
+- Artifact: `.omo/evidence/external-agent-operator-safety-flow-r1/summary.json`
+
 Concurrent runner follow-up:
 
 - Scope: 25 tasks x CEO Harness = 25 live runs with `--concurrency 4`.
@@ -172,7 +179,7 @@ Cross-language follow-up:
 ## Blockers / Risks
 
 - Public "10/10 beats competitors" claim is still unsupported because Codex CLI and OpenCode matched CEO Harness at 25/25 on the controlled suite.
-- The expanded 26/26 CEO Harness live result, 2/2 cross-language result, 3-pass real-repo dogfood result, six-repo copied-workspace dogfood result, 10-iteration local endurance run, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. Deeper task-specific real-repo jobs, harder multi-file jobs, additional provider families, and overnight or truly long-duration tasks are still needed.
+- The expanded 26/26 CEO Harness live result, focused 4/4 external-agent multi-file result, 2/2 cross-language result, 3-pass real-repo dogfood result, six-repo copied-workspace dogfood result, 10-iteration local endurance run, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. Deeper task-specific real-repo jobs, additional provider families, and overnight or truly long-duration tasks are still needed.
 - Provider doctor correctly fails without `OPENAI_API_KEY`; this is setup guidance, not a product pass against a real provider.
 - Rollback QA now covers normal replacements, trailing-newline replacements, and created-file model patches. Arbitrary hand-edited diff rollback is still not claimed.
 
