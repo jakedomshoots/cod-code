@@ -55,6 +55,9 @@ Status date: 2026-07-03
 - Latest first-class Kimi provider proof gate:
   - `sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi-r2`
   - Result: pass. JS reducer scored 6/6 and Python retry policy scored 7/7; both changed required source files, created required evidence artifacts, and passed their task commands through Kimi-backed CEO Harness.
+- Latest first-class Codex provider proof gate:
+  - `sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex-r1`
+  - Result: pass. JS reducer scored 6/6 and Python retry policy scored 7/7; both changed required source files, created required evidence artifacts, and passed their task commands through Codex-backed CEO Harness.
 - Latest real-repo dogfood:
   - `sh scripts/dogfood-real.sh --repo ceo-harness-repeat:/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness --repeat 3 --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-repeat-self-r1`
   - Result: 3 live passes / 0 fails, including expected timeout failure evidence in each run.

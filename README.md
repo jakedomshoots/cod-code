@@ -151,6 +151,7 @@ sh scripts/dogfood-real.sh --copy-workspace --app-code-probe --repo "ceo-harness
 sh scripts/dogfood-real.sh --copy-workspace --integrated-app-code-probe --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-integrated-app-code
 sh scripts/dogfood-real.sh --copy-workspace --multi-file-app-code-probe --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-multi-file-app-code
 sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi
+sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex
 ceo-packet explain-failure latest --workspace .
 ceo-packet retry latest --workspace .
 ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .

@@ -131,6 +131,8 @@ Latest real-provider result:
 | Benchmark | Provider Path | CEO Harness | Evidence |
 | --- | --- | --- | --- |
 | `safety-policy-path-escape` | Kimi CLI OAuth via `scripts/kimi-model-command.sh` | 3/3 pass, 18/18 scored checks, 0 partial, 0 fail, 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json` |
+| `cross-language-js-state-reducer` + `cross-language-python-retry-policy` | Kimi CLI via `scripts/provider-proof.sh --provider kimi` | JS 6/6 pass; Python 7/7 pass; 0 incomplete evidence | `.omo/evidence/provider-proof-kimi-r2/index.md` |
+| `cross-language-js-state-reducer` + `cross-language-python-retry-policy` | Codex CLI via `scripts/provider-proof.sh --provider codex` | JS 6/6 pass; Python 7/7 pass; 0 incomplete evidence | `.omo/evidence/provider-proof-codex-r1/index.md` |
 
 Latest focused multi-file external result:
 

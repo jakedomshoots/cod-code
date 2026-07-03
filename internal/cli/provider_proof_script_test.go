@@ -45,6 +45,40 @@ func Test_ProviderProofScript_dryRunWritesKimiPlan(t *testing.T) {
 	requireTextFile(t, filepath.Join(outputDir, "cross-language-python-retry-policy", "plan.md"))
 }
 
+func Test_ProviderProofScript_dryRunWritesCodexPlan(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "provider-proof")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "provider-proof.sh"),
+		"--dry-run",
+		"--provider", "codex",
+		"--output-dir", outputDir,
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("provider proof codex dry-run failed: %v\n%s", err, string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"# Provider Proof Evidence",
+		"- Provider: codex",
+		"scripts/codex-model-command.sh",
+		"| cross-language-js-state-reducer | planned |",
+		"| cross-language-python-retry-policy | planned |",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+}
+
 func Test_ProviderProofScript_liveFailsWhenBenchmarkSummaryFails(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {

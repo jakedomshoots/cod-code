@@ -8,17 +8,17 @@ cd "$root"
 dry_run=0
 provider="kimi"
 timeout_seconds=600
-output_dir="$root/.omo/evidence/provider-proof-kimi"
+output_dir=""
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/provider-proof.sh [--dry-run] [--provider kimi] [--timeout-seconds n] [--output-dir path]
+Usage: sh scripts/provider-proof.sh [--dry-run] [--provider kimi|codex] [--timeout-seconds n] [--output-dir path]
 
 Runs real-provider benchmark proofs and writes durable evidence.
 
 Options:
   --dry-run            Write the provider proof plan without running commands.
-  --provider name      Provider bridge to use. Currently supported: kimi.
+  --provider name      Provider bridge to use. Supported: kimi, codex.
   --timeout-seconds n  Timeout for each benchmark command. Default: 600.
   --output-dir path    Evidence directory. Default: .omo/evidence/provider-proof-kimi.
   --help               Show this help.
@@ -89,9 +89,25 @@ case "$timeout_seconds" in
     ;;
 esac
 
-if [ "$provider" != "kimi" ]; then
-  printf '%s\n' "provider-proof: unsupported provider: $provider" >&2
-  exit 2
+case "$provider" in
+  kimi)
+    provider_cli="kimi"
+    model_command_script="$root/scripts/kimi-model-command.sh"
+    model_command_display="scripts/kimi-model-command.sh"
+    ;;
+  codex)
+    provider_cli="codex"
+    model_command_script="$root/scripts/codex-model-command.sh"
+    model_command_display="scripts/codex-model-command.sh"
+    ;;
+  *)
+    printf '%s\n' "provider-proof: unsupported provider: $provider" >&2
+    exit 2
+    ;;
+esac
+
+if [ -z "$output_dir" ]; then
+  output_dir="$root/.omo/evidence/provider-proof-$provider"
 fi
 
 case "$output_dir" in
@@ -108,7 +124,7 @@ mkdir -p "$output_dir"
 rm -rf "$output_dir"/index.md "$output_dir"/build "$output_dir"/cross-language-js-state-reducer "$output_dir"/cross-language-python-retry-policy
 index="$output_dir/index.md"
 generated_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-model_command_json=$(printf '["sh","%s/scripts/kimi-model-command.sh"]' "$root")
+model_command_json=$(printf '["sh","%s"]' "$model_command_script")
 
 display_path() {
   case "$output_dir" in
@@ -157,7 +173,7 @@ write_index_header() {
     printf '%s\n' "- Mode: $mode"
     printf '%s\n' "- Provider: $provider"
     printf '%s\n' "- Evidence root: $(display_path)"
-    printf '%s\n' "- Model command: scripts/kimi-model-command.sh"
+    printf '%s\n' "- Model command: $model_command_display"
     printf '%s\n' "- Timeout seconds: $timeout_seconds"
     printf '\n'
     printf '%s\n' "## Task Results"
@@ -180,7 +196,7 @@ write_plan() {
     printf '\n'
     printf '%s\n' "1. Build `bin/ceo-packet`."
     printf '%s\n' "2. Run `ceo-eval --local-agent-benchmark` for `$task_id`."
-    printf '%s\n' "3. Route CEO Harness subagent and CEO review through `scripts/kimi-model-command.sh`."
+    printf '%s\n' "3. Route CEO Harness subagent and CEO review through `$model_command_display`."
     printf '%s\n' "4. Save command output, score JSON, report JSON, diff, and changed-files evidence."
   } >"$task_dir/plan.md"
   append_result "$task_id" "planned" "$task_id/plan.md"
@@ -233,8 +249,8 @@ if [ "$dry_run" -eq 1 ]; then
   write_plan "cross-language-python-retry-policy"
   overall="planned"
 else
-  if ! command -v kimi >/dev/null 2>&1; then
-    printf '%s\n' "provider-proof: kimi CLI not found on PATH" >&2
+  if ! command -v "$provider_cli" >/dev/null 2>&1; then
+    printf '%s\n' "provider-proof: $provider_cli CLI not found on PATH" >&2
     exit 1
   fi
   overall="pass"

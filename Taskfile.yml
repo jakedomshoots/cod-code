@@ -84,6 +84,11 @@ tasks:
     cmds:
       - sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi
 
+  eval:provider:codex:
+    desc: Run the Codex-backed real-provider proof suite
+    cmds:
+      - sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex
+
   ci:
     desc: Run the productization gate used before handoff
     cmds:
