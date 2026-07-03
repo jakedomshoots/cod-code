@@ -9,7 +9,7 @@ CEO Harness is now a productized local CLI, not just a prototype folder. The cor
 - Git repository initialized on `main`.
 - Local build, install, smoke, dogfood, and release scripts.
 - CI workflow for tests, vet, smoke, dogfood, race, and build.
-- Local release workflow for versioned archives, checksums, and a draft Homebrew formula.
+- Local release workflow for versioned archives, checksums, a release manifest, verifier, and a draft Homebrew formula.
 - MIT license, changelog, task runner, Makefile fallback, editor config, and project instructions.
 
 The core product loop already supports:
@@ -90,6 +90,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Copied-workspace dogfood result: `scripts/dogfood-real.sh --copy-workspace --repo ceo-harness-copy:<repo> --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-copy-self-r1` passed all five scenarios without using the source checkout as the writable workspace.
 - Added no-key nightly eval automation through `make eval-nightly` and `.github/workflows/nightly-evals.yml`.
 - Added endurance eval runner through `scripts/endurance.sh`, `make eval-endurance`, and `task eval:endurance`; short local proof produced 3/3 passing iterations at `.omo/evidence/endurance-local-r1/index.md`.
+- Added release manifest and verifier through `dist/release-manifest.json` and `scripts/verify-release.sh`.
 - Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, `sh scripts/dogfood.sh`, `sh scripts/release-local.sh`, `task ci`, `golangci-lint run ./...`, `nilaway ./...`, and `sh scripts/strict-checks.sh`.
 - First product baseline commit: `8509a4b Initial CEO Harness production baseline`.
 - Remaining evidence gap: add more independent real repos, larger multi-file jobs, and truly long-duration endurance runs before making broad market-win claims.

@@ -7,6 +7,7 @@ CEO Harness should be installable, reviewable, and honest about what has actuall
 - Local install from source with `scripts/install-local.sh`.
 - Local release archives from `scripts/release-local.sh`.
 - SHA-256 checksums in `dist/checksums.txt`.
+- Machine-readable release manifest in `dist/release-manifest.json`.
 - Checksum verification from inside `dist/`.
 - Smoke and dogfood scripts that drive the CLI surface.
 
@@ -29,6 +30,12 @@ Verify checksums from the release directory:
 ```sh
 cd dist
 shasum -a 256 -c checksums.txt
+```
+
+Or verify checksums and manifest together:
+
+```sh
+sh scripts/verify-release.sh dist
 ```
 
 Current releases are checksum-only. Signing is planned after a real release identity is chosen.
@@ -60,4 +67,3 @@ if missing:
 print("local markdown links ok")
 PY
 ```
-

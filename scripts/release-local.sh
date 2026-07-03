@@ -45,6 +45,35 @@ build_target linux amd64
 build_target linux arm64
 
 (cd "$dist" && shasum -a 256 *.tar.gz >checksums.txt)
+python3 - "$dist" "$version" "$commit" <<'PY'
+import datetime
+import hashlib
+import json
+import pathlib
+import sys
+
+dist = pathlib.Path(sys.argv[1])
+version = sys.argv[2]
+commit = sys.argv[3]
+artifacts = []
+for archive in sorted(dist.glob("*.tar.gz")):
+    payload = archive.read_bytes()
+    artifacts.append({
+        "name": archive.name,
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "size_bytes": len(payload),
+    })
+manifest = {
+    "schema_version": 1,
+    "name": "ceo-packet",
+    "version": version,
+    "commit": commit,
+    "generated_at": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    "checksum_file": "checksums.txt",
+    "artifacts": artifacts,
+}
+(dist / "release-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+PY
 mkdir -p "$formula_dir"
 
 darwin_archive="ceo-packet_${version}_darwin_arm64.tar.gz"

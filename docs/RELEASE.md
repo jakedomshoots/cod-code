@@ -14,6 +14,7 @@ Artifacts are written to `dist/`:
 - `ceo-packet_<version>_linux_amd64.tar.gz`
 - `ceo-packet_<version>_linux_arm64.tar.gz`
 - `checksums.txt`
+- `release-manifest.json`
 - `homebrew/ceo-packet.rb`
 
 The Homebrew formula is a local draft that points at the generated Darwin archive with the matching checksum. It is for review or local formula testing only; it is not a published tap.
@@ -26,8 +27,7 @@ Before cutting a tag, run:
 make ci
 make test-race
 VERSION=0.1.0 make release-local
-cd dist
-shasum -a 256 -c checksums.txt
+sh scripts/verify-release.sh dist
 ```
 
 If `task` is installed, the equivalent commands are:
@@ -36,8 +36,7 @@ If `task` is installed, the equivalent commands are:
 task ci
 task test:race
 VERSION=0.1.0 task release:local
-cd dist
-shasum -a 256 -c checksums.txt
+sh scripts/verify-release.sh dist
 ```
 
 Optional local formula inspection:
@@ -45,6 +44,8 @@ Optional local formula inspection:
 ```sh
 sed -n '1,80p' dist/homebrew/ceo-packet.rb
 ```
+
+`scripts/verify-release.sh` checks `checksums.txt`, verifies every archive hash and size against `release-manifest.json`, and fails if any artifact is missing or mismatched.
 
 ## Signing
 

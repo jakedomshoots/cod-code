@@ -1,0 +1,70 @@
+#!/bin/sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+dist=${1:-"$root/dist"}
+
+case "$dist" in
+  /*) ;;
+  *) dist="$(pwd)/$dist" ;;
+esac
+
+if [ ! -d "$dist" ]; then
+  printf '%s\n' "verify-release: missing dist directory: $dist" >&2
+  exit 2
+fi
+
+if [ ! -f "$dist/checksums.txt" ]; then
+  printf '%s\n' "verify-release: missing checksums.txt" >&2
+  exit 2
+fi
+
+if [ ! -f "$dist/release-manifest.json" ]; then
+  printf '%s\n' "verify-release: missing release-manifest.json" >&2
+  exit 2
+fi
+
+(cd "$dist" && shasum -a 256 -c checksums.txt)
+
+python3 - "$dist" <<'PY'
+import hashlib
+import json
+import pathlib
+import sys
+
+dist = pathlib.Path(sys.argv[1])
+manifest = json.loads((dist / "release-manifest.json").read_text(encoding="utf-8"))
+if manifest.get("schema_version") != 1:
+    raise SystemExit("release manifest schema_version must be 1")
+if not manifest.get("version") or not manifest.get("commit"):
+    raise SystemExit("release manifest needs version and commit")
+
+checksums = {}
+for raw in (dist / "checksums.txt").read_text(encoding="utf-8").splitlines():
+    parts = raw.split()
+    if len(parts) >= 2:
+        checksums[parts[1]] = parts[0]
+
+artifacts = manifest.get("artifacts")
+if not isinstance(artifacts, list) or not artifacts:
+    raise SystemExit("release manifest needs artifacts")
+
+for artifact in artifacts:
+    name = artifact.get("name")
+    if not name or "/" in name:
+        raise SystemExit(f"invalid artifact name: {name!r}")
+    path = dist / name
+    if not path.exists():
+        raise SystemExit(f"missing artifact: {name}")
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if artifact.get("sha256") != digest:
+        raise SystemExit(f"sha256 mismatch for {name}")
+    if checksums.get(name) != digest:
+        raise SystemExit(f"checksums.txt mismatch for {name}")
+    if artifact.get("size_bytes") != path.stat().st_size:
+        raise SystemExit(f"size mismatch for {name}")
+
+print("release manifest ok")
+PY
+
+printf '%s\n' "release verify ok"

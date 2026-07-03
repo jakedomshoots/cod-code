@@ -61,6 +61,7 @@ Status date: 2026-07-03
   - `go build ... ./cmd/ceo-packet`
 - `go test -race -shuffle=on -count=1 ./...`
 - `VERSION=0.1.0-dev sh scripts/release-local.sh`
+- `sh scripts/verify-release.sh dist`
 - `shasum -a 256 -c checksums.txt` from `dist/`
 - Temporary install QA via `scripts/install-local.sh`
 - Local markdown link check from [Trust Surface](TRUST.md)
@@ -87,6 +88,7 @@ Status date: 2026-07-03
 - `dist/ceo-packet_0.1.0-dev_linux_amd64.tar.gz`
 - `dist/ceo-packet_0.1.0-dev_linux_arm64.tar.gz`
 - `dist/checksums.txt`
+- `dist/release-manifest.json`
 
 ## Tooling Available Locally
 
