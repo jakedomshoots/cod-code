@@ -147,6 +147,7 @@ sh scripts/dogfood-real.sh --repo "ceo-harness:$PWD" --repeat 3 --output-dir .om
 sh scripts/dogfood-real.sh --copy-workspace --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-copy
 sh scripts/dogfood-real.sh --copy-workspace --write-probe --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-write-probe
 sh scripts/dogfood-real.sh --copy-workspace --feature-edit-probe --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-feature-edit
+sh scripts/dogfood-real.sh --copy-workspace --app-code-probe --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-app-code
 ceo-packet explain-failure latest --workspace .
 ceo-packet retry latest --workspace .
 ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .

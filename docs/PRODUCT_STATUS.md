@@ -50,7 +50,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 ## Current Weak Spots
 
 - No public remote repository is configured yet.
-- The real proof still needs deeper app-code feature edits across more independent non-demo coding repos.
+- The real proof still needs deeper integrated app-code feature edits across more independent non-demo coding repos.
 - External/provider gauntlets can still be blocked or incomplete when a provider key, CLI login, timeout log, git status snapshot, or scorer artifact is missing.
 
 ## Market Roadmap Result 2026-07-03
@@ -93,6 +93,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Task-specific copied-workspace dogfood result: ChemCheck and Axis Health both passed all five no-key scenarios using a custom onboarding-docs cleanup task at `.omo/evidence/dogfood-real-task-specific-r1/index.md`.
 - Copied-workspace write-probe dogfood result: ChemCheck and Axis Health both passed six scenarios, including preview plus approved write against copied workspaces only, at `.omo/evidence/dogfood-real-write-probe-r1/index.md`; source checkouts stayed without `ceo-dogfood-write-probe.txt`.
 - Copied-workspace feature-edit dogfood result: ChemCheck and Axis Health both passed feature-note edits through preview plus approved write at `.omo/evidence/dogfood-real-feature-edit-r2/index.md`; source checkouts stayed without `ceo-dogfood-feature.md`.
+- Copied-workspace app-code dogfood result: ChemCheck and Axis Health both passed source-module edits through preview plus approved write at `.omo/evidence/dogfood-real-app-code-r1/index.md`; source checkouts stayed without `src/ceoDogfoodProbe.mjs`.
 - Added no-key nightly eval automation through `make eval-nightly` and `.github/workflows/nightly-evals.yml`.
 - Added endurance eval runner through `scripts/endurance.sh`, `make eval-endurance`, and `task eval:endurance`; short local proof produced 3/3 passing iterations at `.omo/evidence/endurance-local-r1/index.md`.
 - Longer local endurance proof produced 10/10 passing iterations, each running build, 28-task fixture scoring, cross-language gauntlet, and real-repo dogfood, at `.omo/evidence/endurance-local-r2/index.md`.

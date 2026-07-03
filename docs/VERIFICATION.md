@@ -70,6 +70,9 @@ Status date: 2026-07-03
 - Latest copied-workspace feature-edit dogfood:
   - `sh scripts/dogfood-real.sh --copy-workspace --feature-edit-probe --repo chemcheck:/Users/jakedom/Documents/chemcheck-main --repo axis-health:'/Users/jakedom/Documents/Axis health' --task 'Add a copied-workspace onboarding note that proves approved feature edits stay isolated' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-feature-edit-r2`
   - Result: ChemCheck pass and Axis Health pass; both previewed, approved, and applied a repo-specific `ceo-dogfood-feature.md` note inside copied workspaces, saved the final feature file plus after-state git status, and left source checkouts without the marker file.
+- Latest copied-workspace app-code dogfood:
+  - `sh scripts/dogfood-real.sh --copy-workspace --app-code-probe --repo chemcheck:/Users/jakedom/Documents/chemcheck-main --repo axis-health:'/Users/jakedom/Documents/Axis health' --task 'Add a copied-workspace source module proving approved app-code edits stay isolated' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-app-code-r1`
+  - Result: ChemCheck pass and Axis Health pass; both previewed, approved, and applied `src/ceoDogfoodProbe.mjs` inside copied workspaces, saved the final source file plus after-state git status, and left source checkouts without the marker file.
 - Nightly eval task:
   - `make eval-nightly`
   - `/Users/jakedom/go/bin/task eval:nightly`
