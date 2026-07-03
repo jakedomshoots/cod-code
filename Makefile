@@ -3,7 +3,7 @@ PKG := ./cmd/ceo-packet
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || printf dev)
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || printf local)
 
-.PHONY: ci fmt test test-race vet smoke dogfood build release-local eval-nightly eval-endurance
+.PHONY: ci fmt test test-race vet smoke dogfood build release-local release-preflight eval-nightly eval-endurance
 
 ci: fmt test vet smoke dogfood build
 
@@ -31,6 +31,9 @@ build:
 
 release-local:
 	sh scripts/release-local.sh
+
+release-preflight:
+	sh scripts/release-preflight.sh dist
 
 eval-nightly:
 	mkdir -p bin

@@ -28,6 +28,7 @@ make ci
 make test-race
 VERSION=0.1.0 make release-local
 sh scripts/verify-release.sh dist
+sh scripts/release-preflight.sh dist
 ```
 
 If `task` is installed, the equivalent commands are:
@@ -37,6 +38,7 @@ task ci
 task test:race
 VERSION=0.1.0 task release:local
 sh scripts/verify-release.sh dist
+task release:preflight
 ```
 
 Optional local formula inspection:
@@ -46,6 +48,14 @@ sed -n '1,80p' dist/homebrew/ceo-packet.rb
 ```
 
 `scripts/verify-release.sh` checks `checksums.txt`, verifies every archive hash and size against `release-manifest.json`, and fails if any artifact is missing or mismatched.
+
+`scripts/release-preflight.sh` checks whether a release can honestly be called public. It verifies local artifacts, then blocks until a git remote, public release URL, remote Homebrew archive URL, and archive signatures or explicit checksum-only release notes are handled. It does not tag, push, upload, or publish anything.
+
+For an unsigned checksum-only first release, the preflight must be explicit:
+
+```sh
+ALLOW_CHECKSUM_ONLY_RELEASE=1 CHECKSUM_ONLY_RELEASE_NOTES_URL=https://<release-notes-url> sh scripts/release-preflight.sh dist
+```
 
 ## Signing
 
@@ -69,4 +79,4 @@ Blocked prerequisites before publishing:
 - Public repository or release storage URL.
 - Replaced Homebrew placeholder homepage and archive URL.
 - Verified checksum from the remote artifact, not just the local file.
-- Signing choice, or clear release notes saying the artifacts are checksum-only.
+- Archive signatures, or `ALLOW_CHECKSUM_ONLY_RELEASE=1` with public checksum-only release notes.

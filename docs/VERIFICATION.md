@@ -80,6 +80,7 @@ Status date: 2026-07-03
 - `go test -race -shuffle=on -count=1 ./...`
 - `VERSION=0.1.0-dev sh scripts/release-local.sh`
 - `sh scripts/verify-release.sh dist`
+- `sh scripts/release-preflight.sh dist` blocks public release claims when remote URL, public release URL, Homebrew URL, and signature or checksum-only notes are missing.
 - `shasum -a 256 -c checksums.txt` from `dist/`
 - Temporary install QA via `scripts/install-local.sh`
 - Local markdown link check from [Trust Surface](TRUST.md)

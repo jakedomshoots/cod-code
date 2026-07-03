@@ -8,6 +8,7 @@ CEO Harness should be installable, reviewable, and honest about what has actuall
 - Local release archives from `scripts/release-local.sh`.
 - SHA-256 checksums in `dist/checksums.txt`.
 - Machine-readable release manifest in `dist/release-manifest.json`.
+- Public release preflight through `scripts/release-preflight.sh`.
 - Checksum verification from inside `dist/`.
 - Smoke and dogfood scripts that drive the CLI surface.
 
@@ -36,6 +37,18 @@ Or verify checksums and manifest together:
 
 ```sh
 sh scripts/verify-release.sh dist
+```
+
+Check public-release readiness without publishing:
+
+```sh
+sh scripts/release-preflight.sh dist
+```
+
+Unsigned checksum-only releases must opt in explicitly:
+
+```sh
+ALLOW_CHECKSUM_ONLY_RELEASE=1 CHECKSUM_ONLY_RELEASE_NOTES_URL=https://<release-notes-url> sh scripts/release-preflight.sh dist
 ```
 
 Current releases are checksum-only. Signing is planned after a real release identity is chosen.
