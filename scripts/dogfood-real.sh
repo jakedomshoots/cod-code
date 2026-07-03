@@ -11,6 +11,7 @@ timeout_ms=250
 repeat_count=1
 copy_workspace=0
 write_probe=0
+feature_edit_probe=0
 build_tmp=""
 task_text="Plan a bounded real-repo fix without writing files"
 
@@ -18,7 +19,7 @@ trap 'rm -f "$repos_file"; if [ -n "$build_tmp" ]; then rm -rf "$build_tmp"; fi'
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--task text] [--timeout-ms n] [--repeat n] [--output-dir path] [--copy-workspace] [--write-probe]
+Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--task text] [--timeout-ms n] [--repeat n] [--output-dir path] [--copy-workspace] [--write-probe] [--feature-edit-probe]
 
 Creates durable dogfood evidence under .omo/evidence/dogfood-real.
 
@@ -31,6 +32,8 @@ Options:
   --output-dir path  Evidence directory. Default: .omo/evidence/dogfood-real.
   --copy-workspace   Run live scenarios against a copied workspace instead of the source repo.
   --write-probe      In live copied-workspace mode, preview and approve one real write against the copy.
+  --feature-edit-probe
+                     In live copied-workspace mode, preview and approve a repo-specific feature note.
   --help             Show this help.
 USAGE
 }
@@ -125,6 +128,10 @@ while [ "$#" -gt 0 ]; do
       write_probe=1
       shift
       ;;
+    --feature-edit-probe)
+      feature_edit_probe=1
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
@@ -158,6 +165,11 @@ esac
 
 if [ "$write_probe" -eq 1 ] && [ "$copy_workspace" -eq 0 ]; then
   printf '%s\n' "dogfood-real: --write-probe requires --copy-workspace" >&2
+  exit 2
+fi
+
+if [ "$feature_edit_probe" -eq 1 ] && [ "$copy_workspace" -eq 0 ]; then
+  printf '%s\n' "dogfood-real: --feature-edit-probe requires --copy-workspace" >&2
   exit 2
 fi
 
@@ -336,6 +348,11 @@ write_index_header() {
     else
       printf '%s\n' "- Write probe: disabled"
     fi
+    if [ "$feature_edit_probe" -eq 1 ]; then
+      printf '%s\n' "- Feature edit probe: enabled"
+    else
+      printf '%s\n' "- Feature edit probe: disabled"
+    fi
     printf '%s\n' "- Runner: scripts/dogfood-real.sh"
     printf '%s\n' "- Evidence root: $(evidence_display_path)"
     printf '%s\n' "- Secret API keys: not required for smoke path"
@@ -351,6 +368,7 @@ write_index_header() {
     printf '%s\n' "| scenario-04-patch-preview | Capture a patch approval digest on a controlled fixture | listed only | preview report and digest |"
     printf '%s\n' "| scenario-05-timeout-guard | Prove hung model commands do not look successful | listed only | expected-failure transcript |"
     printf '%s\n' "| scenario-06-write-probe | Prove preview plus approved write mutates only the copied workspace | listed only | preview digest, apply report, after-state git status |"
+    printf '%s\n' "| scenario-07-feature-edit-probe | Prove a repo-specific feature note can be previewed and approved in a copied workspace | listed only | feature file, preview digest, after-state git status |"
     printf '\n'
     printf '%s\n' "## Repo Results"
     printf '\n'
@@ -385,6 +403,9 @@ write_dry_run_plan() {
     printf '%s\n' "5. ceo-packet --workspace \"$plan_repo_path\" --write-policy observe --model-command-timeout-ms $timeout_ms --model-command sh -c 'sleep 5' -- \"Probe timeout guard\""
     if [ "$write_probe" -eq 1 ]; then
       printf '%s\n' "6. ceo-packet --workspace <copied-workspace> --write-policy approved-write --approve-preview <digest> --replace ceo-dogfood-write-probe.txt old new --format json \"Apply copied workspace write probe\""
+    fi
+    if [ "$feature_edit_probe" -eq 1 ]; then
+      printf '%s\n' "7. ceo-packet --workspace <copied-workspace> --write-policy approved-write --approve-preview <digest> --replace ceo-dogfood-feature.md <seed> <repo-specific-note> --format json \"Apply copied workspace feature edit probe\""
     fi
   } >"$plan_repo_dir/plan.md"
   printf '%s\n' "planned" >"$plan_repo_dir/status.txt"
@@ -498,6 +519,46 @@ run_write_probe() {
   return 0
 }
 
+run_feature_edit_probe() {
+  feature_repo_name="$1"
+  feature_task_text="$2"
+  feature_repo_path="$3"
+  feature_dir="$4"
+  feature_bin="$5"
+  mkdir -p "$feature_dir"
+  feature_file="$feature_repo_path/ceo-dogfood-feature.md"
+  old_content="pending feature probe"
+  new_content=$(printf '%s\n\n%s\n%s\n%s' "# CEO Dogfood Feature Probe" "- Repo: $feature_repo_name" "- Task: $feature_task_text" "- Result: approved copied-workspace feature edit")
+  printf '%s\n' "$old_content" >"$feature_file"
+
+  if ! run_capture "$feature_dir/preview" "$feature_bin" --workspace "$feature_repo_path" --dry-run --replace ceo-dogfood-feature.md "$old_content" "$new_content" --format json "Preview copied workspace feature edit probe"; then
+    printf '%s\n' "feature edit probe preview failed" >"$feature_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  digest=$(preview_digest_from_stdout "$feature_dir/preview/stdout.txt")
+  if [ -z "$digest" ]; then
+    printf '%s\n' "missing preview digest" >"$feature_dir/pass-fail-note.txt"
+    return 1
+  fi
+  printf '%s\n' "$digest" >"$feature_dir/preview-digest.txt"
+
+  if ! run_capture "$feature_dir/apply" "$feature_bin" --workspace "$feature_repo_path" --write-policy approved-write --approve-preview "$digest" --replace ceo-dogfood-feature.md "$old_content" "$new_content" --format json "Apply copied workspace feature edit probe"; then
+    printf '%s\n' "feature edit probe approved apply failed" >"$feature_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  if ! grep -F -q "# CEO Dogfood Feature Probe" "$feature_file" || ! grep -F -q -- "- Task: $feature_task_text" "$feature_file"; then
+    printf '%s\n' "feature edit probe file content did not include expected task note" >"$feature_dir/pass-fail-note.txt"
+    return 1
+  fi
+
+  capture_git_status_only "$feature_repo_path" "$feature_dir/git-status-after.txt"
+  cp "$feature_file" "$feature_dir/feature-file.md"
+  printf '%s\n' "approved feature edit changed copied workspace only" >"$feature_dir/pass-fail-note.txt"
+  return 0
+}
+
 run_live_repo() {
   live_repo_name="$1"
   live_repo_path="$2"
@@ -566,6 +627,16 @@ run_live_repo() {
     fi
   fi
 
+  scenario_07="skipped_disabled"
+  if [ "$feature_edit_probe" -eq 1 ]; then
+    if run_feature_edit_probe "$live_repo_name" "$task_text" "$live_repo_path" "$live_repo_dir/scenario-07-feature-edit-probe" "$live_bin"; then
+      scenario_07="pass"
+    else
+      scenario_07="fail"
+      overall="fail"
+    fi
+  fi
+
   {
     printf '%s\n' "# Live Dogfood Summary: $live_repo_name"
     printf '\n'
@@ -582,6 +653,9 @@ run_live_repo() {
     printf '%s\n' "| scenario-05-timeout-guard | $scenario_05 | scenario-05-timeout-guard/pass-fail-note.txt |"
     if [ "$write_probe" -eq 1 ]; then
       printf '%s\n' "| scenario-06-write-probe | $scenario_06 | scenario-06-write-probe/pass-fail-note.txt |"
+    fi
+    if [ "$feature_edit_probe" -eq 1 ]; then
+      printf '%s\n' "| scenario-07-feature-edit-probe | $scenario_07 | scenario-07-feature-edit-probe/pass-fail-note.txt |"
     fi
   } >"$live_repo_dir/summary.md"
   printf '%s\n' "$overall" >"$live_repo_dir/status.txt"
