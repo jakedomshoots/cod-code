@@ -36,6 +36,26 @@ require_tool() {
   printf '%s\n' "$path"
 }
 
+run_shell_syntax_check() {
+  failed=0
+  found=0
+  for script in scripts/*.sh examples/*.sh examples/adapters/*.sh tests/*.sh; do
+    [ -f "$script" ] || continue
+    found=1
+    if ! sh -n "$script"; then
+      failed=1
+    fi
+  done
+  if [ "$found" -eq 0 ]; then
+    printf '%s\n' "strict-checks: no shell scripts found" >&2
+    exit 1
+  fi
+  if [ "$failed" -ne 0 ]; then
+    printf '%s\n' "strict-checks: shell syntax failed" >&2
+    exit 1
+  fi
+}
+
 gofumpt=$(require_tool gofumpt)
 golangci_lint=$(require_tool golangci-lint)
 nilaway=$(require_tool nilaway)
@@ -50,10 +70,12 @@ fi
 "$golangci_lint" run ./...
 "$nilaway" ./...
 
+run_shell_syntax_check
+
 if shellcheck_path=$(tool_path shellcheck); then
   "$shellcheck_path" scripts/*.sh examples/*.sh examples/adapters/*.sh tests/*.sh
 else
-  printf '%s\n' "strict-checks: shellcheck skipped (not installed)"
+  printf '%s\n' "strict-checks: shellcheck unavailable; ran sh -n on shell scripts"
 fi
 
 printf '%s\n' "strict-checks ok"

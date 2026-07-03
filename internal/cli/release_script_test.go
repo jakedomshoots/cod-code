@@ -109,7 +109,8 @@ func Test_ReleasePreflight_acceptsExplicitChecksumOnlyReleaseNotes(t *testing.T)
 
 	preflight := exec.Command("sh", filepath.Join(root, "scripts", "release-preflight.sh"), dist)
 	preflight.Dir = root
-	preflight.Env = append(preflight.Environ(),
+	preflight.Env = append(
+		preflight.Environ(),
 		"ALLOW_CHECKSUM_ONLY_RELEASE=1",
 		"CHECKSUM_ONLY_RELEASE_NOTES_URL=https://releases.ceo-harness.dev/v0.2.0",
 	)

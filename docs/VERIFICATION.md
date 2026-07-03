@@ -15,6 +15,7 @@ Status date: 2026-07-03
   - `gofumpt -l cmd internal`
   - `golangci-lint run ./...`
   - `nilaway ./...`
+  - `sh -n` over shell scripts when ShellCheck is unavailable.
   - `sh scripts/strict-checks.sh`
 - Latest live external-agent comparison:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-25-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
@@ -122,4 +123,4 @@ These optional strict tools are installed under the local Go bin and passed duri
 
 - `shellcheck`
 
-ShellCheck is still optional for a source install. Missing optional tools should not block `scripts/install-local.sh`.
+ShellCheck is still optional for a source install. `scripts/strict-checks.sh` now runs `sh -n` over shell scripts when ShellCheck is unavailable, so shell syntax is still checked.

@@ -50,7 +50,6 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 ## Current Weak Spots
 
 - No public remote repository is configured yet.
-- ShellCheck is not installed on this machine, so shell-script linting is skipped by the strict gate.
 - The real proof still needs repeated dogfooding on more independent non-demo coding repos.
 - Market gauntlet evidence can still be partial/incomplete when a provider key, CLI login, timeout log, git status snapshot, or scorer artifact is missing.
 - The CLI still has many advanced flags, but the common help surface now starts with the primary operator flow.
@@ -96,6 +95,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Longer local endurance proof produced 10/10 passing iterations, each running build, 28-task fixture scoring, cross-language gauntlet, and real-repo dogfood, at `.omo/evidence/endurance-local-r2/index.md`.
 - Added release manifest and verifier through `dist/release-manifest.json` and `scripts/verify-release.sh`.
 - Added public release preflight through `scripts/release-preflight.sh`; it blocks public claims until remote URL, Homebrew URL, and signature/checksum posture are explicit.
+- Strict checks now run `sh -n` across shell scripts even when ShellCheck is not installed; ShellCheck remains an optional deeper lint layer.
 - Rollback now covers created-file model patches as well as normal replacement patches; created-file rollback refuses to delete if the file content changed after creation.
 - Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, `sh scripts/dogfood.sh`, `sh scripts/release-local.sh`, `task ci`, `golangci-lint run ./...`, `nilaway ./...`, and `sh scripts/strict-checks.sh`.
 - First product baseline commit: `8509a4b Initial CEO Harness production baseline`.
