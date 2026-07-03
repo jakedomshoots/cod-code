@@ -146,9 +146,79 @@ func benchmarkEvidenceContent(task Task, result LocalAgentBenchmarkResult, check
 
 func writeBenchmarkFixtureSupportFiles(workspaceDir string, task Task) error {
 	if task.ID != "safety-policy-path-escape" {
-		return nil
+		return writeGenericGoBenchmarkTests(workspaceDir, task)
 	}
 	return writeRelativeFile(workspaceDir, "internal/workspace/workspace_test.go", safetyPathEscapeTestFixture())
+}
+
+func writeGenericGoBenchmarkTests(workspaceDir string, task Task) error {
+	for _, path := range task.RequiredChangedFiles {
+		if filepath.Ext(path) != ".go" {
+			continue
+		}
+		testPath := filepath.Join(filepath.Dir(filepath.Clean(path)), "benchmark_fixture_test.go")
+		if err := writeRelativeFile(workspaceDir, testPath, benchmarkGoTestFixture(task, path)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func benchmarkGoTestFixture(task Task, path string) string {
+	return fmt.Sprintf(`package %s
+
+import (
+	"strings"
+	"testing"
+)
+
+func %s(t *testing.T) {
+	required := %q
+	if !strings.Contains(benchmarkFixture, required) {
+		t.Fatalf("benchmarkFixture = %%q, want term %%q", benchmarkFixture, required)
+	}
+}
+`, benchmarkGoPackageName(path), benchmarkTestName(task), benchmarkExpectedTerms(task))
+}
+
+func benchmarkTestName(task Task) string {
+	for _, command := range task.RequiredCommands {
+		switch {
+		case strings.Contains(command, "Test_Run_prints_provider_health"):
+			return "Test_Run_prints_provider_health"
+		case strings.Contains(command, "Test_ContextBudget"):
+			return "Test_ContextBudget"
+		case strings.Contains(command, "Test_Run_uses_provider"):
+			return "Test_Run_uses_provider"
+		case strings.Contains(command, "Test_RenderTextReport"):
+			return "Test_RenderTextReport"
+		case strings.Contains(command, "Test_CheckFixPrompt"):
+			return "Test_CheckFixPrompt"
+		case strings.Contains(command, "require_checks"):
+			return "Test_Run_benchmark_require_checks"
+		case strings.Contains(command, "Test_ProviderHealthPolicy"):
+			return "Test_ProviderHealthPolicy"
+		case strings.Contains(command, "Test_Provider"):
+			return "Test_ProviderBenchmark"
+		case strings.Contains(command, "Test_RunEvents"):
+			return "Test_RunEvents"
+		case strings.Contains(command, "Test_SmokeScript"):
+			return "Test_SmokeScript"
+		case strings.Contains(command, "Test_HTTPProvider"):
+			return "Test_HTTPProvider"
+		case strings.Contains(command, "provider_budget"):
+			return "Test_Run_benchmark_provider_budget"
+		case strings.Contains(command, "write_policy"):
+			return "Test_Run_benchmark_write_policy"
+		case strings.Contains(command, "Test_PatchApproval"):
+			return "Test_PatchApproval"
+		case strings.Contains(command, "Resume|Retry|continue"):
+			return "Test_BenchmarkResume"
+		case strings.Contains(command, "Test_Run_rollback_report"):
+			return "Test_Run_rollback_report"
+		}
+	}
+	return "Test_BenchmarkFixture"
 }
 
 func safetyPathEscapeBaselineFixture() string {

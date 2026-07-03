@@ -35,8 +35,41 @@ func Test_PrepareLocalAgentBenchmarkWorkspace_writes_compile_safe_go_fixture(t *
 		t.Fatalf("fixture = %q, want package cli", string(content))
 	}
 	run := runLocalAgentCommand(context.Background(), []string{"go", "test", "./internal/cli", "-count=1"}, workspaceDir, nil, localAgentTimeout(5))
-	if run.exitCode != 0 || run.errText != "" {
-		t.Fatalf("go fixture did not compile: exit=%d err=%q stderr=%q", run.exitCode, run.errText, run.stderr)
+	if run.exitCode == 0 || !strings.Contains(run.stdout+run.stderr, "benchmarkFixture") {
+		t.Fatalf("go fixture should compile but fail benchmark test: exit=%d err=%q stdout=%q stderr=%q", run.exitCode, run.errText, run.stdout, run.stderr)
+	}
+}
+
+func Test_PrepareLocalAgentBenchmarkWorkspace_writes_task_specific_go_test(t *testing.T) {
+	// Given
+	workspaceDir := filepath.Join(t.TempDir(), "workspace")
+	task := Task{
+		ID:                   "bugfix-provider-health-rollup",
+		Category:             "bug_fix",
+		Title:                "Provider health rollup handles missing providers",
+		Objective:            "Fix provider health summary output when a configured provider has no recent runs.",
+		RequiredChangedFiles: []string{"internal/cli/provider_health_rollup.go"},
+		RequiredCommands:     []string{"go test ./internal/cli -run Test_Run_prints_provider_health -count=1"},
+		RequiredArtifacts:    []string{".omo/evidence/bugfix-provider-health-rollup.md"},
+		RequiredDiffTerms:    []string{"provider"},
+	}
+
+	// When
+	err := prepareLocalAgentBenchmarkWorkspace(context.Background(), workspaceDir, task, nil)
+	// Then
+	if err != nil {
+		t.Fatalf("prepareLocalAgentBenchmarkWorkspace returned error: %v", err)
+	}
+	baselineRun := runLocalAgentCommand(context.Background(), []string{"go", "test", "./internal/cli", "-run", "Test_Run_prints_provider_health", "-count=1"}, workspaceDir, nil, localAgentTimeout(5))
+	if baselineRun.exitCode == 0 {
+		t.Fatalf("baseline provider fixture unexpectedly passed: stdout=%q stderr=%q", baselineRun.stdout, baselineRun.stderr)
+	}
+	if err := os.WriteFile(filepath.Join(workspaceDir, "internal/cli/provider_health_rollup.go"), []byte(benchmarkExpectedText(task, "internal/cli/provider_health_rollup.go")), 0o644); err != nil {
+		t.Fatalf("write expected provider fixture: %v", err)
+	}
+	fixedRun := runLocalAgentCommand(context.Background(), []string{"go", "test", "./internal/cli", "-run", "Test_Run_prints_provider_health", "-count=1"}, workspaceDir, nil, localAgentTimeout(5))
+	if fixedRun.exitCode != 0 || fixedRun.errText != "" {
+		t.Fatalf("fixed provider fixture failed: exit=%d err=%q stderr=%q", fixedRun.exitCode, fixedRun.errText, fixedRun.stderr)
 	}
 }
 
