@@ -75,10 +75,16 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Bounded external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` with complete evidence at `.omo/evidence/external-agent-one-r1/summary.json`.
 - Two-task external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` and `bugfix-cli-timeout` with complete evidence at `.omo/evidence/external-agent-2task-r1/summary.json`.
 - Four-task external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first`, `bugfix-cli-timeout`, `safety-policy-path-escape`, and `recovery-resume-retry` with complete evidence at `.omo/evidence/external-agent-4task-r2/summary.json`.
+- Full production-core external-agent comparison result: 24 tasks x 4 agents = 96 live runs completed at `.omo/evidence/external-agent-production-core-r5/summary.json`.
+  - CEO Harness: 24 pass / 0 partial / 0 timeout / 0 fail.
+  - Codex CLI: 24 pass / 0 partial / 0 timeout / 0 fail.
+  - OpenCode: 23 pass / 1 partial / 0 timeout / 0 fail.
+  - Pi: 20 pass / 2 partial / 2 timeout / 0 fail.
+  - Overall: 91 pass / 3 partial / 2 timeout / 0 fail / 3 incomplete evidence.
 - Live real-repo dogfood result: `scripts/dogfood-real.sh --repo ceo-harness:<repo> --timeout-ms 250` passed all five scenarios, including expected timeout failure evidence, at `.omo/evidence/dogfood-real/index.md`.
 - Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, `sh scripts/dogfood.sh`, `sh scripts/release-local.sh`, `task ci`, `golangci-lint run ./...`, `nilaway ./...`, and `sh scripts/strict-checks.sh`.
 - First product baseline commit: `8509a4b Initial CEO Harness production baseline`.
-- Remaining evidence gap: broaden the external-agent comparison to the full production suite before making market-wide claims.
+- Remaining evidence gap: repeat the full live suite across more real repositories and provider conditions before making broad market-win claims.
 
 ## Additions Completed 2026-07-02
 
@@ -99,8 +105,8 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 ## Best Next Features
 
 1. Dogfood the primary operator flow on more real repos and tighten awkward output.
-2. Run the full 24-task external-agent suite when runtime cost/time is acceptable.
-3. Use the external-agent results to fix remaining cross-agent prompt/setup gaps before making market claims.
+2. Add harder multi-file real-repo tasks beyond the controlled benchmark fixtures.
+3. Use the external-agent results to tighten prompt/setup gaps, especially around Pi timeouts/partials and OpenCode evidence completeness.
 
 ## Current References
 

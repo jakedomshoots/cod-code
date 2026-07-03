@@ -4,17 +4,20 @@ Date: 2026-07-03
 
 ## Go / No-Go
 
-No-go for a public "10/10 beats competitors" launch claim until the full external-agent production suite is complete.
+No-go for a public "10/10 beats competitors" launch claim.
+
+Go for a narrower claim: CEO Harness completed the full controlled production-core coding harness suite cleanly, at parity with Codex CLI on this suite.
 
 The prior full-benchmark proof gap is closed for the eval scorer: all 21 benchmark tasks now have saved deterministic fixture reports, score JSON, per-task logs, and a summary with 21 pass / 0 partial / 0 fail / 0 skipped.
 
-The live competitor proof gap is now narrowed, not gone. CEO Harness, Codex CLI, OpenCode, and Pi completed a four-task head-to-head run with 16 pass / 0 partial / 0 fail / 0 skipped / 0 incomplete evidence. A full 24-task external-agent production suite is still required before making a broad market-win claim.
+The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI, OpenCode, and Pi completed a full 24-task production-core head-to-head run with 96 live runs. CEO Harness and Codex CLI both passed 24/24. OpenCode passed 23/24 with 1 partial. Pi passed 20/24 with 2 partials and 2 timeouts. This supports controlled-suite parity with Codex CLI, not a broad market-win claim.
 
 ## Evidence Root
 
 - Task evidence: `.omo/evidence/task-14-ceo-harness-10-out-of-10/`
 - Dogfood evidence: `.omo/evidence/dogfood-real/index.md`
 - Four-task external-agent evidence: `.omo/evidence/external-agent-4task-r2/summary.json`
+- Full production-core external-agent evidence: `.omo/evidence/external-agent-production-core-r5/summary.json`
 - User report: `outputs/ceo-harness-10-out-of-10-report.md`
 
 ## Required Gates
@@ -33,6 +36,7 @@ The live competitor proof gap is now narrowed, not gone. CEO Harness, Codex CLI,
 | Failure injection | `go run ./cmd/ceo-eval --task bugfix-cli-timeout --report internal/eval/testdata/corrupt/report.json --workspace .` | Expected non-zero; corrupt JSON rejected | `.omo/evidence/task-14-ceo-harness-10-out-of-10/eval-score-forced-failure.stderr` |
 | Competitor comparison | `go run ./cmd/ceo-eval --validate-competitors --competitors evals/competitors.json`, `go run ./cmd/ceo-eval --comparison-plan --competitors evals/competitors.json`, and `go run ./cmd/ceo-eval --comparison-smoke --competitors evals/competitors.json --output-dir .omo/evidence/task-14-ceo-harness-10-out-of-10/competitor-smoke --timeout-seconds 15` | Config valid; plan exists; local smoke ran installed binaries only: 2 pass, 3 skipped missing binary | `.omo/evidence/task-14-ceo-harness-10-out-of-10/competitor-smoke/summary.json` |
 | Four-task external-agent comparison | `go run ./cmd/ceo-packet gauntlet --suite docs-roadmap-cli-first,bugfix-cli-timeout,safety-policy-path-escape,recovery-resume-retry --agents ceo_harness,codex_cli,opencode,pi ...` | 16 runs; 16 pass, 0 partial, 0 fail, 0 timed out, 0 skipped, 0 incomplete evidence | `.omo/evidence/external-agent-4task-r2/summary.json` |
+| Full production-core external-agent comparison | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --timeout-seconds 240 ...` | 96 runs; CEO Harness 24/24 pass; Codex CLI 24/24 pass; OpenCode 23 pass and 1 partial; Pi 20 pass, 2 partial, 2 timeout | `.omo/evidence/external-agent-production-core-r5/summary.json` |
 | Real repo dogfood | `sh scripts/dogfood-real.sh --repo temp-real:<temp-git-repo> --timeout-ms 250` | Temp external git repo row `pass`; 5 scenarios captured | `.omo/evidence/dogfood-real/index.md` |
 | Manual binary QA | `bin/ceo-packet` driven through start/config/provider/demo/write/TUI/history paths, then `cd .omo/evidence/task-14-ceo-harness-10-out-of-10/manual-qa && shasum -a 256 -c SHA256SUMS.txt` | Exit 0; per-surface artifacts hashed and every listed file verifies `OK` | `.omo/evidence/task-14-ceo-harness-10-out-of-10/manual-binary-qa.log`, `.omo/evidence/task-14-ceo-harness-10-out-of-10/manual-qa/SHA256SUMS.txt`, `.omo/evidence/task-14-ceo-harness-10-out-of-10/manual-qa-sha256-verify-task14-fix.log` |
 | Final timeout/doc recheck | `go test -race -shuffle=on -count=20 ./internal/adapter`, `go test ./internal/checkrunner -run Test_Runner_Run_cancels_shell_process_group_when_timeout_expires -count=50 -v`, `go test ./internal/model -run Test_CommandClient_Complete_kills_shell_process_group_when_timeout_expires -count=20 -v`, and `go run ./cmd/ceo-packet --model-command-timeout-ms 50 ... sleep 5` | Adapter version retry proof stable; checkrunner/model process-tree proofs still pass; CLI timeout returns `provider_error_kind: command_timeout` in about 0.18s; no leftover sleep/ceo timeout processes | `.omo/evidence/final-adapter-version-timeout-fix/` |
@@ -85,19 +89,22 @@ Artifacts:
 
 ## Competitor Summary
 
-The comparison harness now has live task evidence for installed external agents, not only a plan or version smoke.
+The comparison harness now has full production-core live task evidence for installed external agents, not only a plan, version smoke, or four-task subset.
 
-- Scope: 4 tasks x 4 agents = 16 live runs.
+- Scope: 24 tasks x 4 agents = 96 live runs.
 - Agents: CEO Harness, Codex CLI, OpenCode, Pi.
-- Tasks: docs roadmap, CLI timeout, path-escape safety, resume/retry recovery.
-- Result: 16 pass, 0 partial, 0 fail, 0 timed out, 0 skipped, 0 incomplete evidence.
+- Result: 91 pass, 3 partial, 0 fail, 2 timed out, 0 skipped, 3 incomplete evidence.
+- CEO Harness: 24 pass, 0 partial, 0 fail, 0 timed out, 0 incomplete evidence.
+- Codex CLI: 24 pass, 0 partial, 0 fail, 0 timed out.
+- OpenCode: 23 pass, 1 partial.
+- Pi: 20 pass, 2 partial, 2 timed out.
 
-Artifact: `.omo/evidence/external-agent-4task-r2/summary.json`
+Artifact: `.omo/evidence/external-agent-production-core-r5/summary.json`
 
 ## Blockers / Risks
 
-- Public "10/10 beats competitors" claim is still unsupported until the full external-agent production suite is complete.
-- The 21/21 benchmark evidence is deterministic fixture-based scorer evidence; the stronger live comparison is currently 4 tasks, not all 24 production tasks.
+- Public "10/10 beats competitors" claim is still unsupported because Codex CLI matched CEO Harness at 24/24 on the controlled suite.
+- The 24/24 CEO Harness live result is controlled benchmark evidence. More real repositories and harder multi-file tasks are still needed for a production-market claim.
 - Provider doctor correctly fails without `OPENAI_API_KEY`; this is setup guidance, not a product pass against a real provider.
 - Rollback QA passed for the supported simple replace path. Multiline/trailing-newline rollback remains a limitation.
 
