@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -47,6 +48,42 @@ func Test_DogfoodRealScript_dryRunRepeatWritesIsolatedEvidence(t *testing.T) {
 	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "summary.md"))
 	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "run-01", "plan.md"))
 	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "run-02", "plan.md"))
+}
+
+func Test_DogfoodRealScript_dryRunRecordsCustomTask(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	repoDir := filepath.Join(t.TempDir(), "repo")
+	if err := os.MkdirAll(repoDir, 0o755); err != nil {
+		t.Fatalf("create temp repo: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "dogfood-real")
+	task := "Plan a repo-specific onboarding docs cleanup without writing files"
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "dogfood-real.sh"),
+		"--dry-run",
+		"--output-dir", outputDir,
+		"--task", task,
+		"--repo", "sample:"+repoDir,
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("dogfood-real dry-run failed: %v\n%s", err, string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	if !strings.Contains(index, "- Task: "+task) {
+		t.Fatalf("index.md missing custom task:\n%s", index)
+	}
+	plan := readTextFile(t, filepath.Join(outputDir, "repos", "sample", "plan.md"))
+	if !strings.Contains(plan, strconv.Quote(task)) {
+		t.Fatalf("plan.md missing quoted custom task:\n%s", plan)
+	}
 }
 
 func Test_DogfoodRealScript_copyWorkspaceLeavesSourceUntouched(t *testing.T) {

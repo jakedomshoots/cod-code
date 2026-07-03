@@ -11,18 +11,20 @@ timeout_ms=250
 repeat_count=1
 copy_workspace=0
 build_tmp=""
+task_text="Plan a bounded real-repo fix without writing files"
 
 trap 'rm -f "$repos_file"; if [ -n "$build_tmp" ]; then rm -rf "$build_tmp"; fi' EXIT
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--timeout-ms n] [--repeat n] [--output-dir path] [--copy-workspace]
+Usage: sh scripts/dogfood-real.sh [--dry-run] [--repo name:/path/to/repo] [--task text] [--timeout-ms n] [--repeat n] [--output-dir path] [--copy-workspace]
 
 Creates durable dogfood evidence under .omo/evidence/dogfood-real.
 
 Options:
   --dry-run          List scenarios and write evidence without running commands or touching repos.
   --repo value       Repo to include. Use name:/path/to/repo or just /path/to/repo.
+  --task text        Task text used by plan/model scenarios. Default is a bounded fix plan.
   --timeout-ms n     Timeout used by the hung-command probe in live mode. Default: 250.
   --repeat n         Repeat each repo scenario set n times. Default: 1.
   --output-dir path  Evidence directory. Default: .omo/evidence/dogfood-real.
@@ -68,6 +70,23 @@ while [ "$#" -gt 0 ]; do
       ;;
     --timeout-ms=*)
       timeout_ms="${1#--timeout-ms=}"
+      shift
+      ;;
+    --task)
+      shift
+      if [ "$#" -eq 0 ] || [ -z "${1:-}" ]; then
+        printf '%s\n' "dogfood-real: --task requires a non-empty value" >&2
+        exit 2
+      fi
+      task_text="${1:-}"
+      shift
+      ;;
+    --task=*)
+      task_text="${1#--task=}"
+      if [ -z "$task_text" ]; then
+        printf '%s\n' "dogfood-real: --task requires a non-empty value" >&2
+        exit 2
+      fi
       shift
       ;;
     --repeat)
@@ -300,6 +319,7 @@ write_index_header() {
     printf '%s\n' "- Mode: $mode"
     printf '%s\n' "- Repeat count: $repeat_count"
     printf '%s\n' "- Workspace mode: $(workspace_mode)"
+    printf '%s\n' "- Task: $task_text"
     printf '%s\n' "- Runner: scripts/dogfood-real.sh"
     printf '%s\n' "- Evidence root: $(evidence_display_path)"
     printf '%s\n' "- Secret API keys: not required for smoke path"
@@ -342,8 +362,8 @@ write_dry_run_plan() {
     printf '%s\n' "## Planned Commands"
     printf '\n'
     printf '%s\n' "1. ceo-packet --doctor --format json"
-    printf '%s\n' "2. ceo-packet --workspace \"$plan_repo_path\" --plan-only --format json \"Plan a bounded real-repo fix\""
-    printf '%s\n' "3. ceo-packet --workspace \"$plan_repo_path\" --write-policy observe --format json --model-command sh examples/command-model.sh -- \"Inspect repo with local model\""
+    printf '%s\n' "2. ceo-packet --workspace \"$plan_repo_path\" --plan-only --format json \"$task_text\""
+    printf '%s\n' "3. ceo-packet --workspace \"$plan_repo_path\" --write-policy observe --format json --model-command sh examples/command-model.sh -- \"$task_text\""
     printf '%s\n' "4. ceo-packet --workspace <controlled-fixture> --dry-run --replace app.txt old new --format json \"Preview patch approval digest\""
     printf '%s\n' "5. ceo-packet --workspace \"$plan_repo_path\" --write-policy observe --model-command-timeout-ms $timeout_ms --model-command sh -c 'sleep 5' -- \"Probe timeout guard\""
   } >"$plan_repo_dir/plan.md"
@@ -429,14 +449,14 @@ run_live_repo() {
     overall="fail"
   fi
 
-  if run_capture "$live_repo_dir/scenario-02-plan-only" "$live_bin" --workspace "$live_repo_path" --plan-only --format json "Plan a bounded real-repo fix without writing files"; then
+  if run_capture "$live_repo_dir/scenario-02-plan-only" "$live_bin" --workspace "$live_repo_path" --plan-only --format json "$task_text"; then
     scenario_02="pass"
   else
     scenario_02="fail"
     overall="fail"
   fi
 
-  if run_capture "$live_repo_dir/scenario-03-observe-run" "$live_bin" --workspace "$live_repo_path" --write-policy observe --format json --model-command sh "$root/examples/command-model.sh" -- "Inspect the repo with a local deterministic model and no writes"; then
+  if run_capture "$live_repo_dir/scenario-03-observe-run" "$live_bin" --workspace "$live_repo_path" --write-policy observe --format json --model-command sh "$root/examples/command-model.sh" -- "$task_text"; then
     scenario_03="pass"
   else
     scenario_03="fail"

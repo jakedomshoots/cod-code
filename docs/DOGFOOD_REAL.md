@@ -18,6 +18,14 @@ sh scripts/dogfood-real.sh --repo "ceo-harness:/path/to/repo"
 
 Live mode builds a local `ceo-packet` binary, records command transcripts, hashes report output, captures git state, uses the local example model for no-key runs, and captures a patch preview digest on a controlled fixture.
 
+Use `--task` to make the plan/model scenarios repo-specific instead of generic:
+
+```sh
+sh scripts/dogfood-real.sh \
+  --repo "ceo-harness:/path/to/repo" \
+  --task "Plan a repo-specific onboarding docs cleanup without writing files"
+```
+
 Missing repos are recorded as `skipped_missing_repo`, not pass.
 
 To avoid touching the original checkout, run against a copied workspace:
@@ -47,6 +55,7 @@ With `--repeat`, each attempt gets its own `run-XX` folder and the repo summary 
 Evidence is saved under `.omo/evidence/dogfood-real/`:
 
 - `index.md`: run summary, scenario catalog, repo status, adversarial notes.
+- `index.md` also records the task text used by plan/model scenarios.
 - `repos/<name>/summary.md`: per-repo pass/fail notes.
 - `repos/<name>/run-XX/summary.md`: per-attempt notes when `--repeat` is greater than 1.
 - `repos/<name>/workspace-mode.txt`: `source` or `copied`.

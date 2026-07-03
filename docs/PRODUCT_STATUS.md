@@ -91,6 +91,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Copied-workspace dogfood result: `scripts/dogfood-real.sh --copy-workspace --repo ceo-harness-copy:<repo> --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-copy-self-r1` passed all five scenarios without using the source checkout as the writable workspace.
 - Independent copied-workspace dogfood result: ChemCheck and Axis Health both passed all five no-key scenarios in copied workspaces at `.omo/evidence/dogfood-real-independent-r1/index.md`.
 - Expanded independent copied-workspace dogfood result: Clicky, DPS Internal Comms, Janus, and Radian all passed all five no-key scenarios in copied workspaces at `.omo/evidence/dogfood-real-independent-r2/index.md`.
+- Task-specific copied-workspace dogfood result: ChemCheck and Axis Health both passed all five no-key scenarios using a custom onboarding-docs cleanup task at `.omo/evidence/dogfood-real-task-specific-r1/index.md`.
 - Added no-key nightly eval automation through `make eval-nightly` and `.github/workflows/nightly-evals.yml`.
 - Added endurance eval runner through `scripts/endurance.sh`, `make eval-endurance`, and `task eval:endurance`; short local proof produced 3/3 passing iterations at `.omo/evidence/endurance-local-r1/index.md`.
 - Longer local endurance proof produced 10/10 passing iterations, each running build, 28-task fixture scoring, cross-language gauntlet, and real-repo dogfood, at `.omo/evidence/endurance-local-r2/index.md`.
