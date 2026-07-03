@@ -267,6 +267,17 @@
     "required_report_fields": ["patch_results"]
   },
   {
+    "id": "multi-file-operator-safety-flow",
+    "category": "multi_file",
+    "title": "Operator safety flow spans runtime, config, and docs",
+    "objective": "Update a larger operator safety flow across CLI runtime notes, workspace safety helpers, config policy, and operator docs without adding unrelated files.",
+    "required_changed_files": ["internal/cli/operator_safety_flow.go", "internal/workspace/operator_safety_flow.go", "internal/config/operator_safety_flow.go", "docs/OPERATOR_SAFETY_FLOW.md"],
+    "required_commands": ["go test ./internal/cli ./internal/workspace ./internal/config -run Test_BenchmarkFixture -count=1"],
+    "required_artifacts": [".omo/evidence/multi-file-operator-safety-flow.md"],
+    "required_diff_terms": ["operator safety", "approval gate", "rollback evidence", "config policy"],
+    "required_report_fields": ["run_manifest.changed_file_count", "patch_results", "evidence_paths"]
+  },
+  {
     "id": "report-quality-evidence-summary",
     "category": "report_quality",
     "title": "Report quality evidence is complete",

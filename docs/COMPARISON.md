@@ -80,7 +80,7 @@ go run ./cmd/ceo-eval \
   --timeout-seconds 240
 ```
 
-Run the full 25-task production suite against CEO Harness:
+Run the full 26-task production suite against CEO Harness:
 
 ```sh
 go run ./cmd/ceo-packet gauntlet \
@@ -98,6 +98,12 @@ Latest production-core all-agent result:
 | Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | 25-task `production-core` | 25/25 pass | 25/25 pass | 25/25 pass | 24/25 pass, 1 timeout | `.omo/evidence/external-agent-production-core-25-r1/summary.json` |
+
+Latest CEO-only production-core result:
+
+| Benchmark | CEO Harness | Evidence |
+| --- | --- | --- |
+| 26-task `production-core` | 26/26 pass, 0 incomplete evidence | `.omo/evidence/production-core-26-ceo-r1/summary.json` |
 
 Use `--concurrency N` on long comparisons to shard independent task/agent runs while keeping the final summary in planned task order.
 

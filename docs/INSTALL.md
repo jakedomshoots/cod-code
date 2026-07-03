@@ -68,7 +68,7 @@ Use the gauntlet command to create market evidence:
 ceo-packet gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
 ```
 
-Use the stricter 25-task production suite when you want production-readiness evidence instead of the faster 10-task market smoke:
+Use the stricter 26-task production suite when you want production-readiness evidence instead of the faster 10-task market smoke:
 
 ```sh
 ceo-packet gauntlet --suite production-core --agents ceo_harness --concurrency 4 --output-dir .omo/evidence/production-gauntlet

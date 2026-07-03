@@ -17,6 +17,7 @@ var allowedCategories = map[string]struct{}{
 	"refactor":        {},
 	"test_repair":     {},
 	"docs":            {},
+	"multi_file":      {},
 	"provider_config": {},
 	"recovery":        {},
 	"report_quality":  {},

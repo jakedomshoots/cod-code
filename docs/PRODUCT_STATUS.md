@@ -68,11 +68,12 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 
 - Benchmark runner now writes a complete artifact packet for missing-agent-binary and terminal benchmark errors instead of leaving summary rows without evidence files.
 - Added regression coverage for missing CEO binary evidence: command, stdout, stderr, report, score, diff, changed-files, git-status, and timing artifacts must all exist and be non-empty.
-- Added `production-core`, now a 25-task gauntlet suite, available through `ceo-packet gauntlet --suite production-core`.
+- Added `production-core`, now a 26-task gauntlet suite, available through `ceo-packet gauntlet --suite production-core`.
 - Synthetic CEO benchmark mode now creates task-specific required evidence artifacts, so the runner can prove a clean pass instead of stopping at partial.
 - Production-core smoke result: 24 tasks / 24 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-smoke-r2/summary.json`.
 - Production-core model-command result: 24 tasks / 24 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-model-command-r4/summary.json`.
 - Expanded production-core CEO result after adding the first multi-file provider/config task: 25 tasks / 25 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-25-ceo-r1/summary.json`.
+- Expanded production-core CEO result after adding the four-file operator safety task: 26 tasks / 26 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-26-ceo-r1/summary.json`.
 - Cross-language-core CEO result after adding JavaScript and Python benchmark fixtures: 2 tasks / concurrency 2 / 2 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/cross-language-core-ceo-r1/summary.json`.
 - Repeated real Kimi provider path-safety result: 3 attempts / 3 pass / 18 scored checks / 0 partial / 0 fail / 0 incomplete evidence at `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json`.
 - Bounded external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` with complete evidence at `.omo/evidence/external-agent-one-r1/summary.json`.
@@ -95,7 +96,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Rollback now covers created-file model patches as well as normal replacement patches; created-file rollback refuses to delete if the file content changed after creation.
 - Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, `sh scripts/dogfood.sh`, `sh scripts/release-local.sh`, `task ci`, `golangci-lint run ./...`, `nilaway ./...`, and `sh scripts/strict-checks.sh`.
 - First product baseline commit: `8509a4b Initial CEO Harness production baseline`.
-- Remaining evidence gap: add more independent real repos beyond the first two, larger multi-file jobs, and truly long-duration endurance runs before making broad market-win claims.
+- Remaining evidence gap: add more independent real repos beyond the first two, harder multi-file jobs, and truly long-duration endurance runs before making broad market-win claims.
 
 ## Additions Completed 2026-07-02
 

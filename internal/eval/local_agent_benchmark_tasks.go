@@ -45,6 +45,7 @@ var localAgentBenchmarkTaskSuites = map[string][]string{
 		"safety-policy-path-escape",
 		"recovery-resume-retry",
 		"safety-policy-rollback-report",
+		"multi-file-operator-safety-flow",
 		"report-quality-evidence-summary",
 	},
 	"cross-language-core": {
