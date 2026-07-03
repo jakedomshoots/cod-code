@@ -87,7 +87,6 @@ func Test_Run_prints_provider_cost_budget_when_config_check_runs(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

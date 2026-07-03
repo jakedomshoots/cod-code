@@ -14,7 +14,6 @@ func Test_Runtime_Run_delegates_to_all_native_subagents_when_task_is_valid(t *te
 
 	// When
 	report, err := runtime.Run(context.Background(), "Fix a failing test")
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -49,7 +48,6 @@ func Test_Runtime_RunJob_writes_subagent_evidence_when_workspace_is_set(t *testi
 		Task:         "Fix a failing test",
 		WorkspaceDir: root,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -82,7 +80,6 @@ func Test_Runtime_RunJob_appends_history_when_workspace_is_set(t *testing.T) {
 		Task:         "Fix a failing test",
 		WorkspaceDir: root,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -121,7 +118,6 @@ func Test_Runtime_RunJob_saves_report_snapshot_when_workspace_is_set(t *testing.
 		Task:         "Fix a failing test",
 		WorkspaceDir: root,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -153,7 +149,6 @@ func Test_Runtime_RunJob_includes_check_result_when_check_command_is_set(t *test
 			"version",
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -179,7 +174,6 @@ func Test_Runtime_RunJob_marks_verdict_fail_when_check_command_fails(t *testing.
 		},
 		CheckEnv: []string{"GO_WANT_CEO_HELPER_PROCESS=fail"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -212,7 +206,6 @@ func Test_Runtime_RunJob_applies_text_patch_when_patch_request_is_set(t *testing
 			{Path: "app.txt", Old: "old", New: "new"},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

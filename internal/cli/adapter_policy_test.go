@@ -28,7 +28,6 @@ func Test_Run_write_policy_dry_run_previews_patch_without_writing(t *testing.T) 
 		"--replace", "app.txt", "old", "new",
 		"Patch app text",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -90,7 +89,6 @@ func Test_Run_init_config_uses_external_adapter_preset(t *testing.T) {
 				"--init-config",
 				"--adapter", adapter,
 			})
-
 			// Then
 			if err != nil {
 				t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -118,7 +116,6 @@ func Test_Run_ConfigInit_usesKimiAdapterPreset_whenAdvertised(t *testing.T) {
 		"--adapter", "kimi",
 		"--format", "text",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

@@ -14,7 +14,6 @@ func Test_LoadWorkspace_returns_empty_config_when_file_is_missing(t *testing.T) 
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)
@@ -134,7 +133,6 @@ func Test_CreateWorkspace_writes_config_when_file_is_missing(t *testing.T) {
 	path, err := CreateWorkspace(context.Background(), root, Config{
 		ModelCommand: []string{"python3", "-c", "print(\"ok\")"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("CreateWorkspace returned error: %v", err)

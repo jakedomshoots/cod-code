@@ -23,7 +23,6 @@ func Test_Runtime_RunJob_previews_coder_model_patch_without_writing(t *testing.T
 		WorkspaceDir:        root,
 		PreviewModelPatches: true,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

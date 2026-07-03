@@ -39,7 +39,6 @@ func Test_Run_resumes_needs_input_job_with_answer(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, resumeArgs)
-
 	// Then
 	if err != nil {
 		t.Fatalf("resume Run returned error: %v\n%s", err, out.String())

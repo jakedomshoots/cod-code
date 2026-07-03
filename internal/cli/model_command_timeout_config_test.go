@@ -25,7 +25,6 @@ func Test_Run_writes_model_command_timeout_when_init_config_flag_is_supplied(t *
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -59,7 +58,6 @@ func Test_Run_prints_model_command_timeout_config_check_when_config_check_flag_i
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -89,7 +87,6 @@ func Test_Run_writes_tool_command_timeout_when_init_config_flag_is_supplied(t *t
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -123,7 +120,6 @@ func Test_Run_prints_tool_command_timeout_config_check_when_config_check_flag_is
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

@@ -11,8 +11,10 @@ import (
 	"time"
 )
 
-const defaultDoctorTimeout = 2 * time.Second
-const versionProbeAttempts = 4
+const (
+	defaultDoctorTimeout = 2 * time.Second
+	versionProbeAttempts = 4
+)
 
 func DoctorAll(ctx context.Context, opts DoctorOptions) []Report {
 	tools := SupportedTools()

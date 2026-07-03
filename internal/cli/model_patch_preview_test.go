@@ -33,7 +33,6 @@ func Test_Run_previews_model_patch_without_writing(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -83,7 +82,6 @@ func Test_Run_previews_model_create_file_patch_without_writing(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

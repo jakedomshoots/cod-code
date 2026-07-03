@@ -26,7 +26,6 @@ func Test_Run_prints_latest_history_job_when_latest_alias_is_supplied(t *testing
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--job", "latest"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -52,7 +51,6 @@ func Test_Run_continues_latest_job_when_last_alias_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--continue-job", "last"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

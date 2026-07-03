@@ -13,7 +13,6 @@ func Test_SmokeScript_runs_core_health_checks(t *testing.T) {
 	// When
 	cmd := exec.Command("sh", script)
 	output, err := cmd.CombinedOutput()
-
 	// Then
 	if err != nil {
 		t.Fatalf("smoke script failed: %v\n%s", err, string(output))

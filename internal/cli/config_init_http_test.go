@@ -34,7 +34,6 @@ func Test_Run_writes_http_provider_when_init_config_http_provider_flags_are_supp
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -92,7 +91,6 @@ func Test_Run_writes_http_provider_controls_when_init_config_http_control_flags_
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

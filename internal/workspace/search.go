@@ -10,8 +10,10 @@ import (
 	"strings"
 )
 
-const DefaultSearchMaxMatches = 20
-const maxSearchFileBytes = 1 << 20
+const (
+	DefaultSearchMaxMatches = 20
+	maxSearchFileBytes      = 1 << 20
+)
 
 var errSearchLimitReached = errors.New("search limit reached")
 

@@ -19,7 +19,6 @@ func Test_ScoreReport_returns_pass_for_happy_fixture(t *testing.T) {
 		ReportPath:   reportPath,
 		WorkspaceDir: workspace,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ScoreReport returned error: %v", err)
@@ -41,7 +40,6 @@ func Test_ScoreReport_returns_partial_for_stale_artifact_fixture(t *testing.T) {
 		ReportPath:   reportPath,
 		WorkspaceDir: workspace,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ScoreReport returned error: %v", err)
@@ -67,7 +65,6 @@ func Test_ScoreReport_returns_partial_for_misleading_success_fixture(t *testing.
 		ReportPath:   reportPath,
 		WorkspaceDir: workspace,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ScoreReport returned error: %v", err)
@@ -107,7 +104,6 @@ func Test_ScoreReport_returns_pass_for_dirty_worktree_happy_fixture(t *testing.T
 		ReportPath:   reportPath,
 		WorkspaceDir: workspace,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ScoreReport returned error: %v", err)
@@ -129,7 +125,6 @@ func Test_ScoreReport_returns_partial_for_dirty_worktree_unreported_fixture(t *t
 		ReportPath:   reportPath,
 		WorkspaceDir: workspace,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ScoreReport returned error: %v", err)

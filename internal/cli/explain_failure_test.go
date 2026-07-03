@@ -45,7 +45,6 @@ func Test_ExplainFailure_latest_failed_report_prints_plain_text(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"explain-failure", "latest", "--workspace", root})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

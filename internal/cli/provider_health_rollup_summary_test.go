@@ -39,7 +39,6 @@ func Test_Run_prints_provider_health_summary_without_rows_when_summary_only_flag
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--provider-health", "--summary-only"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

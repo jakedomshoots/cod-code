@@ -34,7 +34,6 @@ func Test_Run_filters_provider_health_rollup_when_provider_flag_is_supplied(t *t
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--provider-health", "--provider", "fast"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -87,7 +86,6 @@ func Test_Run_filters_provider_health_rollup_when_recommendation_flag_is_supplie
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--provider-health", "--recommendation", "avoid"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -151,7 +149,6 @@ func Test_Run_filters_provider_health_rollup_when_task_flag_is_supplied(t *testi
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--provider-health", "--task", "checkout"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

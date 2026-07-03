@@ -38,7 +38,6 @@ func Test_Runtime_RunJob_sends_ceo_review_metadata_to_model_client(t *testing.T)
 	report, err := runtime.RunJob(context.Background(), JobRequest{
 		Task: "Inspect docs",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -84,7 +83,6 @@ func Test_Runtime_RunJob_sends_ceo_delegation_metadata_to_model_client(t *testin
 	report, err := runtime.RunJob(context.Background(), JobRequest{
 		Task: "Fix bug",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

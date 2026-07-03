@@ -14,7 +14,6 @@ func Test_Run_prints_verification_summary_when_check_runs(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

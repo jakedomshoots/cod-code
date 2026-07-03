@@ -33,7 +33,6 @@ func Test_Runtime_RunJob_records_subagent_duration(t *testing.T) {
 	report, err := runtime.RunJob(context.Background(), JobRequest{
 		Task: "Fix a failing test",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

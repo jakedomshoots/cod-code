@@ -52,7 +52,6 @@ func Test_Run_allows_continue_job_when_human_judgment_accepted_source_job(t *tes
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--continue-job", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("continue Run returned error: %v\n%s", err, out.String())

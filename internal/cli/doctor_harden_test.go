@@ -22,7 +22,6 @@ func Test_Run_Doctor_skips_missing_optional_provider_without_failing(t *testing.
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--doctor"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

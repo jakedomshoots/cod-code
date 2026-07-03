@@ -81,7 +81,6 @@ func Test_Run_writes_ceo_provider_when_init_config_ceo_provider_flag_is_supplied
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -118,7 +117,6 @@ func Test_Run_quickstart_ceo_provider_overrides_example_ceo_adapter_when_running
 		"--ceo-provider",
 		"main",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("quickstart returned error: %v\n%s", err, out.String())

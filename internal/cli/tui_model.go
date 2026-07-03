@@ -27,6 +27,9 @@ type tuiJob struct {
 }
 
 func newTUIModel(workspace string, entries []history.Entry, inbox []reviewQueueRow, providers []history.ProviderHealth) tuiModel {
+	if entries == nil {
+		entries = []history.Entry{}
+	}
 	reasons := map[string]string{}
 	for _, row := range inbox {
 		reasons[row.ID] = row.ReviewReason

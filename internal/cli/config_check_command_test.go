@@ -24,7 +24,6 @@ func Test_Run_uses_check_command_when_workspace_config_supplies_check_command(t 
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

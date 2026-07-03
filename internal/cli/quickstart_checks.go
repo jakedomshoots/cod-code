@@ -40,7 +40,7 @@ func quickstartCheckCommand(workspaceDir string) ([]string, bool) {
 
 func regularFileExists(path string) bool {
 	info, err := os.Stat(path)
-	return err == nil && !info.IsDir()
+	return err == nil && info != nil && !info.IsDir()
 }
 
 func packageJSONHasTestScript(path string) bool {

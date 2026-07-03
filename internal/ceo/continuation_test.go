@@ -58,7 +58,6 @@ func Test_Runtime_RunJob_reuses_matching_passed_subagents_when_continuing(t *tes
 			},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -117,7 +116,6 @@ func Test_Runtime_RunJob_skips_ceo_delegation_when_using_saved_delegation(t *tes
 			},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

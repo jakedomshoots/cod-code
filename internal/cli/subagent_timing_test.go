@@ -26,7 +26,6 @@ func Test_Run_prints_subagent_duration(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

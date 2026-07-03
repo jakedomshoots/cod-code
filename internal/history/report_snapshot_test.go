@@ -23,7 +23,6 @@ func Test_Store_SaveReportSnapshot_reads_snapshot_when_job_id_is_valid(t *testin
 		t.Fatalf("SaveReportSnapshot returned error: %v", err)
 	}
 	got, err := store.ReadReportSnapshot(context.Background(), "job-000001")
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReadReportSnapshot returned error: %v", err)
@@ -70,7 +69,6 @@ func Test_Store_ReadReportSnapshotWithMetadata_marks_legacy_when_schema_version_
 
 	// When
 	snapshot, err := store.ReadReportSnapshotWithMetadata(context.Background(), "job-000001")
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReadReportSnapshotWithMetadata returned error: %v", err)
@@ -100,7 +98,6 @@ func Test_Store_ReadReportSnapshotWithMetadata_reads_schema_v1_when_present(t *t
 
 	// When
 	snapshot, err := store.ReadReportSnapshotWithMetadata(context.Background(), "job-000001")
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReadReportSnapshotWithMetadata returned error: %v", err)
@@ -161,7 +158,6 @@ func Test_Store_InspectReportRecovery_reports_corrupt_partial_snapshot_guidance(
 
 	// When
 	issues, err := store.InspectReportRecovery(context.Background())
-
 	// Then
 	if err != nil {
 		t.Fatalf("InspectReportRecovery returned error: %v", err)
@@ -199,7 +195,6 @@ func Test_Store_InspectReportRecovery_reports_canceled_job_as_recoverable(t *tes
 
 	// When
 	issues, err := store.InspectReportRecovery(context.Background())
-
 	// Then
 	if err != nil {
 		t.Fatalf("InspectReportRecovery returned error: %v", err)

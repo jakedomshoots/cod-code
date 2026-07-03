@@ -41,7 +41,6 @@ func Test_Runtime_RunJob_sends_workspace_brief_to_subagents_when_workspace_is_se
 		Task:         "Fix workspace bug",
 		WorkspaceDir: root,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -73,7 +72,6 @@ func Test_Runtime_RunJob_respects_workspace_brief_max_files(t *testing.T) {
 		WorkspaceDir:           root,
 		WorkspaceBriefMaxFiles: 1,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

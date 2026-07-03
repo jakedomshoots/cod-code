@@ -32,7 +32,6 @@ func Test_ScoreReport_returns_partial_when_dirty_worktree_sensitive_report_missi
 		ReportPath:   reportPath,
 		WorkspaceDir: workspace,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ScoreReport returned error: %v", err)
@@ -73,7 +72,6 @@ func Test_ScoreReport_returns_partial_when_dirty_worktree_sensitive_report_claim
 		ReportPath:   reportPath,
 		WorkspaceDir: workspace,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ScoreReport returned error: %v", err)
@@ -115,7 +113,6 @@ func Test_ScoreReport_returns_partial_when_dirty_worktree_status_contains_unrepo
 		ReportPath:   reportPath,
 		WorkspaceDir: workspace,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ScoreReport returned error: %v", err)

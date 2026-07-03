@@ -13,7 +13,6 @@ func Test_Run_prints_subagent_stages_when_task_uses_native_roles(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

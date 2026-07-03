@@ -13,7 +13,6 @@ func Test_Run_prints_version_when_version_flag_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--version"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -40,7 +39,6 @@ func Test_Run_prints_build_metadata_when_version_metadata_is_set(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--version"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

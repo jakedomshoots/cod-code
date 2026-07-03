@@ -18,7 +18,6 @@ func Test_LoadWorkspace_reads_workspace_brief_max_files(t *testing.T) {
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

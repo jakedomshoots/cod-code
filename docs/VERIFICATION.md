@@ -1,8 +1,27 @@
 # Verification Record
 
-Status date: 2026-07-02
+Status date: 2026-07-03
 
 ## Passed
+
+- Latest production gate:
+  - `go test ./... -count=1`
+  - `go vet ./...`
+  - `sh scripts/smoke.sh`
+  - `sh scripts/dogfood.sh`
+  - `sh scripts/release-local.sh`
+  - `task ci`
+- Latest strict gate:
+  - `gofumpt -l cmd internal`
+  - `golangci-lint run ./...`
+  - `nilaway ./...`
+  - `sh scripts/strict-checks.sh`
+- Latest live external-agent comparison:
+  - `ceo-packet gauntlet --suite docs-roadmap-cli-first,bugfix-cli-timeout,safety-policy-path-escape,recovery-resume-retry --agents ceo_harness,codex_cli,opencode,pi`
+  - Result: 16 runs / 16 pass / 0 partial / 0 fail / 0 timed out / 0 skipped / 0 incomplete evidence.
+- Latest real-repo dogfood:
+  - `sh scripts/dogfood-real.sh --repo ceo-harness:<repo> --timeout-ms 250`
+  - Result: pass, including expected timeout failure evidence.
 
 - Focused additions test:
   - `go test ./internal/cli -run 'Test_Run_(start|inbox|provider_wizard|init_demo_repo|tui|write_policy|init_config_uses_external_adapter|prints_help)' -count=1`
@@ -42,16 +61,17 @@ Status date: 2026-07-02
 - `dist/ceo-packet_0.1.0-dev_linux_arm64.tar.gz`
 - `dist/checksums.txt`
 
-## Tooling Not Available Locally
+## Tooling Available Locally
 
-These are documented/configured, but were not installed on PATH during this pass:
+These optional strict tools are installed under the local Go bin and passed during the latest gate:
 
 - `gofumpt`
 - `golangci-lint`
 - `nilaway`
-- `shellcheck`
 - `task`
 
-The verified gate therefore used available local tooling: `gofmt`, `go test`, `go vet`, smoke, dogfood, release build, checksum verification, install QA, and race/shuffle tests.
+## Tooling Not Available Locally
 
-These tools are optional for a source install. Missing optional tools should not block `scripts/install-local.sh`.
+- `shellcheck`
+
+ShellCheck is still optional for a source install. Missing optional tools should not block `scripts/install-local.sh`.

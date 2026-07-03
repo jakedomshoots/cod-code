@@ -21,7 +21,6 @@ func Test_Run_config_check_reports_adapter_capabilities_and_missing_setup(t *tes
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

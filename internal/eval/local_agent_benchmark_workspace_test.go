@@ -23,7 +23,6 @@ func Test_PrepareLocalAgentBenchmarkWorkspace_writes_compile_safe_go_fixture(t *
 
 	// When
 	err := prepareLocalAgentBenchmarkWorkspace(context.Background(), workspaceDir, task, nil)
-
 	// Then
 	if err != nil {
 		t.Fatalf("prepareLocalAgentBenchmarkWorkspace returned error: %v", err)
@@ -57,7 +56,6 @@ func Test_PrepareLocalAgentBenchmarkWorkspace_writes_real_path_escape_fixture(t 
 
 	// When
 	err := prepareLocalAgentBenchmarkWorkspace(context.Background(), workspaceDir, task, nil)
-
 	// Then
 	if err != nil {
 		t.Fatalf("prepareLocalAgentBenchmarkWorkspace returned error: %v", err)
@@ -128,7 +126,6 @@ printf 'done\n'
 		Agents:          []string{"codex_cli"},
 		BenchmarkTaskID: "bugfix-cli-timeout",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
@@ -160,7 +157,6 @@ func Test_RunLocalAgentBenchmark_writes_evidence_when_workspace_prepare_fails(t 
 		Agents:          []string{"ceo_harness"},
 		BenchmarkTaskID: "bad-workspace",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
@@ -208,7 +204,6 @@ func Test_RunLocalAgentBenchmark_writes_evidence_when_agent_binary_is_missing(t 
 		CEOHarnessBinary: filepath.Join(root, "missing-ceo-packet"),
 		BenchmarkTaskID:  "docs-one",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)

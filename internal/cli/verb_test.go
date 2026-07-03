@@ -138,7 +138,6 @@ func Test_ParseArgs_sets_command_surfaces_when_verbs_are_supplied(t *testing.T) 
 		t.Run(tt.name, func(t *testing.T) {
 			// When
 			opts, err := parseArgs(tt.args)
-
 			// Then
 			if err != nil {
 				t.Fatalf("parseArgs: %v", err)
@@ -154,7 +153,6 @@ func Test_ParseArgs_run_verb_preserves_task_text(t *testing.T) {
 
 	// When
 	opts, err := parseArgs(args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("parseArgs: %v", err)
@@ -173,7 +171,6 @@ func Test_ParseArgs_preserves_single_token_legacy_task_text(t *testing.T) {
 
 	// When
 	opts, err := parseArgs(args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("parseArgs: %v", err)
@@ -189,7 +186,6 @@ func Test_Run_preserves_single_token_legacy_task_text(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"refactor"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -213,7 +209,6 @@ func Test_Run_eval_verb_lists_tasks(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"eval", "--list", "--tasks", "../../evals/tasks"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

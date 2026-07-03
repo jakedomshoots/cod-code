@@ -9,9 +9,11 @@ import (
 	"strings"
 )
 
-var ErrPathEscapesWorkspace = errors.New("path escapes workspace")
-var ErrTextNotFound = errors.New("text to replace was not found")
-var ErrFileAlreadyExists = errors.New("file already exists")
+var (
+	ErrPathEscapesWorkspace = errors.New("path escapes workspace")
+	ErrTextNotFound         = errors.New("text to replace was not found")
+	ErrFileAlreadyExists    = errors.New("file already exists")
+)
 
 type Workspace struct {
 	root string

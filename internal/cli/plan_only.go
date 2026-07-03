@@ -173,10 +173,6 @@ func optionsWithPlanContext(ctx context.Context, opts options) (options, error) 
 	return opts, requireVerificationChecks(opts)
 }
 
-func planCheckCommandCount(opts options) int {
-	return len(planCheckCommands(opts))
-}
-
 func planCheckCommands(opts options) [][]string {
 	if len(opts.checkCommands) > 0 {
 		return clonePlanCheckCommands(opts.checkCommands)

@@ -18,7 +18,6 @@ func Test_LoadWorkspace_reads_max_ceo_iterations_when_config_exists(t *testing.T
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

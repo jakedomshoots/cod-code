@@ -32,7 +32,6 @@ func Test_Workspace_Brief_returns_bounded_file_index_when_workspace_has_files(t 
 
 	// When
 	brief, err := space.Brief(context.Background(), BriefRequest{MaxFiles: 2})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Brief returned error: %v", err)
@@ -77,7 +76,6 @@ func Test_Workspace_Brief_omits_configured_exclude_patterns(t *testing.T) {
 	brief, err := space.Brief(context.Background(), BriefRequest{
 		ExcludePaths: []string{"generated", "*.lock"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Brief returned error: %v", err)

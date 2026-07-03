@@ -18,7 +18,6 @@ func Test_InstallLocalScript_installs_binary_to_prefix(t *testing.T) {
 	cmd.Dir = root
 	cmd.Env = append(cmd.Environ(), "PREFIX="+prefix, "VERSION=0.2.0-test", "COMMIT=script-test")
 	output, err := cmd.CombinedOutput()
-
 	// Then
 	if err != nil {
 		t.Fatalf("install script failed: %v\n%s", err, string(output))

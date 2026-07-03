@@ -19,7 +19,6 @@ func Test_Run_retries_check_until_pass_when_attempts_flag_is_supplied(t *testing
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

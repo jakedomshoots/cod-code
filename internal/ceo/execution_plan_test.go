@@ -14,7 +14,6 @@ func Test_Runtime_RunJob_builds_execution_plan_with_ceo_final_verdict(t *testing
 	report, err := runtime.RunJob(context.Background(), JobRequest{
 		Task: "Fix a failing test",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -46,7 +45,6 @@ func Test_Runtime_RunJob_reports_planner_as_owner_for_planning_task(t *testing.T
 	report, err := runtime.RunJob(context.Background(), JobRequest{
 		Task: "Plan roadmap",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -69,7 +67,6 @@ func Test_Runtime_RunJob_adds_failed_check_to_execution_plan(t *testing.T) {
 		},
 		CheckEnv: []string{"GO_WANT_CEO_HELPER_PROCESS=fail"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

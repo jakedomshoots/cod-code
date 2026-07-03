@@ -11,9 +11,11 @@ import (
 	"ceoharness/internal/subagent"
 )
 
-const modelCommandEnv = "CEO_MODEL_COMMAND_JSON"
-const ceoModelCommandEnv = "CEO_REVIEW_MODEL_COMMAND_JSON"
-const researchCommandEnv = "CEO_RESEARCH_COMMAND_JSON"
+const (
+	modelCommandEnv    = "CEO_MODEL_COMMAND_JSON"
+	ceoModelCommandEnv = "CEO_REVIEW_MODEL_COMMAND_JSON"
+	researchCommandEnv = "CEO_RESEARCH_COMMAND_JSON"
+)
 
 type runtimeFromOptionsResult struct {
 	runtime                 ceo.Runtime

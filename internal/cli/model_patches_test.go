@@ -37,7 +37,6 @@ func Test_Run_applies_coder_model_patch_when_enabled(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -94,7 +93,6 @@ func Test_Run_applies_coder_model_create_file_patch_when_enabled(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -148,7 +146,6 @@ func Test_Run_skips_coder_model_patch_when_coder_lacks_patch_action(t *testing.T
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

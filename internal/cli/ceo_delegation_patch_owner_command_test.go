@@ -44,7 +44,6 @@ func Test_Run_applies_ceo_created_patch_owner_model_patch(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

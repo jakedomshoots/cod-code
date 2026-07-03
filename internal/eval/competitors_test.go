@@ -17,7 +17,6 @@ func Test_LoadCompetitors_accepts_required_competitors_when_config_complete(t *t
 
 	// When
 	config, err := LoadCompetitors(path)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadCompetitors returned error: %v", err)
@@ -57,7 +56,6 @@ func Test_BuildComparisonPlan_records_skipped_missing_binary_when_binary_absent(
 
 	// When
 	plan, err := BuildComparisonPlan(context.Background(), config)
-
 	// Then
 	if err != nil {
 		t.Fatalf("BuildComparisonPlan returned error: %v", err)
@@ -86,7 +84,6 @@ func Test_BuildComparisonPlan_emits_empty_placeholder_when_binary_exists(t *test
 
 	// When
 	plan, err := BuildComparisonPlan(context.Background(), config)
-
 	// Then
 	if err != nil {
 		t.Fatalf("BuildComparisonPlan returned error: %v", err)
@@ -111,7 +108,6 @@ func Test_RunCLI_validates_competitor_config_when_validate_flag_is_set(t *testin
 
 	// When
 	err := RunCLI(context.Background(), &out, &errOut, []string{"--validate-competitors", "--competitors", path})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunCLI returned error: %v\nstderr: %s", err, errOut.String())

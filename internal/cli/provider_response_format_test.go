@@ -41,7 +41,6 @@ func Test_Run_sends_provider_response_format_to_http_provider(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "response", "format", "smoke"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

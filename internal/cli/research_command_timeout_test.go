@@ -32,7 +32,6 @@ func Test_Run_times_out_network_research_when_tool_timeout_flag_is_supplied(t *t
 		"harness",
 		"docs",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

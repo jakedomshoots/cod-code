@@ -33,7 +33,6 @@ func Test_Run_runs_check_fix_attempt_when_enabled(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

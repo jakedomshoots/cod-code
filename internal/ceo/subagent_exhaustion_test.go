@@ -37,7 +37,6 @@ func Test_Runtime_RunJob_returns_failed_report_when_subagent_retries_exhaust(t *
 		Task:             "Fix a failing test",
 		SubagentAttempts: 2,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

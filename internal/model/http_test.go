@@ -64,7 +64,6 @@ func Test_HTTPClient_Complete_posts_chat_completion_request(t *testing.T) {
 
 	// When
 	response, err := client.Complete(context.Background(), Request{Prompt: "hello model"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Complete returned error: %v", err)

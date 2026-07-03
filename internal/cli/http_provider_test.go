@@ -35,7 +35,6 @@ func Test_Run_uses_http_provider_profile_when_workspace_config_assigns_agent_pro
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

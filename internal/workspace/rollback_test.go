@@ -29,7 +29,6 @@ func Test_Workspace_RollbackReplaceText_restores_simple_replace_result(t *testin
 
 	// When
 	rollback, err := space.RollbackReplaceText(context.Background(), result)
-
 	// Then
 	if err != nil {
 		t.Fatalf("RollbackReplaceText returned error: %v", err)
@@ -68,7 +67,6 @@ func Test_Workspace_RollbackReplaceText_restores_trailing_newline_result(t *test
 
 	// When
 	_, err = space.RollbackReplaceText(context.Background(), result)
-
 	// Then
 	if err != nil {
 		t.Fatalf("RollbackReplaceText returned error: %v", err)

@@ -18,7 +18,6 @@ func Test_LoadWorkspace_reads_provider_policy_when_config_exists(t *testing.T) {
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)
@@ -106,7 +105,6 @@ func Test_ProviderPolicyRoutesForTask_routes_agents_by_risk_when_no_explicit_age
 
 	// When
 	routes, err := cfg.ProviderRoutesForTask("Fix auth bug", nil)
-
 	// Then
 	if err != nil {
 		t.Fatalf("ProviderRoutesForTask returned error: %v", err)
@@ -134,7 +132,6 @@ func Test_ProviderPolicyRoutesForTask_keeps_explicit_agent_provider_when_policy_
 
 	// When
 	routes, err := cfg.ProviderRoutesForTask("Fix auth bug", nil)
-
 	// Then
 	if err != nil {
 		t.Fatalf("ProviderRoutesForTask returned error: %v", err)
@@ -166,7 +163,6 @@ func Test_ProviderPolicyRoutesForTask_routes_matching_risk_area_specialists_only
 
 	// When
 	routes, err := cfg.ProviderRoutesForTask("Research payment database migration and deploy the fix", nil)
-
 	// Then
 	if err != nil {
 		t.Fatalf("ProviderRoutesForTask returned error: %v", err)
@@ -198,7 +194,6 @@ func Test_ProviderRouteDecisionsForTask_explains_risk_area_policy_routes(t *test
 
 	// When
 	decisions, err := cfg.ProviderRouteDecisionsForTask("Implement database migration fix", nil)
-
 	// Then
 	if err != nil {
 		t.Fatalf("ProviderRouteDecisionsForTask returned error: %v", err)
@@ -224,7 +219,6 @@ func Test_ProviderPolicyRoutesForTask_keeps_explicit_agent_provider_when_risk_ar
 
 	// When
 	routes, err := cfg.ProviderRoutesForTask("Implement database migration fix", nil)
-
 	// Then
 	if err != nil {
 		t.Fatalf("ProviderRoutesForTask returned error: %v", err)

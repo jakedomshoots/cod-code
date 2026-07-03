@@ -39,7 +39,6 @@ func Test_Run_writes_risk_and_kind_provider_policy_when_init_config_policy_flags
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

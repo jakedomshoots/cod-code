@@ -63,7 +63,6 @@ func Test_Runtime_RunJob_applies_coder_model_patch_when_enabled(t *testing.T) {
 		WorkspaceDir:      root,
 		ApplyModelPatches: true,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -100,7 +99,6 @@ func Test_Runtime_RunJob_applies_coder_model_create_file_patch_when_enabled(t *t
 		WorkspaceDir:      root,
 		ApplyModelPatches: true,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -134,7 +132,6 @@ func Test_Runtime_RunJob_records_explicit_patch_audit(t *testing.T) {
 			{Path: "manual.txt", Old: "old", New: "new"},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -163,7 +160,6 @@ func Test_proposedModelPatches_reads_typed_patch_proposals_when_summary_is_plain
 
 	// When
 	patches, err := proposedModelPatches(results)
-
 	// Then
 	if err != nil {
 		t.Fatalf("proposedModelPatches returned error: %v", err)
@@ -189,7 +185,6 @@ func Test_proposedModelPatches_reads_typed_create_file_proposals_when_summary_is
 
 	// When
 	patches, err := proposedModelPatches(results)
-
 	// Then
 	if err != nil {
 		t.Fatalf("proposedModelPatches returned error: %v", err)
@@ -213,7 +208,6 @@ func Test_Runtime_RunJob_ignores_coder_model_patch_by_default(t *testing.T) {
 		Task:         "Patch app text",
 		WorkspaceDir: root,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

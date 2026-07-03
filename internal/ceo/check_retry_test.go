@@ -22,7 +22,6 @@ func Test_Runtime_RunJob_retries_check_until_pass_when_attempts_allow(t *testing
 		CheckEnv:      []string{"GO_WANT_CEO_HELPER_PROCESS=retry", "GO_CEO_RETRY_STATE=" + statePath},
 		CheckAttempts: 2,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

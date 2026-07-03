@@ -16,7 +16,6 @@ func Test_Runtime_RunJob_includes_compact_run_manifest(t *testing.T) {
 		SubagentConcurrency: 2,
 		MaxToolRequests:     4,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

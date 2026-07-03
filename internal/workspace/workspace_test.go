@@ -22,7 +22,6 @@ func Test_Workspace_WriteText_writes_file_when_path_is_relative(t *testing.T) {
 		Path:    "ceo-artifacts/scanner.md",
 		Content: "scanner evidence",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("WriteText returned error: %v", err)
@@ -110,7 +109,6 @@ func Test_Workspace_ReplaceText_replaces_first_match_when_path_is_safe(t *testin
 		Old:  "old",
 		New:  "new",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReplaceText returned error: %v", err)
@@ -205,7 +203,6 @@ func Test_Workspace_CreateText_writes_new_file_when_path_is_safe(t *testing.T) {
 		Path:    "docs/notes.md",
 		Content: "# Notes\n",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("CreateText returned error: %v", err)
@@ -235,7 +232,6 @@ func Test_Workspace_PreviewCreateText_does_not_write_file(t *testing.T) {
 		Path:    "docs/notes.md",
 		Content: "# Notes\n",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("PreviewCreateText returned error: %v", err)

@@ -35,7 +35,6 @@ func Test_RoutingRunner_Run_uses_agent_specific_client_when_agent_matches(t *tes
 		ContextMode:     "lean",
 		MaxContextBytes: 256,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -59,7 +58,6 @@ func Test_RoutingRunner_Run_uses_default_client_when_agent_has_no_route(t *testi
 		ContextMode:     "lean",
 		MaxContextBytes: 256,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

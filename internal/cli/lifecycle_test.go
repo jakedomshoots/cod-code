@@ -14,7 +14,6 @@ func Test_Run_includes_lifecycle_fields_when_task_passes(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--check", "go", "version", "--", "Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -52,7 +51,6 @@ func Test_Run_events_format_prints_lifecycle_state_on_each_event(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--format", "events", "--check", "go", "version", "--", "Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -95,7 +93,8 @@ func decodeLifecycleEventLines(t *testing.T, payload []byte) []struct {
 
 func jsonLifecycleStatesInclude(events []struct {
 	State string `json:"state"`
-}, want ...string) bool {
+}, want ...string,
+) bool {
 	next := 0
 	for _, event := range events {
 		if next < len(want) && event.State == want[next] {
@@ -108,7 +107,8 @@ func jsonLifecycleStatesInclude(events []struct {
 func jsonRunEventLifecycleIncludes(events []struct {
 	Kind           string `json:"kind"`
 	LifecycleState string `json:"lifecycle_state"`
-}, kind string, state string) bool {
+}, kind string, state string,
+) bool {
 	for _, event := range events {
 		if event.Kind == kind && event.LifecycleState == state {
 			return true

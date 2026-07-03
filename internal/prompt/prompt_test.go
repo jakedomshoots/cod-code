@@ -19,7 +19,6 @@ func Test_Build_returns_compact_prompt_with_role_when_budget_allows(t *testing.T
 
 	// When
 	prompt, err := Build(context.Background(), req)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -61,7 +60,6 @@ func Test_Build_includes_tool_results_when_feedback_is_supplied(t *testing.T) {
 
 	// When
 	prompt, err := Build(context.Background(), req)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -85,7 +83,6 @@ func Test_Build_includes_workspace_brief_when_supplied(t *testing.T) {
 
 	// When
 	prompt, err := Build(context.Background(), req)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -109,7 +106,6 @@ func Test_Build_includes_prior_findings_when_supplied(t *testing.T) {
 
 	// When
 	prompt, err := Build(context.Background(), req)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -131,7 +127,6 @@ func Test_Build_truncates_context_when_budget_is_exceeded(t *testing.T) {
 
 	// When
 	prompt, err := Build(context.Background(), req)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -163,7 +158,6 @@ func Test_Build_preserves_task_when_optional_context_is_truncated(t *testing.T) 
 
 	// When
 	prompt, err := Build(context.Background(), req)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)

@@ -95,7 +95,6 @@ func Test_Run_injects_compact_job_context_when_with_job_context_flag_is_supplied
 		"--",
 		"Continue", "checkout",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

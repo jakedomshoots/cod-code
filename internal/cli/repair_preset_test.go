@@ -11,7 +11,6 @@ func Test_ParseArgs_applies_standard_repair_preset(t *testing.T) {
 
 	// When
 	opts, err := parseArgs(args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("parseArgs returned error: %v", err)
@@ -41,7 +40,6 @@ func Test_ParseArgs_keeps_explicit_repair_flags_when_standard_preset_is_supplied
 
 	// When
 	opts, err := parseArgs(args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("parseArgs returned error: %v", err)

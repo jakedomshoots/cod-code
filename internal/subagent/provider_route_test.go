@@ -28,7 +28,6 @@ func Test_RoutingRunner_Run_uses_requested_provider_client(t *testing.T) {
 		ContextMode:     "lean",
 		MaxContextBytes: 256,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

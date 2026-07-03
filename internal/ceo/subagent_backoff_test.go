@@ -18,7 +18,6 @@ func Test_Runtime_RunJob_waits_between_subagent_retries_when_backoff_is_set(t *t
 		SubagentAttempts:  2,
 		SubagentBackoffMS: 20,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

@@ -28,7 +28,6 @@ func Test_Run_uses_auto_check_set_when_task_matches_keyword(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "auth", "callback"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -68,7 +67,6 @@ func Test_Run_uses_check_set_flag_over_auto_check_set_when_both_match(t *testing
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--check-set", "quick", "Fix", "auth", "callback"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

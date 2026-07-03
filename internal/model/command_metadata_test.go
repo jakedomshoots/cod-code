@@ -31,7 +31,6 @@ func Test_CommandClient_Complete_exposes_request_metadata_to_command_env(t *test
 			ContextMode: "lean",
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Complete returned error: %v", err)

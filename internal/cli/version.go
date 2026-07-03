@@ -6,9 +6,11 @@ import (
 	"strings"
 )
 
-var Version = "dev"
-var Commit = ""
-var BuildDate = ""
+var (
+	Version   = "dev"
+	Commit    = ""
+	BuildDate = ""
+)
 
 func runVersion(out io.Writer) error {
 	_, err := fmt.Fprintf(out, "ceo-packet %s\n", versionDetails())

@@ -68,7 +68,6 @@ func Test_Runtime_RunJob_passes_stage_tool_feedback_to_later_subagents(t *testin
 		Task:         "Fix a failing test",
 		WorkspaceDir: root,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

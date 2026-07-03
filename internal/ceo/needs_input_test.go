@@ -32,7 +32,6 @@ func Test_Runtime_RunJob_returns_needs_input_verdict_when_subagent_needs_user_in
 
 	// When
 	report, err := runtime.RunJob(context.Background(), JobRequest{Task: "Fix ambiguous package"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

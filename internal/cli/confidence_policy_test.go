@@ -22,7 +22,6 @@ func Test_Run_falls_back_when_primary_provider_confidence_is_low(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -68,7 +67,6 @@ func Test_Run_uses_min_subagent_confidence_flag_over_workspace_config(t *testing
 		"a",
 		"bug",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -102,7 +100,6 @@ func Test_Run_writes_min_subagent_confidence_when_init_config_flag_is_supplied(t
 		"--min-subagent-confidence",
 		"0.7",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -135,7 +132,6 @@ func Test_Run_prints_min_subagent_confidence_config_check(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

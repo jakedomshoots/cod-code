@@ -110,7 +110,8 @@ func (r Runner) Run(ctx context.Context, packet TaskPacket) (Result, error) {
 		Role:        packet.Role,
 		Assignment:  assignment,
 		ContextMode: packet.ContextMode,
-		AllowedActions: append([]string(nil),
+		AllowedActions: append(
+			[]string(nil),
 			packet.AllowedActions...,
 		),
 		WorkspaceBrief: workspaceBrief,

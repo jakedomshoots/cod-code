@@ -50,7 +50,6 @@ func Test_Runtime_RunJob_runs_bounded_check_fix_after_failed_check(t *testing.T)
 		},
 		CheckEnv: []string{"GO_WANT_CEO_CHECK_FIX=1", "GO_CEO_FIX_TARGET=" + target},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -101,7 +100,6 @@ func Test_Runtime_RunJob_skips_check_fix_when_max_ceo_iterations_is_exhausted(t 
 		},
 		CheckEnv: []string{"GO_WANT_CEO_CHECK_FIX=1", "GO_CEO_FIX_TARGET=" + target},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

@@ -27,7 +27,6 @@ func Test_Run_with_example_command_model_script(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

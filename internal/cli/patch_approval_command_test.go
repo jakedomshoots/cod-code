@@ -38,7 +38,6 @@ func Test_Run_applies_cli_patch_when_preview_digest_is_approved(t *testing.T) {
 		"--replace", "app.txt", "old", "new",
 		"Patch", "app", "text",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("apply Run returned error: %v\n%s", err, applyOut.String())

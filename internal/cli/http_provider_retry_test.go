@@ -42,7 +42,6 @@ func Test_Run_retries_rate_limited_http_provider_once_without_subagent_attempts_
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "rate", "limit"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

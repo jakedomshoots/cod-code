@@ -30,7 +30,6 @@ func Test_Run_prints_provider_cost_estimate_when_http_provider_has_prices(t *tes
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "cost", "smoke"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

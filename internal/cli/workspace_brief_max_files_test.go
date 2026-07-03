@@ -19,7 +19,6 @@ func Test_Run_limits_workspace_brief_files_when_flag_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--workspace-brief-max-files", "1", "Fix", "workspace", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -52,7 +51,6 @@ func Test_Run_writes_workspace_brief_max_files_when_init_config_flag_is_supplied
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -85,7 +83,6 @@ func Test_Run_prints_workspace_brief_max_files_config_check(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

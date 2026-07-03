@@ -26,7 +26,6 @@ func Test_Store_Append_writes_jsonl_entry_when_workspace_is_set(t *testing.T) {
 		CheckCount:    1,
 		PatchCount:    0,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Append returned error: %v", err)
@@ -65,7 +64,6 @@ func Test_Store_ReadAll_reads_appended_entries_when_history_exists(t *testing.T)
 
 	// When
 	entries, err := store.ReadAll(context.Background())
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReadAll returned error: %v", err)
@@ -95,7 +93,6 @@ func Test_Store_Append_sets_created_at_when_entry_has_no_timestamp(t *testing.T)
 		Task:    "Scan repo",
 		Verdict: "pass",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Append returned error: %v", err)
@@ -132,7 +129,6 @@ func Test_Store_ReadByVerdict_returns_matching_entries_when_verdict_is_set(t *te
 
 	// When
 	filtered, err := store.ReadByVerdict(context.Background(), "fail")
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReadByVerdict returned error: %v", err)
@@ -160,7 +156,6 @@ func Test_Store_ReadRecent_returns_latest_entries_when_limit_is_set(t *testing.T
 
 	// When
 	entries, err := store.ReadRecent(context.Background(), 2)
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReadRecent returned error: %v", err)
@@ -186,7 +181,6 @@ func Test_FilterByCreatedAtRange_returns_entries_inside_bounds(t *testing.T) {
 
 	// When
 	filtered, err := FilterByCreatedAtRange(entries, TimeRange{Since: since, Until: until})
-
 	// Then
 	if err != nil {
 		t.Fatalf("FilterByCreatedAtRange returned error: %v", err)
@@ -246,7 +240,6 @@ func Test_Store_FindByID_returns_entry_when_id_exists(t *testing.T) {
 
 	// When
 	entry, err := store.FindByID(context.Background(), "job-000001")
-
 	// Then
 	if err != nil {
 		t.Fatalf("FindByID returned error: %v", err)

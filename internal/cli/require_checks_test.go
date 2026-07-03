@@ -41,7 +41,6 @@ func Test_Run_uses_workspace_require_checks_when_check_command_is_configured(t *
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "checkout", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -83,7 +82,6 @@ func Test_Run_writes_require_checks_when_init_config_flag_is_supplied(t *testing
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--init-config", "--require-checks"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -116,7 +114,6 @@ func Test_Run_prints_require_checks_in_config_check(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

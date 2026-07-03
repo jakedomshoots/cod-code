@@ -19,7 +19,6 @@ func Test_LoadWorkspace_resolves_agent_http_provider_when_provider_exists(t *tes
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

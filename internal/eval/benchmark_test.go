@@ -44,7 +44,6 @@ func Test_RunBenchmarkFixtures_writes_scores_for_all_tasks_when_specs_are_valid(
 		OutputDir:  outputDir,
 		ReportMode: "deterministic_fixture_scoring",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunBenchmarkFixtures returned error: %v", err)
@@ -121,7 +120,6 @@ func Test_RunCLI_runs_benchmark_fixtures_when_flag_is_set(t *testing.T) {
 		"--tasks", tasksDir,
 		"--output-dir", outputDir,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunCLI returned error: %v", err)

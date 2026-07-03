@@ -24,7 +24,6 @@ func Test_Run_review_queue_includes_compact_context_when_details_flag_is_supplie
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--review-queue", "--review-details"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -65,7 +64,6 @@ func Test_Run_review_queue_prints_compact_context_when_text_details_flag_is_supp
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--review-queue", "--review-details", "--format", "text"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -127,7 +125,6 @@ func Test_Run_review_queue_details_loads_context_only_after_limit_is_applied(t *
 		"--review-details",
 		"--limit", "1",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

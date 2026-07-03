@@ -21,7 +21,6 @@ func Test_Run_dry_run_previews_cli_patch_without_writing(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -105,7 +104,6 @@ func Test_Run_dry_run_previews_model_patch_without_writing(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

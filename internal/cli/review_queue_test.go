@@ -41,7 +41,6 @@ func Test_Run_review_queue_lists_jobs_that_need_human_attention(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--review-queue"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -108,7 +107,6 @@ func Test_Run_review_queue_includes_compact_recovery_fields(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--review-queue"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -160,7 +158,6 @@ func Test_Run_review_queue_prints_text_when_format_text_is_supplied(t *testing.T
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--review-queue", "--format", "text"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -231,7 +228,6 @@ func Test_Run_review_queue_respects_task_filter_and_limit_after_filtering(t *tes
 		"--task", "auth",
 		"--limit", "2",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

@@ -40,7 +40,6 @@ func Test_Run_prints_provider_health_rollup_when_provider_health_flag_is_supplie
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--provider-health"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

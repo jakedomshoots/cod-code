@@ -68,10 +68,6 @@ func parseRetryAfterMS(value string, now time.Time) int64 {
 	return wait.Milliseconds()
 }
 
-func classifyHTTPStatus(status int) error {
-	return sentinelForHTTPErrorKind(classifyHTTPErrorKind(status))
-}
-
 func classifyHTTPErrorKind(status int) HTTPErrorKind {
 	switch {
 	case status == http.StatusUnauthorized || status == http.StatusForbidden:

@@ -38,7 +38,6 @@ func Test_Run_sends_provider_max_output_tokens_to_http_provider(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "token", "cap", "smoke"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

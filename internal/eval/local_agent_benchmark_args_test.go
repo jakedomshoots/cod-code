@@ -47,7 +47,6 @@ printf '{"verdict":"pass"}\n'
 		CEOHarnessBinary: filepath.Join(binDir, "ceo-packet"),
 		BenchmarkTaskID:  "docs-roadmap-cli-first",
 	})
-
 	if err != nil {
 		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
 	}
@@ -80,7 +79,6 @@ func Test_BuildLocalAgentBenchmarkSpec_uses_model_command_mode(t *testing.T) {
 		CEOBenchmarkMode:         ceoBenchmarkModeModelCommand,
 		CEOBenchmarkModelCommand: []string{"go", "run", "model.go"},
 	}, task)
-
 	if err != nil {
 		t.Fatalf("buildLocalAgentBenchmarkSpec returned error: %v", err)
 	}
@@ -140,7 +138,6 @@ func Test_BuildLocalAgentBenchmarkSpec_syntheticModePassesRequiredCheck(t *testi
 	}
 
 	spec, err := buildLocalAgentBenchmarkSpec("ceo_harness", LocalAgentBenchmarkRequest{}, task)
-
 	if err != nil {
 		t.Fatalf("buildLocalAgentBenchmarkSpec returned error: %v", err)
 	}
@@ -196,7 +193,6 @@ func Test_BuildLocalAgentBenchmarkSpec_httpProviderModeWritesWorkspaceConfig(t *
 		CEOBenchmarkProviderAPIKeyEnv:     "OPENROUTER_API_KEY",
 		CEOBenchmarkProviderMaxOutputToks: 2048,
 	}, task)
-
 	if err != nil {
 		t.Fatalf("buildLocalAgentBenchmarkSpec returned error: %v", err)
 	}

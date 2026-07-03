@@ -27,7 +27,6 @@ func Test_Run_prints_job_history_when_history_flag_is_supplied(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -67,7 +66,6 @@ func Test_Run_prints_created_at_when_history_entry_has_timestamp(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -108,7 +106,6 @@ func Test_Run_history_includes_compact_recovery_fields(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

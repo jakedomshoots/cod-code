@@ -18,7 +18,6 @@ func Test_LoadWorkspace_resolves_auto_check_set_when_task_matches_keyword(t *tes
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

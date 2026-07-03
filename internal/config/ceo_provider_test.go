@@ -18,7 +18,6 @@ func Test_LoadWorkspace_reads_ceo_provider_when_provider_exists(t *testing.T) {
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

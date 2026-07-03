@@ -29,7 +29,6 @@ func Test_Run_uses_command_model_when_model_command_flag_is_supplied(t *testing.
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -62,7 +61,6 @@ func Test_Run_uses_command_model_when_env_command_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -95,7 +93,6 @@ func Test_Run_uses_command_model_when_workspace_config_is_supplied(t *testing.T)
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

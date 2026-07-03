@@ -24,7 +24,6 @@ func Test_proposedModelPatches_reads_single_patch_capable_specialist(t *testing.
 
 	// When
 	patches, err := proposedModelPatches(results)
-
 	// Then
 	if err != nil {
 		t.Fatalf("proposedModelPatches returned error: %v", err)

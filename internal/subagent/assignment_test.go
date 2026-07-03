@@ -34,7 +34,6 @@ func Test_Runner_Run_includes_assignment_in_prompt_and_result(t *testing.T) {
 		ContextMode:    "lean",
 		AllowedActions: []string{"read_workspace"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

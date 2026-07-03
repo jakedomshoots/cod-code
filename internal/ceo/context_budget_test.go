@@ -36,7 +36,6 @@ func Test_Runtime_RunJob_uses_subagent_context_budget_when_configured(t *testing
 			{Name: "reviewer", Role: "verify evidence"},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -58,7 +57,6 @@ func Test_Runtime_RunJob_passes_context_budget_to_subagents_when_packet_is_built
 	report, err := runtime.RunJob(context.Background(), JobRequest{
 		Task: "Fix a failing test",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -85,7 +83,6 @@ func Test_Runtime_RunJob_reports_only_prior_findings_sent_under_context_budget(t
 		Task:            "Fix a very long failing checkout workflow",
 		MaxContextBytes: 10,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

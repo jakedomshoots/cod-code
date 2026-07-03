@@ -34,7 +34,6 @@ func Test_Run_applies_check_backoff_flag_between_retries(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

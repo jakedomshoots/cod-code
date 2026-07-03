@@ -10,8 +10,10 @@ import (
 	"strings"
 )
 
-const JobReportDir = "ceo-artifacts/jobs"
-const ReportSchemaVersion = 1
+const (
+	JobReportDir        = "ceo-artifacts/jobs"
+	ReportSchemaVersion = 1
+)
 
 const legacyReportWarning = "missing schema_version; treating as legacy report compatible with schema v1"
 
@@ -129,7 +131,7 @@ func (s Store) InspectReportRecovery(ctx context.Context) ([]ReportRecoveryIssue
 func reportSnapshotMetadata(report []byte) (ReportSnapshotMetadata, error) {
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(report, &fields); err != nil {
-		return ReportSnapshotMetadata{}, fmt.Errorf("%w: %v", ErrInvalidReportSnapshot, err)
+		return ReportSnapshotMetadata{}, fmt.Errorf("%w: %w", ErrInvalidReportSnapshot, err)
 	}
 	rawVersion, ok := fields["schema_version"]
 	if !ok {

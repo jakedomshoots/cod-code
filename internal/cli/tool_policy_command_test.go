@@ -36,7 +36,6 @@ func Test_Run_limits_tool_requests_with_flag(t *testing.T) {
 		"a",
 		"bug",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -84,7 +83,6 @@ func Test_Run_uses_workspace_max_tool_requests_default(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -117,7 +115,6 @@ func Test_Run_writes_max_tool_requests_when_init_config_flag_is_supplied(t *test
 		"--max-tool-requests",
 		"2",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -150,7 +147,6 @@ func Test_Run_prints_max_tool_requests_config_check(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

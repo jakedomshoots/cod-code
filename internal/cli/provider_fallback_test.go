@@ -21,7 +21,6 @@ func Test_Run_falls_back_to_provider_policy_fallback_when_primary_provider_fails
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -84,7 +83,6 @@ func Test_Run_config_check_reports_provider_policy_fallback(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

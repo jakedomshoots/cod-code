@@ -18,7 +18,6 @@ func Test_LoadWorkspace_reads_min_subagent_confidence_when_config_exists(t *test
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

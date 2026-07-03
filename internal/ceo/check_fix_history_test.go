@@ -29,7 +29,6 @@ func Test_Runtime_RunJob_records_check_fix_patch_counts_in_history(t *testing.T)
 		},
 		CheckEnv: []string{"GO_WANT_CEO_CHECK_FIX=1", "GO_CEO_FIX_TARGET=" + target},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

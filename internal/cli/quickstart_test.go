@@ -20,7 +20,6 @@ func Test_Run_quickstarts_workspace_with_example_adapters_and_doctor_check(t *te
 
 	// When
 	err := Run(context.Background(), &out, []string{"--quickstart", root})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -52,7 +51,6 @@ func Test_Run_quickstart_prints_text_first_run_checklist_when_format_text_is_sup
 
 	// When
 	err := Run(context.Background(), &out, []string{"--quickstart", root, "--format", "text"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -141,7 +139,6 @@ func Test_Run_quickstart_enables_required_go_checks_when_go_module_is_detected(t
 
 	// When
 	err := Run(context.Background(), &out, []string{"--quickstart", root})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -170,7 +167,6 @@ func Test_Run_quickstart_enables_required_npm_checks_when_package_test_script_is
 
 	// When
 	err := Run(context.Background(), &out, []string{"--quickstart", root})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

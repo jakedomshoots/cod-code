@@ -40,7 +40,6 @@ func Test_RoutingRunner_Run_records_route_metadata_when_agent_matches(t *testing
 		ContextMode:     "lean",
 		MaxContextBytes: 256,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -72,7 +71,6 @@ func Test_RoutingRunner_Run_uses_fallback_client_when_primary_route_fails(t *tes
 		ContextMode:     "lean",
 		MaxContextBytes: 256,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -113,7 +111,6 @@ func Test_RoutingRunner_Run_records_typed_fallback_reason_when_primary_command_t
 		ContextMode:     "lean",
 		MaxContextBytes: 256,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -146,7 +143,6 @@ func Test_RoutingRunner_Run_uses_fallback_client_when_primary_confidence_is_low(
 		ContextMode:     "lean",
 		MaxContextBytes: 256,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -186,7 +182,6 @@ func Test_RoutingRunner_Run_marks_low_confidence_result_failed_when_no_fallback_
 		ContextMode:     "lean",
 		MaxContextBytes: 256,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

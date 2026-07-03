@@ -25,7 +25,6 @@ func Test_Runtime_RunJob_reports_compact_run_events(t *testing.T) {
 		},
 		CheckEnv: []string{"GO_WANT_TOOL_REQUEST_CHECK=1"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

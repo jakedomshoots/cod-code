@@ -10,7 +10,6 @@ func Test_BuildWithSubagents_preserves_custom_subagent_provider(t *testing.T) {
 
 	// When
 	packet, err := BuildWithSubagents("Review checkout UX", subagents)
-
 	// Then
 	if err != nil {
 		t.Fatalf("BuildWithSubagents returned error: %v", err)

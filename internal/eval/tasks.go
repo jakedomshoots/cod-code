@@ -27,7 +27,7 @@ func LoadTasks(ctx context.Context, dir string) ([]Task, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	var tasks []Task
+	tasks := []Task{}
 	err := filepath.WalkDir(dir, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr

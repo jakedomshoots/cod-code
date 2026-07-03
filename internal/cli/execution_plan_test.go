@@ -13,7 +13,6 @@ func Test_Run_prints_execution_plan_when_task_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

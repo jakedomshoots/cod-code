@@ -21,7 +21,6 @@ func Test_Workspace_ReadText_reads_bounded_file_content(t *testing.T) {
 
 	// When
 	result, err := space.ReadText(context.Background(), ReadTextRequest{Path: "app.txt", MaxBytes: 5})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReadText returned error: %v", err)
@@ -66,7 +65,6 @@ func Test_Workspace_SearchText_returns_bounded_matches(t *testing.T) {
 
 	// When
 	result, err := space.SearchText(context.Background(), SearchTextRequest{Query: "needle", MaxMatches: 1})
-
 	// Then
 	if err != nil {
 		t.Fatalf("SearchText returned error: %v", err)

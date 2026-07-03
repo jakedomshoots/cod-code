@@ -22,7 +22,6 @@ func Test_Run_prints_provider_health_policy_when_config_check_runs(t *testing.T)
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -71,7 +70,6 @@ func Test_Run_prints_provider_health_route_avoidance_when_config_check_runs(t *t
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

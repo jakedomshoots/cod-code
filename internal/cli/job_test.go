@@ -26,7 +26,6 @@ func Test_Run_prints_history_job_when_job_flag_is_supplied(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--job", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -54,7 +53,6 @@ func Test_Run_prints_run_ledger_in_history_job_when_job_flag_is_supplied(t *test
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--job", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -102,7 +100,6 @@ func Test_Run_prints_human_judgment_in_history_job_when_present(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--job", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -141,7 +138,6 @@ func Test_Run_prints_job_report_snapshot_when_job_report_flag_is_supplied(t *tes
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--job-report", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -178,7 +174,6 @@ func Test_Run_prints_legacy_schema_warning_when_job_report_latest_is_old_snapsho
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--job-report", "latest"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

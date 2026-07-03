@@ -30,7 +30,6 @@ func Test_Run_history_includes_human_judgment_when_present(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -84,7 +83,6 @@ func Test_Run_history_summary_counts_human_judgments(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history", "--summary-only"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

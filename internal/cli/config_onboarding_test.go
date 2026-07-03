@@ -28,7 +28,6 @@ func Test_Run_config_completions_writes_shell_files_when_requested(t *testing.T)
 
 			// When
 			err := Run(context.Background(), &out, []string{"config", "completions", "--shell", tt.shell, "--output-dir", outputDir})
-
 			// Then
 			if err != nil {
 				t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -82,7 +81,6 @@ func Test_Run_config_doctor_prints_compact_health_when_alias_is_supplied(t *test
 
 	// When
 	err := Run(context.Background(), &out, []string{"config", "doctor", "--workspace", root, "--format", "text"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -107,7 +105,6 @@ func Test_Run_config_explain_prints_compact_first_run_checklist(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"config", "explain", "--workspace", root, "--format", "text"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -143,7 +140,6 @@ func Test_Run_config_doctor_redacts_secret_values_when_api_key_is_missing(t *tes
 
 	// When
 	err := Run(context.Background(), &out, []string{"config", "doctor", "--workspace", root, "--format", "text"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

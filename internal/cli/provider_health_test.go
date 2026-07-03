@@ -30,7 +30,6 @@ func Test_Run_prints_provider_health_and_history_when_http_provider_has_prices(t
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "provider", "health"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

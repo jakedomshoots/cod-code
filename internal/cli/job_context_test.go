@@ -89,7 +89,6 @@ func Test_Run_prints_compact_job_context_when_job_context_flag_is_supplied(t *te
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--job-context", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

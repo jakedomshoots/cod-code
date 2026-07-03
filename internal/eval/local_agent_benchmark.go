@@ -21,6 +21,9 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 	if err != nil {
 		return LocalAgentBenchmarkSummary{}, err
 	}
+	if len(tasks) == 0 {
+		return LocalAgentBenchmarkSummary{}, fmt.Errorf("%w: no benchmark tasks selected", ErrInvalidTask)
+	}
 	if err := os.MkdirAll(req.OutputDir, 0o755); err != nil {
 		return LocalAgentBenchmarkSummary{}, fmt.Errorf("create local agent benchmark output dir: %w", err)
 	}

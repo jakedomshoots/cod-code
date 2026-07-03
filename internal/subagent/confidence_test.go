@@ -8,7 +8,6 @@ func Test_ParseModelOutput_reads_confidence_when_json_includes_confidence(t *tes
 
 	// When
 	output, err := ParseModelOutput(payload)
-
 	// Then
 	if err != nil {
 		t.Fatalf("ParseModelOutput returned error: %v", err)

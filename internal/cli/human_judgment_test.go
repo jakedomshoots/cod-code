@@ -23,7 +23,6 @@ func Test_Run_writes_human_judgment_when_verdict_is_supplied(t *testing.T) {
 		"--human-verdict", "accept",
 		"--judgment-note", "Ship it.",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -65,7 +64,6 @@ func Test_Run_reads_human_judgment_when_verdict_is_omitted(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--judge-job", "last"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

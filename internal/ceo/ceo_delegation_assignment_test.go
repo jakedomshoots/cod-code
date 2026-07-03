@@ -49,7 +49,6 @@ func Test_Runtime_RunJob_passes_ceo_delegated_assignment_to_selected_subagent(t 
 			{Name: "security", Role: "review auth risks"},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

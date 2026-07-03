@@ -30,7 +30,6 @@ func Test_Run_passes_ceo_assignment_to_selected_subagent_model(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "auth", "flow"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

@@ -71,7 +71,6 @@ func Test_RetryReport_records_check_fix_history_when_repair_runs(t *testing.T) {
 		},
 		CheckEnv: []string{"GO_WANT_CEO_CHECK_FIX=1", "GO_CEO_FIX_TARGET=" + target},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -126,7 +125,6 @@ func Test_Revision_records_retry_history_when_ceo_veto_is_repaired(t *testing.T)
 		},
 		CheckEnv: []string{"GO_WANT_CEO_REVISION_CHECK=1"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -169,7 +167,6 @@ func Test_BadOutput_invalid_model_patch_json_does_not_crash_or_claim_pass(t *tes
 		},
 		CheckEnv: []string{"GO_WANT_CEO_CHECK_FIX=1", "GO_CEO_FIX_TARGET=" + target},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -207,7 +204,6 @@ func Test_NoProgress_repeated_noop_check_fix_stops_with_reason(t *testing.T) {
 		},
 		CheckEnv: []string{"GO_WANT_CEO_CHECK_FIX=1", "GO_CEO_FIX_TARGET=" + target},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

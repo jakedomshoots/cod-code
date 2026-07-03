@@ -16,7 +16,6 @@ func Test_parseCEODelegationResponse_parses_fenced_json(t *testing.T) {
 
 	// When
 	selected, delegation, err := parseCEODelegationResponse(response, candidates)
-
 	// Then
 	if err != nil {
 		t.Fatalf("parseCEODelegationResponse returned error: %v", err)
@@ -37,7 +36,6 @@ func Test_parseCEOReviewResponse_parses_fenced_json(t *testing.T) {
 
 	// When
 	review, err := parseCEOReviewResponse(response)
-
 	// Then
 	if err != nil {
 		t.Fatalf("parseCEOReviewResponse returned error: %v", err)

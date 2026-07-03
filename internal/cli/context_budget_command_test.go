@@ -75,7 +75,6 @@ func Test_Run_prints_workspace_brief_exclude_count_config_check(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

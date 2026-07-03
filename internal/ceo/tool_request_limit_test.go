@@ -67,7 +67,6 @@ func Test_Runtime_RunJob_skips_tool_requests_after_configured_limit(t *testing.T
 			},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

@@ -64,7 +64,6 @@ func Test_Runtime_RunJob_stops_repeated_weak_subagent_after_no_progress_limit(t 
 		SubagentAttempts: 4,
 		NoProgressStop:   2,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -98,7 +97,6 @@ func Test_Runtime_RunJob_continues_when_weak_subagent_makes_progress(t *testing.
 		SubagentAttempts: 3,
 		NoProgressStop:   2,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

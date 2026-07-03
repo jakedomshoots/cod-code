@@ -34,6 +34,11 @@ tasks:
     cmds:
       - go vet ./...
 
+  strict:
+    desc: Run stricter optional local gates when installed
+    cmds:
+      - sh scripts/strict-checks.sh
+
   smoke:
     desc: Run the local CLI smoke check
     cmds:

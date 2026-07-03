@@ -15,7 +15,6 @@ func Test_Run_prints_compact_run_events(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -47,7 +46,6 @@ func Test_Run_prints_events_jsonl_when_events_format_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

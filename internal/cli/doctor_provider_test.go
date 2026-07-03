@@ -31,7 +31,6 @@ func Test_Run_prints_provider_doctor_check_when_provider_is_configured(t *testin
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--doctor"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -79,7 +78,6 @@ func Test_Run_prints_named_provider_doctor_check_when_doctor_provider_is_supplie
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--doctor-provider", "main"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

@@ -26,7 +26,6 @@ func Test_Run_routes_ceo_created_subagent_to_requested_provider(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Plan", "checkout", "UX"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

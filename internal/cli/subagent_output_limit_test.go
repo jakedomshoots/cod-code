@@ -29,7 +29,6 @@ func Test_Run_caps_subagent_output_with_flag(t *testing.T) {
 		"a",
 		"bug",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -78,7 +77,6 @@ func Test_Run_uses_workspace_max_subagent_output_default(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -99,7 +97,6 @@ func Test_Run_writes_max_subagent_output_when_init_config_flag_is_supplied(t *te
 		"--max-subagent-output-bytes",
 		"64",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -132,7 +129,6 @@ func Test_Run_prints_max_subagent_output_config_check(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

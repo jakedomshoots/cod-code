@@ -134,7 +134,6 @@ func Test_RoutingRunner_Run_records_typed_fallback_reason_when_primary_output_is
 		ContextMode:     "lean",
 		MaxContextBytes: 512,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

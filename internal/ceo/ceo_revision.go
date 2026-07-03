@@ -175,6 +175,12 @@ func (r Runtime) runCEORevisionLoop(ctx context.Context, state ceoRevisionState)
 			return state, err
 		}
 		state.CEOReview = review
+		if state.CEOReview == nil {
+			history.Status = "pass"
+			history.FinalVerdict = "pass"
+			state.RetryHistory = append(state.RetryHistory, history)
+			return state, nil
+		}
 		if !shouldRunCEORevision(state.GuardVerdict, state.CEOReview) {
 			history.Status = "pass"
 			history.FinalVerdict = "pass"

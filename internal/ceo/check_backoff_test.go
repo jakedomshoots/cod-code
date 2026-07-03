@@ -25,7 +25,6 @@ func Test_Runtime_RunJob_waits_between_check_retries_when_backoff_is_set(t *test
 		CheckAttempts:  2,
 		CheckBackoffMS: 20,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

@@ -14,7 +14,6 @@ func Test_Run_prints_task_profile_and_history_metadata_when_task_is_mixed_risk(t
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Research", "auth", "bug", "and", "implement", "fix"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -75,7 +74,6 @@ func Test_Run_prints_risk_specific_subagents_for_database_billing_release_task(t
 
 	// When
 	err := Run(context.Background(), &out, []string{"--max-subagents", "7", "Research", "payment", "database", "migration", "and", "deploy", "the", "fix"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -117,7 +115,6 @@ func Test_Run_prints_task_profile_counts_when_history_summary_is_requested(t *te
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--history", "--summary-only"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run history returned error: %v", err)
@@ -153,7 +150,8 @@ func assertStringSlice(t *testing.T, got []string, want []string) {
 
 func assertSubagentNames(t *testing.T, got []struct {
 	Name string `json:"name"`
-}, want []string) {
+}, want []string,
+) {
 	t.Helper()
 	if len(got) != len(want) {
 		t.Fatalf("subagents = %#v, want %v", got, want)

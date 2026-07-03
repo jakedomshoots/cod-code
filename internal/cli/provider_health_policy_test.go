@@ -35,7 +35,6 @@ func Test_Run_provider_health_rollup_uses_workspace_policy_thresholds(t *testing
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--provider-health"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -88,7 +87,6 @@ func Test_Run_provider_health_rollup_uses_workspace_cost_policy_threshold(t *tes
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--provider-health"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

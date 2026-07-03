@@ -51,7 +51,6 @@ func Test_Runtime_RunJob_retries_rate_limited_subagent_once_without_retry_config
 	report, err := runtime.RunJob(context.Background(), JobRequest{
 		Task: "Fix a rate limited provider call",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

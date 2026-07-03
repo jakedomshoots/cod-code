@@ -11,7 +11,6 @@ func Test_Build_returns_lean_ceo_packet_when_task_is_valid(t *testing.T) {
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -48,7 +47,6 @@ func Test_Build_assigns_role_scoped_allowed_actions(t *testing.T) {
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)

@@ -30,7 +30,6 @@ func Test_Run_filters_job_history_when_verdict_flag_is_supplied(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history", "--verdict", "fail"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -68,7 +67,6 @@ func Test_Run_limits_job_history_when_limit_flag_is_supplied(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history", "--limit", "2"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -115,7 +113,6 @@ func Test_Run_filters_job_history_when_since_and_until_flags_are_supplied(t *tes
 		"--since", "2026-07-01T10:00:00Z",
 		"--until", "2026-07-01T13:00:00Z",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

@@ -27,7 +27,6 @@ func Test_CommandClient_Complete_sends_prompt_to_command_stdin(t *testing.T) {
 	response, err := client.Complete(context.Background(), Request{
 		Prompt: "hello model",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Complete returned error: %v", err)

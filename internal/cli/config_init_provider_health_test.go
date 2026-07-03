@@ -30,7 +30,6 @@ func Test_Run_writes_provider_health_policy_when_init_config_policy_flags_are_su
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

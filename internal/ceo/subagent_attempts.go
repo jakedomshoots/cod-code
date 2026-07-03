@@ -14,7 +14,7 @@ func (r Runtime) runSubagentWithAttempts(ctx context.Context, input subagentRunI
 	var result subagent.Result
 	attemptErrors := []string{}
 	attemptRecords := []subagent.AttemptRecord{}
-	lastProviderError := providerErrorFields{}
+	var lastProviderError providerErrorFields
 	packet := input.Packet
 	agent := input.Agent
 	attempts := input.Attempts

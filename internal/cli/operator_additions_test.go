@@ -18,7 +18,6 @@ func Test_Run_start_initializes_workspace_and_prints_operator_next_steps(t *test
 
 	// When
 	err := Run(context.Background(), &out, []string{"--start", root, "--format", "text"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -42,7 +41,6 @@ func Test_Run_inbox_prints_review_queue_with_details_as_text(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--inbox"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -67,7 +65,6 @@ func Test_Run_provider_wizard_writes_openai_provider_config(t *testing.T) {
 		"--http-model", "gpt-5",
 		"--format", "text",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -95,7 +92,6 @@ func Test_Run_init_demo_repo_creates_runnable_golden_repo(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--init-demo-repo", root, "--format", "text"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -118,7 +114,6 @@ func Test_Run_tui_prints_operator_dashboard(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--tui"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

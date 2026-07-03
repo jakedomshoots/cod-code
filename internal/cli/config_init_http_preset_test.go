@@ -28,7 +28,6 @@ func Test_Run_writes_http_provider_from_preset_when_init_config_http_preset_is_s
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -69,7 +68,6 @@ func Test_Run_writes_default_provider_policy_when_init_config_default_provider_i
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -114,7 +112,6 @@ func Test_Run_writes_multiple_http_providers_when_init_config_http_provider_repe
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -162,7 +159,6 @@ func Test_Run_writes_risk_area_provider_policy_when_init_config_risk_area_provid
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

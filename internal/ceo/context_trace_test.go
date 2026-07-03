@@ -26,7 +26,6 @@ func Test_Runtime_RunJob_records_context_trace_when_subagents_receive_packets(t 
 		MaxContextBytes:        64,
 		WorkspaceBriefExcludes: []string{".env"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -59,7 +58,6 @@ func Test_Runtime_RunJob_marks_context_trace_truncated_when_budget_is_tiny(t *te
 		Task:            task,
 		MaxContextBytes: 12,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

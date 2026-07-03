@@ -18,7 +18,6 @@ func Test_LoadWorkspace_reads_subagent_output_policy_when_config_exists(t *testi
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

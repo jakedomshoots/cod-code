@@ -73,7 +73,6 @@ func Test_Run_writes_job_timeout_when_init_config_flag_is_supplied(t *testing.T)
 		"--job-timeout-ms",
 		"2500",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -106,7 +105,6 @@ func Test_Run_prints_job_timeout_config_check(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

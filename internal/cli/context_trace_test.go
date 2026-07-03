@@ -31,7 +31,6 @@ func Test_Run_prints_context_trace_for_saved_job_when_context_command_is_supplie
 
 	// When
 	err := Run(context.Background(), &out, []string{"context", "--workspace", root, "latest"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("context trace Run returned error: %v\n%s", err, out.String())
@@ -105,7 +104,6 @@ func Test_Run_context_trace_marks_truncation_when_saved_job_used_tiny_budget(t *
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--context-trace", "latest"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("context trace Run returned error: %v\n%s", err, out.String())
@@ -139,7 +137,6 @@ func Test_Run_context_trace_redacts_secrets_and_omits_repo_file_contents(t *test
 		"--context-trace", "latest",
 		"--format", "text",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("context trace Run returned error: %v\n%s", err, out.String())

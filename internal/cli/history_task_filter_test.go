@@ -25,7 +25,6 @@ func Test_Run_filters_job_history_when_task_flag_is_supplied(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history", "--task", "checkout"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

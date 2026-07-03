@@ -25,7 +25,6 @@ func Test_Runtime_RunJob_runs_check_command_from_workspace(t *testing.T) {
 		},
 		CheckEnv: []string{"GO_WANT_CEO_HELPER_PROCESS=workspace_check"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

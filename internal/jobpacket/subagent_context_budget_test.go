@@ -10,7 +10,6 @@ func Test_BuildWithSubagents_preserves_custom_subagent_context_budget(t *testing
 
 	// When
 	packet, err := BuildWithSubagents("Fix a failing test", subagents)
-
 	// Then
 	if err != nil {
 		t.Fatalf("BuildWithSubagents returned error: %v", err)

@@ -31,7 +31,6 @@ func Test_Runner_Run_parses_tool_requests_when_model_returns_fenced_json(t *test
 		AllowedActions:  []string{"read_workspace"},
 		MaxContextBytes: 512,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

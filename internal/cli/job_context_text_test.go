@@ -26,7 +26,6 @@ func Test_Run_prints_compact_job_context_text_when_format_text_is_supplied(t *te
 		"--job-context", "job-000001",
 		"--format", "text",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

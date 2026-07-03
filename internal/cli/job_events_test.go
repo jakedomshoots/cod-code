@@ -19,7 +19,6 @@ func Test_Run_prints_saved_job_events_jsonl_when_job_events_flag_is_supplied(t *
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--job-events", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -51,7 +50,6 @@ func Test_Run_prints_saved_job_events_jsonl_when_job_events_latest_alias_is_supp
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--job-events", "latest"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

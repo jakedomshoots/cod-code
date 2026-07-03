@@ -31,7 +31,6 @@ func Test_Run_prints_provider_request_metadata_when_http_provider_returns_it(t *
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "metadata", "smoke"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

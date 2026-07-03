@@ -40,7 +40,6 @@ func Test_Run_prints_plan_only_preview_without_running_models(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--plan-only", "Plan", "roadmap"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -124,7 +123,6 @@ func Test_Run_plan_only_reports_ceo_provider_from_workspace_config(t *testing.T)
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--plan-only", "Fix", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -147,7 +145,6 @@ func Test_Run_plan_only_uses_max_subagents_flag_when_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--plan-only", "--max-subagents", "7", "Research", "payment", "database", "migration", "and", "deploy", "the", "fix"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -181,7 +178,6 @@ func Test_Run_plan_only_previews_continue_job_reuse(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--plan-only", "--continue-job", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

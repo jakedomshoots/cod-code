@@ -37,7 +37,6 @@ func Test_Run_routes_away_from_avoided_provider_to_fallback(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "Plan", "roadmap"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -87,7 +86,6 @@ func Test_Run_keeps_route_when_fallback_provider_is_also_avoided(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "Plan", "roadmap"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -133,7 +131,6 @@ func Test_Run_reports_provider_health_route_avoidance_in_run_manifest(t *testing
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "Plan", "roadmap"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

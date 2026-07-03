@@ -21,7 +21,6 @@ func Test_Runner_Run_returns_passed_result_when_command_exits_zero(t *testing.T)
 
 	// When
 	result, err := runner.Run(context.Background(), cmd)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -50,7 +49,6 @@ func Test_Runner_Run_returns_failed_result_when_command_exits_nonzero(t *testing
 
 	// When
 	result, err := runner.Run(context.Background(), cmd)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -78,7 +76,6 @@ func Test_Runner_Run_uses_working_directory_when_configured(t *testing.T) {
 
 	// When
 	result, err := runner.Run(context.Background(), cmd)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -106,7 +103,6 @@ func Test_Runner_Run_returns_failed_result_when_command_times_out(t *testing.T) 
 
 	// When
 	result, err := runner.Run(context.Background(), cmd)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

@@ -29,7 +29,6 @@ func Test_Store_SaveHumanJudgment_reads_judgment_when_job_id_is_valid(t *testing
 		t.Fatalf("SaveHumanJudgment returned error: %v", err)
 	}
 	got, err := store.ReadHumanJudgment(context.Background(), "job-000001")
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReadHumanJudgment returned error: %v", err)

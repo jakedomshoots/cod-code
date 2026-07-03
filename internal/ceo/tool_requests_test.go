@@ -32,7 +32,8 @@ func (r toolRequestRunner) Run(ctx context.Context, packet subagent.TaskPacket) 
 	}
 	requests := []subagent.ToolRequest{}
 	if packet.AgentName == "scanner" {
-		requests = append(requests,
+		requests = append(
+			requests,
 			subagent.ToolRequest{Action: "read_workspace", Path: "app.txt"},
 			subagent.ToolRequest{Action: "search_workspace", Query: "needle"},
 		)
@@ -71,7 +72,6 @@ func Test_Runtime_RunJob_executes_allowed_subagent_tool_requests(t *testing.T) {
 		},
 		CheckEnv: []string{"GO_WANT_TOOL_REQUEST_CHECK=1"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -142,7 +142,6 @@ func Test_Runtime_RunJob_denies_tool_request_when_action_is_not_allowed(t *testi
 			},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -208,7 +207,6 @@ func Test_Runtime_RunJob_executes_allowed_network_research_tool_request(t *testi
 			"-test.run=Test_HelperProcess_network_research_tool",
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

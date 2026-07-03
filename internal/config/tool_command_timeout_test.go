@@ -18,7 +18,6 @@ func Test_LoadWorkspace_reads_tool_command_timeout_when_config_exists(t *testing
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

@@ -17,7 +17,6 @@ func Test_LoadWorkspace_reads_model_command_when_config_exists(t *testing.T) {
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)
@@ -40,7 +39,6 @@ func Test_LoadWorkspace_reads_ceo_model_command_when_config_exists(t *testing.T)
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)
@@ -63,7 +61,6 @@ func Test_LoadWorkspace_reads_research_command_when_config_exists(t *testing.T) 
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)
@@ -86,7 +83,6 @@ func Test_LoadWorkspace_reads_agent_model_commands_when_config_exists(t *testing
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)
@@ -109,7 +105,6 @@ func Test_LoadWorkspace_reads_check_command_when_config_exists(t *testing.T) {
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)
@@ -132,7 +127,6 @@ func Test_LoadWorkspace_resolves_agent_provider_when_provider_exists(t *testing.
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

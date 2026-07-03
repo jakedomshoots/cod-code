@@ -67,7 +67,6 @@ func Test_Run_tui_snapshot_shows_dashboard_when_jobs_exist(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--tui", "--snapshot"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -96,7 +95,6 @@ func Test_Run_tui_snapshot_shows_setup_guidance_when_workspace_empty(t *testing.
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--tui", "--snapshot"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -129,7 +127,6 @@ func Test_RunWithIO_tui_processes_navigation_and_dispatches_action(t *testing.T)
 
 	// When
 	err := RunWithIO(context.Background(), strings.NewReader("down\nup\nenter\nq\n"), &out, []string{"--workspace", root, "--tui"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunWithIO returned error: %v\n%s", err, out.String())

@@ -31,7 +31,6 @@ func Test_Run_continues_saved_job_without_rerunning_passed_subagents(t *testing.
 		"--continue-job",
 		"job-000001",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("continue Run returned error: %v\n%s", err, out.String())
@@ -96,7 +95,6 @@ func Test_Run_records_reused_subagent_count_in_history_when_continuing(t *testin
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--history"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("history Run returned error: %v\n%s", err, out.String())
@@ -138,7 +136,6 @@ func Test_Run_continues_saved_job_without_reasking_ceo_delegation(t *testing.T) 
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--continue-job", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("continue Run returned error: %v\n%s", err, out.String())

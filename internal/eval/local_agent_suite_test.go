@@ -25,7 +25,6 @@ func Test_RunLocalAgentSuite_records_installed_agents_when_commands_match(t *tes
 		Agents:           []string{"ceo_harness", "codex_cli", "opencode", "pi"},
 		CEOHarnessBinary: filepath.Join(binDir, "ceo-packet"),
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentSuite returned error: %v", err)
@@ -52,7 +51,6 @@ func Test_RunLocalAgentSuite_times_out_hung_agent_without_blocking_suite(t *test
 		TimeoutSeconds: 1,
 		Agents:         []string{"pi"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentSuite returned error: %v", err)
@@ -83,7 +81,6 @@ func Test_RunLocalAgentSuite_scores_edit_file_task_when_agent_changes_fixture(t 
 		CEOHarnessBinary: filepath.Join(binDir, "ceo-packet"),
 		Task:             "edit-file",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentSuite returned error: %v", err)
@@ -114,7 +111,6 @@ func Test_RunCLI_runs_local_agent_suite_when_flag_is_set(t *testing.T) {
 		"--output-dir", outputDir,
 		"--timeout-seconds", "5",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunCLI returned error: %v", err)
@@ -166,7 +162,6 @@ func Test_RunLocalAgentBenchmark_scores_real_task_when_agent_changes_fixture(t *
 		Agents:          []string{"codex_cli"},
 		BenchmarkTaskID: "docs-roadmap-cli-first",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
@@ -203,7 +198,6 @@ func Test_RunCLI_runs_local_agent_benchmark_when_flag_is_set(t *testing.T) {
 		"--output-dir", outputDir,
 		"--timeout-seconds", "5",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunCLI returned error: %v", err)

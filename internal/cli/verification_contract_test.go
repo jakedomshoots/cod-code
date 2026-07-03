@@ -26,7 +26,6 @@ func Test_Run_prints_verification_contract_when_check_runs(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -75,7 +74,6 @@ func Test_Run_prints_verification_contract_in_text_report(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

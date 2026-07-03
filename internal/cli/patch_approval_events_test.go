@@ -36,7 +36,6 @@ func Test_Run_prints_patch_approval_event_when_dry_run_previews_patch(t *testing
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -92,7 +91,6 @@ func Test_Run_prints_patch_approval_event_when_digest_is_approved(t *testing.T) 
 		"--replace", "app.txt", "old", "new",
 		"Patch", "app", "text",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("apply Run returned error: %v\n%s", err, applyOut.String())

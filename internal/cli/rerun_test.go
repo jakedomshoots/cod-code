@@ -23,7 +23,6 @@ func Test_Run_reruns_history_job_when_rerun_flag_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--rerun", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("rerun returned error: %v", err)
@@ -93,7 +92,6 @@ func Test_Retry_latest_reruns_latest_failed_job_with_prior_context(t *testing.T)
 
 	// When
 	err = Run(context.Background(), &out, []string{"retry", "latest", "--workspace", root})
-
 	// Then
 	if err != nil {
 		t.Fatalf("retry latest returned error: %v", err)

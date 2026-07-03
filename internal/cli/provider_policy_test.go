@@ -21,7 +21,6 @@ func Test_Run_routes_high_risk_task_to_provider_policy_target(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "auth", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -62,7 +61,6 @@ func Test_Run_routes_risk_area_specialist_to_provider_policy_target(t *testing.T
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Implement", "database", "migration", "fix"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -135,7 +133,6 @@ func Test_Run_prints_provider_route_decisions_in_plan_only_preview(t *testing.T)
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--plan-only", "Implement", "database", "migration", "fix"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -180,7 +177,6 @@ func Test_Run_config_check_reports_provider_policy_rules_when_config_check_flag_
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -200,7 +196,8 @@ func assertRouteDecision(t *testing.T, decisions []struct {
 	AgentName    string `json:"agent_name"`
 	ProviderName string `json:"provider_name"`
 	Reason       string `json:"reason"`
-}, agentName string, providerName string, reason string) {
+}, agentName string, providerName string, reason string,
+) {
 	t.Helper()
 	for _, decision := range decisions {
 		if decision.AgentName != agentName {

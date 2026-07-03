@@ -36,7 +36,6 @@ func Test_Runtime_RunJob_passes_prior_stage_findings_to_later_subagents(t *testi
 
 	// When
 	report, err := runtime.RunJob(context.Background(), JobRequest{Task: "Fix a failing test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

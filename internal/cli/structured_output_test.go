@@ -37,7 +37,6 @@ func Test_Run_applies_structured_coder_patch_and_reports_summary(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

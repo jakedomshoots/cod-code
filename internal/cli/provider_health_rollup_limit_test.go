@@ -35,7 +35,6 @@ func Test_Run_limits_provider_health_rollup_when_top_providers_flag_is_supplied(
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--provider-health", "--top-providers", "1"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

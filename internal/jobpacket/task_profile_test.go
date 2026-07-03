@@ -8,7 +8,6 @@ func Test_Build_adds_task_profile_when_task_mixes_research_and_coding(t *testing
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -28,7 +27,6 @@ func Test_Build_adds_task_profile_when_task_is_planning(t *testing.T) {
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -48,7 +46,6 @@ func Test_Build_adds_task_profile_risk_areas_when_task_has_multiple_high_risk_do
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)

@@ -27,7 +27,6 @@ func Test_Run_uses_default_check_set_when_workspace_config_supplies_default_chec
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -65,7 +64,6 @@ func Test_Run_uses_check_set_flag_when_workspace_config_supplies_named_check_set
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--check-set", "full", "Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

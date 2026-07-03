@@ -50,8 +50,8 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 ## Current Weak Spots
 
 - No public remote repository is configured yet.
-- Strict external tools (`gofumpt`, `golangci-lint`, `nilaway`) are configured/documented but not installed on this machine.
-- The real proof still needs repeated dogfooding on non-demo coding tasks.
+- ShellCheck is not installed on this machine, so shell-script linting is skipped by the strict gate.
+- The real proof still needs repeated dogfooding on more non-demo coding repos.
 - Market gauntlet evidence can still be partial/incomplete when a provider key, CLI login, timeout log, git status snapshot, or scorer artifact is missing.
 - The CLI still has many advanced flags, but the common help surface now starts with the primary operator flow.
 
@@ -74,9 +74,11 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Production-core model-command result: 24 tasks / 24 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-model-command-r4/summary.json`.
 - Bounded external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` with complete evidence at `.omo/evidence/external-agent-one-r1/summary.json`.
 - Two-task external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` and `bugfix-cli-timeout` with complete evidence at `.omo/evidence/external-agent-2task-r1/summary.json`.
-- Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, and `sh scripts/dogfood.sh`.
-- First product baseline commit: `d9f3055 Initial CEO Harness production baseline`.
-- Remaining evidence gap: broaden the external-agent comparison beyond two tasks before making market-wide claims.
+- Four-task external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first`, `bugfix-cli-timeout`, `safety-policy-path-escape`, and `recovery-resume-retry` with complete evidence at `.omo/evidence/external-agent-4task-r2/summary.json`.
+- Live real-repo dogfood result: `scripts/dogfood-real.sh --repo ceo-harness:<repo> --timeout-ms 250` passed all five scenarios, including expected timeout failure evidence, at `.omo/evidence/dogfood-real/index.md`.
+- Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, `sh scripts/dogfood.sh`, `sh scripts/release-local.sh`, `task ci`, `golangci-lint run ./...`, `nilaway ./...`, and `sh scripts/strict-checks.sh`.
+- First product baseline commit: `8509a4b Initial CEO Harness production baseline`.
+- Remaining evidence gap: broaden the external-agent comparison to the full production suite before making market-wide claims.
 
 ## Additions Completed 2026-07-02
 
@@ -96,8 +98,8 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 
 ## Best Next Features
 
-1. Dogfood the primary operator flow on a real repo and tighten awkward output.
-2. Run a multi-task external-agent comparison, then the full 24-task suite when runtime cost/time is acceptable.
+1. Dogfood the primary operator flow on more real repos and tighten awkward output.
+2. Run the full 24-task external-agent suite when runtime cost/time is acceptable.
 3. Use the external-agent results to fix remaining cross-agent prompt/setup gaps before making market claims.
 
 ## Current References

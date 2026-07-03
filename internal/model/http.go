@@ -104,6 +104,9 @@ func (c HTTPClient) Complete(ctx context.Context, req Request) (Response, error)
 	if err != nil {
 		return Response{}, fmt.Errorf("post chat request: %w", err)
 	}
+	if resp == nil {
+		return Response{}, fmt.Errorf("post chat request: %w", ErrHTTPRequestFailed)
+	}
 	defer resp.Body.Close()
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		content, readErr := io.ReadAll(io.LimitReader(resp.Body, 4096))

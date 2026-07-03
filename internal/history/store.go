@@ -119,6 +119,7 @@ func (s Store) ReadAll(ctx context.Context) (entries []Entry, err error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
+	entries = []Entry{}
 	file, err := os.Open(s.fullPath())
 	if errors.Is(err, os.ErrNotExist) {
 		return []Entry{}, nil

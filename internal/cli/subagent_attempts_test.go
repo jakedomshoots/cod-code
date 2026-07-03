@@ -32,7 +32,6 @@ func Test_Run_retries_subagent_error_when_subagent_attempts_flag_is_supplied(t *
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

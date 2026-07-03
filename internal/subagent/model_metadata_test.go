@@ -31,7 +31,6 @@ func Test_Runner_Run_sends_subagent_metadata_to_model_client(t *testing.T) {
 		Role:        "inspect scope",
 		ContextMode: "lean",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

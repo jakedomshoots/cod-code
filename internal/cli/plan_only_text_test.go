@@ -17,7 +17,6 @@ func Test_Run_plan_only_prints_text_preview_when_text_format_is_supplied(t *test
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--plan-only", "--format", "text", "--continue-job", "job-000001"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

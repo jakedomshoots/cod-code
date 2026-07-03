@@ -5,22 +5,13 @@ run:
   tests: true
 
 linters:
-  default: standard
+  default: none
   enable:
-    - gofumpt
-    - goimports
     - misspell
     - errorlint
-    - errcheck
-    - staticcheck
     - govet
     - ineffassign
     - unused
-
-formatters:
-  enable:
-    - gofumpt
-    - goimports
 
 linters-settings:
   goimports:

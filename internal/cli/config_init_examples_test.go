@@ -19,7 +19,6 @@ func Test_Run_writes_example_adapter_commands_when_init_example_adapters_flag_is
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

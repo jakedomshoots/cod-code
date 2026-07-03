@@ -11,7 +11,6 @@ func Test_Build_uses_planning_subagents_when_task_is_planning(t *testing.T) {
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -26,7 +25,6 @@ func Test_Build_uses_research_subagents_when_task_is_research(t *testing.T) {
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -41,7 +39,6 @@ func Test_Build_keeps_mixed_high_risk_subagents_to_three_when_task_needs_researc
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -56,7 +53,6 @@ func Test_Build_keeps_data_specialist_when_default_budget_allows_one_risk_subage
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -71,7 +67,6 @@ func Test_Build_keeps_only_one_risk_specialist_when_mixed_task_has_multiple_risk
 
 	// When
 	packet, err := Build(task)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
@@ -86,7 +81,6 @@ func Test_BuildWithOptions_uses_explicit_subagent_budget_when_task_has_multiple_
 
 	// When
 	packet, err := BuildWithOptions(BuildOptions{Task: task, MaxSubagents: 7})
-
 	// Then
 	if err != nil {
 		t.Fatalf("BuildWithOptions returned error: %v", err)

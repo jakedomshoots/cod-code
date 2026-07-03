@@ -35,6 +35,9 @@ func writeLocalAgentComparisonReport(path string, summary LocalAgentBenchmarkSum
 	fmt.Fprintf(&builder, "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n")
 	for _, id := range agentOrder {
 		stats := agentStats[id]
+		if stats == nil {
+			continue
+		}
 		fmt.Fprintf(
 			&builder,
 			"| %s | %d | %d | %d | %d | %d | %d | %d | %d | %d |\n",

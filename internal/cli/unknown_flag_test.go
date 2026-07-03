@@ -12,13 +12,13 @@ func Test_Run_rejects_unknown_flag(t *testing.T) {
 	var out bytes.Buffer
 
 	// When
-	err := Run(context.Background(), &out, []string{"--versoin"})
+	err := Run(context.Background(), &out, []string{"--badflag"})
 
 	// Then
 	if err == nil {
 		t.Fatal("expected unknown flag error")
 	}
-	if !strings.Contains(err.Error(), "unknown flag --versoin") {
+	if !strings.Contains(err.Error(), "unknown flag --badflag") {
 		t.Fatalf("error = %q, want unknown flag", err.Error())
 	}
 	if out.Len() != 0 {

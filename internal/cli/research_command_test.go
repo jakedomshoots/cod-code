@@ -32,7 +32,6 @@ func Test_Run_executes_network_research_with_research_command_flag(t *testing.T)
 		"harness",
 		"docs",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -86,7 +85,6 @@ func Test_Run_executes_network_research_with_env_research_command(t *testing.T) 
 		"harness",
 		"docs",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -118,7 +116,6 @@ func Test_Run_executes_network_research_with_workspace_research_command(t *testi
 		"harness",
 		"docs",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

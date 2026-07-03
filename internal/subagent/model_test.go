@@ -36,7 +36,6 @@ func Test_Runner_Run_uses_model_client_when_prompt_is_built(t *testing.T) {
 		ContextMode:     "lean",
 		MaxContextBytes: 256,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -77,7 +76,6 @@ func Test_Runner_Run_parses_tool_requests_when_model_returns_json_envelope(t *te
 		AllowedActions:  []string{"read_workspace", "search_workspace"},
 		MaxContextBytes: 512,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -117,7 +115,6 @@ func Test_Runner_Run_parses_structured_model_output_when_model_returns_full_json
 		AllowedActions:  []string{"read_workspace", "propose_patch"},
 		MaxContextBytes: 512,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -160,7 +157,6 @@ func Test_Runner_Run_parses_create_file_patch_when_model_returns_content(t *test
 		AllowedActions:  []string{"propose_patch"},
 		MaxContextBytes: 512,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -196,7 +192,6 @@ func Test_Runner_Run_marks_needs_input_when_model_requests_user_input(t *testing
 		ContextMode:     "lean",
 		MaxContextBytes: 512,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

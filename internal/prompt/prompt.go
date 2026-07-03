@@ -78,7 +78,8 @@ func Build(ctx context.Context, req Request) (Prompt, error) {
 	if toolResultsValue != "" {
 		toolResults = "\ntool_results: " + toolResultsValue
 	}
-	text := fmt.Sprintf("agent: %s\nrole: %s%s\nmode: %s\nallowed_actions: %s\ntask:\n%s\n%s%s%s%s",
+	text := fmt.Sprintf(
+		"agent: %s\nrole: %s%s\nmode: %s\nallowed_actions: %s\ntask:\n%s\n%s%s%s%s",
 		strings.TrimSpace(req.AgentName),
 		strings.TrimSpace(req.Role),
 		assignment,

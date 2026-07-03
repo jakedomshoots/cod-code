@@ -36,7 +36,6 @@ func Test_BadOutput_repeated_apply_failure_stops_as_no_progress(t *testing.T) {
 		},
 		CheckEnv: []string{"GO_WANT_CEO_CHECK_FIX=1", "GO_CEO_FIX_TARGET=" + target},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

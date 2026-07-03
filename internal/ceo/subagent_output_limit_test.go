@@ -47,7 +47,6 @@ func Test_Runtime_RunJob_caps_subagent_output_before_prior_findings(t *testing.T
 			{Name: "coder", Role: "apply patch"},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

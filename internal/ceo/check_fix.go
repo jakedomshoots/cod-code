@@ -12,8 +12,10 @@ import (
 	"ceoharness/internal/workspace"
 )
 
-const maxCheckFixOutputBytes = 800
-const checkFixRole = "fix failed verification with minimal patch"
+const (
+	maxCheckFixOutputBytes = 800
+	checkFixRole           = "fix failed verification with minimal patch"
+)
 
 type checkFixState struct {
 	Packet          jobpacket.Packet

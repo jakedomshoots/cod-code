@@ -20,7 +20,6 @@ func Test_Run_uses_workspace_subagents_when_config_supplies_delegation(t *testin
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "auth", "flow"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -71,7 +70,6 @@ func Test_Run_reports_workspace_subagents_when_config_check_flag_is_supplied(t *
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

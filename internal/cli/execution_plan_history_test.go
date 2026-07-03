@@ -19,7 +19,6 @@ func Test_Run_history_includes_execution_plan_metadata(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &historyOut, []string{"--workspace", root, "--history"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("history Run returned error: %v\n%s", err, historyOut.String())

@@ -27,7 +27,6 @@ func Test_RunLocalAgentBenchmark_runs_selected_tasks_for_each_repeat(t *testing.
 		BenchmarkTaskID: "docs-one,docs-two",
 		RepeatCount:     2,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
@@ -61,7 +60,6 @@ func Test_LocalAgentBenchmarkTasks_expands_market_parity_core_suite(t *testing.T
 		TasksDir:        tasksDir,
 		BenchmarkTaskID: "market-parity-core",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("localAgentBenchmarkTasks returned error: %v", err)
@@ -89,7 +87,6 @@ func Test_LocalAgentBenchmarkTasks_expands_production_core_suite(t *testing.T) {
 		TasksDir:        tasksDir,
 		BenchmarkTaskID: "production-core",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("localAgentBenchmarkTasks returned error: %v", err)
@@ -126,7 +123,6 @@ func Test_Benchmark_records_failed_score_checks_when_agent_misses_requirement(t 
 		Agents:          []string{"codex_cli"},
 		BenchmarkTaskID: "docs-one",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
@@ -173,7 +169,6 @@ printf 'done\n'
 		Agents:          []string{"codex_cli"},
 		BenchmarkTaskID: "docs-one",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
@@ -214,7 +209,6 @@ func Test_RunCLI_runs_local_agent_benchmark_with_repeat_flag(t *testing.T) {
 		"--output-dir", outputDir,
 		"--timeout-seconds", "5",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunCLI returned error: %v", err)

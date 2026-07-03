@@ -27,7 +27,6 @@ func Test_Run_uses_workspace_retry_policy_for_check_retries(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "a", "failing", "test"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -71,7 +70,6 @@ func Test_Run_uses_workspace_retry_policy_for_subagent_retries(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

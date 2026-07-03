@@ -13,7 +13,6 @@ func Test_StaticClient_Complete_returns_response_when_prompt_is_supplied(t *test
 	response, err := client.Complete(context.Background(), Request{
 		Prompt: "agent: scanner\nrole: inspect scope",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Complete returned error: %v", err)

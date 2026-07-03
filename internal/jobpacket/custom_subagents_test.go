@@ -11,7 +11,6 @@ func Test_BuildWithSubagents_uses_custom_subagents_when_supplied(t *testing.T) {
 
 	// When
 	packet, err := BuildWithSubagents("Fix auth flow", subagents)
-
 	// Then
 	if err != nil {
 		t.Fatalf("BuildWithSubagents returned error: %v", err)
@@ -35,7 +34,6 @@ func Test_BuildWithSubagents_uses_custom_allowed_actions_when_supplied(t *testin
 
 	// When
 	packet, err := BuildWithSubagents("Fix auth flow", subagents)
-
 	// Then
 	if err != nil {
 		t.Fatalf("BuildWithSubagents returned error: %v", err)

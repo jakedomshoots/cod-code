@@ -18,7 +18,6 @@ func Test_Build_includes_assignment_when_supplied(t *testing.T) {
 
 	// When
 	prompt, err := Build(context.Background(), req)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)

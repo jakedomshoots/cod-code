@@ -45,7 +45,6 @@ printf '{"verdict":"pass"}\n'
 		CEOHarnessBinary: filepath.Join(binDir, "ceo-packet"),
 		BenchmarkTaskID:  "docs-one",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)

@@ -120,7 +120,6 @@ func Test_Runtime_RunJob_records_ceo_delegation_route_metadata(t *testing.T) {
 	report, err := runtime.RunJob(context.Background(), JobRequest{
 		Task: "Fix a failing test",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -168,7 +167,6 @@ func Test_Runtime_RunJob_lets_model_ceo_create_and_select_specialist_subagent(t 
 	report, err := runtime.RunJob(context.Background(), JobRequest{
 		Task: "Plan a database migration",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

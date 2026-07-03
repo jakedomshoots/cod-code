@@ -23,7 +23,6 @@ func Test_Run_config_check_reports_provider_env_counts_without_secret_values(t *
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -57,7 +56,6 @@ func Test_Run_config_check_reports_missing_provider_env_names_without_secret_val
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

@@ -17,7 +17,6 @@ func Test_Run_prints_research_command_doctor_check_when_research_command_is_supp
 
 	// When
 	err := Run(context.Background(), &out, []string{"--doctor", "--research-command", "sh", script})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -63,7 +62,6 @@ func Test_Run_prints_workspace_source_for_configured_research_command_doctor_che
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--doctor"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

@@ -30,7 +30,6 @@ func Test_Run_prints_provider_usage_metadata_when_http_provider_returns_it(t *te
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "usage", "smoke"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

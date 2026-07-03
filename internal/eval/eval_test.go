@@ -30,7 +30,6 @@ func Test_LoadTasks_loads_valid_task_specs_when_directory_contains_json_tasks(t 
 
 	// When
 	tasks, err := LoadTasks(context.Background(), tasksDir)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadTasks returned error: %v", err)
@@ -72,7 +71,6 @@ Every score points to real files.
 
 	// When
 	loaded, err := LoadRubric(rubricPath)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadRubric returned error: %v", err)
@@ -119,7 +117,6 @@ func Test_ScoreReport_returns_pass_when_fixture_report_has_artifacts_diffs_and_p
 
 	// When
 	result, err := ScoreReport(context.Background(), ScoreRequest{Task: task, ReportPath: reportPath})
-
 	// Then
 	if err != nil {
 		t.Fatalf("ScoreReport returned error: %v", err)

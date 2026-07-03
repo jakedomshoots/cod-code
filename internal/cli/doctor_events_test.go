@@ -16,7 +16,6 @@ func Test_Run_prints_doctor_event_details_when_events_format_is_supplied(t *test
 
 	// When
 	err := Run(context.Background(), &out, []string{"--doctor", "--format", "events", "--research-command", "sh", script})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

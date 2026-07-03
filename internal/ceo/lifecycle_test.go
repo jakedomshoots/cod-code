@@ -16,7 +16,6 @@ func Test_Lifecycle_RunJob_progresses_to_passed_when_checks_pass(t *testing.T) {
 		Task:         "Fix a failing test",
 		CheckCommand: []string{"go", "version"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -46,7 +45,6 @@ func Test_Lifecycle_RunJob_progresses_to_failed_when_check_fails(t *testing.T) {
 		CheckCommand: []string{os.Args[0], "-test.run=Test_HelperProcess_fail_check"},
 		CheckEnv:     []string{"GO_WANT_CEO_HELPER_PROCESS=fail"},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -71,7 +69,6 @@ func Test_Lifecycle_RunJob_progresses_to_needs_input_when_subagent_asks_question
 
 	// When
 	report, err := runtime.RunJob(context.Background(), JobRequest{Task: "Fix ambiguous package"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -107,7 +104,6 @@ func Test_Lifecycle_RunJob_marks_patch_previewed_when_dry_run_previews_patch(t *
 			{Path: "app.txt", Old: "old", New: "new"},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -160,7 +156,6 @@ func Test_Lifecycle_RunJob_marks_patch_applied_when_approved_preview_is_written(
 			{Path: "app.txt", Old: "old", New: "new"},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
@@ -193,7 +188,6 @@ func Test_LifecycleMachine_cancels_when_context_is_canceled(t *testing.T) {
 
 	// When
 	err := machine.Cancel(context.Canceled)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Cancel returned error: %v", err)

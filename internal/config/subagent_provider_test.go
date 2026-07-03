@@ -17,7 +17,6 @@ func Test_LoadWorkspace_accepts_custom_subagent_provider_when_provider_exists(t 
 
 	// When
 	cfg, err := LoadWorkspace(context.Background(), root)
-
 	// Then
 	if err != nil {
 		t.Fatalf("LoadWorkspace returned error: %v", err)

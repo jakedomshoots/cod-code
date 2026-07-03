@@ -19,7 +19,6 @@ func Test_Run_prints_workspace_brief_when_workspace_is_set(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "Fix", "workspace", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -65,7 +64,6 @@ func Test_Run_uses_workspace_brief_excludes_from_config_and_flag(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--workspace-brief-exclude", "*.lock", "Fix", "workspace", "bug"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

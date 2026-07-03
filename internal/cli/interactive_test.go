@@ -25,7 +25,6 @@ func Test_RunWithIO_interactively_answers_needs_input_and_resumes(t *testing.T) 
 
 	// When
 	err := RunWithIO(context.Background(), strings.NewReader("Use internal/cli.\n"), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunWithIO returned error: %v\n%s", err, out.String())

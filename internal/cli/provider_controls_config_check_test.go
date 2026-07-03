@@ -20,7 +20,6 @@ func Test_Run_config_check_reports_http_provider_control_counts(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--config-check"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

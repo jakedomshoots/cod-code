@@ -21,7 +21,6 @@ func Test_RunCompetitorSmoke_records_missing_binary_as_skip_when_tool_is_absent(
 		OutputDir:       outputDir,
 		TimeoutSeconds:  5,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunCompetitorSmoke returned error: %v", err)
@@ -52,7 +51,6 @@ func Test_RunCompetitorSmoke_runs_version_and_dry_run_when_binary_exists(t *test
 		OutputDir:       outputDir,
 		TimeoutSeconds:  5,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunCompetitorSmoke returned error: %v", err)
@@ -83,7 +81,6 @@ func Test_RunCLI_runs_competitor_smoke_when_flag_is_set(t *testing.T) {
 		"--output-dir", outputDir,
 		"--timeout-seconds", "1",
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunCLI returned error: %v", err)

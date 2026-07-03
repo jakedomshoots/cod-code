@@ -30,7 +30,6 @@ func Test_Run_prints_history_summary_without_rows_when_summary_only_flag_is_supp
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history", "--task", "checkout", "--summary-only"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -127,7 +126,6 @@ func Test_Run_prints_history_work_totals_when_summary_only_flag_is_supplied(t *t
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--history", "--task", "checkout", "--summary-only"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -211,7 +209,6 @@ func Test_Run_status_summary_counts_operator_recovery_states(t *testing.T) {
 
 	// When
 	err = Run(context.Background(), &out, []string{"status", "--workspace", root})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

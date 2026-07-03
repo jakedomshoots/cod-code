@@ -19,7 +19,6 @@ func Test_Runner_Run_executes_native_subagent_when_packet_is_valid(t *testing.T)
 
 	// When
 	result, err := runner.Run(context.Background(), packet)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -60,7 +59,6 @@ func Test_Runner_Run_truncates_task_when_context_budget_is_set(t *testing.T) {
 
 	// When
 	result, err := runner.Run(context.Background(), packet)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -87,7 +85,6 @@ func Test_Runner_Run_reports_context_fields_truncated_by_budget(t *testing.T) {
 
 	// When
 	result, err := runner.Run(context.Background(), packet)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -111,7 +108,6 @@ func Test_Runner_Run_reports_only_prior_findings_sent_under_context_budget(t *te
 
 	// When
 	result, err := runner.Run(context.Background(), packet)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

@@ -17,7 +17,6 @@ func Test_Run_prints_doctor_report_when_doctor_flag_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--doctor"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -65,7 +64,6 @@ func Test_Run_prints_model_command_doctor_check_when_model_command_is_supplied(t
 
 	// When
 	err := Run(context.Background(), &out, []string{"--doctor", "--model-command", "sh", script})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -103,7 +101,6 @@ func Test_Run_prints_ceo_model_command_doctor_check_when_ceo_model_command_is_su
 
 	// When
 	err := Run(context.Background(), &out, []string{"--doctor", "--ceo-model-command", "sh", script})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -153,7 +150,6 @@ func Test_Run_prints_workspace_source_for_configured_doctor_adapter_checks(t *te
 
 	// When
 	err = Run(context.Background(), &out, []string{"--workspace", root, "--doctor"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -182,7 +178,6 @@ func Test_Run_prints_text_doctor_report_when_text_format_is_supplied(t *testing.
 
 	// When
 	err := Run(context.Background(), &out, []string{"--doctor", "--format", "text"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -263,7 +258,8 @@ func requireDoctorCheckSource(t *testing.T, checks []struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`
 	Source string `json:"source"`
-}, name string, source string) {
+}, name string, source string,
+) {
 	t.Helper()
 	for _, check := range checks {
 		if check.Name == name && check.Status == "pass" && check.Source == source {

@@ -14,7 +14,6 @@ func Test_Run_runs_golden_demo_when_demo_flag_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, []string{"--demo"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -67,7 +66,8 @@ func Test_Run_runs_golden_demo_when_demo_flag_is_supplied(t *testing.T) {
 func hasRunEvent(events []struct {
 	Kind   string `json:"kind"`
 	Status string `json:"status"`
-}, kind string, status string) bool {
+}, kind string, status string,
+) bool {
 	for _, event := range events {
 		if event.Kind == kind && event.Status == status {
 			return true

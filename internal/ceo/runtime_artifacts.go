@@ -99,6 +99,9 @@ func patchApprovalForPreviews(previews []workspace.ReplaceTextResult, approvedDi
 		return nil, nil
 	}
 	approval := newPatchPreviewApproval(previews)
+	if approval == nil {
+		return nil, fmt.Errorf("patch approval preview is empty")
+	}
 	if approvedDigest == "" {
 		return approval, nil
 	}

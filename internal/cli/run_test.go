@@ -17,7 +17,6 @@ func Test_Run_prints_ceo_job_packet_when_task_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -81,7 +80,6 @@ func Test_Run_includes_check_result_when_check_flag_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -138,7 +136,6 @@ func Test_Run_applies_text_patch_when_replace_flag_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -189,7 +186,6 @@ func Test_Run_accepts_separator_before_task_text_after_replace(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
@@ -235,7 +231,6 @@ func Test_Run_writes_evidence_file_when_workspace_flag_is_supplied(t *testing.T)
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -261,7 +256,6 @@ func Test_Run_writes_job_history_when_workspace_flag_is_supplied(t *testing.T) {
 
 	// When
 	err := Run(context.Background(), &out, args)
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

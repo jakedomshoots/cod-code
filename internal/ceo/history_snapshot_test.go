@@ -46,7 +46,6 @@ func Test_Runtime_RunJob_persists_schema_version_when_workspace_report_is_saved(
 		Task:         "Save schema version",
 		WorkspaceDir: root,
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)

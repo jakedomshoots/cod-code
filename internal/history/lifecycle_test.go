@@ -62,7 +62,6 @@ func Test_Store_ReadAll_reads_legacy_history_without_lifecycle_fields(t *testing
 
 	// When
 	entries, err := store.ReadAll(context.Background())
-
 	// Then
 	if err != nil {
 		t.Fatalf("ReadAll returned error: %v", err)

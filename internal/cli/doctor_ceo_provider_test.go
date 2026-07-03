@@ -44,7 +44,6 @@ func Test_Run_prints_ceo_provider_doctor_check_when_ceo_provider_is_configured(t
 
 	// When
 	err := Run(context.Background(), &out, []string{"--workspace", root, "--doctor"})
-
 	// Then
 	if err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())

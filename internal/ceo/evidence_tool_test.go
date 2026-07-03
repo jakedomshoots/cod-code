@@ -77,7 +77,6 @@ func Test_Runtime_RunJob_executes_allowed_verify_evidence_tool_request(t *testin
 			},
 		},
 	})
-
 	// Then
 	if err != nil {
 		t.Fatalf("RunJob returned error: %v", err)
