@@ -26,6 +26,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - Repeated real-repo dogfood evidence: `.omo/evidence/dogfood-real-repeat-self-r1/index.md`
 - Copied-workspace dogfood evidence: `.omo/evidence/dogfood-real-copy-self-r1/index.md`
 - Independent copied-workspace dogfood evidence: `.omo/evidence/dogfood-real-independent-r1/index.md`
+- Expanded independent copied-workspace dogfood evidence: `.omo/evidence/dogfood-real-independent-r2/index.md`
 - Repeated real Kimi provider evidence: `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json`
 - Endurance eval evidence: `.omo/evidence/endurance-local-r1/index.md`
 - Longer endurance eval evidence: `.omo/evidence/endurance-local-r2/index.md`
@@ -100,6 +101,15 @@ The latest independent copied-workspace dogfood run used two additional local re
 
 Artifact: `.omo/evidence/dogfood-real-independent-r1/index.md`
 
+The expanded independent copied-workspace dogfood run added four more local repos:
+
+- Clicky: pass, copied workspace, five scenarios.
+- DPS Internal Comms: pass, copied workspace, five scenarios.
+- Janus: pass, copied workspace, five scenarios.
+- Radian: pass, copied workspace, five scenarios.
+
+Artifact: `.omo/evidence/dogfood-real-independent-r2/index.md`
+
 ## Benchmark Summary
 
 The full benchmark suite was scored with deterministic fixture reports generated from `evals/tasks/benchmark_tasks.json`. This proves the scorer can evaluate every task definition and save per-task evidence. It does not prove an autonomous agent completed all 27 tasks live.
@@ -162,7 +172,7 @@ Cross-language follow-up:
 ## Blockers / Risks
 
 - Public "10/10 beats competitors" claim is still unsupported because Codex CLI and OpenCode matched CEO Harness at 25/25 on the controlled suite.
-- The expanded 26/26 CEO Harness live result, 2/2 cross-language result, 3-pass real-repo dogfood result, two-repo copied-workspace dogfood result, 10-iteration local endurance run, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. More independent real repositories, harder multi-file jobs, additional provider families, and overnight or truly long-duration tasks are still needed.
+- The expanded 26/26 CEO Harness live result, 2/2 cross-language result, 3-pass real-repo dogfood result, six-repo copied-workspace dogfood result, 10-iteration local endurance run, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. Deeper task-specific real-repo jobs, harder multi-file jobs, additional provider families, and overnight or truly long-duration tasks are still needed.
 - Provider doctor correctly fails without `OPENAI_API_KEY`; this is setup guidance, not a product pass against a real provider.
 - Rollback QA now covers normal replacements, trailing-newline replacements, and created-file model patches. Arbitrary hand-edited diff rollback is still not claimed.
 

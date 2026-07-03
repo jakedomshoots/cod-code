@@ -51,6 +51,9 @@ Status date: 2026-07-03
 - Latest independent copied-workspace dogfood:
   - `sh scripts/dogfood-real.sh --copy-workspace --repo chemcheck:/Users/jakedom/Documents/chemcheck-main --repo axis-health:'/Users/jakedom/Documents/Axis health' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-independent-r1`
   - Result: ChemCheck pass and Axis Health pass; each ran doctor, plan-only, observe, patch-preview, and timeout-guard scenarios in copied workspaces.
+- Latest expanded independent copied-workspace dogfood:
+  - `sh scripts/dogfood-real.sh --copy-workspace --repo clicky:/Users/jakedom/Documents/clicky-main --repo dps:/Users/jakedom/Documents/DPS-internal-coms-main --repo janus:/Users/jakedom/Documents/janus-code --repo radian:'/Users/jakedom/Documents/Radian notes app ' --timeout-ms 250 --output-dir .omo/evidence/dogfood-real-independent-r2`
+  - Result: Clicky pass, DPS Internal Comms pass, Janus pass, and Radian pass; each ran doctor, plan-only, observe, patch-preview, and timeout-guard scenarios in copied workspaces.
 - Nightly eval task:
   - `make eval-nightly`
   - `/Users/jakedom/go/bin/task eval:nightly`
