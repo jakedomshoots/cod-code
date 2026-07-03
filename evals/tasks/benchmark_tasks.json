@@ -278,6 +278,39 @@
     "required_report_fields": ["run_manifest.changed_file_count", "patch_results", "evidence_paths"]
   },
   {
+    "id": "multi-file-release-readiness-publish-boundary",
+    "category": "multi_file",
+    "title": "Release readiness keeps publish boundaries explicit",
+    "objective": "Update release readiness across CLI, config policy, and docs so public publishing cannot be claimed without remote artifacts, signatures, and an explicit publish boundary.",
+    "required_changed_files": ["internal/cli/release_readiness_gate.go", "internal/config/release_publish_policy.go", "docs/RELEASE_READINESS.md"],
+    "required_commands": ["go test ./internal/cli ./internal/config -run Test_BenchmarkFixture -count=1"],
+    "required_artifacts": [".omo/evidence/multi-file-release-readiness-publish-boundary.md"],
+    "required_diff_terms": ["release readiness", "remote artifact", "signature policy", "publish boundary"],
+    "required_report_fields": ["run_manifest.changed_file_count", "evidence_paths", "verification_contract.status"]
+  },
+  {
+    "id": "multi-file-lean-context-autonomy",
+    "category": "multi_file",
+    "title": "Lean context autonomy stays bounded",
+    "objective": "Update CEO autonomy, subagent context packets, and docs so delegated work stays bounded, summarizes prior state, and avoids repeated full-context prompts.",
+    "required_changed_files": ["internal/ceo/lean_context_autonomy.go", "internal/subagent/lean_context_packet.go", "docs/LEAN_CONTEXT_AUTONOMY.md"],
+    "required_commands": ["go test ./internal/ceo ./internal/subagent -run Test_BenchmarkFixture -count=1"],
+    "required_artifacts": [".omo/evidence/multi-file-lean-context-autonomy.md"],
+    "required_diff_terms": ["lean context", "bounded delegation", "state summary", "no full repo dump"],
+    "required_report_fields": ["run_manifest.changed_file_count", "workspace_brief.files", "subagent_retry_count"]
+  },
+  {
+    "id": "multi-file-secret-safe-provider-proof",
+    "category": "multi_file",
+    "title": "Provider proof never leaks secrets",
+    "objective": "Update provider proof wiring across CLI, model, and docs so missing keys are blocked setup, real keys are redacted, and benchmark evidence never stores secret values.",
+    "required_changed_files": ["internal/cli/provider_proof_gate.go", "internal/model/provider_secret_redaction.go", "docs/PROVIDER_PROOF.md"],
+    "required_commands": ["go test ./internal/cli ./internal/model -run Test_BenchmarkFixture -count=1"],
+    "required_artifacts": [".omo/evidence/multi-file-secret-safe-provider-proof.md"],
+    "required_diff_terms": ["blocked setup", "redacted secret", "provider proof", "no key value"],
+    "required_report_fields": ["run_manifest.changed_file_count", "provider_route_decisions", "evidence_paths"]
+  },
+  {
     "id": "report-quality-evidence-summary",
     "category": "report_quality",
     "title": "Report quality evidence is complete",

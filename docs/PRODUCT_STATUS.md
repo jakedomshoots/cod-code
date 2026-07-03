@@ -66,12 +66,14 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Benchmark runner now writes a complete artifact packet for missing-agent-binary and terminal benchmark errors instead of leaving summary rows without evidence files.
 - Added regression coverage for missing CEO binary evidence: command, stdout, stderr, report, score, diff, changed-files, git-status, and timing artifacts must all exist and be non-empty.
 - Current `market-parity-core` CEO result: 10 tasks / 10 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/market-parity-core-ceo-r2/summary.json`.
-- Added `production-core`, now a 26-task gauntlet suite, available through `ceo-packet gauntlet --suite production-core`.
+- Added `production-core`, now a 29-task gauntlet suite, available through `ceo-packet gauntlet --suite production-core`.
+- Expanded full benchmark fixture scoring now covers 31 tasks, including release readiness, lean-context autonomy, and secret-safe provider proof tasks, with 31/31 pass at `.omo/evidence/benchmark-fixtures-31-r1/summary.json`.
 - Synthetic CEO benchmark mode now creates task-specific required evidence artifacts, so the runner can prove a clean pass instead of stopping at partial.
 - Production-core smoke result: 24 tasks / 24 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-smoke-r2/summary.json`.
 - Production-core model-command result: 24 tasks / 24 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-model-command-r4/summary.json`.
 - Expanded production-core CEO result after adding the first multi-file provider/config task: 25 tasks / 25 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-25-ceo-r1/summary.json`.
 - Expanded production-core CEO result after adding the four-file operator safety task: 26 tasks / 26 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-26-ceo-r1/summary.json`.
+- Expanded production-core CEO result after adding release-readiness, lean-context autonomy, and secret-safe provider-proof tasks: 29 tasks / 29 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/production-core-29-ceo-r1/summary.json`.
 - Cross-language-core CEO result after adding JavaScript and Python benchmark fixtures: 2 tasks / concurrency 2 / 2 pass / 0 partial / 0 incomplete evidence at `.omo/evidence/cross-language-core-ceo-r1/summary.json`.
 - Repeated real Kimi provider path-safety result: 3 attempts / 3 pass / 18 scored checks / 0 partial / 0 fail / 0 incomplete evidence at `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json`.
 - Real Kimi provider JS app-code result: `cross-language-js-state-reducer` passed 6/6 scored checks with complete evidence at `.omo/evidence/provider-kimi-js-state-reducer-r2/summary.json` after the Kimi bridge was fixed to include JS/TS sibling tests in its compact context.

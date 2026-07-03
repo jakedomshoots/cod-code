@@ -123,10 +123,15 @@ func Test_LocalAgentBenchmarkTasks_expands_production_core_suite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("localAgentBenchmarkTasks returned error: %v", err)
 	}
-	if len(tasks) != 26 {
-		t.Fatalf("tasks length = %d, want 26 production tasks", len(tasks))
+	if len(tasks) != 29 {
+		t.Fatalf("tasks length = %d, want 29 production tasks", len(tasks))
 	}
-	if tasks[0].ID != "bugfix-cli-timeout" || tasks[24].ID != "multi-file-operator-safety-flow" || tasks[25].ID != "report-quality-evidence-summary" {
+	if tasks[0].ID != "bugfix-cli-timeout" ||
+		tasks[24].ID != "multi-file-operator-safety-flow" ||
+		tasks[25].ID != "multi-file-release-readiness-publish-boundary" ||
+		tasks[26].ID != "multi-file-lean-context-autonomy" ||
+		tasks[27].ID != "multi-file-secret-safe-provider-proof" ||
+		tasks[28].ID != "report-quality-evidence-summary" {
 		t.Fatalf("suite task ids = %+v, want stable production core order", localAgentBenchmarkTaskIDs(tasks))
 	}
 }

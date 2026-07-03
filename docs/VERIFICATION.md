@@ -29,8 +29,8 @@ Status date: 2026-07-03
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task market-parity-core --local-agent-benchmark-repeat 1 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/market-parity-core-ceo-r2 --timeout-seconds 180 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 10 tasks / 10 pass / 0 partial / 0 fail / 0 timed out / 0 skipped / 0 incomplete evidence.
 - Latest expanded production-core CEO comparison:
-  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/production-core-26-ceo-r1 --timeout-seconds 180 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
-  - Result: 26 tasks / 26 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
+  - `go run ./cmd/ceo-packet gauntlet --suite production-core --agents ceo_harness --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/production-core-29-ceo-r1 --timeout-seconds 180 --concurrency 4 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
+  - Result: 29 tasks / 29 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
 - Latest concurrent production-core CEO comparison:
   - `go run ./cmd/ceo-packet gauntlet --suite production-core --agents ceo_harness --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/production-core-25-ceo-concurrency-r1 --timeout-seconds 120 --concurrency 4 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 25 tasks / concurrency 4 / 25 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
@@ -44,8 +44,8 @@ Status date: 2026-07-03
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task multi-file-operator-safety-flow --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/multi-file-operator-safety-flow-ceo-r1 --timeout-seconds 120 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 1 run / 1 pass / 13 scored checks / 0 incomplete evidence.
 - Latest full benchmark fixture scoring:
-  - `go run ./cmd/ceo-eval --benchmark-fixtures --tasks evals/tasks --output-dir .omo/evidence/benchmark-fixtures-28-r1`
-  - Result: 28 tasks / 28 pass / 0 partial / 0 fail / 0 skipped.
+  - `go run ./cmd/ceo-eval --benchmark-fixtures --tasks evals/tasks --output-dir .omo/evidence/benchmark-fixtures-31-r1`
+  - Result: 31 tasks / 31 pass / 0 partial / 0 fail / 0 skipped.
 - Latest repeated real Kimi provider proof:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task safety-policy-path-escape --local-agent-benchmark-repeat 3 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/provider-kimi-path-safety-repeat-r7 --timeout-seconds 600 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/kimi-model-command.sh"]'`
   - Result: 3 runs / 3 pass / 18 scored checks / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.

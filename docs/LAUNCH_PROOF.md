@@ -6,9 +6,9 @@ Date: 2026-07-03
 
 No-go for a public "10/10 beats competitors" launch claim.
 
-Go for a narrower claim: CEO Harness completed the controlled production-core coding harness suite cleanly, including the expanded 25-task all-agent comparison and newer 26-task CEO-only suite.
+Go for a narrower claim: CEO Harness completed the controlled production-core coding harness suite cleanly, including the expanded 25-task all-agent comparison and newer 29-task CEO-only suite.
 
-The current full-benchmark proof gap is closed for the eval scorer: all 28 benchmark tasks now have saved deterministic fixture reports, score JSON, per-task logs, and a summary with 28 pass / 0 partial / 0 fail / 0 skipped.
+The current full-benchmark proof gap is closed for the eval scorer: all 31 benchmark tasks now have saved deterministic fixture reports, score JSON, per-task logs, and a summary with 31 pass / 0 partial / 0 fail / 0 skipped.
 
 The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI, OpenCode, and Pi completed a full 25-task production-core head-to-head run with 100 live runs. CEO Harness, Codex CLI, and OpenCode each passed 25/25. Pi passed 24/25 with 1 timeout. This supports controlled-suite parity with Codex CLI and OpenCode, not a broad market-win claim.
 
@@ -22,6 +22,8 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - Market-parity-core CEO evidence: `.omo/evidence/market-parity-core-ceo-r2/summary.json`
 - Expanded 25-task CEO evidence: `.omo/evidence/production-core-25-ceo-r1/summary.json`
 - Expanded 26-task CEO evidence: `.omo/evidence/production-core-26-ceo-r1/summary.json`
+- Expanded 29-task CEO evidence: `.omo/evidence/production-core-29-ceo-r1/summary.json`
+- Full 31-task fixture evidence: `.omo/evidence/benchmark-fixtures-31-r1/summary.json`
 - Concurrent 25-task CEO evidence: `.omo/evidence/production-core-25-ceo-concurrency-r1/summary.json`
 - Cross-language CEO evidence: `.omo/evidence/cross-language-core-ceo-r1/summary.json`
 - Repeated real-repo dogfood evidence: `.omo/evidence/dogfood-real-repeat-self-r1/index.md`
@@ -58,10 +60,10 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 | Race/shuffle | `go test -race -shuffle=on -count=1 ./...` | Exit 0 on fresh 2026-07-02 rerun after adapter timeout-proof stabilization | `.omo/evidence/final-adapter-version-timeout-fix/go-test-race-shuffle-all.log` |
 | Release + manifest verification | `VERSION=0.1.0-dev sh scripts/release-local.sh && sh scripts/verify-release.sh dist` | All three archives verified against `checksums.txt` and `release-manifest.json` | `.omo/evidence/task-14-ceo-harness-10-out-of-10/release-local-checksums.log`, `dist/checksums.txt`, `dist/release-manifest.json` |
 | Public release readiness packet | `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1` | Local artifacts verified and GitHub auth passed; public release remains blocked by missing origin remote, release URL, remote Homebrew URL, and signatures/checksum-only notes | `.omo/evidence/release-readiness-r1/index.md`, `.omo/evidence/release-readiness-r1/summary.json` |
-| Eval catalog | `go run ./cmd/ceo-eval --list` | 28 task IDs listed | `.omo/evidence/benchmark-fixtures-28-r1/summary.json` |
+| Eval catalog | `go run ./cmd/ceo-eval --list` | 31 task IDs listed | `.omo/evidence/benchmark-fixtures-31-r1/summary.json` |
 | Eval rubric | `go run ./cmd/ceo-eval --rubric` | `rubric_valid=true` | `.omo/evidence/task-14-ceo-harness-10-out-of-10/eval-rubric.txt` |
 | Benchmark scoring pass | `go run ./cmd/ceo-eval --task bugfix-cli-timeout --report internal/eval/testdata/dirty-worktree/happy/report.json --workspace <temp>` | Verdict `pass`, 8/8 checks | `.omo/evidence/task-14-ceo-harness-10-out-of-10/eval-score-dirty-happy.json` |
-| Full benchmark fixture suite | `go run ./cmd/ceo-eval --benchmark-fixtures --tasks evals/tasks --output-dir .omo/evidence/benchmark-fixtures-28-r1` | 28 tasks scored; 28 pass, 0 partial, 0 fail, 0 skipped | `.omo/evidence/benchmark-fixtures-28-r1/summary.json`, per-task `report.json`, `score.json`, `score.log` |
+| Full benchmark fixture suite | `go run ./cmd/ceo-eval --benchmark-fixtures --tasks evals/tasks --output-dir .omo/evidence/benchmark-fixtures-31-r1` | 31 tasks scored; 31 pass, 0 partial, 0 fail, 0 skipped | `.omo/evidence/benchmark-fixtures-31-r1/summary.json`, per-task `report.json`, `score.json`, `score.log` |
 | Failure injection | `go run ./cmd/ceo-eval --task bugfix-cli-timeout --report internal/eval/testdata/corrupt/report.json --workspace .` | Expected non-zero; corrupt JSON rejected | `.omo/evidence/task-14-ceo-harness-10-out-of-10/eval-score-forced-failure.stderr` |
 | Competitor comparison | `go run ./cmd/ceo-eval --validate-competitors --competitors evals/competitors.json`, `go run ./cmd/ceo-eval --comparison-plan --competitors evals/competitors.json`, and `go run ./cmd/ceo-eval --comparison-smoke --competitors evals/competitors.json --output-dir .omo/evidence/task-14-ceo-harness-10-out-of-10/competitor-smoke --timeout-seconds 15` | Config valid; plan exists; local smoke ran installed binaries only: 2 pass, 3 skipped missing binary | `.omo/evidence/task-14-ceo-harness-10-out-of-10/competitor-smoke/summary.json` |
 | Four-task external-agent comparison | `go run ./cmd/ceo-packet gauntlet --suite docs-roadmap-cli-first,bugfix-cli-timeout,safety-policy-path-escape,recovery-resume-retry --agents ceo_harness,codex_cli,opencode,pi ...` | 16 runs; 16 pass, 0 partial, 0 fail, 0 timed out, 0 skipped, 0 incomplete evidence | `.omo/evidence/external-agent-4task-r2/summary.json` |
@@ -69,6 +71,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 | Full expanded production-core external-agent comparison | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --timeout-seconds 240 ...` | 100 runs; CEO Harness 25/25 pass; Codex CLI 25/25 pass; OpenCode 25/25 pass; Pi 24 pass and 1 timeout | `.omo/evidence/external-agent-production-core-25-r1/summary.json` |
 | Expanded production-core CEO comparison | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task production-core --timeout-seconds 120 ...` | 25 runs; CEO Harness 25/25 pass; 0 partial; 0 timeout; 0 incomplete evidence | `.omo/evidence/production-core-25-ceo-r1/summary.json` |
 | Expanded 26-task production-core CEO comparison | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task production-core --timeout-seconds 180 ...` | 26 runs; CEO Harness 26/26 pass; 0 partial; 0 timeout; 0 incomplete evidence | `.omo/evidence/production-core-26-ceo-r1/summary.json` |
+| Expanded 29-task production-core CEO comparison | `go run ./cmd/ceo-packet gauntlet --suite production-core --agents ceo_harness --concurrency 4 --timeout-seconds 180 ...` | 29 runs; CEO Harness 29/29 pass; 0 partial; 0 timeout; 0 incomplete evidence | `.omo/evidence/production-core-29-ceo-r1/summary.json` |
 | Concurrent production-core CEO comparison | `go run ./cmd/ceo-packet gauntlet --suite production-core --agents ceo_harness --concurrency 4 --timeout-seconds 120 ...` | 25 runs; concurrency 4; CEO Harness 25/25 pass; planned result order preserved | `.omo/evidence/production-core-25-ceo-concurrency-r1/summary.json` |
 | Cross-language CEO comparison | `go run ./cmd/ceo-packet gauntlet --suite cross-language-core --agents ceo_harness --concurrency 2 --timeout-seconds 120 ...` | 2 runs across JavaScript and Python fixtures; CEO Harness 2/2 pass; 0 incomplete evidence | `.omo/evidence/cross-language-core-ceo-r1/summary.json` |
 | Repeated real Kimi provider path-safety proof | `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task safety-policy-path-escape --local-agent-benchmark-repeat 3 --timeout-seconds 600 ... scripts/kimi-model-command.sh` | 3 runs; CEO Harness 3/3 pass; 18/18 scored checks; 0 partial; 0 fail; 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json` |
@@ -161,21 +164,21 @@ Artifact: `.omo/evidence/dogfood-real-app-code-r1/index.md`
 
 ## Benchmark Summary
 
-The full benchmark suite was scored with deterministic fixture reports generated from `evals/tasks/benchmark_tasks.json`. This proves the scorer can evaluate every task definition and save per-task evidence. It does not prove an autonomous agent completed all 27 tasks live.
+The full benchmark suite was scored with deterministic fixture reports generated from `evals/tasks/benchmark_tasks.json`. This proves the scorer can evaluate every task definition and save per-task evidence. It does not prove an autonomous agent completed all 31 tasks live.
 
 - Mode: `deterministic_fixture_scoring`
-- Tasks: 27
-- Passed: 27
+- Tasks: 31
+- Passed: 31
 - Partial: 0
 - Failed: 0
 - Skipped: 0
 
 Artifacts:
 
-- `.omo/evidence/benchmark-fixtures-27-r1/summary.json`
-- `.omo/evidence/benchmark-fixtures-27-r1/*/report.json`
-- `.omo/evidence/benchmark-fixtures-27-r1/*/score.json`
-- `.omo/evidence/benchmark-fixtures-27-r1/*/score.log`
+- `.omo/evidence/benchmark-fixtures-31-r1/summary.json`
+- `.omo/evidence/benchmark-fixtures-31-r1/*/report.json`
+- `.omo/evidence/benchmark-fixtures-31-r1/*/score.json`
+- `.omo/evidence/benchmark-fixtures-31-r1/*/score.log`
 
 ## Competitor Summary
 
@@ -205,6 +208,13 @@ Larger multi-file follow-up:
 - Result: CEO Harness 26 pass, 0 partial, 0 fail, 0 timed out, 0 incomplete evidence.
 - Artifact: `.omo/evidence/production-core-26-ceo-r1/summary.json`
 
+Harder production-core follow-up:
+
+- Scope: 29 tasks x CEO Harness = 29 live runs with `--concurrency 4`.
+- Added tasks: `multi-file-release-readiness-publish-boundary`, `multi-file-lean-context-autonomy`, and `multi-file-secret-safe-provider-proof`.
+- Result: CEO Harness 29 pass, 0 partial, 0 fail, 0 timed out, 0 incomplete evidence.
+- Artifact: `.omo/evidence/production-core-29-ceo-r1/summary.json`
+
 Focused external-agent follow-up for the newest multi-file task:
 
 - Scope: `multi-file-operator-safety-flow` x 4 agents = 4 live runs with concurrency 4.
@@ -228,7 +238,7 @@ Cross-language follow-up:
 ## Blockers / Risks
 
 - Public "10/10 beats competitors" claim is still unsupported because Codex CLI and OpenCode matched CEO Harness at 25/25 on the controlled suite.
-- The expanded 26/26 CEO Harness live result, focused 4/4 external-agent multi-file result, 2/2 cross-language result, 3-pass real-repo dogfood result, six-repo copied-workspace dogfood result, two-repo task-specific dogfood result, 30-iteration local endurance run, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. Deeper task-specific real-repo jobs with real writes, additional provider families, and overnight or truly long-duration tasks are still needed.
+- The expanded 29/29 CEO Harness live result, focused 4/4 external-agent multi-file result, 2/2 cross-language result, 3-pass real-repo dogfood result, six-repo copied-workspace dogfood result, two-repo task-specific dogfood result, 30-iteration local endurance run, and repeated 3/3 real Kimi provider proof are still not enough for a broad production-market claim. Deeper task-specific real-repo jobs with real writes, additional provider families, and overnight or truly long-duration tasks are still needed.
 - Provider doctor correctly fails without `OPENAI_API_KEY`; this is setup guidance, not a product pass against a real provider.
 - Rollback QA now covers normal replacements, trailing-newline replacements, and created-file model patches. Arbitrary hand-edited diff rollback is still not claimed.
 

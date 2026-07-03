@@ -46,6 +46,9 @@ var localAgentBenchmarkTaskSuites = map[string][]string{
 		"recovery-resume-retry",
 		"safety-policy-rollback-report",
 		"multi-file-operator-safety-flow",
+		"multi-file-release-readiness-publish-boundary",
+		"multi-file-lean-context-autonomy",
+		"multi-file-secret-safe-provider-proof",
 		"report-quality-evidence-summary",
 	},
 	"cross-language-core": {
