@@ -207,6 +207,27 @@ run_step() {
   return 1
 }
 
+competitor_smoke_clean() {
+  summary="$1"
+  [ -f "$summary" ] || return 1
+  python3 - "$summary" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    data = json.load(handle)
+
+failed = int(data.get("smoke_failed", 0) or 0)
+setup_blocked = int(data.get("setup_blocked", 0) or 0)
+passed = int(data.get("smoke_passed", 0) or 0)
+competitors = int(data.get("competitors", 0) or 0)
+
+if competitors > 0 and passed > 0 and failed == 0 and setup_blocked == 0:
+    raise SystemExit(0)
+raise SystemExit(1)
+PY
+}
+
 {
   printf '%s\n' "#!/bin/sh"
   printf '%s\n' "set -eu"
@@ -242,7 +263,13 @@ fi
 if [ "$skip_competitor_smoke" -eq 1 ]; then
   add_step "competitor-smoke" "skipped" "not-run" "Skipped by flag"
 else
-  if ! run_step "competitor-smoke" "competitor-smoke/summary.json" go run "$root/cmd/ceo-eval" --comparison-smoke --competitors "$root/evals/competitors.json" --output-dir "$output_dir/competitor-smoke" --timeout-seconds 25; then
+  competitor_smoke_summary="$output_dir/competitor-smoke/summary.json"
+  if ! run_step "competitor-smoke-command" "competitor-smoke/summary.json" go run "$root/cmd/ceo-eval" --comparison-smoke --competitors "$root/evals/competitors.json" --output-dir "$output_dir/competitor-smoke" --timeout-seconds 25; then
+    overall="blocked"
+  elif competitor_smoke_clean "$competitor_smoke_summary"; then
+    add_step "competitor-smoke" "pass" "competitor-smoke/summary.json" "Smoke summary has no failed or setup-blocked competitors"
+  else
+    add_step "competitor-smoke" "blocked" "competitor-smoke/summary.json" "Smoke summary has failed or setup-blocked competitors"
     overall="blocked"
   fi
 fi
@@ -333,10 +360,10 @@ PY
   printf '%s\n' "Publishes or tags: false"
   printf '%s\n' "Secret values saved: false"
   printf '\n'
-  printf '%s\n' "| Step | Status | Evidence |"
-  printf '%s\n' "| --- | --- | --- |"
+  printf '%s\n' "| Step | Status | Evidence | Detail |"
+  printf '%s\n' "| --- | --- | --- | --- |"
   while IFS='	' read -r name status evidence detail; do
-    printf '| %s | %s | `%s` |\n' "$name" "$status" "$evidence"
+    printf '| %s | %s | `%s` | %s |\n' "$name" "$status" "$evidence" "$detail"
   done <"$output_dir/steps.tsv"
   printf '\n'
   printf '%s\n' "## Commands"

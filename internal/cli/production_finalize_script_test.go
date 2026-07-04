@@ -104,3 +104,47 @@ func Test_Run_productionFinalizeVerbRunsDryRun(t *testing.T) {
 		t.Fatalf("summary missing planned status:\n%s", summary)
 	}
 }
+
+func Test_ProductionFinalizeScript_marksSetupBlockedCompetitorSmokeBlocked(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "production-finalize")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "production-finalize.sh"),
+		"--output-dir", outputDir,
+		"--dist", filepath.Join(root, "dist"),
+		"--skip-release-readiness",
+		"--skip-provider-proofs",
+		"--skip-production-readiness",
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("production-finalize unexpectedly passed with setup-blocked smoke:\n%s", string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"| competitor-smoke-command | pass |",
+		"| competitor-smoke | blocked |",
+		"Smoke summary has failed or setup-blocked competitors",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	for _, want := range []string{
+		`"status": "blocked"`,
+		`"competitor-smoke"`,
+	} {
+		if !strings.Contains(summary, want) {
+			t.Fatalf("summary.json missing %q:\n%s", want, summary)
+		}
+	}
+}
