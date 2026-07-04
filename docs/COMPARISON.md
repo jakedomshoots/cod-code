@@ -321,6 +321,8 @@ The Kimi wrapper uses `kimi -p ... --output-format stream-json`, extracts the as
 
 HTTP provider mode is also wired for OpenAI-compatible providers, but the local shell did not have a real API key available during the first OpenRouter attempt. The saved blocked run is `.omo/evidence/local-agent-benchmark-safety-path-escape-openrouter-gpt5mini-2026-07-02-r1/summary.md`, with stderr reporting that `OPENROUTER_API_KEY` was required.
 
+Current comparison reports include a `Readiness Decision` section. This keeps the market claim honest: the report can show `CEO Harness result: clean` while still marking `Overall comparison: blocked` when external CLIs time out or leave incomplete evidence.
+
 Operator setup shorthand:
 
 - Codex CLI path: use the `codex` adapter preset or the saved Codex model-command benchmark path.

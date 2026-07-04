@@ -40,6 +40,9 @@ Status date: 2026-07-03
 - Latest per-agent timeout override proof:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents opencode --local-agent-benchmark-task docs-product-status-weak-spots --local-agent-benchmark-agent-timeouts opencode=600 --tasks evals/tasks --output-dir .omo/evidence/opencode-agent-timeout-r1 --timeout-seconds 240`
   - Result: OpenCode timed out at 600s with no required file changes; `agent_timeouts.opencode` is recorded in `summary.json`.
+- Latest comparison report decision smoke:
+  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task docs-roadmap-cli-first --output-dir .omo/evidence/comparison-report-decision-smoke-r1 ...`
+  - Result: comparison report includes `Overall comparison: pass`, `CEO Harness result: clean`, and `External blockers: none`.
 - Latest focused external-agent comparison for the newest multi-file task:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task multi-file-operator-safety-flow --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-operator-safety-flow-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 4 runs / 4 pass / 0 partial / 0 fail / 0 timed out / 0 skipped / 0 incomplete evidence.

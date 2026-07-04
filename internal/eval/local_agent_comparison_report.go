@@ -6,6 +6,7 @@ import (
 )
 
 func writeLocalAgentComparisonReport(path string, summary LocalAgentBenchmarkSummary) error {
+	agentOrder, agentStats := localAgentComparisonStats(summary.Results)
 	var builder strings.Builder
 	fmt.Fprintf(&builder, "# Market Parity Comparison Report\n\n")
 	fmt.Fprintf(&builder, "Mode: `%s`\n\n", summary.Mode)
@@ -20,17 +21,7 @@ func writeLocalAgentComparisonReport(path string, summary LocalAgentBenchmarkSum
 	fmt.Fprintf(&builder, "Timed out: %d\n", summary.TimedOut)
 	fmt.Fprintf(&builder, "Skipped: %d\n", summary.Skipped)
 	fmt.Fprintf(&builder, "Incomplete evidence: %d\n\n", summary.IncompleteEvidence)
-	agentOrder := make([]string, 0)
-	agentStats := make(map[string]*localAgentComparisonAgentStats)
-	for _, result := range summary.Results {
-		stats, ok := agentStats[result.ID]
-		if !ok {
-			stats = &localAgentComparisonAgentStats{Name: result.Name}
-			agentStats[result.ID] = stats
-			agentOrder = append(agentOrder, result.ID)
-		}
-		stats.add(result)
-	}
+	writeLocalAgentComparisonDecision(&builder, summary, agentOrder, agentStats)
 	fmt.Fprintf(&builder, "## Per-Agent Status\n\n")
 	fmt.Fprintf(&builder, "| Agent | Runs | Pass | Partial | Fail | Timeout | Skipped | Evidence complete | Evidence incomplete | Duration ms |\n")
 	fmt.Fprintf(&builder, "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n")
@@ -78,6 +69,68 @@ func writeLocalAgentComparisonReport(path string, summary LocalAgentBenchmarkSum
 		)
 	}
 	return writeTextFile(path, builder.String())
+}
+
+func localAgentComparisonStats(results []LocalAgentBenchmarkResult) ([]string, map[string]*localAgentComparisonAgentStats) {
+	agentOrder := make([]string, 0)
+	agentStats := make(map[string]*localAgentComparisonAgentStats)
+	for _, result := range results {
+		stats, ok := agentStats[result.ID]
+		if !ok {
+			stats = &localAgentComparisonAgentStats{Name: result.Name}
+			agentStats[result.ID] = stats
+			agentOrder = append(agentOrder, result.ID)
+		}
+		stats.add(result)
+	}
+	return agentOrder, agentStats
+}
+
+func writeLocalAgentComparisonDecision(builder *strings.Builder, summary LocalAgentBenchmarkSummary, agentOrder []string, agentStats map[string]*localAgentComparisonAgentStats) {
+	overallClean := summary.RunCount > 0 &&
+		summary.Passed == summary.RunCount &&
+		summary.Partial == 0 &&
+		summary.Failed == 0 &&
+		summary.TimedOut == 0 &&
+		summary.IncompleteEvidence == 0
+	ceoStats := agentStats["ceo_harness"]
+	ceoClean := ceoStats != nil &&
+		ceoStats.Runs > 0 &&
+		ceoStats.Passed == ceoStats.Runs &&
+		ceoStats.Partial == 0 &&
+		ceoStats.Failed == 0 &&
+		ceoStats.TimedOut == 0 &&
+		ceoStats.EvidenceIncomplete == 0
+
+	fmt.Fprintf(builder, "## Readiness Decision\n\n")
+	if overallClean {
+		fmt.Fprintf(builder, "Overall comparison: pass\n")
+	} else {
+		fmt.Fprintf(builder, "Overall comparison: blocked\n")
+	}
+	if ceoClean {
+		fmt.Fprintf(builder, "CEO Harness result: clean\n")
+	} else {
+		fmt.Fprintf(builder, "CEO Harness result: needs attention\n")
+	}
+	blockers := make([]string, 0)
+	for _, id := range agentOrder {
+		if id == "ceo_harness" {
+			continue
+		}
+		stats := agentStats[id]
+		if stats == nil {
+			continue
+		}
+		if stats.Partial > 0 || stats.Failed > 0 || stats.TimedOut > 0 || stats.EvidenceIncomplete > 0 {
+			blockers = append(blockers, fmt.Sprintf("%s partial=%d fail=%d timeout=%d incomplete=%d", stats.Name, stats.Partial, stats.Failed, stats.TimedOut, stats.EvidenceIncomplete))
+		}
+	}
+	if len(blockers) == 0 {
+		fmt.Fprintf(builder, "External blockers: none\n\n")
+		return
+	}
+	fmt.Fprintf(builder, "External blockers: %s\n\n", strings.Join(blockers, "; "))
 }
 
 type localAgentComparisonAgentStats struct {

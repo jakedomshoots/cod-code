@@ -93,6 +93,9 @@ func Test_WriteLocalAgentComparisonReport_includes_artifact_derived_details(t *t
 	text := string(content)
 	for _, want := range []string{
 		"## Aggregate Counts",
+		"## Readiness Decision",
+		"Overall comparison: blocked",
+		"CEO Harness result: needs attention",
 		"Concurrency: 2",
 		"Passed: 1",
 		"Partial: 1",
@@ -104,6 +107,63 @@ func Test_WriteLocalAgentComparisonReport_includes_artifact_derived_details(t *t
 		"tmp.txt",
 		"run-02/timing.txt",
 		"run-02/report.json",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("comparison report missing %q:\n%s", want, text)
+		}
+	}
+}
+
+func Test_WriteLocalAgentComparisonReport_separatesCleanCEOFromExternalBlockers(t *testing.T) {
+	// Given
+	path := filepath.Join(t.TempDir(), "comparison-report.md")
+	summary := LocalAgentBenchmarkSummary{
+		Mode:               "local_agent_benchmark",
+		TaskCount:          1,
+		Concurrency:        2,
+		RunCount:           2,
+		Passed:             1,
+		TimedOut:           1,
+		IncompleteEvidence: 1,
+		Results: []LocalAgentBenchmarkResult{
+			{
+				ID:             "ceo_harness",
+				Name:           "CEO Harness",
+				TaskID:         "docs-roadmap-cli-first",
+				Attempt:        1,
+				Status:         localAgentStatusPass,
+				EvidenceStatus: localAgentEvidenceComplete,
+				PassedChecks:   5,
+				TotalChecks:    5,
+			},
+			{
+				ID:             "opencode",
+				Name:           "OpenCode",
+				TaskID:         "docs-roadmap-cli-first",
+				Attempt:        1,
+				Status:         localAgentStatusTimeout,
+				EvidenceStatus: localAgentEvidenceIncomplete,
+				PassedChecks:   0,
+				TotalChecks:    5,
+			},
+		},
+	}
+
+	// When
+	if err := writeLocalAgentComparisonReport(path, summary); err != nil {
+		t.Fatalf("writeLocalAgentComparisonReport returned error: %v", err)
+	}
+
+	// Then
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read report: %v", err)
+	}
+	text := string(content)
+	for _, want := range []string{
+		"Overall comparison: blocked",
+		"CEO Harness result: clean",
+		"External blockers: OpenCode partial=0 fail=0 timeout=1 incomplete=1",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("comparison report missing %q:\n%s", want, text)
