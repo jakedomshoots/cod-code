@@ -173,6 +173,20 @@ if [ "$blocked_count" -gt 0 ]; then
   } >"$setup_actions_file"
 fi
 
+setup_action_count=0
+setup_actions_sha256=""
+if [ "$blocked_count" -gt 0 ] && [ -f "$setup_actions_file" ]; then
+  setup_action_count=$(awk '/^- / { count += 1 } END { print count + 0 }' "$setup_actions_file")
+  setup_actions_sha256=$(python3 - "$setup_actions_file" <<'PY'
+import hashlib
+import sys
+
+with open(sys.argv[1], "rb") as handle:
+    print(hashlib.sha256(handle.read()).hexdigest())
+PY
+)
+fi
+
 cat >"$output_dir/summary.json" <<JSON
 {
   "schema_version": 1,
@@ -185,6 +199,8 @@ cat >"$output_dir/summary.json" <<JSON
   "blocked_count": $blocked_count,
   "blocked_checks": $blocked_checks_json,
   "setup_actions": "$(if [ "$blocked_count" -gt 0 ]; then printf 'setup-actions.md'; fi)",
+  "setup_action_count": $setup_action_count,
+  "setup_actions_sha256": "$setup_actions_sha256",
   "origin_remote_configured": $(if [ -n "$remote_url" ]; then printf true; else printf false; fi),
   "github_auth_status": "$github_auth_status",
   "artifacts": {

@@ -207,7 +207,7 @@ Status date: 2026-07-04
 - `sh scripts/verify-release.sh dist`
 - `sh scripts/release-bootstrap.sh --dist dist --output-dir .omo/evidence/release-bootstrap` writes a blocked/pass public-release bootstrap packet without publishing anything.
 - `sh scripts/release-preflight.sh dist` blocks public release claims when remote URL, public release URL, Homebrew URL, and signature or checksum-only notes are missing.
-- `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1` writes a blocked/pass public-release evidence packet without publishing anything, plus `setup-actions.md` when public release blockers remain.
+- `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1` writes a blocked/pass public-release evidence packet without publishing anything, plus `setup-actions.md` when public release blockers remain; `summary.json` records the setup action count and SHA-256 fingerprint.
 - `sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-r1` writes one release/provider/eval/security/endurance/comparison readiness packet without publishing, pushing, tagging, uploading, or calling paid providers.
 - `shasum -a 256 -c checksums.txt` from `dist/`
 - Temporary install QA via `scripts/install-local.sh`

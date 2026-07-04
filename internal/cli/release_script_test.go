@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -237,6 +238,8 @@ func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 		`"preflight_exit_code": 1`,
 		`"blocked_checks": [`,
 		`"setup_actions": "setup-actions.md"`,
+		`"setup_action_count":`,
+		`"setup_actions_sha256": "`,
 		`"remote_release_url"`,
 		`"github_release_assets"`,
 		`"homebrew_formula_url"`,
@@ -245,6 +248,12 @@ func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Fatalf("readiness summary missing %q:\n%s", want, body)
 		}
+	}
+	if !regexp.MustCompile(`"setup_action_count": [1-9][0-9]*`).MatchString(body) {
+		t.Fatalf("readiness summary missing positive setup_action_count:\n%s", body)
+	}
+	if !regexp.MustCompile(`"setup_actions_sha256": "[0-9a-f]{64}"`).MatchString(body) {
+		t.Fatalf("readiness summary missing setup_actions_sha256 fingerprint:\n%s", body)
 	}
 
 	index, err := os.ReadFile(filepath.Join(outputDir, "index.md"))
