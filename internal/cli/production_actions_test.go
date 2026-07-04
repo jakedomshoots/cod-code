@@ -169,6 +169,8 @@ set -eu
 		"Production actions: blocked",
 		"Required actions: 5",
 		"Env ready: 4",
+		"Provider env ready: 0",
+		"Provider env blocked: 1",
 		"Ready now: 0",
 		"Runnable commands: 0",
 		"Blocked commands: 4",
@@ -238,7 +240,7 @@ set -eu
 	if err := json.Unmarshal(out.Bytes(), &body); err != nil {
 		t.Fatalf("decode production actions: %v\n%s", err, out.String())
 	}
-	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || body.ReadyActionCount != 0 || body.RunnableCommandCount != 0 || body.BlockedCommandCount != 4 || body.EvidenceDeclaredMatchCount != 1 || body.EvidenceDeclaredMismatchCount != 0 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
+	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || body.ProviderEnvReadyActionCount != 0 || body.ProviderEnvBlockedActionCount != 1 || body.ReadyActionCount != 0 || body.RunnableCommandCount != 0 || body.BlockedCommandCount != 4 || body.EvidenceDeclaredMatchCount != 1 || body.EvidenceDeclaredMismatchCount != 0 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
 		t.Fatalf("body = %+v, want five actions starting with provider-openai", body)
 	}
 	if body.ActionStateCounts["missing_env"] != 1 || body.ActionStateCounts["setup_blocked"] != 2 || body.ActionStateCounts["waiting"] != 2 {
@@ -295,6 +297,8 @@ set -eu
 	for _, want := range []string{
 		"Required actions: 1",
 		"Env ready: 0",
+		"Provider env ready: 0",
+		"Provider env blocked: 1",
 		"Ready now: 0",
 		"Runnable commands: 0",
 		"Blocked commands: 1",
@@ -340,6 +344,9 @@ set -eu
 	}
 	if body.RequiredActionCount != 1 || len(body.Actions) != 1 || body.Actions[0]["provider"] != "openai" || body.Filter["provider"] != "openai" {
 		t.Fatalf("filtered body = %+v, want one openai action", body)
+	}
+	if body.ProviderEnvReadyActionCount != 0 || body.ProviderEnvBlockedActionCount != 1 {
+		t.Fatalf("provider env counts = ready %d blocked %d, want 0/1", body.ProviderEnvReadyActionCount, body.ProviderEnvBlockedActionCount)
 	}
 
 	out.Reset()
@@ -404,6 +411,8 @@ set -eu
 	for _, want := range []string{
 		"Required actions: 4",
 		"Env ready: 4",
+		"Provider env ready: 0",
+		"Provider env blocked: 0",
 		"Ready now: 0",
 		"Filter: env_ready=true",
 		"release-readiness [release_proof]: Prove public release readiness",
@@ -518,7 +527,7 @@ set -eu
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
 	}
 	text = out.String()
-	if !strings.Contains(text, "Env ready: 1") || !strings.Contains(text, "provider-openai") || strings.Contains(text, "test-key") {
+	if !strings.Contains(text, "Env ready: 1") || !strings.Contains(text, "Provider env ready: 1") || !strings.Contains(text, "Provider env blocked: 0") || !strings.Contains(text, "provider-openai") || strings.Contains(text, "test-key") {
 		t.Fatalf("env-ready production actions text wrong or leaked value:\n%s", text)
 	}
 }

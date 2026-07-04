@@ -16,6 +16,8 @@ type productionActionsReport struct {
 	Status                        string            `json:"status"`
 	RequiredActionCount           int               `json:"required_action_count"`
 	EnvReadyActionCount           int               `json:"env_ready_action_count"`
+	ProviderEnvReadyActionCount   int               `json:"provider_env_ready_action_count"`
+	ProviderEnvBlockedActionCount int               `json:"provider_env_blocked_action_count"`
 	ReadyActionCount              int               `json:"ready_action_count"`
 	RunnableCommandCount          int               `json:"runnable_command_count"`
 	BlockedCommandCount           int               `json:"blocked_command_count"`
@@ -76,6 +78,8 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 		Status:                        raw.Status,
 		RequiredActionCount:           len(actions),
 		EnvReadyActionCount:           countEnvReadyProductionActions(actions),
+		ProviderEnvReadyActionCount:   countProviderEnvProductionActions(actions, true),
+		ProviderEnvBlockedActionCount: countProviderEnvProductionActions(actions, false),
 		ReadyActionCount:              countReadyProductionActions(actions),
 		RunnableCommandCount:          countRunnableProductionActionCommands(actions),
 		BlockedCommandCount:           countBlockedProductionActionCommands(actions),
@@ -614,6 +618,20 @@ func countEnvReadyProductionActions(actions []map[string]any) int {
 	return count
 }
 
+func countProviderEnvProductionActions(actions []map[string]any, ready bool) int {
+	count := 0
+	for _, action := range actions {
+		if actionString(action, "required_env") == "" {
+			continue
+		}
+		envReady, _ := action["env_ready"].(bool)
+		if envReady == ready {
+			count++
+		}
+	}
+	return count
+}
+
 func countReadyProductionActions(actions []map[string]any) int {
 	count := 0
 	for _, action := range actions {
@@ -783,6 +801,8 @@ func renderProductionActionsText(report productionActionsReport) string {
 	fmt.Fprintf(&builder, "Production actions: %s\n", report.Status)
 	fmt.Fprintf(&builder, "Required actions: %d\n", report.RequiredActionCount)
 	fmt.Fprintf(&builder, "Env ready: %d\n", report.EnvReadyActionCount)
+	fmt.Fprintf(&builder, "Provider env ready: %d\n", report.ProviderEnvReadyActionCount)
+	fmt.Fprintf(&builder, "Provider env blocked: %d\n", report.ProviderEnvBlockedActionCount)
 	fmt.Fprintf(&builder, "Ready now: %d\n", report.ReadyActionCount)
 	fmt.Fprintf(&builder, "Runnable commands: %d\n", report.RunnableCommandCount)
 	fmt.Fprintf(&builder, "Blocked commands: %d\n", report.BlockedCommandCount)
