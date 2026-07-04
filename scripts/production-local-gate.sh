@@ -171,6 +171,17 @@ for action in action_rows:
         raise SystemExit(1)
     if not action.get("action_reason"):
         missing_reasons.append(action_id)
+    if action.get("kind") == "release_proof":
+        release_summary = action.get("release_summary") or {}
+        if release_summary.get("setup_command_policy") != "no_publish_no_secret_assignment":
+            print(f"production-local-gate: fail release setup policy missing for {action_id}")
+            raise SystemExit(1)
+        if release_summary.get("publish_actions_performed") is not False:
+            print(f"production-local-gate: fail release publish action flag unsafe for {action_id}")
+            raise SystemExit(1)
+        if release_summary.get("secret_value_saved") is not False:
+            print(f"production-local-gate: fail release secret flag unsafe for {action_id}")
+            raise SystemExit(1)
 if missing_reasons:
     print("production-local-gate: fail action_reason missing for " + ", ".join(missing_reasons))
     raise SystemExit(1)
@@ -213,5 +224,6 @@ print(f"production-local-gate: production_actions={status}")
 print(f"production-local-gate: runnable_commands={runnable}")
 print(f"production-local-gate: blocked_commands={blocked}")
 print(f"production-local-gate: action_reasons={len(action_rows)}")
+print("production-local-gate: release_setup_policy=verified")
 print(f"production-local-gate: finalizer_setup_actions={finalizer.get('setup_required_action_count', 0)}")
 PY
