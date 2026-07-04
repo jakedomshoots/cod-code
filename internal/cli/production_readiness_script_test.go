@@ -194,6 +194,71 @@ func Test_ProductionReadinessScript_usesCanonicalBlockedProviderEvidence(t *test
 	}
 }
 
+func Test_ProductionReadinessScript_usesNewestSkippedReleaseReadinessEvidence(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	evidenceRoot := filepath.Join(t.TempDir(), "evidence")
+	outputDir := filepath.Join(t.TempDir(), "production-readiness")
+
+	writeCompleteProductionReadinessEvidence(t, evidenceRoot)
+	oldRelease := filepath.Join(evidenceRoot, "release-readiness-r1", "summary.json")
+	newRelease := filepath.Join(evidenceRoot, "release-readiness-final", "summary.json")
+	writeProductionReadinessJSON(t, oldRelease, `{
+  "status": "blocked",
+  "public_release_ready": false
+}`)
+	writeProductionReadinessJSON(t, newRelease, `{
+  "status": "pass",
+  "public_release_ready": true
+}`)
+	writeProductionReadinessJSON(t, filepath.Join(evidenceRoot, "external-agent-production-core-29-final", "summary.json"), `{
+  "task_count": 29,
+  "agent_count": 4,
+  "failed": 0,
+  "partial": 0,
+  "timed_out": 0,
+  "incomplete_evidence": 0
+}`)
+	oldTime := time.Now().Add(-2 * time.Hour)
+	newTime := time.Now()
+	if err := os.Chtimes(oldRelease, oldTime, oldTime); err != nil {
+		t.Fatalf("touch old release: %v", err)
+	}
+	if err := os.Chtimes(newRelease, newTime, newTime); err != nil {
+		t.Fatalf("touch new release: %v", err)
+	}
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "production-readiness.sh"),
+		"--evidence-root", evidenceRoot,
+		"--output-dir", outputDir,
+		"--skip-release-readiness",
+		"--skip-secret-scan",
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("production readiness failed with newer passing release evidence: %v\n%s", err, string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"| release | public_release_readiness_run | skipped |",
+		"| release | public_release_ready | pass |",
+		newRelease,
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+	if strings.Contains(index, oldRelease) {
+		t.Fatalf("index.md used stale release-readiness evidence:\n%s", index)
+	}
+}
+
 func Test_ProductionReadinessScript_usesNewestComparisonEvidence(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {

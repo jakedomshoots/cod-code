@@ -165,7 +165,10 @@ else
   fi
 fi
 
-release_summary="$evidence_root/release-readiness-r1/summary.json"
+release_summary=$(latest_evidence_summary "release-readiness-")
+if [ -z "$release_summary" ]; then
+  release_summary="$evidence_root/release-readiness-r1/summary.json"
+fi
 if [ "$skip_release_readiness" -eq 1 ]; then
   add_check "release" "public_release_readiness_run" "skipped" "not-run" "Skipped by flag"
 else

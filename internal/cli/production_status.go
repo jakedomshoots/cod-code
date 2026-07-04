@@ -136,12 +136,36 @@ func latestProductionReadinessSummary(evidenceRoot string) (string, error) {
 		if err != nil {
 			continue
 		}
+		if productionReadinessSummaryHasSkippedChecks(candidate) {
+			continue
+		}
 		if latest == "" || info.ModTime().After(latestMod) {
 			latest = candidate
 			latestMod = info.ModTime()
 		}
 	}
 	return latest, nil
+}
+
+func productionReadinessSummaryHasSkippedChecks(path string) bool {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return true
+	}
+	var raw struct {
+		Checks []struct {
+			Status string `json:"status"`
+		} `json:"checks"`
+	}
+	if err := json.Unmarshal(content, &raw); err != nil {
+		return true
+	}
+	for _, check := range raw.Checks {
+		if check.Status == "skipped" {
+			return true
+		}
+	}
+	return false
 }
 
 func latestProductionFinalizerNextActions(evidenceRoot string) (*productionChecklistStatus, error) {

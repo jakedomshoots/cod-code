@@ -6,9 +6,11 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func Test_Run_production_status_reads_latest_readiness_summary(t *testing.T) {
@@ -208,6 +210,62 @@ func Test_Run_production_status_ignores_skipped_finalizer_next_actions(t *testin
 	}
 	if strings.Contains(text, "production-finalize-skipped/next-actions.md") {
 		t.Fatalf("production status used skipped finalizer:\n%s", text)
+	}
+}
+
+func Test_Run_production_status_ignores_skipped_readiness_summaries(t *testing.T) {
+	root := t.TempDir()
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-complete", "summary.json"), `{
+  "status": "blocked",
+  "local_production_ready": true,
+  "public_production_ready": false,
+  "blocked_count": 2,
+  "blocked_checks": ["release.public_release_readiness_run", "release.public_release_ready"],
+  "launch_checklist": {
+    "path": "launch-checklist.md",
+    "required_action_count": 2,
+    "status": "pass"
+  },
+  "checks": [
+    {"category": "release", "name": "public_release_readiness_run", "status": "blocked"},
+    {"category": "release", "name": "public_release_ready", "status": "blocked"}
+  ]
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-skipped", "summary.json"), `{
+  "status": "blocked",
+  "local_production_ready": true,
+  "public_production_ready": false,
+  "blocked_count": 1,
+  "blocked_checks": ["release.public_release_ready"],
+  "launch_checklist": {
+    "path": "launch-checklist.md",
+    "required_action_count": 1,
+    "status": "pass"
+  },
+  "checks": [
+    {"category": "release", "name": "public_release_readiness_run", "status": "skipped"},
+    {"category": "release", "name": "public_release_ready", "status": "blocked"}
+  ]
+}`)
+	oldTime := time.Now().Add(-2 * time.Hour)
+	newTime := time.Now()
+	if err := os.Chtimes(filepath.Join(root, ".omo", "evidence", "production-readiness-complete", "summary.json"), oldTime, oldTime); err != nil {
+		t.Fatalf("touch complete readiness: %v", err)
+	}
+	if err := os.Chtimes(filepath.Join(root, ".omo", "evidence", "production-readiness-skipped", "summary.json"), newTime, newTime); err != nil {
+		t.Fatalf("touch skipped readiness: %v", err)
+	}
+
+	var out bytes.Buffer
+	if err := Run(context.Background(), &out, []string{"production-status", "--workspace", root}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	var body productionStatusReport
+	if err := json.Unmarshal(out.Bytes(), &body); err != nil {
+		t.Fatalf("decode production status: %v\n%s", err, out.String())
+	}
+	if !strings.Contains(body.SummaryPath, "production-readiness-complete") || body.BlockedCount != 2 {
+		t.Fatalf("status used wrong readiness summary: %+v", body)
 	}
 }
 
