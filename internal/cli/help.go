@@ -189,6 +189,7 @@ Advanced flags:
   --action-kind <kind>            Filter production-actions by kind
   --action-provider <name>        Filter production-actions by provider
   --env-ready-only                Show production actions whose required env is present
+  --commands-only                 Print only production action command lines
   --production-finalize           Run guarded final production evidence sequence
   --run-comparison                Include the expensive 29-task all-agent comparison
   --review-queue                  Print jobs needing human attention

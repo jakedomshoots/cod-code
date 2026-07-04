@@ -120,6 +120,7 @@ ceo-packet production-actions --workspace . --format text --action-provider open
 ceo-packet production-actions --workspace . --format text --env-ready-only
 ceo-packet production-actions --workspace . --format text --action-kind competitor_setup
 ceo-packet production-actions --workspace . --format text --action-kind final_readiness
+ceo-packet production-actions --workspace . --action-id provider-openai --commands-only
 ```
 
 `rollback` supports saved JSON reports for normal replacements and created files produced by CEO Harness. It refuses to remove a created file if the file content no longer matches the saved report.

@@ -14,6 +14,7 @@ type productionActionsReport struct {
 	Status              string            `json:"status"`
 	RequiredActionCount int               `json:"required_action_count"`
 	EnvReadyActionCount int               `json:"env_ready_action_count"`
+	CommandsOnly        bool              `json:"commands_only,omitempty"`
 	Filter              map[string]string `json:"filter,omitempty"`
 	Actions             []map[string]any  `json:"actions"`
 }
@@ -56,6 +57,7 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 		Status:              raw.Status,
 		RequiredActionCount: len(actions),
 		EnvReadyActionCount: countEnvReadyProductionActions(actions),
+		CommandsOnly:        opts.productionActionsCommandsOnly,
 		Filter:              productionActionFilter(opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly),
 		Actions:             actions,
 	}, nil
@@ -323,6 +325,10 @@ func actionString(action map[string]any, key string) string {
 }
 
 func writeProductionActionsReport(out io.Writer, report productionActionsReport, format reportFormat) error {
+	if report.CommandsOnly {
+		_, err := fmt.Fprint(out, renderProductionActionCommandsOnly(report))
+		return err
+	}
 	switch format {
 	case "", reportFormatJSON:
 		encoder := json.NewEncoder(out)
@@ -343,6 +349,9 @@ func writeProductionActionsReport(out io.Writer, report productionActionsReport,
 }
 
 func renderProductionActionsText(report productionActionsReport) string {
+	if report.CommandsOnly {
+		return renderProductionActionCommandsOnly(report)
+	}
 	var builder strings.Builder
 	fmt.Fprintf(&builder, "Production actions: %s\n", report.Status)
 	fmt.Fprintf(&builder, "Required actions: %d\n", report.RequiredActionCount)
@@ -383,6 +392,37 @@ func renderProductionActionsText(report productionActionsReport) string {
 		writeCompetitorSetupText(&builder, action)
 		writeBlockedByText(&builder, action)
 		writeActionCommandText(&builder, action)
+	}
+	return builder.String()
+}
+
+func renderProductionActionCommandsOnly(report productionActionsReport) string {
+	var builder strings.Builder
+	for _, action := range report.Actions {
+		command := stringSlice(action["command"])
+		if len(command) == 0 {
+			continue
+		}
+		id := actionString(action, "id")
+		kind := actionString(action, "kind")
+		if id != "" || kind != "" {
+			fmt.Fprintf(&builder, "# %s", id)
+			if kind != "" {
+				fmt.Fprintf(&builder, " [%s]", kind)
+			}
+			if requiredEnv := actionString(action, "required_env"); requiredEnv != "" {
+				if actionString(action, "missing_required_env") != "" {
+					fmt.Fprintf(&builder, " missing env: %s", requiredEnv)
+				} else {
+					fmt.Fprintf(&builder, " requires env: %s", requiredEnv)
+				}
+			}
+			if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
+				fmt.Fprintf(&builder, " waiting on: %s", strings.Join(blockedBy, ", "))
+			}
+			builder.WriteString("\n")
+		}
+		fmt.Fprintf(&builder, "%s\n", shellCommandLine(command))
 	}
 	return builder.String()
 }

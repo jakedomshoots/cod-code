@@ -213,6 +213,23 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		t.Fatalf("env-ready production actions included missing-env provider:\n%s", text)
 	}
 
+	out.Reset()
+	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--action-id", "provider-openai", "--commands-only"}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	text = out.String()
+	for _, want := range []string{
+		"# provider-openai [provider_proof] missing env: OPENAI_API_KEY",
+		"sh scripts/provider-proof.sh --provider openai",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("commands-only production actions text missing %q:\n%s", want, text)
+		}
+	}
+	if strings.Contains(text, "secret-value") || strings.Contains(text, "Production actions:") {
+		t.Fatalf("commands-only output leaked value or included normal header:\n%s", text)
+	}
+
 	t.Setenv("OPENAI_API_KEY", "test-key")
 	out.Reset()
 	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--format", "text", "--action-provider", "openai", "--env-ready-only"}); err != nil {
@@ -225,11 +242,11 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 }
 
 func Test_ParseArgs_sets_production_actions_from_verb(t *testing.T) {
-	opts, err := parseArgs([]string{"production-actions", "--workspace", "/tmp/workspace", "--action-id", "provider-openai", "--action-kind", "provider_proof", "--action-provider", "openai", "--env-ready-only"})
+	opts, err := parseArgs([]string{"production-actions", "--workspace", "/tmp/workspace", "--action-id", "provider-openai", "--action-kind", "provider_proof", "--action-provider", "openai", "--env-ready-only", "--commands-only"})
 	if err != nil {
 		t.Fatalf("parseArgs: %v", err)
 	}
-	if !opts.showProductionActions || opts.workspaceDir != "/tmp/workspace" || opts.productionActionID != "provider-openai" || opts.productionActionKind != "provider_proof" || opts.productionActionProvider != "openai" || !opts.productionActionsEnvReadyOnly {
+	if !opts.showProductionActions || opts.workspaceDir != "/tmp/workspace" || opts.productionActionID != "provider-openai" || opts.productionActionKind != "provider_proof" || opts.productionActionProvider != "openai" || !opts.productionActionsEnvReadyOnly || !opts.productionActionsCommandsOnly {
 		t.Fatalf("opts = %+v, want production actions for workspace", opts)
 	}
 }

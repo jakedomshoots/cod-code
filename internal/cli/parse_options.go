@@ -63,6 +63,7 @@ type options struct {
 	productionActionKind                       string
 	productionActionProvider                   string
 	productionActionsEnvReadyOnly              bool
+	productionActionsCommandsOnly              bool
 	showProductionFinalize                     bool
 	productionFinalizeRunComparison            bool
 	productionFinalizeDist                     string
