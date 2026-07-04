@@ -331,6 +331,21 @@ write_http_setup_blocked() {
     printf '%s\n' "5. Re-run production readiness."
   } >"$output_dir/setup-checklist.md"
 
+  setup_checklist_item_count=$(awk '/^[0-9]+[.]/ { count += 1 } END { print count + 0 }' "$output_dir/setup-checklist.md")
+  setup_artifacts_sha256=$(python3 - "$output_dir/blocked.md" "$output_dir/env.template" "$output_dir/commands.sh" "$output_dir/setup-checklist.md" <<'PY'
+import hashlib
+import json
+import pathlib
+import sys
+
+result = {}
+for raw_path in sys.argv[1:]:
+    path = pathlib.Path(raw_path)
+    result[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+print(json.dumps(result, sort_keys=True))
+PY
+)
+
   cat >"$output_dir/summary.json" <<JSON
 {
   "schema_version": 1,
@@ -342,6 +357,8 @@ write_http_setup_blocked() {
   "api_key_env": "$api_key_env",
   "blocked_reason": "$blocked_reason",
   "setup_result_status": "$result_status",
+  "setup_checklist_item_count": $setup_checklist_item_count,
+  "setup_artifacts_sha256": $setup_artifacts_sha256,
   "secret_value_saved": false,
   "artifacts": {
     "index": "index.md",

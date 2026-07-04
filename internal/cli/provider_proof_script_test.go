@@ -166,6 +166,12 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
 		`"provider": "openrouter"`,
 		`"api_key_env": "OPENROUTER_API_KEY"`,
 		`"blocked_reason": "missing_api_key_env"`,
+		`"setup_checklist_item_count": 5`,
+		`"setup_artifacts_sha256": {`,
+		`"blocked.md": "`,
+		`"commands.sh": "`,
+		`"env.template": "`,
+		`"setup-checklist.md": "`,
 		`"secret_value_saved": false`,
 	} {
 		if !strings.Contains(summary, want) {
@@ -214,6 +220,8 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyEmpty(t *testing.T) {
 	for _, want := range []string{
 		`"blocked_reason": "empty_api_key_env"`,
 		`"setup_result_status": "blocked_empty_key"`,
+		`"setup_checklist_item_count": 5`,
+		`"setup_artifacts_sha256": {`,
 		`"secret_value_saved": false`,
 	} {
 		if !strings.Contains(summary, want) {
