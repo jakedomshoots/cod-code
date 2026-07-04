@@ -14,6 +14,7 @@ type productionActionsReport struct {
 	Status              string            `json:"status"`
 	RequiredActionCount int               `json:"required_action_count"`
 	EnvReadyActionCount int               `json:"env_ready_action_count"`
+	ReadyActionCount    int               `json:"ready_action_count"`
 	CommandsOnly        bool              `json:"commands_only,omitempty"`
 	Filter              map[string]string `json:"filter,omitempty"`
 	Actions             []map[string]any  `json:"actions"`
@@ -57,6 +58,7 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 		Status:              raw.Status,
 		RequiredActionCount: len(actions),
 		EnvReadyActionCount: countEnvReadyProductionActions(actions),
+		ReadyActionCount:    countReadyProductionActions(actions),
 		CommandsOnly:        opts.productionActionsCommandsOnly,
 		Filter:              productionActionFilter(opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly),
 		Actions:             actions,
@@ -273,6 +275,21 @@ func countEnvReadyProductionActions(actions []map[string]any) int {
 	return count
 }
 
+func countReadyProductionActions(actions []map[string]any) int {
+	count := 0
+	for _, action := range actions {
+		if actionReady(action) {
+			count++
+		}
+	}
+	return count
+}
+
+func actionReady(action map[string]any) bool {
+	envReady, _ := action["env_ready"].(bool)
+	return envReady && len(stringSlice(action["blocked_by"])) == 0
+}
+
 func filterProductionActions(actions []map[string]any, id string, kind string, provider string, envReadyOnly bool) []map[string]any {
 	if id == "" && kind == "" && provider == "" && !envReadyOnly {
 		return actions
@@ -356,6 +373,7 @@ func renderProductionActionsText(report productionActionsReport) string {
 	fmt.Fprintf(&builder, "Production actions: %s\n", report.Status)
 	fmt.Fprintf(&builder, "Required actions: %d\n", report.RequiredActionCount)
 	fmt.Fprintf(&builder, "Env ready: %d\n", report.EnvReadyActionCount)
+	fmt.Fprintf(&builder, "Ready now: %d\n", report.ReadyActionCount)
 	if len(report.Filter) > 0 {
 		parts := []string{}
 		if report.Filter["id"] != "" {

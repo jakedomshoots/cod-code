@@ -107,6 +107,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Production actions: blocked",
 		"Required actions: 5",
 		"Env ready: 4",
+		"Ready now: 2",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 		"(missing env: OPENAI_API_KEY)",
 		"Requires env: OPENAI_API_KEY",
@@ -137,7 +138,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &body); err != nil {
 		t.Fatalf("decode production actions: %v\n%s", err, out.String())
 	}
-	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
+	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || body.ReadyActionCount != 2 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
 		t.Fatalf("body = %+v, want five actions starting with provider-openai", body)
 	}
 	if blockedBy := stringSlice(body.Actions[3]["blocked_by"]); len(blockedBy) != 1 || blockedBy[0] != "competitor-smoke" {
@@ -152,6 +153,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	for _, want := range []string{
 		"Required actions: 1",
 		"Env ready: 0",
+		"Ready now: 0",
 		"Filter: kind=provider_proof",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 	} {
@@ -202,6 +204,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	for _, want := range []string{
 		"Required actions: 4",
 		"Env ready: 4",
+		"Ready now: 2",
 		"Filter: env_ready=true",
 		"release-readiness [release_proof]: Prove public release readiness",
 	} {
