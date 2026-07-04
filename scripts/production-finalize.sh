@@ -217,7 +217,10 @@ quote_display_path() {
   quote_command_arg "$path"
 }
 
-write_command() {
+write_command_with_prefix() {
+  prefix="$1"
+  shift
+  printf '%s' "$prefix" >>"$output_dir/commands.sh"
   first=1
   for arg in "$@"; do
     if [ "$first" -eq 1 ]; then
@@ -228,6 +231,18 @@ write_command() {
     quote_command_arg "$arg" >>"$output_dir/commands.sh"
   done
   printf '\n' >>"$output_dir/commands.sh"
+}
+
+write_command() {
+  write_command_with_prefix "" "$@"
+}
+
+write_blocked_command() {
+  reason="$1"
+  shift
+  write_command_with_prefix "# blocked command: " "$@"
+  printf '%s\n' "# reason: $reason" >>"$output_dir/commands.sh"
+  write_command_with_prefix "# " "$@"
 }
 
 add_step() {
@@ -244,8 +259,8 @@ run_step() {
   shift 2
   step_dir="$output_dir/$name"
   mkdir -p "$step_dir"
-  write_command "$@"
   if [ "$dry_run" -eq 1 ]; then
+    write_command "$@"
     add_step "$name" "planned" "$evidence_rel" "Dry-run only"
     return 0
   fi
@@ -255,9 +270,11 @@ run_step() {
   set -e
   printf '%s\n' "$code" >"$step_dir/exit-code.txt"
   if [ "$code" -eq 0 ]; then
+    write_command "$@"
     add_step "$name" "pass" "$evidence_rel" "Command exited 0"
     return 0
   fi
+  write_blocked_command "step $name exited $code; inspect $name/stdout.txt and $name/stderr.txt before rerunning." "$@"
   add_step "$name" "blocked" "$evidence_rel" "Command exited $code; see stdout/stderr"
   return 1
 }

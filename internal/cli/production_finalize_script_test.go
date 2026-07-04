@@ -127,6 +127,54 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 	}
 }
 
+func Test_ProductionFinalizeScript_commentsBlockedReplayCommands(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "production-finalize")
+	evidenceRoot := filepath.Join(t.TempDir(), "evidence")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "production-finalize.sh"),
+		"--output-dir", outputDir,
+		"--evidence-root", evidenceRoot,
+		"--dist", filepath.Join(root, "dist"),
+		"--skip-competitor-smoke",
+		"--skip-production-readiness",
+	)
+	cmd.Dir = root
+	cmd.Env = withoutEnv(withoutEnv(withoutEnv(cmd.Environ(), "OPENAI_API_KEY"), "OPENROUTER_API_KEY"), "MOONSHOT_API_KEY")
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("production-finalize unexpectedly passed without public release/provider setup:\n%s", string(output))
+	}
+
+	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
+	for _, want := range []string{
+		"# blocked command: sh " + filepath.Join(root, "scripts", "release-readiness.sh"),
+		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openai",
+		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openrouter",
+		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider moonshot",
+		"# reason: step provider-openai exited 1;",
+	} {
+		if !strings.Contains(commands, want) {
+			t.Fatalf("commands.sh missing blocked replay detail %q:\n%s", want, commands)
+		}
+	}
+	for _, blockedRunnable := range []string{
+		"\nsh " + filepath.Join(root, "scripts", "release-readiness.sh"),
+		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openai",
+		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openrouter",
+		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider moonshot",
+	} {
+		if strings.Contains(commands, blockedRunnable) {
+			t.Fatalf("commands.sh should not contain runnable blocked command %q:\n%s", blockedRunnable, commands)
+		}
+	}
+}
+
 func Test_ProductionFinalizeScript_usesExistingCleanComparisonEvidence(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {
