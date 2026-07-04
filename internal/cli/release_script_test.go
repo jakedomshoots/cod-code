@@ -334,6 +334,7 @@ func Test_ReleaseBootstrapScript_writesBlockedEvidencePacket(t *testing.T) {
 		filepath.Join(outputDir, "summary.json"),
 		filepath.Join(outputDir, "commands.sh"),
 		filepath.Join(outputDir, "env.template"),
+		filepath.Join(outputDir, "release-handoff.md"),
 		filepath.Join(outputDir, "release-checklist.md"),
 		filepath.Join(outputDir, "remote-homebrew-formula.rb"),
 		filepath.Join(outputDir, "verify-release.txt"),
@@ -355,6 +356,7 @@ func Test_ReleaseBootstrapScript_writesBlockedEvidencePacket(t *testing.T) {
 		`"release_checklist_item_count": 7`,
 		`"bootstrap_artifacts_sha256"`,
 		`"commands.sh"`,
+		`"release-handoff.md"`,
 		`"release-checklist.md"`,
 	} {
 		if !strings.Contains(summary, want) {
@@ -404,6 +406,7 @@ func Test_ReleaseBootstrapScript_passesWithPublicMetadata(t *testing.T) {
 		`"blocked_count": 0`,
 		`"release_checklist_item_count": 7`,
 		`"bootstrap_artifacts_sha256"`,
+		`"release-handoff.md"`,
 		`"remote-homebrew-formula.rb"`,
 	} {
 		if !strings.Contains(summary, want) {
@@ -420,5 +423,21 @@ func Test_ReleaseBootstrapScript_passesWithPublicMetadata(t *testing.T) {
 		if !strings.Contains(formula, want) {
 			t.Fatalf("remote formula missing %q:\n%s", want, formula)
 		}
+	}
+	handoff := readTextFile(t, filepath.Join(outputDir, "release-handoff.md"))
+	for _, want := range []string{
+		"# Public Release Handoff",
+		"ceo-packet_0.2.0-test_darwin_arm64.tar.gz",
+		"`dist/checksums.txt`",
+		"`dist/release-manifest.json`",
+		"Publishing is intentionally manual",
+		"go run ./cmd/ceo-packet production-finalize --workspace . --dry-run",
+	} {
+		if !strings.Contains(handoff, want) {
+			t.Fatalf("release handoff missing %q:\n%s", want, handoff)
+		}
+	}
+	if strings.Contains(handoff, "gh release create") || strings.Contains(handoff, "git push") {
+		t.Fatalf("release handoff should not include publish commands:\n%s", handoff)
 	}
 }

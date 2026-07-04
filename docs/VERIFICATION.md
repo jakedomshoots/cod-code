@@ -71,6 +71,9 @@ Status date: 2026-07-04
 - Latest release workflow guard:
   - `go test ./internal/cli -run Test_ReleaseWorkflow_publishesGitHubReleaseAssets -count=1`
   - Result: verifies the tag-triggered GitHub release workflow has write permission, derives the version from `GITHUB_REF_NAME`, runs local release plus verification, creates the GitHub Release, and attaches archives, checksums, and the manifest.
+- Latest release bootstrap handoff proof:
+  - `go test ./internal/cli -run Test_ReleaseBootstrapScript -count=1`
+  - Result: verifies `release-bootstrap` writes `release-handoff.md` with required public assets, checksums, operator boundaries, and post-publish verification commands while avoiding tag/push/upload commands.
 - Latest local production gate:
   - `sh scripts/production-local-gate.sh --dist dist --output-dir .omo/evidence/production-local-gate-skip-guard-r1`
   - Result: pass. Local production readiness is true; public blockers remain recorded as evidence. The gate also requires the production action queue while public blockers remain, writes `production-actions.json`, `production-status.json`, and `production-actions.commands.sh`, validates action row, state-count, runnable, and blocked command counts, requires `action_state` and `action_reason` on every action, enforces release setup no-publish/no-secret policy fields and setup-action file content, enforces provider setup no-secret policy fields plus setup artifact hashes and command-file content, rejects declared-evidence mismatches, requires finalizer setup checklist hash/count metadata, fails launch/finalizer checklist fingerprint drift, and confirms blocked commands are commented with reasons in the command script.

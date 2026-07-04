@@ -258,6 +258,64 @@ Status inputs are captured in \`summary.json\`. This packet does not publish any
 Publish boundary: do not tag, push, upload, publish a tap, or announce installer support until the readiness gates pass against public URLs.
 EOF
 
+cat >"$output_dir/release-handoff.md" <<EOF
+# Public Release Handoff
+
+This handoff is safe to share with a release operator. It does not publish anything.
+
+## Inputs
+
+- Version: \`$version\`
+- Repo URL: \`$repo_url\`
+- Release URL: \`$release_url\`
+- Archive base URL: \`$homebrew_archive_base_url\`
+- Signing mode: \`$signing_mode\`
+- Checksum notes URL: \`$checksum_notes_url\`
+
+## Required Public Assets
+
+- \`dist/checksums.txt\`
+- \`dist/release-manifest.json\`
+EOF
+
+if [ -f "$dist/release-manifest.json" ]; then
+  python3 - "$dist/release-manifest.json" >>"$output_dir/release-handoff.md" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    manifest = json.load(handle)
+
+for artifact in manifest.get("artifacts", []):
+    name = artifact.get("name", "")
+    sha = artifact.get("sha256", "")
+    if name:
+        print(f"- `dist/{name}` sha256 `{sha}`")
+PY
+else
+  printf '%s\n' "- Blocked: release manifest is missing." >>"$output_dir/release-handoff.md"
+fi
+
+cat >>"$output_dir/release-handoff.md" <<EOF
+
+## Operator Boundary
+
+- Do not paste secrets into repo files or evidence folders.
+- Do not claim public production readiness until \`release-readiness\`, provider proof, and \`production-readiness\` pass.
+- Publishing is intentionally manual from this handoff; this script did not tag, push, upload, create a GitHub release, or publish a tap.
+
+## Verification Commands After Publishing
+
+\`\`\`sh
+ALLOW_CHECKSUM_ONLY_RELEASE=$(if [ "$signing_mode" = "checksum-only" ]; then printf 1; else printf 0; fi) \\
+CHECKSUM_ONLY_RELEASE_NOTES_URL="$checksum_notes_url" \\
+RELEASE_URL="$release_url" \\
+sh scripts/release-preflight.sh dist
+sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final
+go run ./cmd/ceo-packet production-finalize --workspace . --dry-run
+\`\`\`
+EOF
+
 blocked_count=$(wc -l <"$blocked_file" | tr -d ' ')
 if [ "$blocked_count" -eq 0 ]; then
   overall_status=pass
@@ -293,6 +351,7 @@ artifacts = [
     "blocked-checks.txt",
     "commands.sh",
     "env.template",
+    "release-handoff.md",
     "release-checklist.md",
     "remote-homebrew-formula.rb",
     "verify-release.txt",
@@ -333,6 +392,7 @@ cat >"$output_dir/summary.json" <<JSON
     "summary": "summary.json",
     "commands": "commands.sh",
     "env_template": "env.template",
+    "handoff": "release-handoff.md",
     "checklist": "release-checklist.md",
     "homebrew_formula": "remote-homebrew-formula.rb",
     "verify_release": "verify-release.txt"
@@ -366,6 +426,7 @@ JSON
   printf '\n'
   printf '%s\n' '- `commands.sh`'
   printf '%s\n' '- `env.template`'
+  printf '%s\n' '- `release-handoff.md`'
   printf '%s\n' '- `release-checklist.md`'
   printf '%s\n' '- `remote-homebrew-formula.rb`'
   printf '\n'

@@ -124,6 +124,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Extended local endurance proof produced 30/30 passing iterations in 102 seconds at `.omo/evidence/endurance-local-r3/index.md`.
 - Added release manifest and verifier through `dist/release-manifest.json` and `scripts/verify-release.sh`.
 - Added public release bootstrap evidence through `scripts/release-bootstrap.sh`; it prepares commands, env, checklist, and a remote Homebrew formula draft without publishing anything.
+- Release bootstrap now writes `release-handoff.md`, listing required public assets, checksums, operator boundaries, and post-publish verification commands without including tag/push/upload commands.
 - Added public release preflight through `scripts/release-preflight.sh`; it blocks public claims until remote URL, Homebrew URL, and signature/checksum posture are explicit.
 - Added public release readiness evidence through `scripts/release-readiness.sh`; it writes `index.md`, `summary.json`, preflight output, git remote state, and GitHub auth state without publishing anything.
 - Release readiness now writes `setup-actions.md` and safe `setup-commands.sh` when public release blockers remain and records action/command SHA-256 fingerprints, `no_publish_no_secret_assignment` setup policy, `publish_actions_performed: false`, and `secret_value_saved: false` in `summary.json`, so missing remote, release URL, GitHub release assets, Homebrew URL, and signing/checksum policy work is listed in actionable, fingerprinted files.
