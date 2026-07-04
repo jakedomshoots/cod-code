@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -66,6 +67,52 @@ func Test_RunCompetitorSmoke_runs_version_and_dry_run_when_binary_exists(t *test
 	requireFile(t, filepath.Join(outputDir, "codex_cli", "version.stderr"))
 	requireFile(t, filepath.Join(outputDir, "codex_cli", "dry-run.stdout"))
 	requireFile(t, filepath.Join(outputDir, "codex_cli", "dry-run.stderr"))
+}
+
+func Test_RunCompetitorSmoke_marks_provider_quota_as_setup_blocked(t *testing.T) {
+	// Given
+	binDir := t.TempDir()
+	writeExecutableContent(t, filepath.Join(binDir, "opencode"), `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  printf 'opencode 1.0.0\n'
+  exit 0
+fi
+printf 'AI_APICallError: Token Plan usage limit reached\n' >&2
+exit 1
+`)
+	t.Setenv("PATH", binDir)
+	entries := completeCompetitorEntries(map[string]string{
+		"opencode": "opencode",
+	})
+	for _, entry := range entries {
+		if entry["id"] == "opencode" {
+			entry["dry_run_args"] = []string{"run", "--print-logs", "--log-level", "INFO", "Reply exactly CEO_HARNESS_EVAL_OK."}
+		}
+	}
+	configPath := writeCompetitorFixture(t, entries)
+	outputDir := filepath.Join(t.TempDir(), "smoke")
+
+	// When
+	summary, err := RunCompetitorSmoke(context.Background(), CompetitorSmokeRequest{
+		CompetitorsPath: configPath,
+		OutputDir:       outputDir,
+		TimeoutSeconds:  5,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunCompetitorSmoke returned error: %v", err)
+	}
+	result := requireCompetitorSmokeResult(t, summary, "opencode")
+	if result.Status != competitorSmokeStatusBlocked || summary.SetupBlocked != 1 {
+		t.Fatalf("result=%+v summary=%+v, want setup-blocked", result, summary)
+	}
+	stderr, err := os.ReadFile(filepath.Join(outputDir, "opencode", "dry-run.stderr"))
+	if err != nil {
+		t.Fatalf("read dry-run stderr: %v", err)
+	}
+	if !strings.Contains(string(stderr), "Token Plan usage limit reached") {
+		t.Fatalf("dry-run stderr missing quota evidence:\n%s", stderr)
+	}
 }
 
 func Test_RunCLI_runs_competitor_smoke_when_flag_is_set(t *testing.T) {

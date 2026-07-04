@@ -56,6 +56,9 @@ Status date: 2026-07-03
 - Latest OpenCode provider-error visibility proof:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents opencode --local-agent-benchmark-task docs-product-status-weak-spots --tasks evals/tasks --output-dir .omo/evidence/opencode-setup-blocked-r1 --timeout-seconds 25`
   - Result: OpenCode records `setup_blocked: 1`, `timed_out: 0`, and `incomplete_evidence: 0`; `stderr.log` shows `Token Plan usage limit reached` for `minimax-coding-plan/MiniMax-M3`.
+- Latest competitor smoke setup preflight:
+  - `go run ./cmd/ceo-eval --comparison-smoke --competitors evals/competitors.json --output-dir .omo/evidence/competitor-smoke-setup-r1 --timeout-seconds 25`
+  - Result: Codex CLI smoke passed, OpenCode recorded `setup_blocked: 1` from provider quota evidence, and missing Claude Code, Aider, and Goose binaries were skipped instead of failed.
 - Latest comparison report decision smoke:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task docs-roadmap-cli-first --output-dir .omo/evidence/comparison-report-decision-smoke-r1 ...`
   - Result: comparison report includes `Overall comparison: pass`, `CEO Harness result: clean`, and `External blockers: none`.

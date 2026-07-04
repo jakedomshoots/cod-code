@@ -35,6 +35,18 @@ go run ./cmd/ceo-eval --comparison-plan --competitors evals/competitors.json
 
 The plan-only output is not a benchmark result. It only says whether the configured binary is discoverable and records an empty placeholder until evidence exists.
 
+Run installed competitor smoke checks before any serious comparison:
+
+```sh
+go run ./cmd/ceo-eval \
+  --comparison-smoke \
+  --competitors evals/competitors.json \
+  --output-dir .omo/evidence/competitor-smoke-setup-r1 \
+  --timeout-seconds 25
+```
+
+Smoke checks are setup proof, not benchmark proof. OpenCode uses a non-editing dry run with logs enabled so provider quota, auth, or credential failures become `setup_blocked` with saved stdout/stderr instead of a vague timeout.
+
 Run installed local agents against the same safe task:
 
 ```sh

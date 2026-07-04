@@ -16,6 +16,7 @@ const (
 	competitorSmokeMode          = "local_version_and_dry_run_smoke"
 	competitorSmokeStatusPass    = "smoke_pass"
 	competitorSmokeStatusFail    = "smoke_failed"
+	competitorSmokeStatusBlocked = "setup_blocked"
 	competitorSmokeStatusSkipped = "skipped_missing_binary"
 )
 
@@ -39,6 +40,8 @@ func RunCompetitorSmoke(ctx context.Context, req CompetitorSmokeRequest) (Compet
 		switch result.Status {
 		case competitorSmokeStatusPass:
 			summary.SmokePassed++
+		case competitorSmokeStatusBlocked:
+			summary.SetupBlocked++
 		case competitorSmokeStatusSkipped:
 			summary.Skipped++
 		default:
@@ -94,8 +97,22 @@ func runCompetitorSmoke(ctx context.Context, req CompetitorSmokeRequest, competi
 		result.Status = competitorSmokeStatusPass
 		return result
 	}
+	if smokeSetupBlocked(version) || smokeSetupBlocked(dryRun) {
+		result.Status = competitorSmokeStatusBlocked
+		result.Note = "provider setup is blocked; smoke stdout/stderr captured auth, quota, or credential evidence"
+		return result
+	}
 	result.Status = competitorSmokeStatusFail
 	return result
+}
+
+func smokeSetupBlocked(result SmokeCommandResult) bool {
+	run := localAgentRunResult{
+		stdout:  result.Stdout,
+		stderr:  result.Stderr,
+		errText: result.Error,
+	}
+	return localAgentSetupBlocked(run)
 }
 
 func runSmokeCommand(ctx context.Context, binary string, args []string, timeoutSeconds int) SmokeCommandResult {

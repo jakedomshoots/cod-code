@@ -24,6 +24,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - Focused path-safety rubric repair evidence: `.omo/evidence/external-agent-path-escape-rubric-r1/summary.json`
 - Focused timeout-retry evidence: `.omo/evidence/external-agent-timeout-retry-r1/summary.json`
 - OpenCode 600s timeout override evidence: `.omo/evidence/opencode-agent-timeout-r1/summary.json`
+- Competitor smoke setup evidence: `.omo/evidence/competitor-smoke-setup-r1/summary.json`
 - Market-parity-core CEO evidence: `.omo/evidence/market-parity-core-ceo-r2/summary.json`
 - Expanded 25-task CEO evidence: `.omo/evidence/production-core-25-ceo-r1/summary.json`
 - Expanded 26-task CEO evidence: `.omo/evidence/production-core-26-ceo-r1/summary.json`

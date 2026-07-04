@@ -62,7 +62,7 @@
       "homepage": "https://opencode.ai/docs/",
       "setup_hint": "Install OpenCode and configure its provider before real comparison runs.",
       "version_args": ["--version"],
-      "dry_run_args": ["--version"],
+      "dry_run_args": ["run", "--print-logs", "--log-level", "INFO", "--pure", "--auto", "--format", "json", "Reply exactly CEO_HARNESS_EVAL_OK. Do not edit files."],
       "timeout_seconds": 1800,
       "comparison_dimensions": [
         "task_success",
