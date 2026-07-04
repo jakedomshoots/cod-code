@@ -88,6 +88,17 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 	if strings.Contains(providerCommands, "OPENAI_API_KEY=") || strings.Contains(providerCommands, "<redacted>") {
 		t.Fatalf("provider command artifact should not include secret assignments:\n%s", providerCommands)
 	}
+	releaseSetup := readTextFile(t, filepath.Join(root, ".omo", "evidence", "release-readiness-final", "setup-actions.md"))
+	for _, want := range []string{
+		"- git_remote:",
+		"- github_release_assets:",
+		"sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final",
+		"ceo-packet production-finalize --workspace . --dry-run",
+	} {
+		if !strings.Contains(releaseSetup, want) {
+			t.Fatalf("release setup artifact missing %q:\n%s", want, releaseSetup)
+		}
+	}
 	actions := readTextFile(t, filepath.Join(outputDir, "production-actions.json"))
 	for _, want := range []string{
 		`"path":`,

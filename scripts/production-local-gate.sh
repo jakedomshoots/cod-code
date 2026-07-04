@@ -182,6 +182,21 @@ for action in action_rows:
         if release_summary.get("secret_value_saved") is not False:
             print(f"production-local-gate: fail release secret flag unsafe for {action_id}")
             raise SystemExit(1)
+        setup_actions_path = release_summary.get("setup_actions_path") or ""
+        if not setup_actions_path or not os.path.exists(setup_actions_path):
+            print(f"production-local-gate: fail release setup actions file missing for {action_id}")
+            raise SystemExit(1)
+        setup_actions_text = open(setup_actions_path, "r", encoding="utf-8").read()
+        for blocked_check in release_summary.get("blocked_checks") or []:
+            if f"- {blocked_check}:" not in setup_actions_text:
+                print(f"production-local-gate: fail release setup action missing for {action_id}: {blocked_check}")
+                raise SystemExit(1)
+        if "sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final" not in setup_actions_text:
+            print(f"production-local-gate: fail release setup actions missing readiness rerun for {action_id}")
+            raise SystemExit(1)
+        if "ceo-packet production-finalize --workspace . --dry-run" not in setup_actions_text:
+            print(f"production-local-gate: fail release setup actions missing finalizer rerun for {action_id}")
+            raise SystemExit(1)
     if action.get("kind") == "provider_proof":
         provider_summary = action.get("provider_summary") or {}
         provider_name = provider_summary.get("provider") or action.get("provider") or ""
