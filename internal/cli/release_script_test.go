@@ -487,6 +487,21 @@ func Test_ReleaseBootstrapScript_writesBlockedEvidencePacket(t *testing.T) {
 			t.Fatalf("bootstrap summary missing %q:\n%s", want, summary)
 		}
 	}
+
+	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
+	for _, want := range []string{
+		"# blocked homebrew formula:",
+		"# sh scripts/release-homebrew-formula.sh",
+		"# blocked release preflight:",
+		"# sh scripts/release-preflight.sh dist",
+	} {
+		if !strings.Contains(commands, want) {
+			t.Fatalf("blocked bootstrap commands missing %q:\n%s", want, commands)
+		}
+	}
+	if strings.Contains(commands, `--repo-url ""`) || strings.Contains(commands, `RELEASE_URL=""`) || strings.Contains(commands, `CHECKSUM_ONLY_RELEASE_NOTES_URL=""`) {
+		t.Fatalf("blocked bootstrap commands should not run with empty public metadata:\n%s", commands)
+	}
 }
 
 func Test_ReleaseBootstrapScript_passesWithPublicMetadata(t *testing.T) {
@@ -563,5 +578,21 @@ func Test_ReleaseBootstrapScript_passesWithPublicMetadata(t *testing.T) {
 	}
 	if strings.Contains(handoff, "gh release create") || strings.Contains(handoff, "git push") {
 		t.Fatalf("release handoff should not include publish commands:\n%s", handoff)
+	}
+
+	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
+	for _, want := range []string{
+		`sh scripts/release-homebrew-formula.sh \`,
+		`--repo-url "https://github.com/acme/ceo-harness"`,
+		`--homebrew-archive-base-url "https://github.com/acme/ceo-harness/releases/download/v0.2.0-test"`,
+		`RELEASE_URL="https://github.com/acme/ceo-harness/releases/tag/v0.2.0-test"`,
+		"sh scripts/release-preflight.sh dist",
+	} {
+		if !strings.Contains(commands, want) {
+			t.Fatalf("pass bootstrap commands missing %q:\n%s", want, commands)
+		}
+	}
+	if strings.Contains(commands, "# blocked homebrew formula") || strings.Contains(commands, "# blocked release preflight") {
+		t.Fatalf("pass bootstrap commands should not include blocked comments:\n%s", commands)
 	}
 }

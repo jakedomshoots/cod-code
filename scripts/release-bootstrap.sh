@@ -217,16 +217,47 @@ sh scripts/verify-release.sh dist
 
 # After remote artifacts exist, update the Homebrew tap formula from:
 # $output_dir/remote-homebrew-formula.rb
+EOF
+
+if [ "$repo_status" = "pass" ] && [ "$homebrew_status" = "pass" ]; then
+  cat >>"$output_dir/commands.sh" <<EOF
 sh scripts/release-homebrew-formula.sh \\
   --dist dist \\
   --repo-url "$repo_url" \\
   --homebrew-archive-base-url "$homebrew_archive_base_url"
 
+EOF
+else
+  {
+    printf '%s\n' '# blocked homebrew formula: provide REPO_URL and HOMEBREW_ARCHIVE_BASE_URL before running release-homebrew-formula.sh.'
+    printf '%s\n' '# sh scripts/release-homebrew-formula.sh \'
+    printf '%s\n' '#   --dist dist \'
+    printf '%s\n' '#   --repo-url "https://github.com/<owner>/<repo>" \'
+    printf '%s\n' '#   --homebrew-archive-base-url "https://github.com/<owner>/<repo>/releases/download/v<version>"'
+    printf '\n'
+  } >>"$output_dir/commands.sh"
+fi
+
+if [ "$release_status" = "pass" ] && [ "$signing_status" = "pass" ]; then
+  cat >>"$output_dir/commands.sh" <<EOF
 ALLOW_CHECKSUM_ONLY_RELEASE=$(if [ "$signing_mode" = "checksum-only" ]; then printf 1; else printf 0; fi) \\
 CHECKSUM_ONLY_RELEASE_NOTES_URL="$checksum_notes_url" \\
 RELEASE_URL="$release_url" \\
 sh scripts/release-preflight.sh dist
 
+EOF
+else
+  {
+    printf '%s\n' '# blocked release preflight: provide RELEASE_URL plus signing or checksum-note policy first.'
+    printf '%s\n' '# ALLOW_CHECKSUM_ONLY_RELEASE=1 \'
+    printf '%s\n' '# CHECKSUM_ONLY_RELEASE_NOTES_URL="https://github.com/<owner>/<repo>/releases/tag/v<version>" \'
+    printf '%s\n' '# RELEASE_URL="https://github.com/<owner>/<repo>/releases/tag/v<version>" \'
+    printf '%s\n' '# sh scripts/release-preflight.sh dist'
+    printf '\n'
+  } >>"$output_dir/commands.sh"
+fi
+
+cat >>"$output_dir/commands.sh" <<EOF
 sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
 sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness
 EOF
