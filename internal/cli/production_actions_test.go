@@ -44,6 +44,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
       "provider": "openai",
       "required_env": "OPENAI_API_KEY",
       "text": "Prove OpenAI HTTP provider",
+      "evidence": "`+filepath.ToSlash(filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "index.md"))+`",
       "command": ["sh", "scripts/provider-proof.sh", "--provider", "openai"]
     },
     {
@@ -99,6 +100,22 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
     {"id": "aider", "name": "Aider", "status": "skipped_missing_binary", "setup_hint": "Install Aider"}
   ]
 }`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "summary.json"), `{
+  "schema_version": 1,
+  "status": "blocked",
+  "provider": "openai",
+  "provider_mode": "http-provider",
+  "http_preset": "openai",
+  "http_model": "gpt-5",
+  "api_key_env": "OPENAI_API_KEY",
+  "blocked_reason": "missing_api_key_env",
+  "secret_value_saved": false,
+  "artifacts": {
+    "checklist": "setup-checklist.md",
+    "commands": "commands.sh",
+    "env_template": "env.template"
+  }
+}`)
 
 	var out bytes.Buffer
 	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--format", "text"}); err != nil {
@@ -112,6 +129,11 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Ready now: 2",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 		"(missing env: OPENAI_API_KEY)",
+		"Provider blocker: missing_api_key_env",
+		"Provider model: gpt-5",
+		"Setup checklist:",
+		"provider-proof-openai",
+		"Setup command file:",
 		"Requires env: OPENAI_API_KEY",
 		"Command: sh scripts/provider-proof.sh --provider openai",
 		"release-readiness [release_proof]: Prove public release readiness",

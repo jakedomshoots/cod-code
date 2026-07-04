@@ -85,6 +85,7 @@ func annotateProductionActions(actions []map[string]any, sourceDir string) []map
 		}
 		next["env_ready"] = envReady
 		annotateReleaseProof(next)
+		annotateProviderProof(next)
 		annotateCompetitorSetup(next, sourceDir)
 		annotated = append(annotated, next)
 	}
@@ -215,6 +216,61 @@ func annotateReleaseProof(action map[string]any) {
 	if summary.SetupActions != "" {
 		action["release_summary"].(map[string]any)["setup_actions_path"] = filepath.Join(filepath.Dir(summaryPath), summary.SetupActions)
 	}
+}
+
+func annotateProviderProof(action map[string]any) {
+	if actionString(action, "kind") != "provider_proof" {
+		return
+	}
+	evidencePath := actionString(action, "evidence")
+	if evidencePath == "" {
+		return
+	}
+	summaryPath := filepath.Join(filepath.Dir(evidencePath), "summary.json")
+	content, err := os.ReadFile(summaryPath)
+	if err != nil {
+		action["provider_summary_error"] = err.Error()
+		return
+	}
+	var summary struct {
+		Status           string `json:"status"`
+		Provider         string `json:"provider"`
+		ProviderMode     string `json:"provider_mode"`
+		HTTPPreset       string `json:"http_preset"`
+		HTTPModel        string `json:"http_model"`
+		APIKeyEnv        string `json:"api_key_env"`
+		BlockedReason    string `json:"blocked_reason"`
+		SecretValueSaved bool   `json:"secret_value_saved"`
+		Artifacts        struct {
+			Checklist   string `json:"checklist"`
+			Commands    string `json:"commands"`
+			EnvTemplate string `json:"env_template"`
+		} `json:"artifacts"`
+	}
+	if err := json.Unmarshal(content, &summary); err != nil {
+		action["provider_summary_error"] = err.Error()
+		return
+	}
+	providerSummary := map[string]any{
+		"status":             summary.Status,
+		"provider":           summary.Provider,
+		"provider_mode":      summary.ProviderMode,
+		"http_preset":        summary.HTTPPreset,
+		"http_model":         summary.HTTPModel,
+		"api_key_env":        summary.APIKeyEnv,
+		"blocked_reason":     summary.BlockedReason,
+		"secret_value_saved": summary.SecretValueSaved,
+	}
+	if summary.Artifacts.Checklist != "" {
+		providerSummary["checklist_path"] = filepath.Join(filepath.Dir(summaryPath), summary.Artifacts.Checklist)
+	}
+	if summary.Artifacts.Commands != "" {
+		providerSummary["commands_path"] = filepath.Join(filepath.Dir(summaryPath), summary.Artifacts.Commands)
+	}
+	if summary.Artifacts.EnvTemplate != "" {
+		providerSummary["env_template_path"] = filepath.Join(filepath.Dir(summaryPath), summary.Artifacts.EnvTemplate)
+	}
+	action["provider_summary"] = providerSummary
 }
 
 func annotateCompetitorSetup(action map[string]any, sourceDir string) {
@@ -472,6 +528,7 @@ func renderProductionActionsText(report productionActionsReport) string {
 			fmt.Fprintf(&builder, "- %s: %s%s\n", id, text, suffix)
 		}
 		writeReleaseProofText(&builder, action)
+		writeProviderProofText(&builder, action)
 		writeCompetitorSetupText(&builder, action)
 		writeBlockedByText(&builder, action)
 		writeActionCommandText(&builder, action)
@@ -532,6 +589,25 @@ func writeReleaseProofText(builder *strings.Builder, action map[string]any) {
 	}
 	if setupActions := stringValue(summary["setup_actions_path"]); setupActions != "" {
 		fmt.Fprintf(builder, "  Setup actions: %s\n", setupActions)
+	}
+}
+
+func writeProviderProofText(builder *strings.Builder, action map[string]any) {
+	summary, _ := action["provider_summary"].(map[string]any)
+	if summary == nil {
+		return
+	}
+	if blockedReason := stringValue(summary["blocked_reason"]); blockedReason != "" {
+		fmt.Fprintf(builder, "  Provider blocker: %s\n", blockedReason)
+	}
+	if model := stringValue(summary["http_model"]); model != "" {
+		fmt.Fprintf(builder, "  Provider model: %s\n", model)
+	}
+	if checklist := stringValue(summary["checklist_path"]); checklist != "" {
+		fmt.Fprintf(builder, "  Setup checklist: %s\n", checklist)
+	}
+	if commands := stringValue(summary["commands_path"]); commands != "" {
+		fmt.Fprintf(builder, "  Setup command file: %s\n", commands)
 	}
 }
 
