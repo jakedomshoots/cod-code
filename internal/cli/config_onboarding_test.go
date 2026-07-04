@@ -50,6 +50,20 @@ func Test_Run_config_completions_writes_shell_files_when_requested(t *testing.T)
 					t.Fatalf("%s completion content missing oauth completion %q:\n%s", tt.shell, want, string(content))
 				}
 			}
+			if !strings.Contains(string(content), "gauntlet") {
+				t.Fatalf("%s completion content missing gauntlet command:\n%s", tt.shell, string(content))
+			}
+			wantAgentsFlag := "--agents"
+			if tt.shell == "fish" {
+				wantAgentsFlag = "-l agents"
+			}
+			if tt.shell != "zsh" {
+				for _, want := range []string{wantAgentsFlag, "ceo_harness codex_cli claude_code aider opencode goose pi oh_my_pi"} {
+					if !strings.Contains(string(content), want) {
+						t.Fatalf("%s completion content missing gauntlet --agents completion %q:\n%s", tt.shell, want, string(content))
+					}
+				}
+			}
 			for _, want := range []string{"production-actions", "action-state", "ready missing_env empty_env setup_blocked waiting", "release_proof provider_proof competitor_setup comparison final_readiness", "openai openrouter kimi-code moonshot minimax kimi codex"} {
 				if !strings.Contains(string(content), want) {
 					t.Fatalf("%s completion content missing production action completion %q:\n%s", tt.shell, want, string(content))

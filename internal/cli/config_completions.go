@@ -121,7 +121,7 @@ func bashCompletion() string {
     return 0
   fi
   if [[ "${COMP_WORDS[1]}" == gauntlet && "$prev" == --agents ]]; then
-    COMPREPLY=( $(compgen -W "ceo_harness codex_cli opencode pi" -- "$cur") )
+    COMPREPLY=( $(compgen -W "ceo_harness codex_cli claude_code aider opencode goose pi oh_my_pi" -- "$cur") )
     return 0
   fi
   if [[ "${COMP_WORDS[1]}" == production-actions && "$prev" == --action-state ]]; then
@@ -150,7 +150,7 @@ func fishCompletion() string {
 complete -c ceo-packet -f -n "__fish_seen_subcommand_from config" -a "check doctor explain completions init"
 complete -c ceo-packet -f -n "__fish_seen_subcommand_from oauth" -a "` + oauthCommandWords() + `"
 complete -c ceo-packet -n "__fish_seen_subcommand_from oauth" -a "` + oauthProviderWords() + `"
-complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l agents -a "ceo_harness codex_cli opencode pi"
+complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l agents -a "ceo_harness codex_cli claude_code aider opencode goose pi oh_my_pi"
 complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l output-dir -r
 complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-state -a "` + productionActionStateWords() + `"
 complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-kind -a "release_proof provider_proof competitor_setup comparison final_readiness"

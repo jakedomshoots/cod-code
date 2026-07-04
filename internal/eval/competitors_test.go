@@ -21,8 +21,8 @@ func Test_LoadCompetitors_accepts_required_competitors_when_config_complete(t *t
 	if err != nil {
 		t.Fatalf("LoadCompetitors returned error: %v", err)
 	}
-	if len(config.Competitors) != 6 {
-		t.Fatalf("len(config.Competitors) = %d, want 6", len(config.Competitors))
+	if len(config.Competitors) != 7 {
+		t.Fatalf("len(config.Competitors) = %d, want 7", len(config.Competitors))
 	}
 	if config.Competitors[0].ID != "codex_cli" {
 		t.Fatalf("first competitor ID = %q, want codex_cli", config.Competitors[0].ID)
@@ -112,7 +112,7 @@ func Test_RunCLI_validates_competitor_config_when_validate_flag_is_set(t *testin
 	if err != nil {
 		t.Fatalf("RunCLI returned error: %v\nstderr: %s", err, errOut.String())
 	}
-	if !strings.Contains(out.String(), "competitors_valid=true count=6") {
+	if !strings.Contains(out.String(), "competitors_valid=true count=7") {
 		t.Fatalf("stdout = %q, want valid competitor count", out.String())
 	}
 }
@@ -153,7 +153,7 @@ func writeCompetitorFixture(t *testing.T, competitors []map[string]any) string {
 }
 
 func completeCompetitorEntries(binaryOverrides map[string]string) []map[string]any {
-	ids := []string{"codex_cli", "claude_code", "aider", "opencode", "goose", "pi"}
+	ids := []string{"codex_cli", "claude_code", "aider", "opencode", "goose", "pi", "oh_my_pi"}
 	names := map[string]string{
 		"codex_cli":   "OpenAI Codex CLI",
 		"claude_code": "Claude Code",
@@ -161,6 +161,7 @@ func completeCompetitorEntries(binaryOverrides map[string]string) []map[string]a
 		"opencode":    "OpenCode",
 		"goose":       "Goose",
 		"pi":          "Pi CLI",
+		"oh_my_pi":    "Oh My Pi",
 	}
 	binaries := map[string]string{
 		"codex_cli":   "codex",
@@ -169,6 +170,7 @@ func completeCompetitorEntries(binaryOverrides map[string]string) []map[string]a
 		"opencode":    "opencode",
 		"goose":       "goose",
 		"pi":          "pi",
+		"oh_my_pi":    "omp",
 	}
 	for id, binary := range binaryOverrides {
 		binaries[id] = binary

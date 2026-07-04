@@ -55,6 +55,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Public release proof is complete for GitHub release `v0.1.0` with release assets, checksums, release manifest, and checksum-only release notes.
 - HTTP provider proof passes for the default public-readiness set: `OPENROUTER_API_KEY`, `KIMI_CODE_API_KEY`, and `MINIMAX_API_KEY`, with secret values omitted from evidence.
 - The secure OpenAI key setup app still requires reauthentication before Codex can create/write an OpenAI key from this workspace, but OpenAI HTTP is not part of the default public-readiness gate.
+- Expanded full competitor runner support is wired for Claude Code, Aider, Goose, and Oh My Pi; the scored expanded slice passes for Aider, Goose, and Oh My Pi, while Claude Code is setup-blocked until `claude /login` succeeds.
 - `production-status` currently reports `Production status: pass`, `Local ready: true`, `Public ready: true`, and zero blocked checks.
 - Public 10/10 production status is tracked in `docs/PRODUCTION_10_10.md`; release, provider, comparison, finalizer, and readiness gates are green.
 

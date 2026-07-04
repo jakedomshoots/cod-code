@@ -31,6 +31,10 @@ func buildLocalAgentBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, tas
 			args:      args,
 			setupHint: "Install and authenticate Codex CLI before benchmark runs.",
 		}, nil
+	case "claude_code":
+		return buildClaudeCodeBenchmarkSpec(id, req, prompt), nil
+	case "aider":
+		return buildAiderBenchmarkSpec(id, req, task, prompt), nil
 	case "opencode":
 		args := []string{"run", "--print-logs", "--log-level", "INFO", "--pure", "--auto", "--format", "json"}
 		args = appendAgentModelArgs(args, req.AgentModels, id)
@@ -42,6 +46,8 @@ func buildLocalAgentBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, tas
 			args:      args,
 			setupHint: "Install and authenticate OpenCode before benchmark runs.",
 		}, nil
+	case "goose":
+		return buildGooseBenchmarkSpec(id, req, prompt), nil
 	case "pi":
 		args := []string{"--no-session", "--approve"}
 		args = appendAgentModelArgs(args, req.AgentModels, id)
@@ -53,6 +59,8 @@ func buildLocalAgentBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, tas
 			args:      args,
 			setupHint: "Install Pi and configure a provider key before benchmark runs.",
 		}, nil
+	case "oh_my_pi":
+		return buildOhMyPiBenchmarkSpec(id, req, prompt), nil
 	default:
 		return localAgentSpec{}, fmt.Errorf("%w: unknown local agent %q", ErrInvalidCompetitor, id)
 	}

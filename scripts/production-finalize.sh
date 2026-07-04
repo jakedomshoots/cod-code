@@ -383,7 +383,7 @@ if [ "$run_comparison" -eq 1 ]; then
     overall="blocked"
   elif ! run_step "all-agent-29-comparison" "$comparison_output/summary.json" go run "$root/cmd/ceo-eval" \
     --local-agent-benchmark \
-    --local-agents ceo_harness,codex_cli,opencode,pi \
+    --local-agents ceo_harness,codex_cli,claude_code,aider,opencode,goose,pi,oh_my_pi \
     --local-agent-benchmark-task production-core \
     --local-agent-benchmark-repeat 1 \
     --local-agent-benchmark-concurrency 4 \
@@ -400,7 +400,7 @@ if [ "$run_comparison" -eq 1 ]; then
 else
   write_command go run ./cmd/ceo-eval \
     --local-agent-benchmark \
-    --local-agents ceo_harness,codex_cli,opencode,pi \
+    --local-agents ceo_harness,codex_cli,claude_code,aider,opencode,goose,pi,oh_my_pi \
     --local-agent-benchmark-task production-core \
     --local-agent-benchmark-repeat 1 \
     --local-agent-benchmark-concurrency 4 \

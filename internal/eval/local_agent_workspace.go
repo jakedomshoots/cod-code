@@ -53,5 +53,8 @@ func localAgentCommand(binary string, args []string, workspaceDir string) []stri
 		command = append(command, "-C", workspaceDir)
 		return append(command, args[1:]...)
 	}
+	if filepath.Base(binary) == "omp" {
+		return append([]string{binary, "--cwd", workspaceDir}, args...)
+	}
 	return append([]string{binary}, args...)
 }

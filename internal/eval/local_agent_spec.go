@@ -12,10 +12,18 @@ func buildLocalAgentSpec(id string, ceoBinary string, task localAgentTaskSpec) (
 		return buildCEOHarnessSpec(id, ceoBinary, task), nil
 	case "codex_cli":
 		return buildCodexCLISpec(id, task), nil
+	case "claude_code":
+		return buildClaudeCodeSpec(id, task), nil
+	case "aider":
+		return buildAiderSpec(id, task), nil
 	case "opencode":
 		return buildOpenCodeSpec(id, task), nil
+	case "goose":
+		return buildGooseSpec(id, task), nil
 	case "pi":
 		return buildPiSpec(id, task), nil
+	case "oh_my_pi":
+		return buildOhMyPiSpec(id, task), nil
 	default:
 		return localAgentSpec{}, fmt.Errorf("%w: unknown local agent %q", ErrInvalidCompetitor, id)
 	}

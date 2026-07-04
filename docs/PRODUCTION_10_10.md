@@ -15,6 +15,7 @@ Overall: 10/10
 | Provider proof | OAuth and HTTP provider paths proven without secret leakage | Pass | `.omo/evidence/provider-proof-openrouter/summary.json`, `.omo/evidence/provider-proof-kimi-code/summary.json`, `.omo/evidence/provider-proof-minimax/summary.json`, `.omo/evidence/production-finalize-final/summary.json` |
 | Real repo dogfood | Five real repos with approved writes and rollback evidence | Pass | `.omo/evidence/dogfood-real-production-*`, `.omo/evidence/external-agent-production-core-29-final-result-retry-r1/summary.json` |
 | CI gates | Regression gates run in CI and preserve artifacts | Pass | `.github/workflows/ci.yml`, GitHub release workflow for `v0.1.0` |
+| Expanded competitor runner slice | Aider, Goose, and Oh My Pi pass; Claude Code setup is blocked until `claude /login` succeeds | Hardening in progress | `.omo/evidence/expanded-runners-20260704T231533Z/benchmark-docs-roadmap-r2/summary.json` |
 | Docs onboarding | New user can install, configure, run, recover | Pass | `README.md`, `docs/INSTALL.md`, clean release install smoke |
 | Security posture | Secret scan, no token storage, safe command files, path safety | Pass | `scripts/secret-scan.sh`, `secret_value_saved=false` in provider/finalizer summaries |
 

@@ -188,6 +188,8 @@ func localAgentSetupBlocked(run localAgentRunResult) bool {
 		"api key appears to be invalid",
 		"api key appears to be invalid or may have expired",
 		"authentication_error",
+		"not logged in",
+		"please run /login",
 		"quota",
 		"usage limit",
 	} {

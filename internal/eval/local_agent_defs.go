@@ -20,7 +20,7 @@ const (
 	localAgentTaskEditFile   = "edit-file"
 )
 
-var defaultLocalAgentIDs = []string{"ceo_harness", "codex_cli", "opencode", "pi"}
+var defaultLocalAgentIDs = []string{"ceo_harness", "codex_cli", "claude_code", "aider", "opencode", "goose", "pi", "oh_my_pi"}
 
 type localAgentSpec struct {
 	id                       string

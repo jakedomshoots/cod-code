@@ -1,6 +1,6 @@
 # Competitor Comparison
 
-CEO Harness is compared as a local coding orchestration layer, not as an editor. The comparison set is Codex CLI, Claude Code, Aider, OpenCode, and Goose.
+CEO Harness is compared as a local coding orchestration layer, not as an editor. The comparison set is Codex CLI, Claude Code, Aider, OpenCode, Goose, Pi CLI, and Oh My Pi.
 
 ## No Result Without Evidence Rule
 
@@ -52,7 +52,7 @@ Run installed local agents against the same safe task:
 ```sh
 go run ./cmd/ceo-eval \
   --local-agent-suite \
-  --local-agents ceo_harness,codex_cli,opencode,pi \
+  --local-agents ceo_harness,codex_cli,claude_code,aider,opencode,goose,pi,oh_my_pi \
   --ceo-binary ./bin/ceo-packet \
   --output-dir .omo/evidence/local-agent-suite-2026-07-02-r4 \
   --timeout-seconds 45
@@ -64,20 +64,20 @@ Run installed local agents against the same tiny edit task:
 go run ./cmd/ceo-eval \
   --local-agent-suite \
   --local-agent-task edit-file \
-  --local-agents ceo_harness,codex_cli,opencode,pi \
+  --local-agents ceo_harness,codex_cli,claude_code,aider,opencode,goose,pi,oh_my_pi \
   --ceo-binary ./bin/ceo-packet \
   --output-dir .omo/evidence/local-agent-edit-file-2026-07-02-postsplit-r2 \
   --timeout-seconds 180
 ```
 
-Latest saved live results:
+Latest saved starter-suite results:
 
-| Suite | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| Suite | Claude Code | Aider | Goose | Oh My Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| Readiness ping | pass, 19ms | pass, 5028ms | pass, 3320ms | pass, 7588ms | `.omo/evidence/local-agent-suite-2026-07-02-r4/summary.md` |
-| Edit file | pass, 6ms | pass, 19815ms | pass, 11728ms | pass, 25796ms | `.omo/evidence/local-agent-edit-file-2026-07-02-postsplit-r2/summary.md` |
+| Readiness ping | setup-blocked: `claude` reports `Not logged in` | pass, 3093ms | pass, 5332ms | pass, 2110ms | `.omo/evidence/expanded-runners-20260704T231533Z/local-agent-readiness/summary.md` |
+| Edit file | setup-blocked: `claude` reports `Not logged in` | pass, 3740ms | pass, 17548ms | pass, 20138ms | `.omo/evidence/expanded-runners-20260704T231533Z/local-agent-edit-file/summary.md` |
 
-The local-agent suite is still a starter comparison, not a full product benchmark. The first improvement-loop item is `benchmark-task-runner`: run real benchmark tasks with repo reset, scoring, changed-file checks, and per-agent artifacts instead of only a one-file mutation. Exact-content scoring stays strict because one post-split run caught a real newline mismatch before a clean rerun passed.
+The local-agent suite is still a starter comparison, not a full product benchmark. Exact-content scoring stays strict because previous runs caught newline mismatches and Aider path drift before clean reruns passed.
 
 Run installed local agents against one scored benchmark task:
 
@@ -85,7 +85,7 @@ Run installed local agents against one scored benchmark task:
 go run ./cmd/ceo-eval \
   --local-agent-benchmark \
   --local-agent-benchmark-task docs-roadmap-cli-first \
-  --local-agents ceo_harness,codex_cli,opencode,pi \
+  --local-agents ceo_harness,codex_cli,claude_code,aider,opencode,goose,pi,oh_my_pi \
   --ceo-binary ./bin/ceo-packet \
   --tasks evals/tasks \
   --output-dir .omo/evidence/local-agent-benchmark-docs-roadmap-2026-07-02-r3 \
@@ -112,7 +112,13 @@ Latest production-core all-agent result:
 | 25-task `production-core` | 25/25 pass | 25/25 pass | 25/25 pass | 24/25 pass, 1 timeout | `.omo/evidence/external-agent-production-core-25-r1/summary.json` |
 | 29-task `production-core` | 29/29 pass | 29/29 pass | 29/29 pass | 29/29 pass | `.omo/evidence/external-agent-production-core-29-final-result-retry-r1/summary.json` |
 
-The latest 29-task run is a clean comparison pass after enabling one timeout retry and one result retry. One OpenCode partial was retried once and then passed; the prior attempt remains in evidence.
+Latest expanded-runner scored slice:
+
+| Benchmark | Claude Code | Aider | Goose | Oh My Pi | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| `docs-roadmap-cli-first` | setup-blocked: `claude` reports `Not logged in` | pass 5/5 | pass 5/5 | pass 5/5 | `.omo/evidence/expanded-runners-20260704T231533Z/benchmark-docs-roadmap-r2/summary.json` |
+
+The latest stable 29-task run is a clean comparison pass after enabling one timeout retry and one result retry. Expanded full-runner support is wired, but the expanded matrix is not clean until Claude Code is logged in and the full production-core suite reruns with `claude_code,aider,goose,oh_my_pi` included.
 
 Latest CEO-only production-core result:
 
@@ -130,7 +136,7 @@ go run ./cmd/ceo-eval \
   --local-agent-benchmark-task production-core \
   --local-agent-benchmark-timeout-retries 1 \
   --local-agent-benchmark-result-retries 1 \
-  --local-agents ceo_harness,codex_cli,opencode,pi \
+  --local-agents ceo_harness,codex_cli,claude_code,aider,opencode,goose,pi,oh_my_pi \
   --ceo-binary ./bin/ceo-packet \
   --tasks evals/tasks \
   --output-dir .omo/evidence/external-agent-production-core-29-retry \
@@ -225,7 +231,7 @@ go run ./cmd/ceo-eval \
   --local-agent-benchmark \
   --local-agent-benchmark-task docs-roadmap-cli-first,docs-product-status-weak-spots \
   --local-agent-benchmark-repeat 2 \
-  --local-agents ceo_harness,codex_cli,opencode,pi \
+  --local-agents ceo_harness,codex_cli,claude_code,aider,opencode,goose,pi,oh_my_pi \
   --ceo-binary ./bin/ceo-packet \
   --tasks evals/tasks \
   --output-dir .omo/evidence/local-agent-benchmark-expanded-2026-07-02-r1 \
@@ -244,7 +250,7 @@ Run a Go-file dirty-worktree-sensitive benchmark:
 go run ./cmd/ceo-eval \
   --local-agent-benchmark \
   --local-agent-benchmark-task bugfix-cli-timeout \
-  --local-agents ceo_harness,codex_cli,opencode,pi \
+  --local-agents ceo_harness,codex_cli,claude_code,aider,opencode,goose,pi,oh_my_pi \
   --ceo-binary ./bin/ceo-packet \
   --tasks evals/tasks \
   --output-dir .omo/evidence/local-agent-benchmark-go-bugfix-2026-07-02-r2 \
