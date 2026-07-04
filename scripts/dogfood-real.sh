@@ -718,18 +718,25 @@ select_integrated_source_file() {
     "$integrated_repo_path/src/main.jsx" \
     "$integrated_repo_path/src/main.tsx" \
     "$integrated_repo_path/src/App.js" \
-    "$integrated_repo_path/src/main.js"; do
+    "$integrated_repo_path/src/main.js" \
+    "$integrated_repo_path/app/page.tsx" \
+    "$integrated_repo_path/app/layout.tsx" \
+    "$integrated_repo_path/cmd/ceo-packet/main.go" \
+    "$integrated_repo_path/cmd/ceo-eval/main.go"; do
     if [ -f "$candidate" ]; then
       printf '%s\n' "$candidate"
       return 0
     fi
   done
-  if [ -d "$integrated_repo_path/src" ]; then
-    find "$integrated_repo_path/src" -type f \( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' \) \
-      | grep -Ev '/(__tests__|test)/|[._](test|spec)\.' \
-      | sort \
-      | sed -n '1p'
-  fi
+  for source_dir in src app components lib internal cmd pkg convex; do
+    if [ -d "$integrated_repo_path/$source_dir" ]; then
+      find "$integrated_repo_path/$source_dir" -type f \( -name '*.go' -o -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.mjs' -o -name '*.cjs' \) \
+        | grep -Ev '/(__tests__|test|tests|e2e|dist|out|node_modules)/|[._](test|spec)\.' \
+        | sort \
+        | sed -n '1p'
+      return 0
+    fi
+  done
 }
 
 run_integrated_app_code_probe() {
