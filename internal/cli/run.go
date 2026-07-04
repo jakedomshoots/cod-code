@@ -77,6 +77,9 @@ func RunWithIO(ctx context.Context, in io.Reader, out io.Writer, args []string) 
 	if opts.showProductionStatus {
 		return runProductionStatus(out, opts)
 	}
+	if opts.showProductionActions {
+		return runProductionActions(out, opts)
+	}
 	if opts.showProductionFinalize {
 		return runProductionFinalize(ctx, out, opts)
 	}

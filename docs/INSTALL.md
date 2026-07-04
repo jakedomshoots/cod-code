@@ -109,6 +109,12 @@ ceo-packet production-finalize --workspace . --dry-run
 
 Remove `--dry-run` after release metadata and provider key environment variables are ready. The script writes evidence and command files, but it does not publish, tag, upload, or save secret values.
 
+To list the remaining production actions without opening files:
+
+```sh
+ceo-packet production-actions --workspace . --format text
+```
+
 `rollback` supports saved JSON reports for normal replacements and created files produced by CEO Harness. It refuses to remove a created file if the file content no longer matches the saved report.
 
 ## Requirements

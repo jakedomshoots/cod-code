@@ -15,6 +15,7 @@ Primary flow:
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
   production-status [flags]       Print local/public production readiness
+  production-actions [flags]      Print remaining production action checklist
   production-finalize [flags]     Run guarded final production evidence
   resume <job> --answer <text>    Resume a needs_input job
   retry <job>                     Rerun a saved job with current config
@@ -31,6 +32,7 @@ Usage:
   ceo-packet inbox [flags]
   ceo-packet status [flags]
   ceo-packet production-status [flags]
+  ceo-packet production-actions [flags]
   ceo-packet production-finalize --dry-run [flags]
   ceo-packet resume <job> --answer <text>
   ceo-packet retry <job>
@@ -68,6 +70,7 @@ Examples:
   ceo-packet gauntlet --suite production-core --agents ceo_harness --output-dir .omo/evidence/production-gauntlet
   ceo-packet inbox --workspace .
   ceo-packet production-status --workspace .
+  ceo-packet production-actions --workspace . --format text
   ceo-packet production-finalize --workspace . --dry-run
   ceo-packet retry latest --workspace .
   ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
@@ -87,6 +90,7 @@ Primary flow:
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
   production-status [flags]       Print local/public production readiness
+  production-actions [flags]      Print remaining production action checklist
   production-finalize [flags]     Run guarded final production evidence
   resume <job> --answer <text>    Resume a needs_input job
   retry <job>                     Rerun a saved job with current config
@@ -103,6 +107,7 @@ Usage:
   ceo-packet inbox [flags]
   ceo-packet status [flags]
   ceo-packet production-status [flags]
+  ceo-packet production-actions [flags]
   ceo-packet production-finalize --dry-run [flags]
   ceo-packet resume <job> --answer <text>
   ceo-packet retry <job>
@@ -177,6 +182,7 @@ Advanced flags:
   --output-dir <path>             Completion output directory
   --history                       Print recent job history
   --production-status             Print latest production-readiness status from evidence
+  --production-actions            Print latest production finalizer action checklist
   --production-finalize           Run guarded final production evidence sequence
   --run-comparison                Include the expensive 29-task all-agent comparison
   --review-queue                  Print jobs needing human attention

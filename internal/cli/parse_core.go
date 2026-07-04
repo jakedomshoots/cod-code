@@ -52,6 +52,9 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 	case "--production-status":
 		opts.showProductionStatus = true
 		return true, index, nil
+	case "--production-actions":
+		opts.showProductionActions = true
+		return true, index, nil
 	case "--production-finalize":
 		opts.showProductionFinalize = true
 		return true, index, nil

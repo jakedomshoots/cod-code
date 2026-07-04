@@ -58,6 +58,7 @@ type options struct {
 	reviewDetails                              bool
 	showProviderHealth                         bool
 	showProductionStatus                       bool
+	showProductionActions                      bool
 	showProductionFinalize                     bool
 	productionFinalizeRunComparison            bool
 	productionFinalizeDist                     string

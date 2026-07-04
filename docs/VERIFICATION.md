@@ -46,6 +46,9 @@ Status date: 2026-07-03
 - Latest production status next-action proof:
   - `go run ./cmd/ceo-packet production-status --workspace . --format text`
   - Result: reports the launch checklist plus latest complete finalizer `next-actions.md`, prints `Finalizer actions JSON: .omo/evidence/production-finalize-full-next-actions-r4/next-actions.json`, ignores partial finalizer packets with skipped steps, and sets `Next action` to open `.omo/evidence/production-finalize-full-next-actions-r4/next-actions.md`.
+- Latest production actions command proof:
+  - `go run ./cmd/ceo-packet production-actions --workspace . --format text`
+  - Result: prints seven structured finalizer actions from `.omo/evidence/production-finalize-full-next-actions-r4/next-actions.json`, including release, provider, competitor setup, comparison, and final readiness actions.
 - Latest complete finalizer next-actions proof:
   - `sh scripts/production-finalize.sh --output-dir .omo/evidence/production-finalize-full-next-actions-r4 --dist dist`
   - Result: exits blocked as expected, records no skipped steps, and writes seven repo-relative remaining actions covering release, providers, competitor setup, comparison, and final readiness in `next-actions.md`; `next-actions.json` includes structured action ids, kinds, commands, provider names, required env vars, and evidence paths.
