@@ -82,7 +82,71 @@ func annotateProductionActions(actions []map[string]any, sourceDir string) []map
 		annotateCompetitorSetup(next, sourceDir)
 		annotated = append(annotated, next)
 	}
+	annotateProductionActionDependencies(annotated)
 	return annotated
+}
+
+func annotateProductionActionDependencies(actions []map[string]any) {
+	byID := map[string]map[string]any{}
+	for _, action := range actions {
+		if id := actionString(action, "id"); id != "" {
+			byID[id] = action
+		}
+	}
+	if comparison := byID["all-agent-29-comparison"]; comparison != nil {
+		if actionHasOpenBlocker(byID["competitor-smoke"]) {
+			addBlockedBy(comparison, "competitor-smoke")
+		}
+	}
+	if final := byID["production-readiness"]; final != nil {
+		for _, action := range actions {
+			id := actionString(action, "id")
+			if id == "" || id == "production-readiness" {
+				continue
+			}
+			if actionHasOpenBlocker(action) {
+				addBlockedBy(final, id)
+			}
+		}
+	}
+}
+
+func actionHasOpenBlocker(action map[string]any) bool {
+	if action == nil {
+		return false
+	}
+	if missingEnv := actionString(action, "missing_required_env"); missingEnv != "" {
+		return true
+	}
+	if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
+		return true
+	}
+	if summary, _ := action["release_summary"].(map[string]any); summary != nil {
+		if numberValue(summary["blocked_count"]) > 0 || !boolValue(summary["public_release_ready"]) {
+			return true
+		}
+	}
+	if summary, _ := action["competitor_summary"].(map[string]any); summary != nil {
+		blockers, _ := summary["blockers"].([]map[string]string)
+		if len(blockers) > 0 || numberValue(summary["setup_blocked"]) > 0 || numberValue(summary["skipped"]) > 0 || numberValue(summary["smoke_failed"]) > 0 {
+			return true
+		}
+	}
+	status := actionString(action, "status")
+	return status != "" && status != "pass"
+}
+
+func addBlockedBy(action map[string]any, id string) {
+	if id == "" {
+		return
+	}
+	current := stringSlice(action["blocked_by"])
+	for _, existing := range current {
+		if existing == id {
+			return
+		}
+	}
+	action["blocked_by"] = append(current, id)
 }
 
 func annotateReleaseProof(action map[string]any) {
@@ -308,6 +372,7 @@ func renderProductionActionsText(report productionActionsReport) string {
 		}
 		writeReleaseProofText(&builder, action)
 		writeCompetitorSetupText(&builder, action)
+		writeBlockedByText(&builder, action)
 	}
 	return builder.String()
 }
@@ -355,6 +420,14 @@ func writeCompetitorSetupText(builder *strings.Builder, action map[string]any) {
 	}
 }
 
+func writeBlockedByText(builder *strings.Builder, action map[string]any) {
+	blockedBy := stringSlice(action["blocked_by"])
+	if len(blockedBy) == 0 {
+		return
+	}
+	fmt.Fprintf(builder, "  Waiting on: %s\n", strings.Join(blockedBy, ", "))
+}
+
 func numberValue(value any) float64 {
 	switch typed := value.(type) {
 	case int:
@@ -374,4 +447,21 @@ func stringValue(value any) string {
 func boolValue(value any) bool {
 	typed, _ := value.(bool)
 	return typed
+}
+
+func stringSlice(value any) []string {
+	switch typed := value.(type) {
+	case []string:
+		return append([]string(nil), typed...)
+	case []any:
+		result := make([]string, 0, len(typed))
+		for _, item := range typed {
+			if text, ok := item.(string); ok && text != "" {
+				result = append(result, text)
+			}
+		}
+		return result
+	default:
+		return nil
+	}
 }
