@@ -124,6 +124,68 @@ func Test_ReleasePreflight_acceptsExplicitChecksumOnlyReleaseNotes(t *testing.T)
 	}
 }
 
+func Test_ReleasePreflight_verifiesGitHubReleaseAssets(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	tmp := t.TempDir()
+	dist := filepath.Join(tmp, "dist")
+
+	release := exec.Command("sh", filepath.Join(root, "scripts", "release-local.sh"))
+	release.Dir = root
+	release.Env = append(release.Environ(), "DIST="+dist, "VERSION=0.2.0-test", "COMMIT=abc123")
+	output, err := release.CombinedOutput()
+	if err != nil {
+		t.Fatalf("release-local failed: %v\n%s", err, string(output))
+	}
+
+	fakeBin := filepath.Join(tmp, "bin")
+	if err := os.MkdirAll(fakeBin, 0o755); err != nil {
+		t.Fatalf("create fake bin: %v", err)
+	}
+	fakeGH := filepath.Join(fakeBin, "gh")
+	fakeGHBody := `#!/bin/sh
+cat <<'JSON'
+{
+  "url": "https://github.com/jakedom/ceo-harness/releases/tag/v0.2.0-test",
+  "assets": [
+    {"name": "ceo-packet_0.2.0-test_darwin_arm64.tar.gz"},
+    {"name": "ceo-packet_0.2.0-test_linux_amd64.tar.gz"},
+    {"name": "ceo-packet_0.2.0-test_linux_arm64.tar.gz"},
+    {"name": "checksums.txt"},
+    {"name": "release-manifest.json"}
+  ]
+}
+JSON
+`
+	if err := os.WriteFile(fakeGH, []byte(fakeGHBody), 0o755); err != nil {
+		t.Fatalf("write fake gh: %v", err)
+	}
+
+	preflight := exec.Command("sh", filepath.Join(root, "scripts", "release-preflight.sh"), dist)
+	preflight.Dir = root
+	preflight.Env = append(
+		preflight.Environ(),
+		"PATH="+fakeBin+string(os.PathListSeparator)+os.Getenv("PATH"),
+		"GH_RELEASE_TAG=v0.2.0-test",
+		"GH_REPO=jakedom/ceo-harness",
+	)
+	preflightOutput, err := preflight.CombinedOutput()
+	if err == nil {
+		t.Fatalf("release-preflight unexpectedly passed while other public blockers remain:\n%s", string(preflightOutput))
+	}
+	body := string(preflightOutput)
+	for _, want := range []string{
+		"| remote_release_url | pass | https://github.com/jakedom/ceo-harness/releases/tag/v0.2.0-test |",
+		"| github_release_assets | pass | GitHub release v0.2.0-test has all archives, checksums.txt, and release-manifest.json |",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("preflight output missing %q:\n%s", want, body)
+		}
+	}
+}
+
 func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {
@@ -174,6 +236,7 @@ func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 		`"preflight_exit_code": 1`,
 		`"blocked_checks": [`,
 		`"remote_release_url"`,
+		`"github_release_assets"`,
 		`"homebrew_formula_url"`,
 		`"artifact_signatures"`,
 	} {
