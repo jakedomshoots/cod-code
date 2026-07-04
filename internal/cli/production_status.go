@@ -23,13 +23,17 @@ type productionStatusReport struct {
 }
 
 type productionChecklistStatus struct {
-	Path                string         `json:"path"`
-	JSONPath            string         `json:"json_path,omitempty"`
-	SetupPath           string         `json:"setup_path,omitempty"`
-	SHA256              string         `json:"sha256,omitempty"`
-	RequiredActionCount int            `json:"required_action_count"`
-	ActionStateCounts   map[string]int `json:"action_state_counts,omitempty"`
-	Status              string         `json:"status"`
+	Path                          string         `json:"path"`
+	JSONPath                      string         `json:"json_path,omitempty"`
+	SetupPath                     string         `json:"setup_path,omitempty"`
+	SHA256                        string         `json:"sha256,omitempty"`
+	RequiredActionCount           int            `json:"required_action_count"`
+	RunnableCommandCount          int            `json:"runnable_command_count"`
+	BlockedCommandCount           int            `json:"blocked_command_count"`
+	EvidenceDeclaredMatchCount    int            `json:"evidence_declared_match_count"`
+	EvidenceDeclaredMismatchCount int            `json:"evidence_declared_mismatch_count"`
+	ActionStateCounts             map[string]int `json:"action_state_counts,omitempty"`
+	Status                        string         `json:"status"`
 }
 
 func runProductionStatus(out io.Writer, opts options) error {
@@ -182,8 +186,12 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 	}
 	if raw.NextActions.JSONPath != "" {
 		status.JSONPath = filepath.Join(finalizerDir, raw.NextActions.JSONPath)
-		if counts, err := productionActionStateCountsFromJSON(status.JSONPath); err == nil {
-			status.ActionStateCounts = counts
+		if summary, err := productionActionSummaryFromJSON(status.JSONPath); err == nil {
+			status.ActionStateCounts = summary.StateCounts
+			status.RunnableCommandCount = summary.RunnableCommandCount
+			status.BlockedCommandCount = summary.BlockedCommandCount
+			status.EvidenceDeclaredMatchCount = summary.EvidenceDeclaredMatchCount
+			status.EvidenceDeclaredMismatchCount = summary.EvidenceDeclaredMismatchCount
 		}
 	}
 	if raw.SetupActions != nil && raw.SetupActions.Path != "" {
@@ -192,19 +200,53 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 	return status, nil
 }
 
-func productionActionStateCountsFromJSON(path string) (map[string]int, error) {
+type productionActionSummary struct {
+	StateCounts                   map[string]int
+	RunnableCommandCount          int
+	BlockedCommandCount           int
+	EvidenceDeclaredMatchCount    int
+	EvidenceDeclaredMismatchCount int
+}
+
+func productionActionSummaryFromJSON(path string) (productionActionSummary, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return productionActionSummary{}, err
 	}
 	var raw struct {
 		Actions []map[string]any `json:"actions"`
 	}
 	if err := json.Unmarshal(content, &raw); err != nil {
-		return nil, err
+		return productionActionSummary{}, err
 	}
 	annotated := annotateProductionActions(raw.Actions, filepath.Dir(path))
-	return countProductionActionStates(annotated), nil
+	matches, mismatches := countProductionEvidenceDeclaredMatches(annotated)
+	return productionActionSummary{
+		StateCounts:                   countProductionActionStates(annotated),
+		RunnableCommandCount:          countRunnableProductionActionCommands(annotated),
+		BlockedCommandCount:           countBlockedProductionActionCommands(annotated),
+		EvidenceDeclaredMatchCount:    matches,
+		EvidenceDeclaredMismatchCount: mismatches,
+	}, nil
+}
+
+func countProductionEvidenceDeclaredMatches(actions []map[string]any) (int, int) {
+	matches := 0
+	mismatches := 0
+	for _, action := range actions {
+		for _, file := range evidenceFileEntries(action["evidence_files"]) {
+			match, ok := file["matches_declared"].(bool)
+			if !ok {
+				continue
+			}
+			if match {
+				matches++
+			} else {
+				mismatches++
+			}
+		}
+	}
+	return matches, mismatches
 }
 
 func productionFinalizerSummaryHasSkippedSteps(path string) bool {
@@ -261,6 +303,8 @@ func renderProductionStatusText(report productionStatusReport) string {
 		if len(report.FinalizerNextActions.ActionStateCounts) > 0 {
 			fmt.Fprintf(&builder, "Finalizer action states: %s\n", renderActionStateCounts(report.FinalizerNextActions.ActionStateCounts))
 		}
+		fmt.Fprintf(&builder, "Finalizer commands: runnable=%d blocked=%d\n", report.FinalizerNextActions.RunnableCommandCount, report.FinalizerNextActions.BlockedCommandCount)
+		fmt.Fprintf(&builder, "Finalizer evidence matches: declared=%d mismatched=%d\n", report.FinalizerNextActions.EvidenceDeclaredMatchCount, report.FinalizerNextActions.EvidenceDeclaredMismatchCount)
 		if report.FinalizerNextActions.SetupPath != "" {
 			fmt.Fprintf(&builder, "Finalizer setup actions: %s\n", report.FinalizerNextActions.SetupPath)
 		}

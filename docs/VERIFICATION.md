@@ -45,7 +45,7 @@ Status date: 2026-07-04
   - Result: writes `next-actions.md` with the exact competitor setup and all-agent comparison follow-up commands, and records `next_actions.required_action_count`.
 - Latest production status next-action proof:
   - `go run ./cmd/ceo-packet production-status --workspace . --format text`
-  - Result: reports the launch checklist plus latest complete finalizer `next-actions.md`, prints `Finalizer actions JSON: .omo/evidence/production-finalize-after-clean-comparison-r1/next-actions.json`, summarizes finalizer action states from that JSON, prints `Finalizer setup actions: .omo/evidence/production-finalize-after-clean-comparison-r1/setup-actions.md`, ignores partial finalizer packets with skipped steps, and sets `Next action` to open `.omo/evidence/production-finalize-after-clean-comparison-r1/next-actions.md`.
+  - Result: reports the launch checklist plus latest complete finalizer `next-actions.md`, prints `Finalizer actions JSON: .omo/evidence/production-finalize-after-clean-comparison-r1/next-actions.json`, summarizes finalizer action states, runnable/blocked command counts, and declared-evidence match counts from that JSON, prints `Finalizer setup actions: .omo/evidence/production-finalize-after-clean-comparison-r1/setup-actions.md`, ignores partial finalizer packets with skipped steps, and sets `Next action` to open `.omo/evidence/production-finalize-after-clean-comparison-r1/next-actions.md`.
 - Latest production actions command proof:
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text`
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text --action-id provider-openai`

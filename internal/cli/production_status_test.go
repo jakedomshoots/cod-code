@@ -131,6 +131,8 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 		"Finalizer actions JSON:",
 		"production-finalize-r1/next-actions.json",
 		"Finalizer action states: missing_env=1 waiting=1",
+		"Finalizer commands: runnable=0 blocked=0",
+		"Finalizer evidence matches: declared=0 mismatched=0",
 		"Finalizer setup actions:",
 		"production-finalize-r1/setup-actions.md",
 		"Next action: open ",
