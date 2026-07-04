@@ -154,6 +154,7 @@ sh scripts/dogfood-real.sh --copy-workspace --feature-edit-probe --repo "ceo-har
 sh scripts/dogfood-real.sh --copy-workspace --app-code-probe --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-app-code
 sh scripts/dogfood-real.sh --copy-workspace --integrated-app-code-probe --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-integrated-app-code
 sh scripts/dogfood-real.sh --copy-workspace --multi-file-app-code-probe --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-multi-file-app-code
+sh scripts/provider-setup-preflight.sh --output-dir .omo/evidence/provider-setup-preflight
 sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi
 sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex
 sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai

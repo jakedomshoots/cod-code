@@ -90,6 +90,11 @@ tasks:
     cmds:
       - sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
 
+  provider:setup-preflight:
+    desc: Check paid HTTP provider env readiness without printing or saving secret values
+    cmds:
+      - sh scripts/provider-setup-preflight.sh --output-dir .omo/evidence/provider-setup-preflight
+
   production:readiness:
     desc: Write the full production-readiness evidence packet without publishing or calling paid providers
     cmds:

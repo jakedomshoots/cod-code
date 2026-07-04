@@ -166,7 +166,7 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
 		`"provider": "openrouter"`,
 		`"api_key_env": "OPENROUTER_API_KEY"`,
 		`"blocked_reason": "missing_api_key_env"`,
-		`"setup_checklist_item_count": 5`,
+		`"setup_checklist_item_count": 6`,
 		`"setup_artifacts_sha256": {`,
 		`"blocked.md": "`,
 		`"commands.sh": "`,
@@ -186,6 +186,9 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
 	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
 	if !strings.Contains(commands, "scripts/provider-proof.sh --provider openrouter") {
 		t.Fatalf("commands.sh missing rerun command:\n%s", commands)
+	}
+	if !strings.Contains(commands, "scripts/provider-setup-preflight.sh --providers openrouter") {
+		t.Fatalf("commands.sh missing provider setup preflight:\n%s", commands)
 	}
 	for _, want := range []string{
 		"${OPENROUTER_API_KEY+x}",
@@ -234,7 +237,7 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyEmpty(t *testing.T) {
 	for _, want := range []string{
 		`"blocked_reason": "empty_api_key_env"`,
 		`"setup_result_status": "blocked_empty_key"`,
-		`"setup_checklist_item_count": 5`,
+		`"setup_checklist_item_count": 6`,
 		`"setup_artifacts_sha256": {`,
 		`"command_script_secret_policy": "no_secret_assignment"`,
 		`"secret_value_saved": false`,
@@ -242,6 +245,111 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyEmpty(t *testing.T) {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("summary.json missing %q:\n%s", want, summary)
 		}
+	}
+}
+
+func Test_ProviderSetupPreflightScript_writesBlockedEvidenceWithoutSecretValues(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "provider-setup")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "provider-setup-preflight.sh"),
+		"--providers", "openai,openrouter,moonshot",
+		"--output-dir", outputDir,
+	)
+	cmd.Dir = root
+	cmd.Env = append(
+		withoutEnv(withoutEnv(withoutEnv(os.Environ(), "OPENAI_API_KEY"), "OPENROUTER_API_KEY"), "MOONSHOT_API_KEY"),
+		"OPENROUTER_API_KEY=",
+	)
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("provider setup preflight unexpectedly passed:\n%s", string(output))
+	}
+
+	for _, path := range []string{
+		filepath.Join(outputDir, "index.md"),
+		filepath.Join(outputDir, "summary.json"),
+		filepath.Join(outputDir, "commands.sh"),
+		filepath.Join(outputDir, "blocked-providers.txt"),
+	} {
+		requireTextFile(t, path)
+	}
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"Status: blocked",
+		"| Provider | Status | Env | Model |\n| --- | --- | --- | --- |",
+		"| openai | missing_env | `OPENAI_API_KEY` |",
+		"| openrouter | empty_env | `OPENROUTER_API_KEY` |",
+		"| moonshot | missing_env | `MOONSHOT_API_KEY` |",
+		"Secret values were not printed or saved.",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	for _, want := range []string{
+		`"status": "blocked"`,
+		`"provider_count": 3`,
+		`"ready_count": 0`,
+		`"blocked_count": 3`,
+		`"command_script_secret_policy": "no_secret_assignment"`,
+		`"secret_value_saved": false`,
+		`"commands_sha256": "`,
+	} {
+		if !strings.Contains(summary, want) {
+			t.Fatalf("summary.json missing %q:\n%s", want, summary)
+		}
+	}
+	if strings.Contains(summary, "secret-openai") || strings.Contains(index, "secret-openai") {
+		t.Fatalf("provider setup preflight leaked secret-like value")
+	}
+}
+
+func Test_ProviderSetupPreflightScript_passesWhenHTTPKeysArePresent(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "provider-setup")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "provider-setup-preflight.sh"),
+		"--providers", "openai openrouter moonshot",
+		"--output-dir", outputDir,
+	)
+	cmd.Dir = root
+	cmd.Env = append(
+		withoutEnv(withoutEnv(withoutEnv(os.Environ(), "OPENAI_API_KEY"), "OPENROUTER_API_KEY"), "MOONSHOT_API_KEY"),
+		"OPENAI_API_KEY=secret-openai",
+		"OPENROUTER_API_KEY=secret-openrouter",
+		"MOONSHOT_API_KEY=secret-moonshot",
+	)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("provider setup preflight failed with keys present: %v\n%s", err, string(output))
+	}
+
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	for _, want := range []string{
+		`"status": "pass"`,
+		`"provider_count": 3`,
+		`"ready_count": 3`,
+		`"blocked_count": 0`,
+		`"secret_value_saved": false`,
+	} {
+		if !strings.Contains(summary, want) {
+			t.Fatalf("summary.json missing %q:\n%s", want, summary)
+		}
+	}
+	if strings.Contains(summary, "secret-openai") || strings.Contains(summary, "secret-openrouter") || strings.Contains(summary, "secret-moonshot") {
+		t.Fatalf("provider setup preflight leaked secret values:\n%s", summary)
 	}
 }
 

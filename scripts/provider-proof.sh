@@ -303,6 +303,7 @@ write_http_setup_blocked() {
     printf '\n'
     printf '%s\n' "\`\`\`sh"
     printf '%s\n' "# Export $api_key_env in your shell or local secret manager first."
+    printf '%s\n' "sh scripts/provider-setup-preflight.sh --providers $provider --output-dir .omo/evidence/provider-setup-preflight-$provider"
     printf '%s\n' "sh scripts/provider-proof.sh --provider $provider --output-dir .omo/evidence/provider-proof-$provider --timeout-seconds $timeout_seconds"
     printf '%s\n' "\`\`\`"
   } >"$output_dir/blocked.md"
@@ -326,6 +327,7 @@ write_http_setup_blocked() {
     printf '%s\n' "  printf '%s\\n' 'provider setup: $api_key_env is empty' >&2"
     printf '%s\n' "  exit 2"
     printf '%s\n' "fi"
+    printf '%s\n' "sh scripts/provider-setup-preflight.sh --providers $provider --output-dir .omo/evidence/provider-setup-preflight-$provider"
     printf '%s\n' "sh scripts/provider-proof.sh --provider $provider --output-dir .omo/evidence/provider-proof-$provider --timeout-seconds $timeout_seconds"
     printf '%s\n' "sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness"
   } >"$output_dir/commands.sh"
@@ -336,9 +338,10 @@ write_http_setup_blocked() {
     printf '\n'
     printf '%s\n' "1. $setup_action"
     printf '%s\n' "2. Keep the key out of git, logs, reports, and evidence folders."
-    printf '%s\n' "3. Run \`commands.sh\` from the repo root."
-    printf '%s\n' "4. Confirm \`index.md\` says \`- Overall: pass\`."
-    printf '%s\n' "5. Re-run production readiness."
+    printf '%s\n' "3. Run \`sh scripts/provider-setup-preflight.sh --providers $provider --output-dir .omo/evidence/provider-setup-preflight-$provider\`."
+    printf '%s\n' "4. Run \`commands.sh\` from the repo root."
+    printf '%s\n' "5. Confirm \`index.md\` says \`- Overall: pass\`."
+    printf '%s\n' "6. Re-run production readiness."
   } >"$output_dir/setup-checklist.md"
 
   setup_checklist_item_count=$(awk '/^[0-9]+[.]/ { count += 1 } END { print count + 0 }' "$output_dir/setup-checklist.md")

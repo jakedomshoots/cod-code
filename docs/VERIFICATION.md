@@ -145,6 +145,8 @@ Status date: 2026-07-04
   - `sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex-r1`
   - Result: pass. JS reducer scored 6/6 and Python retry policy scored 7/7; both changed required source files, created required evidence artifacts, and passed their task commands through Codex-backed CEO Harness.
 - Latest HTTP provider proof setup gate:
+  - `sh scripts/provider-setup-preflight.sh --output-dir .omo/evidence/provider-setup-preflight`
+  - Result: writes secret-safe provider readiness evidence before paid HTTP provider proofs; missing or empty env vars are setup blockers, not benchmark failures.
   - `sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter`
   - Result: blocked setup because `OPENROUTER_API_KEY` is missing. Evidence writes `blocked.md`, `summary.json`, `env.template`, `commands.sh`, `setup-checklist.md`, and `index.md`; `summary.json` records setup checklist count, SHA-256 fingerprints for the setup artifacts, and `command_script_secret_policy: no_secret_assignment`. This is not scored as a benchmark failure.
 - Latest real-repo dogfood:
