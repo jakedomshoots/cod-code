@@ -204,6 +204,14 @@ display_path() {
   esac
 }
 
+if command -v ceo-packet >/dev/null 2>&1; then
+  ceo_packet_cmd="ceo-packet"
+  ceo_packet_words="ceo-packet"
+else
+  ceo_packet_cmd="go run ./cmd/ceo-packet"
+  ceo_packet_words="go	run	./cmd/ceo-packet"
+fi
+
 quote_display_path() {
   path=$(display_path "$1")
   quote_command_arg "$path"
@@ -429,10 +437,10 @@ fi
         printf '%s\n' "- Prove Moonshot HTTP provider: export \`MOONSHOT_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider moonshot --output-dir $(quote_display_path "$evidence_root/provider-proof-moonshot") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       competitor-smoke|competitor-smoke-command)
-        printf '%s\n' "- Fix competitor setup before final comparison: inspect \`$(display_path "$output_dir/competitor-smoke/summary.json")\`, install missing binaries or fix provider auth/quota, then rerun \`ceo-packet production-finalize --workspace . --dry-run\` or the full finalizer."
+        printf '%s\n' "- Fix competitor setup before final comparison: inspect \`$(display_path "$output_dir/competitor-smoke/summary.json")\`, install missing binaries or fix provider auth/quota, then rerun \`$ceo_packet_cmd production-finalize --workspace . --dry-run\` or the full finalizer."
         ;;
       all-agent-29-comparison)
-        printf '%s\n' "- Run the final all-agent 29-task comparison after setup is clean: \`ceo-packet production-finalize --workspace . --run-comparison\`."
+        printf '%s\n' "- Run the final all-agent 29-task comparison after setup is clean: \`$ceo_packet_cmd production-finalize --workspace . --run-comparison\`."
         ;;
       production-readiness)
         printf '%s\n' "- Re-run the final readiness aggregate after release, provider, smoke, and comparison proof are clean: \`sh scripts/production-readiness.sh --dist $(quote_display_path "$dist") --output-dir $(quote_display_path "$evidence_root/production-readiness-final")\`. Evidence: \`$(display_path "$evidence")\`."
@@ -479,13 +487,13 @@ fi
   printf '%s\n' "## Final Rerun"
   printf '\n'
   printf '%s\n' '```sh'
-  printf '%s\n' 'ceo-packet production-finalize --workspace . --dry-run'
-  printf '%s\n' 'ceo-packet production-finalize --workspace . --run-comparison'
+  printf '%s\n' "$ceo_packet_cmd production-finalize --workspace . --dry-run"
+  printf '%s\n' "$ceo_packet_cmd production-finalize --workspace . --run-comparison"
   printf '%s\n' 'sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-final'
   printf '%s\n' '```'
 } >"$output_dir/setup-actions.md"
 
-python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output_dir/next-actions.md" "$output_dir/next-actions.json" "$provider_timeout_seconds" "$output_dir/setup-actions.md" <<'PY'
+python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output_dir/next-actions.md" "$output_dir/next-actions.json" "$provider_timeout_seconds" "$output_dir/setup-actions.md" "$ceo_packet_words" <<'PY'
 import json
 import sys
 import pathlib
@@ -513,6 +521,7 @@ for step, line in zip([step for step in steps if step["status"] not in {"pass", 
 
 provider_timeout = sys.argv[6]
 next_actions_dir = pathlib.Path(sys.argv[5]).resolve().parent
+ceo_packet_prefix = sys.argv[8].split("\t")
 
 def evidence_metadata(action):
     files = []
@@ -568,10 +577,10 @@ def action_for_step(step):
     elif name in {"competitor-smoke", "competitor-smoke-command"}:
         action["kind"] = "competitor_setup"
         action["inspect"] = "competitor-smoke/summary.json"
-        action["command"] = ["ceo-packet", "production-finalize", "--workspace", ".", "--dry-run"]
+        action["command"] = ceo_packet_prefix + ["production-finalize", "--workspace", ".", "--dry-run"]
     elif name == "all-agent-29-comparison":
         action["kind"] = "comparison"
-        action["command"] = ["ceo-packet", "production-finalize", "--workspace", ".", "--run-comparison"]
+        action["command"] = ceo_packet_prefix + ["production-finalize", "--workspace", ".", "--run-comparison"]
     elif name == "production-readiness":
         action["kind"] = "final_readiness"
         action["command"] = ["sh", "scripts/production-readiness.sh", "--dist", "dist", "--output-dir", ".omo/evidence/production-readiness-final"]

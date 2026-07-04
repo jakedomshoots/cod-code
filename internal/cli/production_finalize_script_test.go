@@ -91,6 +91,10 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		`"field": "evidence"`,
 		`"exists":`,
 		`"sha256":`,
+		`"go"`,
+		`"run"`,
+		`"./cmd/ceo-packet"`,
+		`"production-finalize"`,
 	} {
 		if !strings.Contains(nextActionsJSON, want) {
 			t.Fatalf("next-actions.json missing declared evidence metadata %q:\n%s", want, nextActionsJSON)
@@ -103,7 +107,7 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		"## Providers",
 		"openai:",
 		"## Final Rerun",
-		"ceo-packet production-finalize --workspace . --run-comparison",
+		"go run ./cmd/ceo-packet production-finalize --workspace . --run-comparison",
 	} {
 		if !strings.Contains(setupActions, want) {
 			t.Fatalf("setup-actions.md missing %q:\n%s", want, setupActions)
@@ -236,6 +240,7 @@ exit 1
 	for _, want := range []string{
 		"# Production Finalize Next Actions",
 		"Fix competitor setup before final comparison",
+		"go run ./cmd/ceo-packet production-finalize --workspace . --dry-run",
 		"production-finalize/competitor-smoke/summary.json",
 	} {
 		if !strings.Contains(nextActions, want) {

@@ -59,6 +59,12 @@ esac
 
 mkdir -p "$output_dir"
 
+if command -v ceo-packet >/dev/null 2>&1; then
+  ceo_packet_cmd="ceo-packet"
+else
+  ceo_packet_cmd="go run ./cmd/ceo-packet"
+fi
+
 verify_status=blocked
 if sh "$root/scripts/verify-release.sh" "$dist" >"$output_dir/verify-release.txt" 2>&1; then
   verify_status=pass
@@ -168,7 +174,7 @@ if [ "$blocked_count" -gt 0 ]; then
     printf '\n'
     printf '%s\n' '```sh'
     printf '%s\n' 'sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final'
-    printf '%s\n' 'ceo-packet production-finalize --workspace . --dry-run'
+    printf '%s\n' "$ceo_packet_cmd production-finalize --workspace . --dry-run"
     printf '%s\n' '```'
   } >"$setup_actions_file"
 fi

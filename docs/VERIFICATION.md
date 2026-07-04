@@ -45,7 +45,7 @@ Status date: 2026-07-04
   - Result: writes `next-actions.md` with the exact competitor setup and all-agent comparison follow-up commands, and records `next_actions.required_action_count`.
 - Latest production status next-action proof:
   - `go run ./cmd/ceo-packet production-status --workspace . --format text`
-  - Result: reports the launch checklist plus latest complete finalizer `next-actions.md`, prints `Finalizer actions JSON: .omo/evidence/production-finalize-setup-hash-r1/next-actions.json`, summarizes finalizer action states, runnable/blocked command counts, and declared-evidence match counts from that JSON, prints `Finalizer setup actions: .omo/evidence/production-finalize-setup-hash-r1/setup-actions.md`, rechecks launch/finalizer setup checklist hashes live, ignores skipped production-readiness packets and partial finalizer packets with skipped steps, and sets `Next action` to open `.omo/evidence/production-finalize-setup-hash-r1/next-actions.md`.
+  - Result: reports the launch checklist plus latest complete finalizer `next-actions.md`, prints `Finalizer actions JSON: .omo/evidence/production-finalize-setup-hash-r1/next-actions.json`, summarizes finalizer action states, runnable/blocked command counts, and declared-evidence match counts from that JSON, prints `Finalizer setup actions: .omo/evidence/production-finalize-setup-hash-r1/setup-actions.md`, rechecks launch/finalizer setup checklist hashes live, ignores skipped production-readiness packets plus skipped or planned finalizer packets, and sets `Next action` to open `.omo/evidence/production-finalize-setup-hash-r1/next-actions.md`.
 - Latest production actions command proof:
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text`
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text --action-id provider-openai`
@@ -64,6 +64,10 @@ Status date: 2026-07-04
 - Latest complete finalizer next-actions proof:
   - `sh scripts/production-finalize.sh --output-dir .omo/evidence/production-finalize-setup-hash-r1 --dist dist`
   - Result: exits blocked as expected, records no skipped steps, and writes five repo-relative remaining actions covering release, providers, and final readiness in `next-actions.md`; `next-actions.json` includes structured action ids, kinds, commands, provider names, required env vars, evidence paths, and declared evidence fingerprints. Release readiness writes `setup-actions.md`; competitor smoke covers all six configured competitors and passes for Codex CLI, Claude Code, Aider, OpenCode, Goose, and Pi; all-agent comparison passes from existing clean evidence; root `setup-actions.md` consolidates release, provider, and final rerun work.
+- Latest source-checkout finalizer runner proof:
+  - `sh scripts/production-finalize.sh --dry-run --output-dir .omo/evidence/production-finalize-source-runner-r1 --dist dist`
+  - `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-source-runner-r1`
+  - Result: generated setup actions use `go run ./cmd/ceo-packet ...` when `ceo-packet` is not installed on `PATH`; production status/actions still ignore the planned dry-run packet and use `.omo/evidence/production-finalize-setup-hash-r1/next-actions.json` as the authoritative blocker queue.
 - Latest release workflow guard:
   - `go test ./internal/cli -run Test_ReleaseWorkflow_publishesGitHubReleaseAssets -count=1`
   - Result: verifies the tag-triggered GitHub release workflow has write permission, derives the version from `GITHUB_REF_NAME`, runs local release plus verification, creates the GitHub Release, and attaches archives, checksums, and the manifest.

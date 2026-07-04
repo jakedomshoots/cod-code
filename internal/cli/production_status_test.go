@@ -199,6 +199,14 @@ func Test_Run_production_status_ignores_skipped_finalizer_next_actions(t *testin
     "required_action_count": 2
   }
 }`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-planned", "summary.json"), `{
+  "status": "planned",
+  "skipped_steps": [],
+  "next_actions": {
+    "path": "next-actions.md",
+    "required_action_count": 9
+  }
+}`)
 
 	var out bytes.Buffer
 	if err := Run(context.Background(), &out, []string{"production-status", "--workspace", root, "--format", "text"}); err != nil {
@@ -210,6 +218,9 @@ func Test_Run_production_status_ignores_skipped_finalizer_next_actions(t *testin
 	}
 	if strings.Contains(text, "production-finalize-skipped/next-actions.md") {
 		t.Fatalf("production status used skipped finalizer:\n%s", text)
+	}
+	if strings.Contains(text, "production-finalize-planned/next-actions.md") {
+		t.Fatalf("production status used planned finalizer:\n%s", text)
 	}
 }
 

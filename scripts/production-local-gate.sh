@@ -194,7 +194,9 @@ for action in action_rows:
         if "sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final" not in setup_actions_text:
             print(f"production-local-gate: fail release setup actions missing readiness rerun for {action_id}")
             raise SystemExit(1)
-        if "ceo-packet production-finalize --workspace . --dry-run" not in setup_actions_text:
+        has_installed_finalizer = "ceo-packet production-finalize --workspace . --dry-run" in setup_actions_text
+        has_source_finalizer = "go run ./cmd/ceo-packet production-finalize --workspace . --dry-run" in setup_actions_text
+        if not (has_installed_finalizer or has_source_finalizer):
             print(f"production-local-gate: fail release setup actions missing finalizer rerun for {action_id}")
             raise SystemExit(1)
     if action.get("kind") == "provider_proof":
