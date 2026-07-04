@@ -1,16 +1,18 @@
 # CEO Harness Launch Proof
 
-Date: 2026-07-03
+Date: 2026-07-04
 
 ## Go / No-Go
 
 No-go for a public "10/10 beats competitors" launch claim.
 
-Go for a narrower claim: CEO Harness completed the controlled production-core coding harness suite cleanly, including the expanded 25-task all-agent comparison and newer 29-task CEO-only suite.
+Go for a narrower claim: CEO Harness is locally production-ready and has clean controlled-suite proof, including the 29-task CEO-only suite and the final 29-task all-agent comparison.
 
 The current full-benchmark proof gap is closed for the eval scorer: all 31 benchmark tasks now have saved deterministic fixture reports, score JSON, per-task logs, and a summary with 31 pass / 0 partial / 0 fail / 0 skipped.
 
-The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI, OpenCode, and Pi completed a full 25-task production-core head-to-head run with 100 live runs. CEO Harness, Codex CLI, and OpenCode each passed 25/25. Pi passed 24/25 with 1 timeout. This supports controlled-suite parity with Codex CLI and OpenCode, not a broad market-win claim.
+The live competitor proof gap is closed for the controlled local suite. CEO Harness, Codex CLI, OpenCode, and Pi completed the final 29-task production-core head-to-head run with 116 live runs: 116 pass / 0 partial / 0 fail / 0 timeout / 0 incomplete evidence. This supports controlled-suite parity on this benchmark, not a broad public market-win claim.
+
+Public production remains blocked until real external release and paid HTTP provider evidence exists: public release URL/assets/Homebrew/signing or checksum notes, plus non-empty `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, and `MOONSHOT_API_KEY` provider proofs.
 
 ## Evidence Root
 
