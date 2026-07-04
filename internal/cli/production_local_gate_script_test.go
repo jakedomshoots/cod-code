@@ -44,6 +44,7 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		"production-local-gate: production_actions=",
 		"production-local-gate: runnable_commands=",
 		"production-local-gate: blocked_commands=",
+		"production-local-gate: finalizer_setup_actions=",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("production-local-gate output missing %q:\n%s", want, body)
@@ -58,6 +59,8 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		filepath.Join(outputDir, "production-actions.json"),
 		filepath.Join(outputDir, "production-actions.commands.sh"),
 		filepath.Join(outputDir, "production-actions.stderr.txt"),
+		filepath.Join(outputDir, "production-status.json"),
+		filepath.Join(outputDir, "production-status.stderr.txt"),
 	} {
 		if _, err := os.Stat(path); err != nil {
 			t.Fatalf("expected evidence file %s: %v", path, err)
@@ -75,6 +78,17 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 	} {
 		if !strings.Contains(actions, want) {
 			t.Fatalf("production action artifact missing %q:\n%s", want, actions)
+		}
+	}
+	status := readTextFile(t, filepath.Join(outputDir, "production-status.json"))
+	for _, want := range []string{
+		`"finalizer_next_actions":`,
+		`"setup_sha256":`,
+		`"setup_required_action_count":`,
+		`"evidence_declared_mismatch_count": 0`,
+	} {
+		if !strings.Contains(status, want) {
+			t.Fatalf("production status artifact missing %q:\n%s", want, status)
 		}
 	}
 }

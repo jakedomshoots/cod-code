@@ -110,16 +110,18 @@ go run "$root/cmd/ceo-packet" production-actions --workspace "$root" --format js
 actions_status=$?
 go run "$root/cmd/ceo-packet" production-actions --workspace "$root" --commands-only >"$output_dir/production-actions.commands.sh" 2>>"$output_dir/production-actions.stderr.txt"
 commands_status=$?
+go run "$root/cmd/ceo-packet" production-status --workspace "$root" --format json >"$output_dir/production-status.json" 2>"$output_dir/production-status.stderr.txt"
+status_status=$?
 set -e
 
-python3 - "$output_dir/summary.json" "$output_dir/production-actions.json" "$output_dir/production-actions.commands.sh" "$actions_status" "$commands_status" <<'PY'
+python3 - "$output_dir/summary.json" "$output_dir/production-actions.json" "$output_dir/production-actions.commands.sh" "$output_dir/production-status.json" "$actions_status" "$commands_status" "$status_status" <<'PY'
 import json
 import os
 import sys
 
-summary_path, actions_path, commands_path = sys.argv[1], sys.argv[2], sys.argv[3]
-actions_status, commands_status = int(sys.argv[4]), int(sys.argv[5])
-if actions_status != 0 or commands_status != 0:
+summary_path, actions_path, commands_path, status_path = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+actions_status, commands_status, status_status = int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7])
+if actions_status != 0 or commands_status != 0 or status_status != 0:
     print("production-local-gate: fail production-actions command failed")
     raise SystemExit(1)
 
@@ -128,6 +130,9 @@ with open(summary_path, "r", encoding="utf-8") as handle:
 
 with open(actions_path, "r", encoding="utf-8") as handle:
     actions = json.load(handle)
+
+with open(status_path, "r", encoding="utf-8") as handle:
+    production_status = json.load(handle)
 
 status = actions.get("status")
 if status == "missing":
@@ -149,6 +154,24 @@ if required > 0 and runnable + blocked <= 0:
     print("production-local-gate: fail production action command counts missing")
     raise SystemExit(1)
 
+mismatches = 0
+for action in actions.get("actions", []):
+    for evidence_file in action.get("evidence_files", []):
+        if evidence_file.get("matches_declared") is False:
+            mismatches += 1
+if mismatches > 0:
+    print(f"production-local-gate: fail production action evidence mismatches={mismatches}")
+    raise SystemExit(1)
+
+finalizer = production_status.get("finalizer_next_actions") or {}
+if not bool(readiness.get("public_production_ready")):
+    if int(finalizer.get("evidence_declared_mismatch_count", 0) or 0) > 0:
+        print("production-local-gate: fail finalizer evidence mismatch")
+        raise SystemExit(1)
+    if int(finalizer.get("setup_required_action_count", 0) or 0) <= 0 or not finalizer.get("setup_sha256"):
+        print("production-local-gate: fail finalizer setup metadata missing")
+        raise SystemExit(1)
+
 commands_text = open(commands_path, "r", encoding="utf-8").read()
 if "OPENAI_API_KEY=" in commands_text or "OPENROUTER_API_KEY=" in commands_text or "MOONSHOT_API_KEY=" in commands_text:
     print("production-local-gate: fail production action commands include secret assignment")
@@ -161,4 +184,5 @@ if blocked_lines != blocked:
 print(f"production-local-gate: production_actions={status}")
 print(f"production-local-gate: runnable_commands={runnable}")
 print(f"production-local-gate: blocked_commands={blocked}")
+print(f"production-local-gate: finalizer_setup_actions={finalizer.get('setup_required_action_count', 0)}")
 PY
