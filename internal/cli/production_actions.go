@@ -9,22 +9,23 @@ import (
 )
 
 type productionActionsReport struct {
-	Path                string           `json:"path"`
-	Status              string           `json:"status"`
-	RequiredActionCount int              `json:"required_action_count"`
-	Actions             []map[string]any `json:"actions"`
+	Path                string            `json:"path"`
+	Status              string            `json:"status"`
+	RequiredActionCount int               `json:"required_action_count"`
+	Filter              map[string]string `json:"filter,omitempty"`
+	Actions             []map[string]any  `json:"actions"`
 }
 
 func runProductionActions(out io.Writer, opts options) error {
-	report, err := buildProductionActionsReport(opts.workspaceDir)
+	report, err := buildProductionActionsReport(opts)
 	if err != nil {
 		return err
 	}
 	return writeProductionActionsReport(out, report, opts.reportFormat)
 }
 
-func buildProductionActionsReport(workspaceDir string) (productionActionsReport, error) {
-	status, err := buildProductionStatusReport(workspaceDir)
+func buildProductionActionsReport(opts options) (productionActionsReport, error) {
+	status, err := buildProductionStatusReport(opts.workspaceDir)
 	if err != nil {
 		return productionActionsReport{}, err
 	}
@@ -46,12 +47,50 @@ func buildProductionActionsReport(workspaceDir string) (productionActionsReport,
 	if err := json.Unmarshal(content, &raw); err != nil {
 		return productionActionsReport{}, fmt.Errorf("decode production actions: %w", err)
 	}
+	actions := filterProductionActions(raw.Actions, opts.productionActionKind, opts.productionActionProvider)
 	return productionActionsReport{
 		Path:                status.FinalizerNextActions.JSONPath,
 		Status:              raw.Status,
-		RequiredActionCount: raw.RequiredActionCount,
-		Actions:             raw.Actions,
+		RequiredActionCount: len(actions),
+		Filter:              productionActionFilter(opts.productionActionKind, opts.productionActionProvider),
+		Actions:             actions,
 	}, nil
+}
+
+func filterProductionActions(actions []map[string]any, kind string, provider string) []map[string]any {
+	if kind == "" && provider == "" {
+		return actions
+	}
+	filtered := make([]map[string]any, 0, len(actions))
+	for _, action := range actions {
+		if kind != "" && actionString(action, "kind") != kind {
+			continue
+		}
+		if provider != "" && actionString(action, "provider") != provider {
+			continue
+		}
+		filtered = append(filtered, action)
+	}
+	return filtered
+}
+
+func productionActionFilter(kind string, provider string) map[string]string {
+	filter := map[string]string{}
+	if kind != "" {
+		filter["kind"] = kind
+	}
+	if provider != "" {
+		filter["provider"] = provider
+	}
+	if len(filter) == 0 {
+		return nil
+	}
+	return filter
+}
+
+func actionString(action map[string]any, key string) string {
+	value, _ := action[key].(string)
+	return value
 }
 
 func writeProductionActionsReport(out io.Writer, report productionActionsReport, format reportFormat) error {
@@ -78,6 +117,16 @@ func renderProductionActionsText(report productionActionsReport) string {
 	var builder strings.Builder
 	fmt.Fprintf(&builder, "Production actions: %s\n", report.Status)
 	fmt.Fprintf(&builder, "Required actions: %d\n", report.RequiredActionCount)
+	if len(report.Filter) > 0 {
+		parts := []string{}
+		if report.Filter["kind"] != "" {
+			parts = append(parts, "kind="+report.Filter["kind"])
+		}
+		if report.Filter["provider"] != "" {
+			parts = append(parts, "provider="+report.Filter["provider"])
+		}
+		fmt.Fprintf(&builder, "Filter: %s\n", strings.Join(parts, " "))
+	}
 	if report.Path != "" {
 		fmt.Fprintf(&builder, "Source: %s\n", report.Path)
 	}

@@ -59,6 +59,8 @@ type options struct {
 	showProviderHealth                         bool
 	showProductionStatus                       bool
 	showProductionActions                      bool
+	productionActionKind                       string
+	productionActionProvider                   string
 	showProductionFinalize                     bool
 	productionFinalizeRunComparison            bool
 	productionFinalizeDist                     string
