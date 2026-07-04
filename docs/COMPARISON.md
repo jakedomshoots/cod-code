@@ -110,6 +110,9 @@ Latest production-core all-agent result:
 | Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | 25-task `production-core` | 25/25 pass | 25/25 pass | 25/25 pass | 24/25 pass, 1 timeout | `.omo/evidence/external-agent-production-core-25-r1/summary.json` |
+| 29-task `production-core` | 29/29 pass | 29/29 pass | 29/29 pass | 27/29 pass, 2 timeouts | `.omo/evidence/external-agent-production-core-29-final/summary.json` |
+
+The latest 29-task run is better than the prior 6-timeout rerun, but it is still not a clean market-comparison pass because Pi timed out twice and left one incomplete-evidence result.
 
 Latest CEO-only production-core result:
 

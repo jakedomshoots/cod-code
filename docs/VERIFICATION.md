@@ -19,8 +19,8 @@ Status date: 2026-07-04
   - `sh -n` over shell scripts when ShellCheck is unavailable.
   - `sh scripts/strict-checks.sh`
 - Latest production-readiness aggregate gate:
-  - `sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-r1`
-  - Result: local production checks pass; public production readiness remains blocked until public release, HTTP provider, and clean 29-task all-agent evidence are complete.
+  - `sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-after-final-comparison-r1`
+  - Result: local production checks pass; public production readiness remains blocked until public release, HTTP provider, and clean 29-task all-agent evidence are complete. The comparison check now reads `.omo/evidence/external-agent-production-core-29-final/summary.json` as the newest matching evidence packet.
   - The packet writes `launch-checklist.md` with the exact remaining public-production commands and records its SHA-256 plus action count in `summary.json`.
 - Latest production status command:
   - `ceo-packet production-status --workspace . --format text`
@@ -74,9 +74,9 @@ Status date: 2026-07-04
   - CEO Harness result: 25 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
   - Agent totals: Codex CLI 25 pass; OpenCode 25 pass; Pi 24 pass and 1 timed out.
 - Latest current-suite external-agent comparison:
-  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-29-r2 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
-  - Result: 116 runs / 110 pass / 0 partial / 0 fail / 6 timed out / 0 skipped / 4 incomplete evidence.
-  - CEO Harness stayed clean; remaining failures are external-tool timeouts in Codex CLI, OpenCode, and Pi.
+  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-29-final --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
+  - Result: 116 runs / 114 pass / 0 partial / 0 fail / 2 timed out / 0 skipped / 1 incomplete evidence.
+  - CEO Harness stayed clean; remaining failures are Pi timeouts on `test-repair-require-checks` and `test-repair-smoke-script`.
 - Focused path-safety rubric repair:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task safety-policy-path-escape --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-path-escape-rubric-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 4 runs / 4 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.

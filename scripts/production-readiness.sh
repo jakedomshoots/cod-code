@@ -139,12 +139,20 @@ endurance_index_has_pass() {
 
 latest_evidence_summary() {
   prefix="$1"
-  latest=""
-  for candidate in "$evidence_root"/"$prefix"*/summary.json; do
-    [ -f "$candidate" ] || continue
-    latest="$candidate"
-  done
-  printf '%s\n' "$latest"
+  python3 - "$evidence_root" "$prefix" <<'PY'
+import glob
+import os
+import sys
+
+root, prefix = sys.argv[1], sys.argv[2]
+candidates = glob.glob(os.path.join(root, prefix + "*/summary.json"))
+if not candidates:
+    print("")
+    raise SystemExit(0)
+
+latest = max(candidates, key=lambda path: (os.path.getmtime(path), path))
+print(latest)
+PY
 }
 
 if [ "$skip_secret_scan" -eq 1 ]; then

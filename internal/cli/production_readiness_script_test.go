@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func Test_ProductionReadinessScript_reportsCurrentPublicBlockers(t *testing.T) {
@@ -147,6 +148,94 @@ func Test_ProductionReadinessScript_passesWithCompleteEvidence(t *testing.T) {
 			t.Fatalf("index.md missing %q:\n%s", want, index)
 		}
 	}
+}
+
+func Test_ProductionReadinessScript_usesNewestComparisonEvidence(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	evidenceRoot := filepath.Join(t.TempDir(), "evidence")
+	outputDir := filepath.Join(t.TempDir(), "production-readiness")
+
+	writeCompleteProductionReadinessEvidence(t, evidenceRoot)
+	oldComparison := filepath.Join(evidenceRoot, "external-agent-production-core-29-r9", "summary.json")
+	newComparison := filepath.Join(evidenceRoot, "external-agent-production-core-29-final", "summary.json")
+	writeProductionReadinessJSON(t, oldComparison, `{
+  "task_count": 29,
+  "agent_count": 4,
+  "failed": 0,
+  "partial": 0,
+  "timed_out": 0,
+  "incomplete_evidence": 0
+}`)
+	writeProductionReadinessJSON(t, newComparison, `{
+  "task_count": 29,
+  "agent_count": 4,
+  "failed": 0,
+  "partial": 0,
+  "timed_out": 2,
+  "incomplete_evidence": 1
+}`)
+	oldTime := time.Now().Add(-2 * time.Hour)
+	newTime := time.Now()
+	if err := os.Chtimes(oldComparison, oldTime, oldTime); err != nil {
+		t.Fatalf("touch old comparison: %v", err)
+	}
+	if err := os.Chtimes(newComparison, newTime, newTime); err != nil {
+		t.Fatalf("touch new comparison: %v", err)
+	}
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "production-readiness.sh"),
+		"--evidence-root", evidenceRoot,
+		"--output-dir", outputDir,
+		"--skip-release-readiness",
+		"--skip-secret-scan",
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("production readiness unexpectedly passed with newer blocked comparison:\n%s", string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"| comparison | all_agent_29_task_comparison | blocked |",
+		newComparison,
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+}
+
+func writeCompleteProductionReadinessEvidence(t *testing.T, evidenceRoot string) {
+	t.Helper()
+	writeProductionReadinessJSON(t, filepath.Join(evidenceRoot, "release-readiness-r1", "summary.json"), `{
+  "status": "pass",
+  "public_release_ready": true
+}`)
+	writeProductionReadinessJSON(t, filepath.Join(evidenceRoot, "production-core-29-ceo-r1", "summary.json"), `{
+  "passed": 29,
+  "failed": 0,
+  "partial": 0,
+  "timed_out": 0,
+  "incomplete_evidence": 0
+}`)
+	writeProductionReadinessJSON(t, filepath.Join(evidenceRoot, "benchmark-fixtures-31-r1", "summary.json"), `{
+  "task_count": 31,
+  "passed": 31,
+  "failed": 0,
+  "partial": 0
+}`)
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-kimi-r2", "index.md"), "pass")
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-codex-r1", "index.md"), "pass")
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-openai", "index.md"), "pass")
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-openrouter", "index.md"), "pass")
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-moonshot", "index.md"), "pass")
+	writeProductionReadinessText(t, filepath.Join(evidenceRoot, "endurance-local-r3", "index.md"), "# Endurance Evidence\n\n## Summary\n\n- Overall: pass\n- Completed iterations: 30\n")
 }
 
 func writeProviderIndex(t *testing.T, path string, status string) {
