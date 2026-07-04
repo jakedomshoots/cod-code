@@ -382,6 +382,7 @@ func renderProductionActionsText(report productionActionsReport) string {
 		writeReleaseProofText(&builder, action)
 		writeCompetitorSetupText(&builder, action)
 		writeBlockedByText(&builder, action)
+		writeActionCommandText(&builder, action)
 	}
 	return builder.String()
 }
@@ -435,6 +436,37 @@ func writeBlockedByText(builder *strings.Builder, action map[string]any) {
 		return
 	}
 	fmt.Fprintf(builder, "  Waiting on: %s\n", strings.Join(blockedBy, ", "))
+}
+
+func writeActionCommandText(builder *strings.Builder, action map[string]any) {
+	command := stringSlice(action["command"])
+	if len(command) == 0 {
+		return
+	}
+	if requiredEnv := actionString(action, "required_env"); requiredEnv != "" {
+		fmt.Fprintf(builder, "  Requires env: %s\n", requiredEnv)
+	}
+	fmt.Fprintf(builder, "  Command: %s\n", shellCommandLine(command))
+}
+
+func shellCommandLine(args []string) string {
+	parts := make([]string, 0, len(args))
+	for _, arg := range args {
+		parts = append(parts, shellQuote(arg))
+	}
+	return strings.Join(parts, " ")
+}
+
+func shellQuote(arg string) string {
+	if arg == "" {
+		return "''"
+	}
+	if strings.IndexFunc(arg, func(r rune) bool {
+		return !(r == '_' || r == '-' || r == '.' || r == '/' || r == ':' || r == '=' || r == '@' || r == '+' || (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z'))
+	}) == -1 {
+		return arg
+	}
+	return "'" + strings.ReplaceAll(arg, "'", "'\"'\"'") + "'"
 }
 
 func numberValue(value any) float64 {

@@ -63,13 +63,15 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
       "id": "all-agent-29-comparison",
       "kind": "comparison",
       "status": "planned",
-      "text": "Run comparison"
+      "text": "Run comparison",
+      "command": ["ceo-packet", "production-finalize", "--workspace", ".", "--run-comparison"]
     },
     {
       "id": "production-readiness",
       "kind": "final_readiness",
       "status": "blocked",
-      "text": "Run final readiness"
+      "text": "Run final readiness",
+      "command": ["sh", "scripts/production-readiness.sh"]
     }
   ]
 }`)
@@ -107,9 +109,12 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Env ready: 4",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 		"(missing env: OPENAI_API_KEY)",
+		"Requires env: OPENAI_API_KEY",
+		"Command: sh scripts/provider-proof.sh --provider openai",
 		"release-readiness [release_proof]: Prove public release readiness",
 		"Release readiness: blocked, public_ready=false, artifacts_verified=true, blocked=2",
 		"Blocked checks: git_remote, github_release_assets",
+		"Command: sh scripts/release-readiness.sh",
 		"competitor-smoke [competitor_setup]: Fix competitor setup",
 		"Competitor setup: 1 pass, 1 blocked, 1 skipped, 0 failed",
 		"opencode: setup_blocked - provider setup is blocked",
@@ -168,6 +173,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Filter: id=all-agent-29-comparison",
 		"all-agent-29-comparison [comparison]: Run comparison",
 		"Waiting on: competitor-smoke",
+		"Command: ",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("action-id production actions text missing %q:\n%s", want, text)
@@ -243,5 +249,13 @@ func TestProductionActionsDoesNotReadSecretValuesIntoReport(t *testing.T) {
 	}
 	if len(actions) != 1 || actions[0]["required_env_set"] != true || actions[0]["env_ready"] != true {
 		t.Fatalf("actions = %+v, want env presence only", actions)
+	}
+}
+
+func TestProductionActionsShellCommandLineQuotesUnsafeArgs(t *testing.T) {
+	got := shellCommandLine([]string{"sh", "scripts/run check.sh", "it's", ""})
+	want := "sh 'scripts/run check.sh' 'it'\"'\"'s' ''"
+	if got != want {
+		t.Fatalf("shellCommandLine = %q, want %q", got, want)
 	}
 }
