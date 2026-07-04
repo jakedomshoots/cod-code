@@ -90,6 +90,24 @@
         "cost_provider_used",
         "evidence_quality"
       ]
+    },
+    {
+      "id": "pi",
+      "name": "Pi CLI",
+      "binary": "pi",
+      "homepage": "https://github.com/sisyphuslabsai/pi",
+      "setup_hint": "Install and authenticate Pi before real comparison runs.",
+      "version_args": ["--version"],
+      "dry_run_args": ["--version"],
+      "timeout_seconds": 1800,
+      "comparison_dimensions": [
+        "task_success",
+        "time_to_complete",
+        "files_changed",
+        "safety_prompts",
+        "cost_provider_used",
+        "evidence_quality"
+      ]
     }
   ]
 }

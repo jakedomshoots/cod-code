@@ -22,6 +22,7 @@ var requiredCompetitorIDs = []string{
 	"aider",
 	"opencode",
 	"goose",
+	"pi",
 }
 
 var requiredComparisonDimensions = []string{
