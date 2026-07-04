@@ -55,6 +55,12 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 	case "--production-actions":
 		opts.showProductionActions = true
 		return true, index, nil
+	case "--action-id":
+		value, err := parseNextValue(args, index, "--action-id requires an action id")
+		if err != nil {
+			return true, index, err
+		}
+		opts.productionActionID = value
 	case "--action-kind":
 		value, err := parseNextValue(args, index, "--action-kind requires an action kind")
 		if err != nil {

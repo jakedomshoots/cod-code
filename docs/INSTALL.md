@@ -113,6 +113,7 @@ To list the remaining production actions without opening files:
 
 ```sh
 ceo-packet production-actions --workspace . --format text
+ceo-packet production-actions --workspace . --format text --action-id provider-openai
 ceo-packet production-actions --workspace . --format text --action-kind release_proof
 ceo-packet production-actions --workspace . --format text --action-kind provider_proof
 ceo-packet production-actions --workspace . --format text --action-provider openai

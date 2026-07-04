@@ -185,6 +185,7 @@ Advanced flags:
   --history                       Print recent job history
   --production-status             Print latest production-readiness status from evidence
   --production-actions            Print latest production finalizer action checklist
+  --action-id <id>                Filter production-actions by exact action id
   --action-kind <kind>            Filter production-actions by kind
   --action-provider <name>        Filter production-actions by provider
   --env-ready-only                Show production actions whose required env is present

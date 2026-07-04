@@ -59,6 +59,7 @@ type options struct {
 	showProviderHealth                         bool
 	showProductionStatus                       bool
 	showProductionActions                      bool
+	productionActionID                         string
 	productionActionKind                       string
 	productionActionProvider                   string
 	productionActionsEnvReadyOnly              bool
