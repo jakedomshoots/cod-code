@@ -28,6 +28,9 @@ jobs:
       - name: Vet
         run: go vet ./...
 
+      - name: Secret scan
+        run: sh scripts/secret-scan.sh
+
       - name: Smoke
         run: sh scripts/smoke.sh
 
@@ -43,10 +46,10 @@ jobs:
       - name: Local production gate
         run: |
           sh scripts/release-local.sh
-          sh scripts/production-local-gate.sh --dist dist --output-dir .omo/evidence/production-local-gate
+          sh scripts/production-local-gate.sh --workspace . --dist dist --output-dir .omo/evidence/ci-production-local-gate
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: production-local-gate-evidence
-          path: .omo/evidence/production-local-gate/**
+          name: ci-production-local-gate-evidence
+          path: .omo/evidence/ci-production-local-gate/**

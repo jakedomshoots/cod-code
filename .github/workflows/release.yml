@@ -21,10 +21,10 @@ jobs:
       - name: Build release archives
         run: |
           version="${GITHUB_REF_NAME#v}"
-          VERSION="$version" sh scripts/release-local.sh
+          VERSION="$version" sh scripts/release-local.sh --dist dist
 
       - name: Verify release archives
-        run: sh scripts/verify-release.sh dist
+        run: sh scripts/verify-release.sh --dist dist
 
       - name: Write release notes
         run: |
@@ -49,7 +49,23 @@ jobs:
             --notes-file dist/release-notes.md \
             --verify-tag
 
+      - name: Verify public release readiness
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          GH_RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+          REPO_URL: https://github.com/${{ github.repository }}
+          HOMEBREW_ARCHIVE_BASE_URL: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}
+          ALLOW_CHECKSUM_ONLY_RELEASE: "1"
+          CHECKSUM_ONLY_RELEASE_NOTES_URL: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+        run: |
+          sh scripts/release-homebrew-formula.sh --dist dist --repo-url "$REPO_URL" --homebrew-archive-base-url "$HOMEBREW_ARCHIVE_BASE_URL"
+          sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-ci
+
       - uses: actions/upload-artifact@v4
         with:
           name: ceo-packet-release
-          path: dist/*
+          path: |
+            dist/*
+            .omo/evidence/release-readiness-ci/**

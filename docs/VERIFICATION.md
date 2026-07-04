@@ -7,9 +7,11 @@ Status date: 2026-07-04
 - Latest production gate:
   - `go test ./... -count=1`
   - `go vet ./...`
+  - `sh scripts/secret-scan.sh`
   - `sh scripts/smoke.sh`
   - `sh scripts/dogfood.sh`
-  - `sh scripts/release-local.sh`
+  - `VERSION=0.1.0-dev sh scripts/release-local.sh --dist dist`
+  - `sh scripts/production-local-gate.sh --workspace . --dist dist --output-dir .omo/evidence/ci-production-local-gate`
   - `task ci`
 - Latest strict gate:
   - `gofumpt -l cmd internal`
@@ -75,7 +77,7 @@ Status date: 2026-07-04
   - `go test ./internal/cli -run Test_ReleaseBootstrapScript -count=1`
   - Result: verifies `release-bootstrap` writes `release-handoff.md` with required public assets, checksums, operator boundaries, and post-publish verification commands while avoiding tag/push/upload commands.
 - Latest local production gate:
-  - `sh scripts/production-local-gate.sh --dist dist --output-dir .omo/evidence/production-local-gate-skip-guard-r1`
+  - `sh scripts/production-local-gate.sh --workspace . --output-dir .omo/evidence/security-production-final`
   - Result: pass. Local production readiness is true; public blockers remain recorded as evidence. The gate also requires the production action queue while public blockers remain, writes `production-actions.json`, `production-status.json`, and `production-actions.commands.sh`, validates action row, state-count, runnable, and blocked command counts, requires `action_state` and `action_reason` on every action, enforces release setup no-publish/no-secret policy fields and setup-action file content, enforces provider setup no-secret policy fields plus setup artifact hashes and command-file content, rejects declared-evidence mismatches, requires finalizer setup checklist hash/count metadata, fails launch/finalizer checklist fingerprint drift, and confirms blocked commands are commented with reasons in the command script.
 - Latest live external-agent comparison:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-25-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
@@ -204,6 +206,12 @@ Status date: 2026-07-04
 - Focused rollback test:
   - `go test ./internal/workspace -run Test_Workspace_RollbackReplaceText -count=1`
   - `go test ./internal/cli -run 'Test_Run_rollback_report|Test_HelperProcess_cli_model_create_file_patch' -count=1`
+- GitHub Actions CI workflow:
+  - `go test ./... -count=1`
+  - `go vet ./...`
+  - `sh scripts/secret-scan.sh`
+  - `sh scripts/smoke.sh`
+  - `sh scripts/production-local-gate.sh --workspace . --dist dist --output-dir .omo/evidence/ci-production-local-gate`
 - `make ci`
   - `gofmt -w ./cmd ./internal`
   - `go test ./... -count=1`
@@ -212,8 +220,9 @@ Status date: 2026-07-04
   - `sh scripts/dogfood.sh`
   - `go build ... ./cmd/ceo-packet`
 - `go test -race -shuffle=on -count=1 ./...`
-- `VERSION=0.1.0-dev sh scripts/release-local.sh`
-- `sh scripts/verify-release.sh dist`
+- `VERSION=0.1.0-dev sh scripts/release-local.sh --dist dist`
+- `sh scripts/verify-release.sh --dist dist`
+  - Release workflow also runs `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-ci` after GitHub release assets are published and verified.
 - `sh scripts/release-bootstrap.sh --dist dist --output-dir .omo/evidence/release-bootstrap` writes a blocked/pass public-release bootstrap packet without publishing anything; `summary.json` records the checklist item count and SHA-256 fingerprints for the bootstrap files.
 - `sh scripts/release-preflight.sh dist` blocks public release claims when remote URL, public release URL, Homebrew URL, and signature or checksum-only notes are missing.
 - `sh scripts/release-homebrew-formula.sh --dist dist --repo-url <repo-url> --homebrew-archive-base-url <archive-base-url>` updates `dist/homebrew/ceo-packet.rb` to the real remote archive URL and checksum without publishing a tap.
