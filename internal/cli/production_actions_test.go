@@ -50,6 +50,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
       "id": "release-readiness",
       "kind": "release_proof",
       "text": "Prove public release readiness",
+      "evidence": "`+filepath.ToSlash(filepath.Join(root, ".omo", "evidence", "release-readiness-final", "index.md"))+`",
       "command": ["sh", "scripts/release-readiness.sh"]
     },
     {
@@ -59,6 +60,16 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
       "text": "Fix competitor setup"
     }
   ]
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "release-readiness-final", "summary.json"), `{
+  "status": "blocked",
+  "public_release_ready": false,
+  "release_artifacts_verified": true,
+  "preflight_status": "blocked",
+  "blocked_count": 2,
+  "blocked_checks": ["git_remote", "github_release_assets"],
+  "origin_remote_configured": false,
+  "github_auth_status": "pass"
 }`)
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "competitor-smoke", "summary.json"), `{
   "competitors": 3,
@@ -85,6 +96,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 		"(missing env: OPENAI_API_KEY)",
 		"release-readiness [release_proof]: Prove public release readiness",
+		"Release readiness: blocked, public_ready=false, artifacts_verified=true, blocked=2",
+		"Blocked checks: git_remote, github_release_assets",
 		"competitor-smoke [competitor_setup]: Fix competitor setup",
 		"Competitor setup: 1 pass, 1 blocked, 1 skipped, 0 failed",
 		"opencode: setup_blocked - provider setup is blocked",

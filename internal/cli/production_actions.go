@@ -78,10 +78,51 @@ func annotateProductionActions(actions []map[string]any, sourceDir string) []map
 			}
 		}
 		next["env_ready"] = envReady
+		annotateReleaseProof(next)
 		annotateCompetitorSetup(next, sourceDir)
 		annotated = append(annotated, next)
 	}
 	return annotated
+}
+
+func annotateReleaseProof(action map[string]any) {
+	if actionString(action, "kind") != "release_proof" {
+		return
+	}
+	evidencePath := actionString(action, "evidence")
+	if evidencePath == "" {
+		return
+	}
+	summaryPath := filepath.Join(filepath.Dir(evidencePath), "summary.json")
+	content, err := os.ReadFile(summaryPath)
+	if err != nil {
+		action["release_summary_error"] = err.Error()
+		return
+	}
+	var summary struct {
+		Status                   string   `json:"status"`
+		PublicReleaseReady       bool     `json:"public_release_ready"`
+		ReleaseArtifactsVerified bool     `json:"release_artifacts_verified"`
+		PreflightStatus          string   `json:"preflight_status"`
+		BlockedCount             int      `json:"blocked_count"`
+		BlockedChecks            []string `json:"blocked_checks"`
+		OriginRemoteConfigured   bool     `json:"origin_remote_configured"`
+		GitHubAuthStatus         string   `json:"github_auth_status"`
+	}
+	if err := json.Unmarshal(content, &summary); err != nil {
+		action["release_summary_error"] = err.Error()
+		return
+	}
+	action["release_summary"] = map[string]any{
+		"status":                     summary.Status,
+		"public_release_ready":       summary.PublicReleaseReady,
+		"release_artifacts_verified": summary.ReleaseArtifactsVerified,
+		"preflight_status":           summary.PreflightStatus,
+		"blocked_count":              summary.BlockedCount,
+		"blocked_checks":             summary.BlockedChecks,
+		"origin_remote_configured":   summary.OriginRemoteConfigured,
+		"github_auth_status":         summary.GitHubAuthStatus,
+	}
 }
 
 func annotateCompetitorSetup(action map[string]any, sourceDir string) {
@@ -265,9 +306,29 @@ func renderProductionActionsText(report productionActionsReport) string {
 		} else {
 			fmt.Fprintf(&builder, "- %s: %s%s\n", id, text, suffix)
 		}
+		writeReleaseProofText(&builder, action)
 		writeCompetitorSetupText(&builder, action)
 	}
 	return builder.String()
+}
+
+func writeReleaseProofText(builder *strings.Builder, action map[string]any) {
+	summary, _ := action["release_summary"].(map[string]any)
+	if summary == nil {
+		return
+	}
+	fmt.Fprintf(
+		builder,
+		"  Release readiness: %s, public_ready=%t, artifacts_verified=%t, blocked=%d\n",
+		stringValue(summary["status"]),
+		boolValue(summary["public_release_ready"]),
+		boolValue(summary["release_artifacts_verified"]),
+		int(numberValue(summary["blocked_count"])),
+	)
+	checks, _ := summary["blocked_checks"].([]string)
+	if len(checks) > 0 {
+		fmt.Fprintf(builder, "  Blocked checks: %s\n", strings.Join(checks, ", "))
+	}
 }
 
 func writeCompetitorSetupText(builder *strings.Builder, action map[string]any) {
@@ -303,4 +364,14 @@ func numberValue(value any) float64 {
 	default:
 		return 0
 	}
+}
+
+func stringValue(value any) string {
+	typed, _ := value.(string)
+	return typed
+}
+
+func boolValue(value any) bool {
+	typed, _ := value.(bool)
+	return typed
 }
