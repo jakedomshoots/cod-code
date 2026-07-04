@@ -31,8 +31,12 @@ func runProductionFinalize(ctx context.Context, out io.Writer, opts options) err
 	if opts.productionFinalizeRunComparison {
 		args = append(args, "--run-comparison")
 	}
-	if opts.completionOutputDir != "" {
-		args = append(args, "--output-dir", opts.completionOutputDir)
+	outputDir := opts.completionOutputDir
+	if outputDir == "" && opts.productionFinalizeEvidenceRoot != "" {
+		outputDir = opts.productionFinalizeEvidenceRoot
+	}
+	if outputDir != "" {
+		args = append(args, "--output-dir", outputDir)
 	}
 	if opts.productionFinalizeEvidenceRoot != "" {
 		args = append(args, "--evidence-root", opts.productionFinalizeEvidenceRoot)

@@ -359,15 +359,18 @@ else
   done
 fi
 
+competitor_setup_blocked=0
 if [ "$skip_competitor_smoke" -eq 1 ]; then
   add_step "competitor-smoke" "skipped" "not-run" "Skipped by flag"
 else
   competitor_smoke_summary="$output_dir/competitor-smoke/summary.json"
   if ! run_step "competitor-smoke-command" "competitor-smoke/summary.json" go run "$root/cmd/ceo-eval" --comparison-smoke --competitors "$root/evals/competitors.json" --output-dir "$output_dir/competitor-smoke" --timeout-seconds 25; then
+    competitor_setup_blocked=1
     overall="blocked"
   elif competitor_smoke_clean "$competitor_smoke_summary"; then
     add_step "competitor-smoke" "pass" "competitor-smoke/summary.json" "Smoke summary has no failed or setup-blocked competitors"
   else
+    competitor_setup_blocked=1
     add_step "competitor-smoke" "blocked" "competitor-smoke/summary.json" "Smoke summary has failed or setup-blocked competitors"
     overall="blocked"
   fi
@@ -375,7 +378,10 @@ fi
 
 comparison_output="$evidence_root/external-agent-production-core-29-final-result-retry-r1"
 if [ "$run_comparison" -eq 1 ]; then
-  if ! run_step "all-agent-29-comparison" "$comparison_output/summary.json" go run "$root/cmd/ceo-eval" \
+  if [ "$competitor_setup_blocked" -eq 1 ]; then
+    add_step "all-agent-29-comparison" "blocked" "commands.sh" "Waiting on clean competitor smoke before running all-agent comparison"
+    overall="blocked"
+  elif ! run_step "all-agent-29-comparison" "$comparison_output/summary.json" go run "$root/cmd/ceo-eval" \
     --local-agent-benchmark \
     --local-agents ceo_harness,codex_cli,opencode,pi \
     --local-agent-benchmark-task production-core \
@@ -435,9 +441,18 @@ fi
   printf '%s\n' "Status: $overall"
   printf '\n'
   action_count=0
+  competitor_action_written=0
   while IFS='	' read -r name status evidence detail; do
     case "$status" in
       pass|skipped) continue ;;
+    esac
+    case "$name" in
+      competitor-smoke|competitor-smoke-command)
+        if [ "$competitor_action_written" -eq 1 ]; then
+          continue
+        fi
+        competitor_action_written=1
+        ;;
     esac
     action_count=$((action_count + 1))
     case "$name" in
@@ -533,12 +548,25 @@ action_lines = [
 ]
 actions = []
 action_text_by_step = {}
-for step, line in zip([step for step in steps if step["status"] not in {"pass", "skipped"}], action_lines):
+nonpass_steps = [step for step in steps if step["status"] not in {"pass", "skipped"}]
+competitor_step_present = any(step["name"] == "competitor-smoke" for step in nonpass_steps)
+action_steps = []
+for step in nonpass_steps:
+    if step["name"] == "competitor-smoke-command" and competitor_step_present:
+        continue
+    action_steps.append(step)
+for step, line in zip(action_steps, action_lines):
     action_text_by_step[step["name"]] = line
 
 provider_timeout = sys.argv[6]
 next_actions_dir = pathlib.Path(sys.argv[5]).resolve().parent
 ceo_packet_prefix = sys.argv[8].split("\t")
+
+def action_output_dir(step):
+    path = pathlib.Path(step["evidence"])
+    if not path.is_absolute():
+        path = next_actions_dir / path
+    return str(path.parent)
 
 def evidence_metadata(action):
     files = []
@@ -575,22 +603,22 @@ def action_for_step(step):
     }
     if name == "release-readiness":
         action["kind"] = "release_proof"
-        action["command"] = ["sh", "scripts/release-readiness.sh", "--dist", "dist", "--output-dir", ".omo/evidence/release-readiness-final"]
+        action["command"] = ["sh", "scripts/release-readiness.sh", "--dist", "dist", "--output-dir", action_output_dir(step)]
     elif name == "provider-openrouter":
         action["kind"] = "provider_proof"
         action["provider"] = "openrouter"
         action["required_env"] = "OPENROUTER_API_KEY"
-        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "openrouter", "--output-dir", ".omo/evidence/provider-proof-openrouter", "--timeout-seconds", provider_timeout]
+        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "openrouter", "--output-dir", action_output_dir(step), "--timeout-seconds", provider_timeout]
     elif name == "provider-kimi-code":
         action["kind"] = "provider_proof"
         action["provider"] = "kimi-code"
         action["required_env"] = "KIMI_CODE_API_KEY"
-        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "kimi-code", "--output-dir", ".omo/evidence/provider-proof-kimi-code", "--timeout-seconds", provider_timeout]
+        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "kimi-code", "--output-dir", action_output_dir(step), "--timeout-seconds", provider_timeout]
     elif name == "provider-minimax":
         action["kind"] = "provider_proof"
         action["provider"] = "minimax"
         action["required_env"] = "MINIMAX_API_KEY"
-        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "minimax", "--output-dir", ".omo/evidence/provider-proof-minimax", "--timeout-seconds", provider_timeout]
+        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "minimax", "--output-dir", action_output_dir(step), "--timeout-seconds", provider_timeout]
     elif name in {"competitor-smoke", "competitor-smoke-command"}:
         action["kind"] = "competitor_setup"
         action["inspect"] = "competitor-smoke/summary.json"
@@ -600,7 +628,7 @@ def action_for_step(step):
         action["command"] = ceo_packet_prefix + ["production-finalize", "--workspace", ".", "--run-comparison"]
     elif name == "production-readiness":
         action["kind"] = "final_readiness"
-        action["command"] = ["sh", "scripts/production-readiness.sh", "--dist", "dist", "--output-dir", ".omo/evidence/production-readiness-final"]
+        action["command"] = ["sh", "scripts/production-readiness.sh", "--dist", "dist", "--output-dir", action_output_dir(step)]
     else:
         action["kind"] = "manual"
     files = evidence_metadata(action)
@@ -608,9 +636,7 @@ def action_for_step(step):
         action["declared_evidence_files"] = files
     return action
 
-for step in steps:
-    if step["status"] in {"pass", "skipped"}:
-        continue
+for step in action_steps:
     actions.append(action_for_step(step))
 
 with open(sys.argv[5], "w", encoding="utf-8") as handle:

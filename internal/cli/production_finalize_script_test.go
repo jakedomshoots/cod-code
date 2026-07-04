@@ -53,9 +53,9 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
 	for _, want := range []string{
 		"scripts/release-readiness.sh",
-		"scripts/provider-proof.sh --provider openrouter",
-		"scripts/provider-proof.sh --provider kimi-code",
-		"scripts/provider-proof.sh --provider minimax",
+		"--provider openrouter",
+		"--provider kimi-code",
+		"--provider minimax",
 		"--comparison-smoke",
 		"--local-agent-benchmark-task production-core",
 		"--local-agent-benchmark-timeout-retries 1",
@@ -153,10 +153,12 @@ func Test_ProductionFinalizeScript_commentsBlockedReplayCommands(t *testing.T) {
 
 	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
 	for _, want := range []string{
-		"# blocked command: sh " + filepath.Join(root, "scripts", "release-readiness.sh"),
-		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openrouter",
-		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider kimi-code",
-		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider minimax",
+		"# blocked command: sh ",
+		"scripts/release-readiness.sh",
+		"scripts/provider-proof.sh",
+		"--provider openrouter",
+		"--provider kimi-code",
+		"--provider minimax",
 		"# reason: step provider-openrouter exited 1;",
 	} {
 		if !strings.Contains(commands, want) {
@@ -164,10 +166,10 @@ func Test_ProductionFinalizeScript_commentsBlockedReplayCommands(t *testing.T) {
 		}
 	}
 	for _, blockedRunnable := range []string{
-		"\nsh " + filepath.Join(root, "scripts", "release-readiness.sh"),
-		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openrouter",
-		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider kimi-code",
-		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider minimax",
+		"\nsh " + shellQuote(filepath.Join(root, "scripts", "release-readiness.sh")),
+		"\nsh " + shellQuote(filepath.Join(root, "scripts", "provider-proof.sh")) + " --provider openrouter",
+		"\nsh " + shellQuote(filepath.Join(root, "scripts", "provider-proof.sh")) + " --provider kimi-code",
+		"\nsh " + shellQuote(filepath.Join(root, "scripts", "provider-proof.sh")) + " --provider minimax",
 	} {
 		if strings.Contains(commands, blockedRunnable) {
 			t.Fatalf("commands.sh should not contain runnable blocked command %q:\n%s", blockedRunnable, commands)
@@ -244,6 +246,30 @@ func Test_Run_productionFinalizeVerbRunsDryRun(t *testing.T) {
 	}
 	if !strings.Contains(out.String(), "production-finalize: planned") {
 		t.Fatalf("output = %q, want planned finalizer", out.String())
+	}
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	if !strings.Contains(summary, `"status": "planned"`) {
+		t.Fatalf("summary missing planned status:\n%s", summary)
+	}
+}
+
+func Test_Run_productionFinalizeEvidenceRootDefaultsOutputDir(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "production-finalize-final")
+	var out bytes.Buffer
+
+	err = Run(context.Background(), &out, []string{
+		"production-finalize",
+		"--workspace", root,
+		"--dry-run",
+		"--evidence-root", outputDir,
+		"--dist", filepath.Join(root, "dist"),
+	})
+	if err != nil {
+		t.Fatalf("Run production-finalize returned error: %v\n%s", err, out.String())
 	}
 	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
 	if !strings.Contains(summary, `"status": "planned"`) {
@@ -332,6 +358,78 @@ exit 1
 	} {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("summary.json missing %q:\n%s", want, summary)
+		}
+	}
+}
+
+func Test_ProductionFinalizeScript_runComparisonWaitsForCleanCompetitorSmoke(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "production-finalize")
+	binDir := t.TempDir()
+	realGo, err := exec.LookPath("go")
+	if err != nil {
+		t.Fatalf("find go binary: %v", err)
+	}
+	markerPath := filepath.Join(outputDir, "comparison-ran.txt")
+	writeExecutableScript(t, filepath.Join(binDir, "go"), `#!/bin/sh
+case "$*" in
+*"--comparison-smoke"*)
+  out=""
+  prev=""
+  for arg in "$@"; do
+    if [ "$prev" = "--output-dir" ]; then
+      out="$arg"
+    fi
+    prev="$arg"
+  done
+  mkdir -p "$out"
+  cat >"$out/summary.json" <<'JSON'
+{"competitors":1,"smoke_passed":0,"setup_blocked":1,"smoke_failed":0}
+JSON
+  exit 0
+  ;;
+*"--local-agent-benchmark"*)
+  mkdir -p "`+outputDir+`"
+  printf 'comparison ran\n' >"`+markerPath+`"
+  exit 0
+  ;;
+*)
+  exec `+shellQuote(realGo)+` "$@"
+  ;;
+esac
+`)
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "production-finalize.sh"),
+		"--run-comparison",
+		"--output-dir", outputDir,
+		"--dist", filepath.Join(root, "dist"),
+		"--skip-release-readiness",
+		"--skip-provider-proofs",
+		"--skip-production-readiness",
+	)
+	cmd.Dir = root
+	cmd.Env = append(cmd.Environ(), "PATH="+binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("production-finalize unexpectedly passed with setup-blocked smoke:\n%s", string(output))
+	}
+	if _, err := os.Stat(markerPath); !os.IsNotExist(err) {
+		t.Fatalf("comparison ran before clean competitor smoke; marker err=%v", err)
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"| competitor-smoke | blocked |",
+		"| all-agent-29-comparison | blocked |",
+		"Waiting on clean competitor smoke before running all-agent comparison",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
 		}
 	}
 }
