@@ -489,6 +489,7 @@ python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output
 import json
 import sys
 import pathlib
+import hashlib
 
 steps = []
 with open(sys.argv[1], "r", encoding="utf-8") as handle:
@@ -511,6 +512,32 @@ for step, line in zip([step for step in steps if step["status"] not in {"pass", 
     action_text_by_step[step["name"]] = line
 
 provider_timeout = sys.argv[6]
+next_actions_dir = pathlib.Path(sys.argv[5]).resolve().parent
+
+def evidence_metadata(action):
+    files = []
+    for field in ("evidence", "inspect"):
+        value = action.get(field)
+        if not value:
+            continue
+        path = pathlib.Path(value)
+        if not path.is_absolute():
+            path = next_actions_dir / path
+        entry = {
+            "field": field,
+            "path": str(path),
+        }
+        try:
+            content = path.read_bytes()
+        except OSError as error:
+            entry["exists"] = False
+            entry["error"] = str(error)
+        else:
+            entry["exists"] = True
+            entry["size_bytes"] = len(content)
+            entry["sha256"] = hashlib.sha256(content).hexdigest()
+        files.append(entry)
+    return files
 
 def action_for_step(step):
     name = step["name"]
@@ -550,6 +577,9 @@ def action_for_step(step):
         action["command"] = ["sh", "scripts/production-readiness.sh", "--dist", "dist", "--output-dir", ".omo/evidence/production-readiness-final"]
     else:
         action["kind"] = "manual"
+    files = evidence_metadata(action)
+    if files:
+        action["declared_evidence_files"] = files
     return action
 
 for step in steps:

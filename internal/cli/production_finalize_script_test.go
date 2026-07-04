@@ -83,6 +83,18 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		}
 	}
 
+	nextActionsJSON := readTextFile(t, filepath.Join(outputDir, "next-actions.json"))
+	for _, want := range []string{
+		`"declared_evidence_files":`,
+		`"field": "evidence"`,
+		`"exists":`,
+		`"sha256":`,
+	} {
+		if !strings.Contains(nextActionsJSON, want) {
+			t.Fatalf("next-actions.json missing declared evidence metadata %q:\n%s", want, nextActionsJSON)
+		}
+	}
+
 	setupActions := readTextFile(t, filepath.Join(outputDir, "setup-actions.md"))
 	for _, want := range []string{
 		"# Production Setup Actions",

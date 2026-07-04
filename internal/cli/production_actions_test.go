@@ -45,6 +45,15 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
       "required_env": "OPENAI_API_KEY",
       "text": "Prove OpenAI HTTP provider",
       "evidence": "`+filepath.ToSlash(filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "index.md"))+`",
+      "declared_evidence_files": [
+        {
+          "field": "evidence",
+          "path": "`+filepath.ToSlash(filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "index.md"))+`",
+          "exists": true,
+          "size_bytes": 27,
+          "sha256": "b4da9bebb1ea70a3c232161b674b70a15ed3d1ef59fd23dbf94f8dae8c7fda42"
+        }
+      ],
       "command": ["sh", "scripts/provider-proof.sh", "--provider", "openai"]
     },
     {
@@ -155,6 +164,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Setup command file:",
 		"Evidence file:",
 		"sha256=",
+		"declared_match=true",
 		"Requires env: OPENAI_API_KEY",
 		"Command: sh scripts/provider-proof.sh --provider openai",
 		"release-readiness [release_proof]: Prove public release readiness",
@@ -217,7 +227,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		t.Fatalf("provider evidence_files = %#v, want one declared evidence file", body.Actions[0]["evidence_files"])
 	}
 	firstEvidence, _ := evidenceFiles[0].(map[string]any)
-	if firstEvidence["exists"] != true || firstEvidence["sha256"] == "" || numberValue(firstEvidence["size_bytes"]) <= 0 {
+	if firstEvidence["exists"] != true || firstEvidence["sha256"] == "" || numberValue(firstEvidence["size_bytes"]) <= 0 || firstEvidence["matches_declared"] != true {
 		t.Fatalf("provider evidence metadata = %#v, want existing fingerprinted evidence", firstEvidence)
 	}
 

@@ -104,6 +104,7 @@ func annotateProductionActions(actions []map[string]any, sourceDir string) []map
 }
 
 func annotateDeclaredEvidence(action map[string]any, sourceDir string) {
+	declared := declaredEvidenceFilesByField(action["declared_evidence_files"])
 	refs := []struct {
 		field string
 		path  string
@@ -124,17 +125,38 @@ func annotateDeclaredEvidence(action map[string]any, sourceDir string) {
 			"field": ref.field,
 			"path":  path,
 		}
+		if declaredEntry := declared[ref.field]; declaredEntry != nil {
+			if declaredPath := stringValue(declaredEntry["path"]); declaredPath != "" {
+				entry["declared_path"] = declaredPath
+			}
+			if declaredSHA := stringValue(declaredEntry["sha256"]); declaredSHA != "" {
+				entry["declared_sha256"] = declaredSHA
+			}
+			if declaredSize := numberValue(declaredEntry["size_bytes"]); declaredSize > 0 {
+				entry["declared_size_bytes"] = int(declaredSize)
+			}
+			if declaredExists, ok := declaredEntry["exists"].(bool); ok {
+				entry["declared_exists"] = declaredExists
+			}
+		}
 		content, err := os.ReadFile(path)
 		if err != nil {
 			entry["exists"] = false
 			entry["error"] = err.Error()
+			if _, ok := entry["declared_sha256"]; ok {
+				entry["matches_declared"] = false
+			}
 			files = append(files, entry)
 			continue
 		}
 		sum := sha256.Sum256(content)
+		currentSHA := fmt.Sprintf("%x", sum[:])
 		entry["exists"] = true
 		entry["size_bytes"] = len(content)
-		entry["sha256"] = fmt.Sprintf("%x", sum[:])
+		entry["sha256"] = currentSHA
+		if declaredSHA := stringValue(entry["declared_sha256"]); declaredSHA != "" {
+			entry["matches_declared"] = declaredSHA == currentSHA
+		}
 		files = append(files, entry)
 	}
 	if len(files) > 0 {
@@ -866,7 +888,11 @@ func writeEvidenceFilesText(builder *strings.Builder, action map[string]any) {
 			label = "Inspect file"
 		}
 		if exists, _ := file["exists"].(bool); exists {
-			fmt.Fprintf(builder, "  %s: %s sha256=%s size=%d\n", label, path, stringValue(file["sha256"]), int(numberValue(file["size_bytes"])))
+			fmt.Fprintf(builder, "  %s: %s sha256=%s size=%d", label, path, stringValue(file["sha256"]), int(numberValue(file["size_bytes"])))
+			if match, ok := file["matches_declared"].(bool); ok {
+				fmt.Fprintf(builder, " declared_match=%t", match)
+			}
+			builder.WriteString("\n")
 			continue
 		}
 		if err := stringValue(file["error"]); err != "" {
@@ -952,6 +978,18 @@ func evidenceFileEntries(value any) []map[string]any {
 	default:
 		return nil
 	}
+}
+
+func declaredEvidenceFilesByField(value any) map[string]map[string]any {
+	result := map[string]map[string]any{}
+	for _, entry := range evidenceFileEntries(value) {
+		field := stringValue(entry["field"])
+		if field == "" {
+			continue
+		}
+		result[field] = entry
+	}
+	return result
 }
 
 func stringSlice(value any) []string {
