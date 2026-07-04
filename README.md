@@ -124,7 +124,7 @@ sh scripts/production-local-gate.sh --dist dist --output-dir .omo/evidence/produ
 ceo-packet production-status --workspace . --format text
 ```
 
-The release script writes tarballs, checksums, and a local Homebrew formula draft under `dist/homebrew/ceo-packet.rb`. The readiness scripts write pass/blocked evidence without publishing, tagging, pushing, or creating a remote release. `production-local-gate` fails only if local production readiness regresses; public release/provider blockers stay visible but do not fail source CI. `production-status` reads that evidence and prints local/public readiness plus the next action.
+The release script writes tarballs, checksums, and a local Homebrew formula draft under `dist/homebrew/ceo-packet.rb`. The readiness scripts write pass/blocked evidence without publishing, tagging, pushing, or creating a remote release. `production-local-gate` fails only if local production readiness regresses; public release/provider blockers stay visible but do not fail source CI. `production-status` reads that evidence and prints local/public readiness, `External setup required: true` when only outside release/provider setup remains, plus the next action.
 
 Create a working example workspace config:
 

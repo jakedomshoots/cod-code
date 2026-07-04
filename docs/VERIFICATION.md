@@ -24,7 +24,7 @@ Status date: 2026-07-04
   - The packet writes `launch-checklist.md` with the exact remaining public-production commands and records its SHA-256 plus action count in `summary.json`.
 - Latest production status command:
   - `ceo-packet production-status --workspace . --format text`
-  - Result: reports `Local ready: true`, `Public ready: false`, five blocked public checks, the launch checklist hash, finalizer action counts, declared-evidence match counts, setup checklist hash, and the latest finalizer next action from saved evidence.
+  - Result: reports `Local ready: true`, `Public ready: false`, `External setup required: true`, five blocked public checks, the launch checklist hash, finalizer action counts, declared-evidence match counts, setup checklist hash, and the latest finalizer next action from saved evidence.
 - Latest production finalizer dry-run:
   - `sh scripts/production-finalize.sh --dry-run --output-dir .omo/evidence/production-finalize-dry-run-r1 --dist dist`
   - Result: writes `index.md`, `summary.json`, and `commands.sh` for the guarded final release/provider/comparison/readiness sequence without publishing, tagging, uploading, or saving secret values.

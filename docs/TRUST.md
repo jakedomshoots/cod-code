@@ -13,7 +13,7 @@ CEO Harness should be installable, reviewable, and honest about what has actuall
 - Secret leak scan through `scripts/secret-scan.sh`.
 - Checksum verification from inside `dist/`.
 - Smoke and dogfood scripts that drive the CLI surface.
-- Local production readiness through `production-status`: local ready is true while public ready remains blocked.
+- Local production readiness through `production-status`: local ready is true while public ready remains blocked, with `External setup required: true` when only release/provider setup remains.
 - Guarded production finalizer evidence: release/provider/readiness commands stay commented while setup is blocked, with no publish/tag/upload or secret-saving behavior.
 - Final 29-task all-agent comparison evidence at `.omo/evidence/external-agent-production-core-29-final-result-retry-r1/summary.json`: 116 runs / 116 pass / 0 partial / 0 fail / 0 timeout / 0 incomplete evidence.
 

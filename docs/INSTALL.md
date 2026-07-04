@@ -102,7 +102,7 @@ ceo-packet retry latest --workspace /path/to/repo
 ceo-packet rollback .ceo-harness/history/job-000001.json --workspace /path/to/repo
 ```
 
-`production-status` reads the latest `.omo/evidence/production-readiness*/summary.json` packet and reports local readiness, public readiness, blockers, and the launch checklist next action.
+`production-status` reads the latest `.omo/evidence/production-readiness*/summary.json` packet and reports local readiness, public readiness, whether only external setup remains, blockers, and the launch checklist next action.
 
 For the final public-production evidence sequence, run:
 
