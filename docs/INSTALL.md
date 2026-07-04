@@ -128,6 +128,8 @@ ceo-packet production-actions --workspace . --format text --action-kind final_re
 ceo-packet production-actions --workspace . --action-id provider-openai --commands-only
 ```
 
+`--commands-only` is paste-safe: actions that are missing environment variables, setup-blocked, or waiting on another action are emitted as commented `# blocked command:` lines. Use `--ready-only --commands-only` when you want only immediately runnable commands.
+
 `rollback` supports saved JSON reports for normal replacements and created files produced by CEO Harness. It refuses to remove a created file if the file content no longer matches the saved report.
 
 ## Requirements

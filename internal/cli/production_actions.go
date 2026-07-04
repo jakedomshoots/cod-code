@@ -771,7 +771,12 @@ func renderProductionActionCommandsOnly(report productionActionsReport) string {
 			builder.WriteString("\n")
 		}
 		writeActionSetupComments(&builder, action)
-		fmt.Fprintf(&builder, "%s\n", shellCommandLine(command))
+		commandLine := shellCommandLine(command)
+		if actionReady(action) {
+			fmt.Fprintf(&builder, "%s\n", commandLine)
+		} else {
+			fmt.Fprintf(&builder, "# blocked command: %s\n", commandLine)
+		}
 	}
 	return builder.String()
 }

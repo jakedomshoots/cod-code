@@ -420,7 +420,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"# setup checklist:",
 		"# 1. Export `OPENAI_API_KEY` in the shell or local secret manager.",
 		"# 2. Keep the key out of git, logs, reports, and evidence folders.",
-		"sh scripts/provider-proof.sh --provider openai",
+		"# blocked command: sh scripts/provider-proof.sh --provider openai",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("commands-only production actions text missing %q:\n%s", want, text)
@@ -440,7 +440,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"# setup actions:",
 		"# - git_remote: configure an origin remote for the public repo.",
 		"# - github_release_assets: push a v* tag and upload release assets.",
-		"sh scripts/release-readiness.sh",
+		"# blocked command: sh scripts/release-readiness.sh",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("release commands-only text missing %q:\n%s", want, text)
@@ -522,6 +522,9 @@ func TestProductionActionsTreatsEmptyEnvAsNotReady(t *testing.T) {
 	}
 	if strings.Contains(text, "missing env: OPENROUTER_API_KEY") {
 		t.Fatalf("commands-only output should distinguish empty env from missing env:\n%s", text)
+	}
+	if !strings.Contains(text, "# blocked command: sh scripts/provider-proof.sh --provider openrouter") {
+		t.Fatalf("commands-only output should comment blocked command:\n%s", text)
 	}
 }
 
