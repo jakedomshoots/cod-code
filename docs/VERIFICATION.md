@@ -21,6 +21,7 @@ Status date: 2026-07-03
 - Latest production-readiness aggregate gate:
   - `sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-r1`
   - Result: local production checks pass; public production readiness remains blocked until public release, HTTP provider, and clean 29-task all-agent evidence are complete.
+  - The packet writes `launch-checklist.md` with the exact remaining public-production commands.
 - Latest live external-agent comparison:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-25-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 100 runs / 99 pass / 0 partial / 0 fail / 1 timed out / 0 skipped / 1 incomplete evidence.

@@ -33,6 +33,7 @@ func Test_ProductionReadinessScript_reportsCurrentPublicBlockers(t *testing.T) {
 		"# Production Readiness Evidence",
 		"Local production ready: true",
 		"Public production ready: false",
+		"Next public-production actions are in `launch-checklist.md`.",
 		"| comparison | all_agent_29_task_comparison | blocked |",
 		"| provider | openai_http_provider | blocked |",
 		"| provider | openrouter_http_provider | blocked |",
@@ -40,6 +41,22 @@ func Test_ProductionReadinessScript_reportsCurrentPublicBlockers(t *testing.T) {
 	} {
 		if !strings.Contains(index, want) {
 			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+
+	checklist := readTextFile(t, filepath.Join(outputDir, "launch-checklist.md"))
+	for _, want := range []string{
+		"# Launch Checklist",
+		"Public production ready: false",
+		"Publish release proof",
+		"Refresh market comparison",
+		"Prove OpenAI provider",
+		"Prove OpenRouter provider",
+		"Prove Moonshot provider",
+		"sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness",
+	} {
+		if !strings.Contains(checklist, want) {
+			t.Fatalf("launch-checklist.md missing %q:\n%s", want, checklist)
 		}
 	}
 

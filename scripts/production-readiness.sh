@@ -279,6 +279,53 @@ with open(sys.argv[2], "w", encoding="utf-8") as handle:
 PY
 
 {
+  printf '%s\n' "# Launch Checklist"
+  printf '\n'
+  printf '%s\n' "Local production ready: $local_ready"
+  printf '%s\n' "Public production ready: $public_ready"
+  printf '\n'
+  printf '%s\n' "## Required Before Public Production Claim"
+  printf '\n'
+  if [ "$public_blockers" -eq 0 ]; then
+    printf '%s\n' "- No public-production blockers remain."
+  else
+    while IFS='	' read -r category name status evidence detail; do
+      case "$status" in
+        pass|skipped) continue ;;
+      esac
+      case "$category.$name" in
+        release.public_release_readiness_run|release.public_release_ready)
+          printf '%s\n' "- Publish release proof: run \`sh scripts/release-bootstrap.sh --dist dist --output-dir .omo/evidence/release-bootstrap\`, fill public repo/release/Homebrew/signing inputs, then rerun \`sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1\`."
+          ;;
+        comparison.all_agent_29_task_comparison)
+          printf '%s\n' "- Refresh market comparison: rerun the 29-task all-agent gauntlet after external CLI auth/timeout setup, then confirm \`comparison-report.md\` says \`Overall comparison: pass\`."
+          ;;
+        provider.openai_http_provider)
+          printf '%s\n' "- Prove OpenAI provider: export \`OPENAI_API_KEY\`, run \`sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai\`, and keep the key out of evidence."
+          ;;
+        provider.openrouter_http_provider)
+          printf '%s\n' "- Prove OpenRouter provider: export \`OPENROUTER_API_KEY\`, run \`sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter\`, and keep the key out of evidence."
+          ;;
+        provider.moonshot_http_provider)
+          printf '%s\n' "- Prove Moonshot provider: export \`MOONSHOT_API_KEY\`, run \`sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot\`, and keep the key out of evidence."
+          ;;
+        *)
+          printf -- '- Resolve `%s.%s`: %s Evidence: `%s`.\n' "$category" "$name" "$detail" "$evidence"
+          ;;
+      esac
+    done <"$output_dir/checks.tsv" | awk '!seen[$0]++'
+  fi
+  printf '\n'
+  printf '%s\n' "## Final Gate"
+  printf '\n'
+  printf '%s\n' "After every item above is complete, run:"
+  printf '\n'
+  printf '%s\n' "\`\`\`sh"
+  printf '%s\n' "sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness"
+  printf '%s\n' "\`\`\`"
+} >"$output_dir/launch-checklist.md"
+
+{
   printf '%s\n' "# Production Readiness Evidence"
   printf '\n'
   printf '%s\n' "Status: $overall_status"
@@ -300,6 +347,10 @@ PY
     done <"$output_dir/blockers.txt"
     printf '\n'
   fi
+  printf '%s\n' "## Launch Checklist"
+  printf '\n'
+  printf '%s\n' "Next public-production actions are in \`launch-checklist.md\`."
+  printf '\n'
   printf '%s\n' "## Publish Boundary"
   printf '\n'
   printf '%s\n' "This command does not publish, push, tag, upload, create releases, or call paid providers."
