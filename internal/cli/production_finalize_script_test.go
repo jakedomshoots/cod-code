@@ -101,6 +101,18 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		}
 	}
 
+	nextActions := readTextFile(t, filepath.Join(outputDir, "next-actions.md"))
+	for _, want := range []string{
+		"scripts/provider-setup-preflight.sh --providers openai",
+		"scripts/provider-setup-preflight.sh --providers openrouter",
+		"scripts/provider-setup-preflight.sh --providers moonshot",
+		"scripts/provider-proof.sh --provider openai",
+	} {
+		if !strings.Contains(nextActions, want) {
+			t.Fatalf("next-actions.md missing %q:\n%s", want, nextActions)
+		}
+	}
+
 	setupActions := readTextFile(t, filepath.Join(outputDir, "setup-actions.md"))
 	for _, want := range []string{
 		"# Production Setup Actions",

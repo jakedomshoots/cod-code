@@ -428,13 +428,13 @@ fi
         printf '%s\n' "- Publish and verify release evidence: set public release metadata, then rerun \`sh scripts/release-readiness.sh --dist $(quote_display_path "$dist") --output-dir $(quote_display_path "$evidence_root/release-readiness-final")\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       provider-openai)
-        printf '%s\n' "- Prove OpenAI HTTP provider: export \`OPENAI_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider openai --output-dir $(quote_display_path "$evidence_root/provider-proof-openai") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
+        printf '%s\n' "- Prove OpenAI HTTP provider: export \`OPENAI_API_KEY\`, run \`sh scripts/provider-setup-preflight.sh --providers openai --output-dir .omo/evidence/provider-setup-preflight-openai\`, then rerun \`sh scripts/provider-proof.sh --provider openai --output-dir $(quote_display_path "$evidence_root/provider-proof-openai") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       provider-openrouter)
-        printf '%s\n' "- Prove OpenRouter HTTP provider: export \`OPENROUTER_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider openrouter --output-dir $(quote_display_path "$evidence_root/provider-proof-openrouter") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
+        printf '%s\n' "- Prove OpenRouter HTTP provider: export \`OPENROUTER_API_KEY\`, run \`sh scripts/provider-setup-preflight.sh --providers openrouter --output-dir .omo/evidence/provider-setup-preflight-openrouter\`, then rerun \`sh scripts/provider-proof.sh --provider openrouter --output-dir $(quote_display_path "$evidence_root/provider-proof-openrouter") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       provider-moonshot)
-        printf '%s\n' "- Prove Moonshot HTTP provider: export \`MOONSHOT_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider moonshot --output-dir $(quote_display_path "$evidence_root/provider-proof-moonshot") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
+        printf '%s\n' "- Prove Moonshot HTTP provider: export \`MOONSHOT_API_KEY\`, run \`sh scripts/provider-setup-preflight.sh --providers moonshot --output-dir .omo/evidence/provider-setup-preflight-moonshot\`, then rerun \`sh scripts/provider-proof.sh --provider moonshot --output-dir $(quote_display_path "$evidence_root/provider-proof-moonshot") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       competitor-smoke|competitor-smoke-command)
         printf '%s\n' "- Fix competitor setup before final comparison: inspect \`$(display_path "$output_dir/competitor-smoke/summary.json")\`, install missing binaries or fix provider auth/quota, then rerun \`$ceo_packet_cmd production-finalize --workspace . --dry-run\` or the full finalizer."
