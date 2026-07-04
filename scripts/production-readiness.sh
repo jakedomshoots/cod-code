@@ -183,8 +183,10 @@ fi
 
 if json_check "$release_summary" "data.get('status') == 'pass' and data.get('public_release_ready') is True"; then
   add_check "release" "public_release_ready" "pass" "$release_summary" "Public release evidence is green"
-else
+elif json_check "$release_summary" "data.get('status') == 'blocked' and data.get('public_release_ready') is False and data.get('publish_actions_performed') is False and data.get('secret_value_saved') is False and data.get('setup_command_policy') == 'no_publish_no_secret_assignment'"; then
   add_check "release" "public_release_ready" "blocked" "$release_summary" "Remote/release/Homebrew/signing evidence is not complete"
+else
+  add_check "release" "public_release_ready" "blocked" "$release_summary" "Release evidence missing setup safety policy"
 fi
 
 if json_check "$evidence_root/production-core-29-ceo-r1/summary.json" "int(data.get('passed', 0)) >= 29 and int(data.get('failed', 0)) == 0 and int(data.get('partial', 0)) == 0 and int(data.get('timed_out', 0)) == 0 and int(data.get('incomplete_evidence', 0)) == 0"; then

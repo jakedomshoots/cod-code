@@ -195,6 +195,46 @@ func Test_ProductionReadinessScript_usesCanonicalBlockedProviderEvidence(t *test
 	}
 }
 
+func Test_ProductionReadinessScript_requiresSafeBlockedReleaseEvidence(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	evidenceRoot := filepath.Join(t.TempDir(), "evidence")
+	outputDir := filepath.Join(t.TempDir(), "production-readiness")
+
+	writeCompleteProductionReadinessEvidence(t, evidenceRoot)
+	writeProductionReadinessJSON(t, filepath.Join(evidenceRoot, "release-readiness-final", "summary.json"), `{
+  "status": "blocked",
+  "public_release_ready": false,
+  "publish_actions_performed": false,
+  "secret_value_saved": false
+}`)
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "production-readiness.sh"),
+		"--evidence-root", evidenceRoot,
+		"--output-dir", outputDir,
+		"--skip-release-readiness",
+		"--skip-secret-scan",
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("production readiness unexpectedly passed with unsafe blocked release evidence:\n%s", string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	if !strings.Contains(index, "| release | public_release_ready | blocked |") {
+		t.Fatalf("index.md missing blocked release row:\n%s", index)
+	}
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	if !strings.Contains(summary, "Release evidence missing setup safety policy") {
+		t.Fatalf("summary.json missing unsafe release detail:\n%s", summary)
+	}
+}
+
 func Test_ProductionReadinessScript_usesNewestSkippedReleaseReadinessEvidence(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {

@@ -201,6 +201,9 @@ cat >"$output_dir/summary.json" <<JSON
   "setup_actions": "$(if [ "$blocked_count" -gt 0 ]; then printf 'setup-actions.md'; fi)",
   "setup_action_count": $setup_action_count,
   "setup_actions_sha256": "$setup_actions_sha256",
+  "setup_command_policy": "no_publish_no_secret_assignment",
+  "publish_actions_performed": false,
+  "secret_value_saved": false,
   "origin_remote_configured": $(if [ -n "$remote_url" ]; then printf true; else printf false; fi),
   "github_auth_status": "$github_auth_status",
   "artifacts": {

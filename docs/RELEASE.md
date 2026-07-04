@@ -79,7 +79,7 @@ GH_RELEASE_TAG=v0.1.0 GH_REPO=<owner>/<repo> sh scripts/release-preflight.sh dis
 
 When `GH_RELEASE_TAG` is set, preflight uses `gh release view` to prove the public release has every archive from `release-manifest.json` plus `checksums.txt` and `release-manifest.json`. `GH_REPO` is optional when `origin` is a GitHub remote.
 
-`scripts/release-readiness.sh` writes the durable evidence packet for that decision: `index.md`, `summary.json`, `preflight.md`, `verify-release.txt`, `git-remote.txt`, and `github-auth.txt`. It exits non-zero while public release blockers remain, but still writes the evidence folder so the next action is obvious.
+`scripts/release-readiness.sh` writes the durable evidence packet for that decision: `index.md`, `summary.json`, `preflight.md`, `verify-release.txt`, `git-remote.txt`, and `github-auth.txt`. It exits non-zero while public release blockers remain, but still writes the evidence folder so the next action is obvious. Blocked setup evidence records `setup_command_policy: no_publish_no_secret_assignment`, `publish_actions_performed: false`, and `secret_value_saved: false`.
 
 For an unsigned checksum-only first release, the preflight must be explicit:
 
