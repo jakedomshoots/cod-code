@@ -127,6 +127,7 @@ type CompetitorSmokeSummary struct {
 	SmokeFailed   int                     `json:"smoke_failed"`
 	SetupBlocked  int                     `json:"setup_blocked,omitempty"`
 	Skipped       int                     `json:"skipped"`
+	SetupActions  string                  `json:"setup_actions,omitempty"`
 	Results       []CompetitorSmokeResult `json:"results"`
 }
 

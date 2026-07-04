@@ -91,6 +91,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
   "smoke_failed": 0,
   "setup_blocked": 1,
   "skipped": 1,
+  "setup_actions": "setup-actions.md",
   "results": [
     {"id": "codex_cli", "name": "Codex CLI", "status": "smoke_pass"},
     {"id": "opencode", "name": "OpenCode", "status": "setup_blocked", "note": "provider setup is blocked"},
@@ -120,6 +121,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Competitor setup: 1 pass, 1 blocked, 1 skipped, 0 failed",
 		"opencode: setup_blocked - provider setup is blocked",
 		"aider: skipped_missing_binary - Install Aider",
+		"Setup actions:",
+		"setup-actions.md",
 		"all-agent-29-comparison [comparison]: Run comparison",
 		"Waiting on: competitor-smoke",
 		"production-readiness [final_readiness]: Run final readiness",

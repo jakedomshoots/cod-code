@@ -48,10 +48,58 @@ func RunCompetitorSmoke(ctx context.Context, req CompetitorSmokeRequest) (Compet
 			summary.SmokeFailed++
 		}
 	}
+	if summary.SetupBlocked > 0 || summary.Skipped > 0 || summary.SmokeFailed > 0 {
+		summary.SetupActions = "setup-actions.md"
+	}
 	if err := writeJSONFile(filepath.Join(req.OutputDir, "summary.json"), summary); err != nil {
 		return CompetitorSmokeSummary{}, err
 	}
+	if summary.SetupActions != "" {
+		if err := writeCompetitorSetupActions(filepath.Join(req.OutputDir, summary.SetupActions), summary); err != nil {
+			return CompetitorSmokeSummary{}, err
+		}
+	}
 	return summary, nil
+}
+
+func writeCompetitorSetupActions(path string, summary CompetitorSmokeSummary) error {
+	var builder strings.Builder
+	builder.WriteString("# Competitor Setup Actions\n\n")
+	builder.WriteString("Run these before the full all-agent comparison.\n\n")
+	for _, result := range summary.Results {
+		switch result.Status {
+		case competitorSmokeStatusPass:
+			continue
+		case competitorSmokeStatusSkipped:
+			fmt.Fprintf(&builder, "- %s: install/authenticate `%s` before comparison. %s\n", result.ID, result.Binary, setupReason(result))
+		case competitorSmokeStatusBlocked:
+			fmt.Fprintf(&builder, "- %s: fix provider auth/quota for `%s`. %s\n", result.ID, result.Binary, setupReason(result))
+		default:
+			fmt.Fprintf(&builder, "- %s: fix smoke failure for `%s`. %s\n", result.ID, result.Binary, setupReason(result))
+		}
+	}
+	builder.WriteString("\nAfter setup is clean, rerun:\n\n")
+	builder.WriteString("```sh\n")
+	builder.WriteString("ceo-packet production-finalize --workspace . --dry-run\n")
+	builder.WriteString("ceo-packet production-finalize --workspace . --run-comparison\n")
+	builder.WriteString("```\n")
+	return os.WriteFile(path, []byte(builder.String()), 0o644)
+}
+
+func setupReason(result CompetitorSmokeResult) string {
+	if strings.TrimSpace(result.SetupHint) != "" {
+		return result.SetupHint
+	}
+	if strings.TrimSpace(result.Note) != "" {
+		return result.Note
+	}
+	if strings.TrimSpace(result.DryRun.Error) != "" {
+		return result.DryRun.Error
+	}
+	if strings.TrimSpace(result.Version.Error) != "" {
+		return result.Version.Error
+	}
+	return "Inspect summary.json and saved stdout/stderr."
 }
 
 func runCompetitorSmoke(ctx context.Context, req CompetitorSmokeRequest, competitor Competitor) CompetitorSmokeResult {

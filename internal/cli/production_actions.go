@@ -229,11 +229,12 @@ func annotateCompetitorSetup(action map[string]any, sourceDir string) {
 		return
 	}
 	var summary struct {
-		Competitors  int `json:"competitors"`
-		SmokePassed  int `json:"smoke_passed"`
-		SmokeFailed  int `json:"smoke_failed"`
-		SetupBlocked int `json:"setup_blocked"`
-		Skipped      int `json:"skipped"`
+		Competitors  int    `json:"competitors"`
+		SmokePassed  int    `json:"smoke_passed"`
+		SmokeFailed  int    `json:"smoke_failed"`
+		SetupBlocked int    `json:"setup_blocked"`
+		Skipped      int    `json:"skipped"`
+		SetupActions string `json:"setup_actions"`
 		Results      []struct {
 			ID        string `json:"id"`
 			Name      string `json:"name"`
@@ -280,7 +281,11 @@ func annotateCompetitorSetup(action map[string]any, sourceDir string) {
 		"smoke_failed":  summary.SmokeFailed,
 		"setup_blocked": summary.SetupBlocked,
 		"skipped":       summary.Skipped,
+		"setup_actions": summary.SetupActions,
 		"blockers":      blockers,
+	}
+	if summary.SetupActions != "" {
+		action["competitor_summary"].(map[string]any)["setup_actions_path"] = filepath.Join(filepath.Dir(inspectPath), summary.SetupActions)
 	}
 }
 
@@ -543,6 +548,9 @@ func writeCompetitorSetupText(builder *strings.Builder, action map[string]any) {
 		} else {
 			fmt.Fprintf(builder, "  - %s: %s\n", blocker["id"], blocker["status"])
 		}
+	}
+	if setupActions := stringValue(summary["setup_actions_path"]); setupActions != "" {
+		fmt.Fprintf(builder, "  Setup actions: %s\n", setupActions)
 	}
 }
 

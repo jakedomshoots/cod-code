@@ -34,6 +34,16 @@ func Test_RunCompetitorSmoke_records_missing_binary_as_skip_when_tool_is_absent(
 		t.Fatalf("SetupHint is empty, want install guidance")
 	}
 	requireFile(t, filepath.Join(outputDir, "summary.json"))
+	setupActions := readTextFile(t, filepath.Join(outputDir, "setup-actions.md"))
+	for _, want := range []string{
+		"# Competitor Setup Actions",
+		"codex_cli: install/authenticate `missing-ceo-harness-competitor`",
+		"ceo-packet production-finalize --workspace . --run-comparison",
+	} {
+		if !strings.Contains(setupActions, want) {
+			t.Fatalf("setup-actions.md missing %q:\n%s", want, setupActions)
+		}
+	}
 }
 
 func Test_RunCompetitorSmoke_runs_version_and_dry_run_when_binary_exists(t *testing.T) {
@@ -113,6 +123,10 @@ exit 1
 	if !strings.Contains(string(stderr), "Token Plan usage limit reached") {
 		t.Fatalf("dry-run stderr missing quota evidence:\n%s", stderr)
 	}
+	setupActions := readTextFile(t, filepath.Join(outputDir, "setup-actions.md"))
+	if !strings.Contains(setupActions, "opencode: fix provider auth/quota for `opencode`") || !strings.Contains(setupActions, "provider setup is blocked") {
+		t.Fatalf("setup-actions.md missing opencode quota action:\n%s", setupActions)
+	}
 }
 
 func Test_RunCLI_runs_competitor_smoke_when_flag_is_set(t *testing.T) {
@@ -133,6 +147,7 @@ func Test_RunCLI_runs_competitor_smoke_when_flag_is_set(t *testing.T) {
 		t.Fatalf("RunCLI returned error: %v", err)
 	}
 	requireFile(t, filepath.Join(outputDir, "summary.json"))
+	requireFile(t, filepath.Join(outputDir, "setup-actions.md"))
 }
 
 func requireCompetitorSmokeResult(t *testing.T, summary CompetitorSmokeSummary, id string) CompetitorSmokeResult {
@@ -144,4 +159,13 @@ func requireCompetitorSmokeResult(t *testing.T, summary CompetitorSmokeSummary, 
 	}
 	t.Fatalf("missing smoke result for %s in %+v", id, summary.Results)
 	return CompetitorSmokeResult{}
+}
+
+func readTextFile(t *testing.T, path string) string {
+	t.Helper()
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read %s: %v", path, err)
+	}
+	return string(content)
 }
