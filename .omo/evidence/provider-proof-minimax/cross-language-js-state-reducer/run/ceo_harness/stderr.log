@@ -1,0 +1,1 @@
+complete CEO delegation: chat request failed: status 429: http model rate limited: {"type":"error","error":{"type":"rate_limit_error","message":"Token Plan usage limit reached: Upgrade your Token Plan or purchase Credits for more usage. (2056)","http_code":"429"},"request_id":"06988a158cc77bafc8802ce4a80af255"}

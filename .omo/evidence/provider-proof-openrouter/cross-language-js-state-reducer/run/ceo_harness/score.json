@@ -1,0 +1,37 @@
+{
+  "task_id": "cross-language-js-state-reducer",
+  "verdict": "pass",
+  "passed": 6,
+  "total": 6,
+  "checks": [
+    {
+      "name": "changed_file:frontend/state.js",
+      "status": "pass",
+      "evidence": "frontend/state.js"
+    },
+    {
+      "name": "command:node frontend/state.test.js",
+      "status": "pass"
+    },
+    {
+      "name": "artifact:.omo/evidence/cross-language-js-state-reducer.md",
+      "status": "pass",
+      "evidence": ".omo/evidence/cross-language-js-state-reducer.md"
+    },
+    {
+      "name": "diff_term:optimistic update",
+      "status": "pass"
+    },
+    {
+      "name": "diff_term:rollback",
+      "status": "pass"
+    },
+    {
+      "name": "report_field:changed_files",
+      "status": "pass"
+    }
+  ],
+  "evidence_paths": [
+    ".omo/evidence/cross-language-js-state-reducer.md"
+  ]
+}

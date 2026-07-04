@@ -1,22 +1,14 @@
 {
   "schema_version": 1,
-  "status": "blocked",
+  "status": "fail",
   "provider": "minimax",
   "provider_mode": "http-provider",
   "http_preset": "minimax",
   "http_model": "MiniMax-M3",
   "api_key_env": "MINIMAX_API_KEY",
-  "blocked_reason": "empty_api_key_env",
-  "setup_result_status": "blocked_empty_key",
-  "setup_checklist_item_count": 6,
-  "setup_artifacts_sha256": {"blocked.md": "9c219bb65d59b9b442161076615e65100917f87faed6958f86653dcd857ce69f", "commands.sh": "c289e62e8bb61645f995989102b3ed1debcc28273a0d92a7e4520a431d1d7819", "env.template": "34d3afffcf74c0601097d89aeefb110d1afb442f940b7474c8b8676e4d3edcb0", "setup-checklist.md": "52246e9f9a47e7d9e17febd8e79171759dd8293acdc6d3ddf4ab51f7007b6291"},
   "command_script_secret_policy": "no_secret_assignment",
   "secret_value_saved": false,
   "artifacts": {
-    "index": "index.md",
-    "blocked": "blocked.md",
-    "env_template": "env.template",
-    "commands": "commands.sh",
-    "checklist": "setup-checklist.md"
+    "index": "index.md"
   }
 }

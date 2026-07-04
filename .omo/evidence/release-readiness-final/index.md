@@ -1,23 +1,13 @@
 # Release Readiness Evidence
 
-Status: release readiness: blocked
+Status: release readiness: pass
 
 | Check | Status | Evidence |
 | --- | --- | --- |
 | local_release_artifacts | pass | `verify-release.txt` |
-| public_release_preflight | blocked | `preflight.md` |
-| git_remote | blocked | `git-remote.txt` |
+| public_release_preflight | pass | `preflight.md` |
+| git_remote | pass | `git-remote.txt` |
 | github_auth | pass | `github-auth.txt` |
-
-## Blocked Checks
-
-- `git_remote`
-- `remote_release_url`
-- `github_release_assets`
-- `homebrew_formula_url`
-- `artifact_signatures`
-
-Setup actions: `setup-actions.md`
 
 ## Publish Boundary
 

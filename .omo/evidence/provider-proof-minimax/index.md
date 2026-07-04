@@ -1,6 +1,6 @@
 # Provider Proof Evidence
 
-- Generated: 2026-07-04T16:03:46Z
+- Generated: 2026-07-04T18:55:16Z
 - Mode: live
 - Provider: minimax
 - Provider mode: http-provider
@@ -14,8 +14,8 @@
 
 | Task | Status | Evidence |
 | --- | --- | --- |
-| provider_setup | blocked_empty_key | blocked.md |
+| cross-language-js-state-reducer | fail | cross-language-js-state-reducer/run/summary.json |
 
 ## Summary
 
-- Overall: blocked
+- Overall: fail

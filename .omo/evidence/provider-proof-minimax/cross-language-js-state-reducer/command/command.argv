@@ -1,0 +1,26 @@
+go
+run
+./cmd/ceo-eval
+--local-agent-benchmark
+--local-agents
+ceo_harness
+--local-agent-benchmark-task
+cross-language-js-state-reducer
+--local-agent-benchmark-repeat
+1
+--ceo-binary
+./bin/ceo-packet
+--tasks
+evals/tasks
+--output-dir
+/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-minimax/cross-language-js-state-reducer/run
+--timeout-seconds
+600
+--ceo-benchmark-mode
+http-provider
+--ceo-benchmark-provider-preset
+minimax
+--ceo-benchmark-provider-model
+MiniMax-M3
+--ceo-benchmark-provider-api-key-env
+MINIMAX_API_KEY

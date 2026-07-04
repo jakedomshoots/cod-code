@@ -1,0 +1,11 @@
+diff --git a/scripts/retry_policy.py b/scripts/retry_policy.py
+index dc5ff7a..7f393ca 100644
+--- a/scripts/retry_policy.py
++++ b/scripts/retry_policy.py
+@@ -1 +1,5 @@
+-benchmark_fixture = "TODO: update this benchmark fixture"
++# Retry policy benchmark fixture indicating strategy details for cross-language tests.
++benchmark_fixture = (
++    "This benchmark verifies the retry policy implements exponential backoff and jitter "
++    "for timeout scenarios."
++)

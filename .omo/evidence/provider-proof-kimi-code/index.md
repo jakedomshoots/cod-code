@@ -1,6 +1,6 @@
 # Provider Proof Evidence
 
-- Generated: 2026-07-04T16:03:46Z
+- Generated: 2026-07-04T18:54:01Z
 - Mode: live
 - Provider: kimi-code
 - Provider mode: http-provider
@@ -14,8 +14,9 @@
 
 | Task | Status | Evidence |
 | --- | --- | --- |
-| provider_setup | blocked_missing_key | blocked.md |
+| cross-language-js-state-reducer | pass | cross-language-js-state-reducer/run/summary.json |
+| cross-language-python-retry-policy | pass | cross-language-python-retry-policy/run/summary.json |
 
 ## Summary
 
-- Overall: blocked
+- Overall: pass

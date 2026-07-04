@@ -1,0 +1,41 @@
+{
+  "task_id": "cross-language-python-retry-policy",
+  "verdict": "pass",
+  "passed": 7,
+  "total": 7,
+  "checks": [
+    {
+      "name": "changed_file:scripts/retry_policy.py",
+      "status": "pass",
+      "evidence": "scripts/retry_policy.py"
+    },
+    {
+      "name": "command:python3 scripts/test_retry_policy.py",
+      "status": "pass"
+    },
+    {
+      "name": "artifact:.omo/evidence/cross-language-python-retry-policy.md",
+      "status": "pass",
+      "evidence": ".omo/evidence/cross-language-python-retry-policy.md"
+    },
+    {
+      "name": "diff_term:exponential backoff",
+      "status": "pass"
+    },
+    {
+      "name": "diff_term:jitter",
+      "status": "pass"
+    },
+    {
+      "name": "diff_term:timeout",
+      "status": "pass"
+    },
+    {
+      "name": "report_field:changed_files",
+      "status": "pass"
+    }
+  ],
+  "evidence_paths": [
+    ".omo/evidence/cross-language-python-retry-policy.md"
+  ]
+}

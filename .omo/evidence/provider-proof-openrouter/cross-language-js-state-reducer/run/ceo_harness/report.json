@@ -1,0 +1,28 @@
+{
+  "changed_files": [
+    "frontend/state.js",
+    ".omo/evidence/cross-language-js-state-reducer.md"
+  ],
+  "check_results": [
+    {
+      "argv": [
+        "node",
+        "frontend/state.test.js"
+      ],
+      "status": "pass",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "evidence_paths": [
+    ".omo/evidence/cross-language-js-state-reducer.md"
+  ],
+  "patch_results": [
+    {
+      "path": "frontend/state.js",
+      "diff": "diff --git a/frontend/state.js b/frontend/state.js\nindex 14078f5..de01dc5 100644\n--- a/frontend/state.js\n+++ b/frontend/state.js\n@@ -1 +1,6 @@\n-module.exports = { benchmarkFixture: \"TODO: update this benchmark fixture\" };\n+// This fixture denotes a reducer that performs an optimistic update\n+// and retains the evidence required to support a future rollback on failure.\n+module.exports = {\n+  benchmarkFixture:\n+    \"Reducer supports optimistic update and preserves evidence for rollback when a request fails.\",\n+};\n"
+    }
+  ],
+  "task_id": "cross-language-js-state-reducer"
+}
