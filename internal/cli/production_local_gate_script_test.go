@@ -102,6 +102,22 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		!strings.Contains(releaseSetup, "go run ./cmd/ceo-packet production-finalize --workspace . --dry-run") {
 		t.Fatalf("release setup artifact missing finalizer rerun command:\n%s", releaseSetup)
 	}
+	releaseSetupCommandsPath := filepath.Join(root, ".omo", "evidence", "release-readiness-final", "setup-commands.sh")
+	if _, err := os.Stat(releaseSetupCommandsPath); err == nil {
+		releaseSetupCommands := readTextFile(t, releaseSetupCommandsPath)
+		for _, want := range []string{
+			"# blocked git_remote:",
+			"# blocked github_release_assets:",
+			"sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final",
+		} {
+			if !strings.Contains(releaseSetupCommands, want) {
+				t.Fatalf("release setup commands missing %q:\n%s", want, releaseSetupCommands)
+			}
+		}
+		if strings.Contains(releaseSetupCommands, "git push") || strings.Contains(releaseSetupCommands, "gh release create") {
+			t.Fatalf("release setup commands should not include publish commands:\n%s", releaseSetupCommands)
+		}
+	}
 	actions := readTextFile(t, filepath.Join(outputDir, "production-actions.json"))
 	for _, want := range []string{
 		`"path":`,

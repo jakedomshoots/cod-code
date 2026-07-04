@@ -199,6 +199,22 @@ for action in action_rows:
         if not (has_installed_finalizer or has_source_finalizer):
             print(f"production-local-gate: fail release setup actions missing finalizer rerun for {action_id}")
             raise SystemExit(1)
+        setup_commands_path = release_summary.get("setup_commands_path") or ""
+        if setup_commands_path or release_summary.get("setup_commands_sha256"):
+            if not setup_commands_path or not os.path.exists(setup_commands_path):
+                print(f"production-local-gate: fail release setup command file missing for {action_id}")
+                raise SystemExit(1)
+            setup_commands_text = open(setup_commands_path, "r", encoding="utf-8").read()
+            if "RELEASE_URL=" in setup_commands_text and "# blocked remote_release_url:" not in setup_commands_text:
+                print(f"production-local-gate: fail release setup commands assign release URL for {action_id}")
+                raise SystemExit(1)
+            if "git push" in setup_commands_text or "gh release create" in setup_commands_text:
+                print(f"production-local-gate: fail release setup commands include publish command for {action_id}")
+                raise SystemExit(1)
+            for blocked_check in release_summary.get("blocked_checks") or []:
+                if f"# blocked {blocked_check}:" not in setup_commands_text:
+                    print(f"production-local-gate: fail release setup command missing for {action_id}: {blocked_check}")
+                    raise SystemExit(1)
     if action.get("kind") == "provider_proof":
         provider_summary = action.get("provider_summary") or {}
         provider_name = provider_summary.get("provider") or action.get("provider") or ""

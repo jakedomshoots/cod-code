@@ -95,6 +95,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
   "setup_actions": "setup-actions.md",
   "setup_action_count": 2,
   "setup_actions_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "setup_commands": "setup-commands.sh",
+  "setup_commands_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
   "setup_command_policy": "no_publish_no_secret_assignment",
   "publish_actions_performed": false,
   "secret_value_saved": false,
@@ -107,6 +109,11 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 
 - git_remote: configure an origin remote for the public repo.
 - github_release_assets: push a v* tag and upload release assets.
+`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "release-readiness-final", "setup-commands.sh"), `#!/bin/sh
+set -eu
+# blocked git_remote: configure origin.
+# blocked github_release_assets: verify release assets.
 `)
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "competitor-smoke", "summary.json"), `{
   "competitors": 3,
@@ -192,8 +199,11 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Blocked checks: git_remote, github_release_assets",
 		"Setup actions:",
 		"release-readiness-final",
+		"Setup command file:",
+		"setup-commands.sh",
 		"Setup action count: 2",
 		"Setup actions sha256: 1111111111111111111111111111111111111111111111111111111111111111",
+		"Setup commands sha256: 5555555555555555555555555555555555555555555555555555555555555555",
 		"Setup command policy: no_publish_no_secret_assignment",
 		"Publish actions performed: false",
 		"Secret value saved: false",
@@ -259,7 +269,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if len(setupItems) != 2 {
 		t.Fatalf("setup_action_items = %#v, want two structured release setup items", releaseSummary["setup_action_items"])
 	}
-	if numberValue(releaseSummary["setup_action_count"]) != 2 || releaseSummary["setup_actions_sha256"] != "1111111111111111111111111111111111111111111111111111111111111111" {
+	if numberValue(releaseSummary["setup_action_count"]) != 2 || releaseSummary["setup_actions_sha256"] != "1111111111111111111111111111111111111111111111111111111111111111" || releaseSummary["setup_commands_sha256"] != "5555555555555555555555555555555555555555555555555555555555555555" {
 		t.Fatalf("release setup proof = %#v, want count and sha", releaseSummary)
 	}
 	if releaseSummary["setup_command_policy"] != "no_publish_no_secret_assignment" || releaseSummary["publish_actions_performed"] != false || releaseSummary["secret_value_saved"] != false {

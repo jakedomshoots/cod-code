@@ -339,6 +339,8 @@ func annotateReleaseProof(action map[string]any) {
 		SetupActions             string   `json:"setup_actions"`
 		SetupActionCount         int      `json:"setup_action_count"`
 		SetupActionsSHA256       string   `json:"setup_actions_sha256"`
+		SetupCommands            string   `json:"setup_commands"`
+		SetupCommandsSHA256      string   `json:"setup_commands_sha256"`
 		SetupCommandPolicy       string   `json:"setup_command_policy"`
 		PublishActionsPerformed  bool     `json:"publish_actions_performed"`
 		SecretValueSaved         bool     `json:"secret_value_saved"`
@@ -359,6 +361,8 @@ func annotateReleaseProof(action map[string]any) {
 		"setup_actions":              summary.SetupActions,
 		"setup_action_count":         summary.SetupActionCount,
 		"setup_actions_sha256":       summary.SetupActionsSHA256,
+		"setup_commands":             summary.SetupCommands,
+		"setup_commands_sha256":      summary.SetupCommandsSHA256,
 		"setup_command_policy":       summary.SetupCommandPolicy,
 		"publish_actions_performed":  summary.PublishActionsPerformed,
 		"secret_value_saved":         summary.SecretValueSaved,
@@ -372,6 +376,10 @@ func annotateReleaseProof(action map[string]any) {
 		if setupActionItems, err := readReleaseSetupActionItems(setupActionsPath); err == nil && len(setupActionItems) > 0 {
 			releaseSummary["setup_action_items"] = setupActionItems
 		}
+	}
+	if summary.SetupCommands != "" {
+		releaseSummary := action["release_summary"].(map[string]any)
+		releaseSummary["setup_commands_path"] = filepath.Join(filepath.Dir(summaryPath), summary.SetupCommands)
 	}
 }
 
@@ -922,11 +930,17 @@ func writeReleaseProofText(builder *strings.Builder, action map[string]any) {
 	if setupActions := stringValue(summary["setup_actions_path"]); setupActions != "" {
 		fmt.Fprintf(builder, "  Setup actions: %s\n", setupActions)
 	}
+	if setupCommands := stringValue(summary["setup_commands_path"]); setupCommands != "" {
+		fmt.Fprintf(builder, "  Setup command file: %s\n", setupCommands)
+	}
 	if count := int(numberValue(summary["setup_action_count"])); count > 0 {
 		fmt.Fprintf(builder, "  Setup action count: %d\n", count)
 	}
 	if sha := stringValue(summary["setup_actions_sha256"]); sha != "" {
 		fmt.Fprintf(builder, "  Setup actions sha256: %s\n", sha)
+	}
+	if sha := stringValue(summary["setup_commands_sha256"]); sha != "" {
+		fmt.Fprintf(builder, "  Setup commands sha256: %s\n", sha)
 	}
 	if policy := stringValue(summary["setup_command_policy"]); policy != "" {
 		fmt.Fprintf(builder, "  Setup command policy: %s\n", policy)
