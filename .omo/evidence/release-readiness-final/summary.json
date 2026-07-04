@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "public_release_ready": false,
+  "status": "blocked",
+  "dist": "/Users/jakedom/Documents/cod code/dist",
+  "release_artifacts_verified": true,
+  "preflight_status": "blocked",
+  "preflight_exit_code": 1,
+  "blocked_count": 5,
+  "blocked_checks": ["git_remote", "remote_release_url", "github_release_assets", "homebrew_formula_url", "artifact_signatures"],
+  "setup_actions": "setup-actions.md",
+  "setup_action_count": 5,
+  "setup_actions_sha256": "334fd224b46e33edb988eb818f258df31f87058da7e9036db82d88f5e1e3f2b9",
+  "setup_commands": "setup-commands.sh",
+  "setup_commands_sha256": "b5650c21aa7419be4c59f114d8de030b35f4dd9e4ebeb49bfff0b2e288cbf3ea",
+  "setup_command_policy": "no_publish_no_secret_assignment",
+  "publish_actions_performed": false,
+  "secret_value_saved": false,
+  "origin_remote_configured": false,
+  "github_auth_status": "pass",
+  "artifacts": {
+    "index": "index.md",
+    "summary": "summary.json",
+    "preflight": "preflight.md",
+    "verify_release": "verify-release.txt",
+    "git_remote": "git-remote.txt",
+    "github_auth": "github-auth.txt",
+    "setup_actions": "setup-actions.md",
+    "setup_commands": "setup-commands.sh"
+  }
+}

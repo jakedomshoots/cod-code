@@ -5,6 +5,42 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 version=${VERSION:-0.1.0-dev}
 commit=${COMMIT:-$(git -C "$root" rev-parse --short HEAD 2>/dev/null || printf local)}
 dist=${DIST:-"$root/dist"}
+
+usage() {
+  cat <<'USAGE'
+Usage: sh scripts/release-local.sh [--dist dist]
+
+Builds local release archives, checksums, manifest, and Homebrew formula draft.
+USAGE
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --dist)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "release-local: --dist requires a value" >&2
+        exit 2
+      }
+      dist="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      printf '%s\n' "release-local: unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+case "$dist" in
+  /*) ;;
+  *) dist="$(pwd)/$dist" ;;
+esac
+
 formula_dir="$dist/homebrew"
 
 case "$version" in

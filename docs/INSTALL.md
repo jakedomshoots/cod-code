@@ -22,6 +22,30 @@ PREFIX="$(mktemp -d)" sh scripts/install-local.sh
 
 The script builds `./cmd/ceo-packet`, installs only the `ceo-packet` binary, prints `ceo-packet <version> commit=<commit>`, and does not require Homebrew, Task, ShellCheck, golangci-lint, nilaway, or gofumpt.
 
+## Public Release Install
+
+Use this path only after a `v*` tag has published GitHub release assets:
+
+```sh
+test -n "${GITHUB_REPOSITORY:-}" || { echo "set GITHUB_REPOSITORY, for example owner/repo"; exit 1; }
+export RELEASE_VERSION=0.1.0
+curl -L -o ceo-packet.tar.gz "https://github.com/${GITHUB_REPOSITORY}/releases/download/v${RELEASE_VERSION}/ceo-packet_${RELEASE_VERSION}_darwin_arm64.tar.gz"
+tar -xzf ceo-packet.tar.gz
+./ceo-packet --version
+./ceo-packet oauth list --format text
+./ceo-packet doctor --format text
+```
+
+Before making a public-production claim, replay the release readiness proof:
+
+```sh
+export RELEASE_PUBLIC_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/v${RELEASE_VERSION}"
+export RELEASE_ARCHIVE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/v${RELEASE_VERSION}/ceo-packet_${RELEASE_VERSION}_darwin_arm64.tar.gz"
+export HOMEBREW_ARCHIVE_URL="$RELEASE_ARCHIVE_URL"
+ALLOW_CHECKSUM_ONLY_RELEASE=1 CHECKSUM_ONLY_RELEASE_NOTES_URL="$RELEASE_PUBLIC_URL" sh scripts/release-homebrew-formula.sh --dist dist
+ALLOW_CHECKSUM_ONLY_RELEASE=1 CHECKSUM_ONLY_RELEASE_NOTES_URL="$RELEASE_PUBLIC_URL" sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final
+```
+
 ## First Run
 
 Start with a real repo and keep the first run read-only:
@@ -158,7 +182,7 @@ Optional:
 If optional tools are missing, use the documented fallback commands in [Verification](VERIFICATION.md).
 
 ## Known Limits
-
+- Public release readiness is tracked with `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final`.
 - No remote install URL or Homebrew tap is published yet.
 - Local archives are checksum-only; they are not signed.
 - Public release readiness is tracked with `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness`.

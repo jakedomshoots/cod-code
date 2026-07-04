@@ -4,7 +4,7 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 dist=${DIST:-"$root/dist"}
 repo_url=${REPO_URL:-}
-archive_base_url=${HOMEBREW_ARCHIVE_BASE_URL:-}
+archive_base_url=${HOMEBREW_ARCHIVE_BASE_URL:-${HOMEBREW_ARCHIVE_URL:-}}
 version=${VERSION:-}
 output=${OUTPUT:-}
 
@@ -21,6 +21,10 @@ Options:
   --homebrew-archive-base-url URL    Public HTTPS directory containing archives.
   --version VERSION                  Release version. Defaults to manifest version.
   --output PATH                      Formula path. Defaults to dist/homebrew/ceo-packet.rb.
+
+Environment aliases:
+  GITHUB_REPOSITORY                 owner/name fallback for --repo-url.
+  HOMEBREW_ARCHIVE_URL              Full public archive URL; base path is inferred.
 USAGE
 }
 
@@ -94,6 +98,16 @@ is_public_https_url() {
 slash_trim() {
   printf '%s' "$1" | sed 's:/*$::'
 }
+
+if [ -z "$repo_url" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+  repo_url="https://github.com/$GITHUB_REPOSITORY"
+fi
+
+case "$archive_base_url" in
+  *.tar.gz)
+    archive_base_url=${archive_base_url%/*}
+    ;;
+esac
 
 if ! is_public_https_url "$repo_url"; then
   printf '%s\n' "release-homebrew-formula: --repo-url must be a real public HTTPS URL" >&2

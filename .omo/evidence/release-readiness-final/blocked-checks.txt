@@ -1,0 +1,5 @@
+git_remote
+remote_release_url
+github_release_assets
+homebrew_formula_url
+artifact_signatures

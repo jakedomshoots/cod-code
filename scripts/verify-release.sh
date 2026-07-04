@@ -2,8 +2,43 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-dist=${1:-"$root/dist"}
+dist=${DIST:-"$root/dist"}
 signing_public_key=${RELEASE_SIGNING_PUBLIC_KEY:-${SIGNING_PUBLIC_KEY:-}}
+
+usage() {
+  cat <<'USAGE'
+Usage: sh scripts/verify-release.sh [--dist dist]
+       sh scripts/verify-release.sh [dist]
+
+Verifies release checksums, manifest integrity, and optional signatures.
+USAGE
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --dist)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "verify-release: --dist requires a value" >&2
+        exit 2
+      }
+      dist="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --*)
+      printf '%s\n' "verify-release: unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+    *)
+      dist="$1"
+      shift
+      ;;
+  esac
+done
 
 case "$dist" in
   /*) ;;

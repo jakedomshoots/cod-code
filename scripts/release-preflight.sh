@@ -2,45 +2,73 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-dist=${1:-${DIST:-"$root/dist"}}
-release_url=${RELEASE_URL:-${PUBLIC_RELEASE_URL:-}}
+dist=${DIST:-"$root/dist"}
+release_url=${RELEASE_URL:-${PUBLIC_RELEASE_URL:-${RELEASE_PUBLIC_URL:-}}}
 github_release_tag=${GH_RELEASE_TAG:-${RELEASE_TAG:-}}
-github_repo=${GH_REPO:-}
+github_repo=${GH_REPO:-${GITHUB_REPOSITORY:-}}
 checksum_only_notes_url=${CHECKSUM_ONLY_RELEASE_NOTES_URL:-}
 allow_checksum_only=${ALLOW_CHECKSUM_ONLY_RELEASE:-}
 signing_public_key=${RELEASE_SIGNING_PUBLIC_KEY:-${SIGNING_PUBLIC_KEY:-}}
 blockers=0
 
-case "$dist" in
-  /*) ;;
-  *) dist="$(pwd)/$dist" ;;
-esac
-
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/release-preflight.sh [dist]
+Usage: sh scripts/release-preflight.sh [--dist dist]
+       sh scripts/release-preflight.sh [dist]
 
 Checks whether a local release is ready to be called public. This command does
 not tag, push, upload, publish a tap, or create a release.
 
 Environment:
-  RELEASE_URL or PUBLIC_RELEASE_URL   Public HTTPS URL for the release page.
-  GH_RELEASE_TAG or RELEASE_TAG       Optional GitHub release tag to verify.
-  GH_REPO                             Optional GitHub repo in owner/name form.
-  ALLOW_CHECKSUM_ONLY_RELEASE=1       Allow unsigned archives only when paired
-                                      with CHECKSUM_ONLY_RELEASE_NOTES_URL.
-  CHECKSUM_ONLY_RELEASE_NOTES_URL     Public HTTPS notes explaining checksum-only
-                                      verification.
-  RELEASE_SIGNING_PUBLIC_KEY          Optional public key used to verify .sig
-                                      files before accepting signatures.
-  SIGNING_PUBLIC_KEY                  Alternate public key env name.
+  RELEASE_URL or PUBLIC_RELEASE_URL     Public HTTPS URL for the release page.
+  RELEASE_PUBLIC_URL                    Alternate release URL name used by plans.
+  GH_RELEASE_TAG or RELEASE_TAG         Optional GitHub release tag to verify.
+  RELEASE_VERSION                       Used as v<version> when no tag is set.
+  GH_REPO or GITHUB_REPOSITORY          Optional GitHub repo in owner/name form.
+  ALLOW_CHECKSUM_ONLY_RELEASE=1         Allow unsigned archives only when paired
+                                        with CHECKSUM_ONLY_RELEASE_NOTES_URL.
+  CHECKSUM_ONLY_RELEASE_NOTES_URL       Public HTTPS notes explaining checksum-only
+                                        verification.
+  RELEASE_SIGNING_PUBLIC_KEY            Optional public key used to verify .sig
+                                        files before accepting signatures.
+  SIGNING_PUBLIC_KEY                    Alternate public key env name.
 USAGE
 }
 
-if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
-  usage
-  exit 0
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --dist)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "release-preflight: --dist requires a value" >&2
+        exit 2
+      }
+      dist="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --*)
+      printf '%s\n' "release-preflight: unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+    *)
+      dist="$1"
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$github_release_tag" ] && [ -n "${RELEASE_VERSION:-}" ]; then
+  github_release_tag="v$RELEASE_VERSION"
 fi
+
+case "$dist" in
+  /*) ;;
+  *) dist="$(pwd)/$dist" ;;
+esac
 
 row() {
   name="$1"
@@ -162,7 +190,7 @@ printf '| --- | --- | --- |\n'
 if [ -d "$dist" ] && sh "$root/scripts/verify-release.sh" "$dist" >/tmp/ceo-release-preflight-verify.$$ 2>&1; then
   row "local_release_artifacts" "pass" "checksums and release-manifest verified"
 else
-  detail="run VERSION=<version> sh scripts/release-local.sh, then sh scripts/verify-release.sh dist"
+  detail="run VERSION=<version> sh scripts/release-local.sh --dist dist, then sh scripts/verify-release.sh --dist dist"
   row "local_release_artifacts" "blocked" "$detail"
 fi
 rm -f /tmp/ceo-release-preflight-verify.$$
@@ -174,15 +202,15 @@ if [ -n "$remote_url" ]; then
     github_repo=$(github_repo_from_remote "$remote_url" || true)
   fi
 elif is_github_repo_name "$github_repo"; then
-  row "git_remote" "pass" "GH_REPO=$github_repo"
+  row "git_remote" "pass" "GITHUB_REPOSITORY=$github_repo"
 else
-  row "git_remote" "blocked" "no origin remote configured; set GH_REPO=owner/name for release-only verification"
+  row "git_remote" "blocked" "no origin remote configured; set GITHUB_REPOSITORY=owner/name for release-only verification"
 fi
 
 github_release_json="/tmp/ceo-release-preflight-gh-release.$$"
 github_release_url=""
 github_release_assets_status=blocked
-github_release_assets_detail="set GH_RELEASE_TAG after pushing a v* tag so gh can verify release assets"
+github_release_assets_detail="set RELEASE_VERSION and GITHUB_REPOSITORY after pushing a v* tag so gh can verify release assets"
 if [ -n "$github_release_tag" ]; then
   if github_release_url=$(verify_github_release_assets "$github_release_tag" "$github_repo" "$github_release_json"); then
     github_release_assets_status=pass
@@ -193,7 +221,7 @@ if [ -n "$github_release_tag" ]; then
   elif ! command -v gh >/dev/null 2>&1; then
     github_release_assets_detail="gh CLI is required to verify GitHub release assets"
   elif [ -z "$github_repo" ]; then
-    github_release_assets_detail="set GH_REPO=owner/name or configure a GitHub origin remote"
+    github_release_assets_detail="set GITHUB_REPOSITORY=owner/name or configure a GitHub origin remote"
   else
     github_release_assets_detail="GitHub release $github_release_tag is missing required assets or is not readable"
   fi
@@ -203,7 +231,7 @@ rm -f "$github_release_json"
 if has_public_release_url; then
   row "remote_release_url" "pass" "$release_url"
 else
-  row "remote_release_url" "blocked" "set RELEASE_URL to the public HTTPS release page"
+  row "remote_release_url" "blocked" "set RELEASE_PUBLIC_URL to the public HTTPS release page"
 fi
 
 row "github_release_assets" "$github_release_assets_status" "$github_release_assets_detail"
