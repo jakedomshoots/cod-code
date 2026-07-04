@@ -140,6 +140,9 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 		if err != nil {
 			continue
 		}
+		if productionFinalizerSummaryHasSkippedSteps(candidate) {
+			continue
+		}
 		if latest == "" || info.ModTime().After(latestMod) {
 			latest = candidate
 			latestMod = info.ModTime()
@@ -169,6 +172,20 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 		RequiredActionCount: raw.NextActions.RequiredActionCount,
 		Status:              "pass",
 	}, nil
+}
+
+func productionFinalizerSummaryHasSkippedSteps(path string) bool {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return true
+	}
+	var raw struct {
+		SkippedSteps []string `json:"skipped_steps"`
+	}
+	if err := json.Unmarshal(content, &raw); err != nil {
+		return true
+	}
+	return len(raw.SkippedSteps) > 0
 }
 
 func writeProductionStatusReport(out io.Writer, report productionStatusReport, format reportFormat) error {

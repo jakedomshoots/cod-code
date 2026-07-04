@@ -106,6 +106,50 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 	}
 }
 
+func Test_Run_production_status_ignores_skipped_finalizer_next_actions(t *testing.T) {
+	root := t.TempDir()
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-r1", "summary.json"), `{
+  "status": "blocked",
+  "local_production_ready": true,
+  "public_production_ready": false,
+  "blocked_count": 1,
+  "blocked_checks": ["provider.openai_http_provider"],
+  "launch_checklist": {
+    "path": "launch-checklist.md",
+    "required_action_count": 5,
+    "status": "pass"
+  }
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-complete", "summary.json"), `{
+  "status": "blocked",
+  "skipped_steps": [],
+  "next_actions": {
+    "path": "next-actions.md",
+    "required_action_count": 6
+  }
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-skipped", "summary.json"), `{
+  "status": "blocked",
+  "skipped_steps": ["release-readiness", "provider-openai"],
+  "next_actions": {
+    "path": "next-actions.md",
+    "required_action_count": 2
+  }
+}`)
+
+	var out bytes.Buffer
+	if err := Run(context.Background(), &out, []string{"production-status", "--workspace", root, "--format", "text"}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	text := out.String()
+	if !strings.Contains(text, "production-finalize-complete/next-actions.md (6 actions)") {
+		t.Fatalf("production status did not prefer complete finalizer:\n%s", text)
+	}
+	if strings.Contains(text, "production-finalize-skipped/next-actions.md") {
+		t.Fatalf("production status used skipped finalizer:\n%s", text)
+	}
+}
+
 func Test_ParseArgs_sets_production_status_from_verb(t *testing.T) {
 	opts, err := parseArgs([]string{"production-status", "--workspace", "/tmp/workspace"})
 	if err != nil {

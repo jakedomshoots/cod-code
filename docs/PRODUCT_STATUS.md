@@ -131,6 +131,8 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Finalizer competitor smoke now validates `summary.json`, so setup-blocked or failed competitors block the finalizer even when the smoke command exits 0.
 - Finalizer now writes `next-actions.md` and records the required action count in `summary.json`, giving one place to see the exact remaining release/provider/comparison commands.
 - `production-status` now surfaces the latest finalizer `next-actions.md` when public readiness is blocked, so the operator sees the most actionable next step first.
+- `production-status` ignores partial finalizer packets with skipped steps, preventing a narrow smoke-only run from hiding release and provider blockers.
+- Latest complete finalizer next-actions result: `.omo/evidence/production-finalize-full-next-actions-r1/next-actions.md` lists seven remaining actions across release proof, HTTP providers, competitor setup, all-agent comparison, and final readiness.
 - Latest guarded finalization result: `scripts/production-finalize.sh --output-dir .omo/evidence/production-finalize-r2 --dist dist` wrote a blocked evidence packet, passed competitor smoke, and saved release/provider setup blockers without publishing or saving secret values.
 - Added `ceo-packet production-status`, a read-only operator command that reports the latest local/public production-readiness state from saved evidence.
 - Added `scripts/production-local-gate.sh` and CI artifact upload so source CI fails on local production regressions while preserving public-production blockers as evidence.

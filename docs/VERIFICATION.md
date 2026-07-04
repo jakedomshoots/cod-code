@@ -45,7 +45,10 @@ Status date: 2026-07-03
   - Result: writes `next-actions.md` with the exact competitor setup and all-agent comparison follow-up commands, and records `next_actions.required_action_count`.
 - Latest production status next-action proof:
   - `go run ./cmd/ceo-packet production-status --workspace . --format text`
-  - Result: reports the launch checklist plus latest finalizer `next-actions.md`, and sets `Next action` to open the finalizer next-actions file.
+  - Result: reports the launch checklist plus latest complete finalizer `next-actions.md`, ignores partial finalizer packets with skipped steps, and sets `Next action` to open `.omo/evidence/production-finalize-full-next-actions-r1/next-actions.md`.
+- Latest complete finalizer next-actions proof:
+  - `sh scripts/production-finalize.sh --output-dir .omo/evidence/production-finalize-full-next-actions-r1 --dist dist`
+  - Result: exits blocked as expected, records no skipped steps, and writes seven remaining actions covering release, providers, competitor setup, comparison, and final readiness.
 - Latest release workflow guard:
   - `go test ./internal/cli -run Test_ReleaseWorkflow_publishesGitHubReleaseAssets -count=1`
   - Result: verifies the tag-triggered GitHub release workflow has write permission, derives the version from `GITHUB_REF_NAME`, runs local release plus verification, creates the GitHub Release, and attaches archives, checksums, and the manifest.
