@@ -66,6 +66,10 @@ func Test_ProductionReadinessScript_reportsCurrentPublicBlockers(t *testing.T) {
 		`"local_production_ready": true`,
 		`"public_production_ready": false`,
 		`"comparison.all_agent_29_task_comparison"`,
+		`"launch_checklist": {`,
+		`"path": "launch-checklist.md"`,
+		`"required_action_count":`,
+		`"status": "pass"`,
 	} {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("summary.json missing %q:\n%s", want, summary)

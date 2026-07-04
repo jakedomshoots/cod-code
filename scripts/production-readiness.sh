@@ -246,38 +246,6 @@ else
   overall_status=blocked
 fi
 
-python3 - "$output_dir/checks.tsv" "$output_dir/summary.json" "$local_ready" "$public_ready" "$overall_status" <<'PY'
-import json
-import sys
-
-checks = []
-with open(sys.argv[1], "r", encoding="utf-8") as handle:
-    for line in handle:
-        category, name, status, evidence, detail = line.rstrip("\n").split("\t", 4)
-        checks.append({
-            "category": category,
-            "name": name,
-            "status": status,
-            "evidence": evidence,
-            "detail": detail,
-        })
-
-blocked = [check for check in checks if check["status"] not in {"pass", "skipped"}]
-summary = {
-    "schema_version": 1,
-    "status": sys.argv[5],
-    "local_production_ready": sys.argv[3] == "true",
-    "public_production_ready": sys.argv[4] == "true",
-    "check_count": len(checks),
-    "blocked_count": len(blocked),
-    "blocked_checks": [f"{check['category']}.{check['name']}" for check in blocked],
-    "checks": checks,
-}
-with open(sys.argv[2], "w", encoding="utf-8") as handle:
-    json.dump(summary, handle, indent=2)
-    handle.write("\n")
-PY
-
 {
   printf '%s\n' "# Launch Checklist"
   printf '\n'
@@ -324,6 +292,49 @@ PY
   printf '%s\n' "sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness"
   printf '%s\n' "\`\`\`"
 } >"$output_dir/launch-checklist.md"
+
+python3 - "$output_dir/checks.tsv" "$output_dir/summary.json" "$output_dir/launch-checklist.md" "$local_ready" "$public_ready" "$overall_status" <<'PY'
+import hashlib
+import json
+import pathlib
+import sys
+
+checks = []
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    for line in handle:
+        category, name, status, evidence, detail = line.rstrip("\n").split("\t", 4)
+        checks.append({
+            "category": category,
+            "name": name,
+            "status": status,
+            "evidence": evidence,
+            "detail": detail,
+        })
+
+checklist_path = pathlib.Path(sys.argv[3])
+checklist_text = checklist_path.read_text(encoding="utf-8")
+actions = [line for line in checklist_text.splitlines() if line.startswith("- ")]
+blocked = [check for check in checks if check["status"] not in {"pass", "skipped"}]
+summary = {
+    "schema_version": 1,
+    "status": sys.argv[6],
+    "local_production_ready": sys.argv[4] == "true",
+    "public_production_ready": sys.argv[5] == "true",
+    "check_count": len(checks),
+    "blocked_count": len(blocked),
+    "blocked_checks": [f"{check['category']}.{check['name']}" for check in blocked],
+    "launch_checklist": {
+        "path": "launch-checklist.md",
+        "sha256": hashlib.sha256(checklist_text.encode("utf-8")).hexdigest(),
+        "required_action_count": len(actions),
+        "status": "pass" if "# Launch Checklist" in checklist_text and "## Final Gate" in checklist_text else "fail",
+    },
+    "checks": checks,
+}
+with open(sys.argv[2], "w", encoding="utf-8") as handle:
+    json.dump(summary, handle, indent=2)
+    handle.write("\n")
+PY
 
 {
   printf '%s\n' "# Production Readiness Evidence"
