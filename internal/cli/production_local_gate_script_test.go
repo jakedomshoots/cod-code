@@ -41,6 +41,9 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		"production-local-gate: pass local_production_ready=true public_production_ready=false",
 		"production-local-gate: blocked_count=",
 		"production-local-gate: checklist_actions=",
+		"production-local-gate: production_actions=",
+		"production-local-gate: runnable_commands=",
+		"production-local-gate: blocked_commands=",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("production-local-gate output missing %q:\n%s", want, body)
@@ -52,10 +55,17 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		filepath.Join(outputDir, "launch-checklist.md"),
 		filepath.Join(outputDir, "production-readiness.stdout.txt"),
 		filepath.Join(outputDir, "production-readiness.stderr.txt"),
+		filepath.Join(outputDir, "production-actions.json"),
+		filepath.Join(outputDir, "production-actions.commands.sh"),
+		filepath.Join(outputDir, "production-actions.stderr.txt"),
 	} {
 		if _, err := os.Stat(path); err != nil {
 			t.Fatalf("expected evidence file %s: %v", path, err)
 		}
+	}
+	commands := readTextFile(t, filepath.Join(outputDir, "production-actions.commands.sh"))
+	if !strings.Contains(commands, "# blocked command:") {
+		t.Fatalf("production action command artifact should comment blocked commands:\n%s", commands)
 	}
 }
 

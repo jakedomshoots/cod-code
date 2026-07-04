@@ -69,7 +69,7 @@ Status date: 2026-07-04
   - Result: verifies the tag-triggered GitHub release workflow has write permission, derives the version from `GITHUB_REF_NAME`, runs local release plus verification, creates the GitHub Release, and attaches archives, checksums, and the manifest.
 - Latest local production gate:
   - `sh scripts/production-local-gate.sh --dist dist --output-dir .omo/evidence/production-local-gate-r1`
-  - Result: pass. Local production readiness is true; public blockers remain recorded as evidence.
+  - Result: pass. Local production readiness is true; public blockers remain recorded as evidence. The gate also writes `production-actions.json`, `production-actions.commands.sh`, validates runnable/blocked command counts, and confirms blocked commands are commented in the command script.
 - Latest live external-agent comparison:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-25-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 100 runs / 99 pass / 0 partial / 0 fail / 1 timed out / 0 skipped / 1 incomplete evidence.

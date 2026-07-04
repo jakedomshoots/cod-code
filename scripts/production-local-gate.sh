@@ -104,3 +104,49 @@ print(f"production-local-gate: pass local_production_ready=true public_productio
 print(f"production-local-gate: blocked_count={summary.get('blocked_count', 0)}")
 print(f"production-local-gate: checklist_actions={checklist.get('required_action_count', 0)}")
 PY
+
+set +e
+go run "$root/cmd/ceo-packet" production-actions --workspace "$root" --format json >"$output_dir/production-actions.json" 2>"$output_dir/production-actions.stderr.txt"
+actions_status=$?
+go run "$root/cmd/ceo-packet" production-actions --workspace "$root" --commands-only >"$output_dir/production-actions.commands.sh" 2>>"$output_dir/production-actions.stderr.txt"
+commands_status=$?
+set -e
+
+python3 - "$output_dir/production-actions.json" "$output_dir/production-actions.commands.sh" "$actions_status" "$commands_status" <<'PY'
+import json
+import sys
+
+actions_path, commands_path = sys.argv[1], sys.argv[2]
+actions_status, commands_status = int(sys.argv[3]), int(sys.argv[4])
+if actions_status != 0 or commands_status != 0:
+    print("production-local-gate: fail production-actions command failed")
+    raise SystemExit(1)
+
+with open(actions_path, "r", encoding="utf-8") as handle:
+    actions = json.load(handle)
+
+status = actions.get("status")
+if status == "missing":
+    print("production-local-gate: production_actions=missing")
+    raise SystemExit(0)
+
+runnable = int(actions.get("runnable_command_count", 0) or 0)
+blocked = int(actions.get("blocked_command_count", 0) or 0)
+required = int(actions.get("required_action_count", 0) or 0)
+if required > 0 and runnable + blocked <= 0:
+    print("production-local-gate: fail production action command counts missing")
+    raise SystemExit(1)
+
+commands_text = open(commands_path, "r", encoding="utf-8").read()
+if "OPENAI_API_KEY=" in commands_text or "OPENROUTER_API_KEY=" in commands_text or "MOONSHOT_API_KEY=" in commands_text:
+    print("production-local-gate: fail production action commands include secret assignment")
+    raise SystemExit(1)
+blocked_lines = sum(1 for line in commands_text.splitlines() if line.startswith("# blocked command:"))
+if blocked_lines != blocked:
+    print(f"production-local-gate: fail blocked command lines={blocked_lines} expected={blocked}")
+    raise SystemExit(1)
+
+print(f"production-local-gate: production_actions={status}")
+print(f"production-local-gate: runnable_commands={runnable}")
+print(f"production-local-gate: blocked_commands={blocked}")
+PY
