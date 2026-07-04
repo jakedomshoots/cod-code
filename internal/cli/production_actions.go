@@ -77,10 +77,15 @@ func annotateProductionActions(actions []map[string]any, sourceDir string) []map
 		requiredEnv := actionString(next, "required_env")
 		envReady := true
 		if requiredEnv != "" {
-			envReady = os.Getenv(requiredEnv) != ""
-			next["required_env_set"] = envReady
+			value, present := os.LookupEnv(requiredEnv)
+			envReady = present && value != ""
+			next["required_env_set"] = present
 			if !envReady {
-				next["missing_required_env"] = requiredEnv
+				if present {
+					next["empty_required_env"] = requiredEnv
+				} else {
+					next["missing_required_env"] = requiredEnv
+				}
 			}
 		}
 		next["env_ready"] = envReady
@@ -101,6 +106,9 @@ func annotateProductionActionStates(actions []map[string]any) {
 }
 
 func productionActionState(action map[string]any) string {
+	if emptyEnv := actionString(action, "empty_required_env"); emptyEnv != "" {
+		return "empty_env"
+	}
 	if missingEnv := actionString(action, "missing_required_env"); missingEnv != "" {
 		return "missing_env"
 	}
@@ -138,6 +146,9 @@ func annotateProductionActionDependencies(actions []map[string]any) {
 func actionHasOpenBlocker(action map[string]any) bool {
 	if action == nil {
 		return false
+	}
+	if emptyEnv := actionString(action, "empty_required_env"); emptyEnv != "" {
+		return true
 	}
 	if missingEnv := actionString(action, "missing_required_env"); missingEnv != "" {
 		return true
@@ -519,7 +530,9 @@ func renderProductionActionsText(report productionActionsReport) string {
 		kind, _ := action["kind"].(string)
 		text, _ := action["text"].(string)
 		suffix := ""
-		if missingEnv, _ := action["missing_required_env"].(string); missingEnv != "" {
+		if emptyEnv, _ := action["empty_required_env"].(string); emptyEnv != "" {
+			suffix = " (empty env: " + emptyEnv + ")"
+		} else if missingEnv, _ := action["missing_required_env"].(string); missingEnv != "" {
 			suffix = " (missing env: " + missingEnv + ")"
 		}
 		if kind != "" {
@@ -551,7 +564,9 @@ func renderProductionActionCommandsOnly(report productionActionsReport) string {
 				fmt.Fprintf(&builder, " [%s]", kind)
 			}
 			if requiredEnv := actionString(action, "required_env"); requiredEnv != "" {
-				if actionString(action, "missing_required_env") != "" {
+				if actionString(action, "empty_required_env") != "" {
+					fmt.Fprintf(&builder, " empty env: %s", requiredEnv)
+				} else if actionString(action, "missing_required_env") != "" {
 					fmt.Fprintf(&builder, " missing env: %s", requiredEnv)
 				} else {
 					fmt.Fprintf(&builder, " requires env: %s", requiredEnv)

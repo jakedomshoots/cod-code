@@ -391,6 +391,30 @@ func TestProductionActionsDoesNotReadSecretValuesIntoReport(t *testing.T) {
 	}
 }
 
+func TestProductionActionsTreatsEmptyEnvAsNotReady(t *testing.T) {
+	t.Setenv("OPENROUTER_API_KEY", "")
+	actions := annotateProductionActions([]map[string]any{{
+		"id":           "provider-openrouter",
+		"kind":         "provider_proof",
+		"required_env": "OPENROUTER_API_KEY",
+		"command":      []any{"sh", "scripts/provider-proof.sh", "--provider", "openrouter"},
+	}}, "")
+	if len(actions) != 1 {
+		t.Fatalf("actions length = %d, want 1", len(actions))
+	}
+	if actions[0]["required_env_set"] != true || actions[0]["env_ready"] != false || actions[0]["empty_required_env"] != "OPENROUTER_API_KEY" || actions[0]["action_state"] != "empty_env" {
+		t.Fatalf("actions = %+v, want empty env blocker", actions)
+	}
+	report := productionActionsReport{Actions: actions, CommandsOnly: true}
+	text := renderProductionActionCommandsOnly(report)
+	if !strings.Contains(text, "# provider-openrouter [provider_proof] empty env: OPENROUTER_API_KEY state: empty_env") {
+		t.Fatalf("commands-only output missing empty env state:\n%s", text)
+	}
+	if strings.Contains(text, "missing env: OPENROUTER_API_KEY") {
+		t.Fatalf("commands-only output should distinguish empty env from missing env:\n%s", text)
+	}
+}
+
 func TestProductionActionsShellCommandLineQuotesUnsafeArgs(t *testing.T) {
 	got := shellCommandLine([]string{"sh", "scripts/run check.sh", "it's", ""})
 	want := "sh 'scripts/run check.sh' 'it'\"'\"'s' ''"

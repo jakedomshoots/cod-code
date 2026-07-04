@@ -188,7 +188,7 @@ Advanced flags:
   --action-id <id>                Filter production-actions by exact action id
   --action-kind <kind>            Filter production-actions by kind
   --action-provider <name>        Filter production-actions by provider
-  --action-state <state>          Filter production-actions by ready, missing_env, or waiting
+  --action-state <state>          Filter production-actions by ready, missing_env, empty_env, or waiting
   --env-ready-only                Show production actions whose required env is present
   --ready-only                    Show production actions with env and dependencies ready
   --next                          Show the first ready production action after filters

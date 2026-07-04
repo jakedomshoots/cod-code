@@ -182,6 +182,46 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
 	}
 }
 
+func Test_ProviderProofScript_liveBlocksWhenHTTPKeyEmpty(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "provider-proof")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "provider-proof.sh"),
+		"--provider", "moonshot",
+		"--output-dir", outputDir,
+	)
+	cmd.Dir = root
+	cmd.Env = append(withoutEnv(os.Environ(), "MOONSHOT_API_KEY"), "MOONSHOT_API_KEY=")
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("provider proof unexpectedly passed with empty MOONSHOT_API_KEY:\n%s", string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	if !strings.Contains(index, "| provider_setup | blocked_empty_key | blocked.md |") {
+		t.Fatalf("index.md missing empty key blocker:\n%s", index)
+	}
+	blocked := readTextFile(t, filepath.Join(outputDir, "blocked.md"))
+	if !strings.Contains(blocked, "has `MOONSHOT_API_KEY` set, but it is empty") {
+		t.Fatalf("blocked.md missing empty key guidance:\n%s", blocked)
+	}
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	for _, want := range []string{
+		`"blocked_reason": "empty_api_key_env"`,
+		`"setup_result_status": "blocked_empty_key"`,
+		`"secret_value_saved": false`,
+	} {
+		if !strings.Contains(summary, want) {
+			t.Fatalf("summary.json missing %q:\n%s", want, summary)
+		}
+	}
+}
+
 func Test_ProviderProofScript_liveFailsWhenBenchmarkSummaryFails(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {

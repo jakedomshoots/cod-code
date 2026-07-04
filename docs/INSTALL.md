@@ -70,7 +70,7 @@ sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/pr
 sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot
 ```
 
-HTTP proof gates require `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, or `MOONSHOT_API_KEY`. Missing keys are recorded as `blocked_missing_key`.
+HTTP proof gates require non-empty `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, or `MOONSHOT_API_KEY`. Missing keys are recorded as `blocked_missing_key`; blank keys are recorded as `blocked_empty_key`.
 When a key is missing, the proof gate also writes `summary.json`, `env.template`, `commands.sh`, and `setup-checklist.md` so setup blockers can be resolved without saving secret values.
 
 ## Market Gauntlet
@@ -118,6 +118,7 @@ ceo-packet production-actions --workspace . --format text --action-kind release_
 ceo-packet production-actions --workspace . --format text --action-kind provider_proof
 ceo-packet production-actions --workspace . --format text --action-provider openai
 ceo-packet production-actions --workspace . --format text --action-state missing_env
+ceo-packet production-actions --workspace . --format text --action-state empty_env
 ceo-packet production-actions --workspace . --format text --env-ready-only
 ceo-packet production-actions --workspace . --format text --ready-only
 ceo-packet production-actions --workspace . --format text --next

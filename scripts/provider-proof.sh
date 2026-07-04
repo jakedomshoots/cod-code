@@ -283,10 +283,20 @@ write_plan() {
 }
 
 write_http_setup_blocked() {
+  blocked_reason="${1:-missing_api_key_env}"
+  if [ "$blocked_reason" = "empty_api_key_env" ]; then
+    blocked_message="Provider \`$provider\` has \`$api_key_env\` set, but it is empty."
+    setup_action="Fill \`$api_key_env\` with a non-empty value in the shell or local secret manager."
+    result_status="blocked_empty_key"
+  else
+    blocked_message="Provider \`$provider\` requires \`$api_key_env\` for HTTP benchmark mode."
+    setup_action="Export \`$api_key_env\` in the shell or local secret manager."
+    result_status="blocked_missing_key"
+  fi
   {
     printf '%s\n' "# Provider Proof Blocked"
     printf '\n'
-    printf '%s\n' "Provider \`$provider\` requires \`$api_key_env\` for HTTP benchmark mode."
+    printf '%s\n' "$blocked_message"
     printf '%s\n' "Set the environment variable, then rerun this command. The key value is not printed or saved."
     printf '\n'
     printf '%s\n' "## Next Command"
@@ -314,7 +324,7 @@ write_http_setup_blocked() {
   {
     printf '%s\n' "# Provider Setup Checklist"
     printf '\n'
-    printf '%s\n' "1. Export \`$api_key_env\` in the shell or local secret manager."
+    printf '%s\n' "1. $setup_action"
     printf '%s\n' "2. Keep the key out of git, logs, reports, and evidence folders."
     printf '%s\n' "3. Run \`commands.sh\` from the repo root."
     printf '%s\n' "4. Confirm \`index.md\` says \`- Overall: pass\`."
@@ -330,7 +340,8 @@ write_http_setup_blocked() {
   "http_preset": "$http_preset",
   "http_model": "$http_model",
   "api_key_env": "$api_key_env",
-  "blocked_reason": "missing_api_key_env",
+  "blocked_reason": "$blocked_reason",
+  "setup_result_status": "$result_status",
   "secret_value_saved": false,
   "artifacts": {
     "index": "index.md",
@@ -421,10 +432,15 @@ else
       exit 1
     fi
   else
+    eval "api_key_present=\${$api_key_env+x}"
     eval "configured_api_key=\${$api_key_env:-}"
     if [ -z "$configured_api_key" ]; then
-      write_http_setup_blocked
-      append_result "provider_setup" "blocked_missing_key" "blocked.md"
+      if [ "$api_key_present" = "x" ]; then
+        write_http_setup_blocked "empty_api_key_env"
+      else
+        write_http_setup_blocked "missing_api_key_env"
+      fi
+      append_result "provider_setup" "$result_status" "blocked.md"
       overall="blocked"
     fi
   fi
