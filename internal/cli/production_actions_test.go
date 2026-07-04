@@ -444,6 +444,21 @@ func Test_ParseArgs_sets_production_actions_from_verb(t *testing.T) {
 	}
 }
 
+func Test_ParseArgs_validates_production_action_state(t *testing.T) {
+	for _, state := range []string{"ready", "missing_env", "empty_env", "setup_blocked", "waiting"} {
+		opts, err := parseArgs([]string{"production-actions", "--workspace", "/tmp/workspace", "--action-state", state})
+		if err != nil {
+			t.Fatalf("parseArgs(%s): %v", state, err)
+		}
+		if opts.productionActionState != state {
+			t.Fatalf("productionActionState = %q, want %q", opts.productionActionState, state)
+		}
+	}
+	if _, err := parseArgs([]string{"production-actions", "--workspace", "/tmp/workspace", "--action-state", "blocked"}); err == nil || !strings.Contains(err.Error(), "--action-state must be ready, missing_env, empty_env, setup_blocked, or waiting") {
+		t.Fatalf("parseArgs invalid state err = %v, want validation error", err)
+	}
+}
+
 func TestProductionActionsDoesNotReadSecretValuesIntoReport(t *testing.T) {
 	t.Setenv("OPENAI_API_KEY", "secret-value")
 	actions := annotateProductionActions([]map[string]any{{

@@ -74,9 +74,12 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 		}
 		opts.productionActionProvider = value
 	case "--action-state":
-		value, err := parseNextValue(args, index, "--action-state requires ready, missing_env, or waiting")
+		value, err := parseNextValue(args, index, "--action-state requires ready, missing_env, empty_env, setup_blocked, or waiting")
 		if err != nil {
 			return true, index, err
+		}
+		if !validProductionActionState(value) {
+			return true, index, fmt.Errorf("--action-state must be ready, missing_env, empty_env, setup_blocked, or waiting")
 		}
 		opts.productionActionState = value
 	case "--env-ready-only":

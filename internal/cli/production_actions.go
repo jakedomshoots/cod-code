@@ -123,6 +123,15 @@ func productionActionState(action map[string]any) string {
 	return "ready"
 }
 
+func validProductionActionState(state string) bool {
+	switch state {
+	case "ready", "missing_env", "empty_env", "setup_blocked", "waiting":
+		return true
+	default:
+		return false
+	}
+}
+
 func hasSetupBlocker(action map[string]any) bool {
 	if summary, _ := action["release_summary"].(map[string]any); summary != nil {
 		return numberValue(summary["blocked_count"]) > 0 || !boolValue(summary["public_release_ready"])
