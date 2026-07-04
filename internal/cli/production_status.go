@@ -22,6 +22,7 @@ type productionStatusReport struct {
 	FinalizerNextActions   *productionChecklistStatus    `json:"finalizer_next_actions,omitempty"`
 	ReleaseBootstrap       *productionBootstrapStatus    `json:"release_bootstrap,omitempty"`
 	ProviderSetupPreflight *providerSetupPreflightStatus `json:"provider_setup_preflight,omitempty"`
+	ExternalSetupRequired  bool                          `json:"external_setup_required"`
 	NextAction             string                        `json:"next_action"`
 }
 
@@ -150,7 +151,21 @@ func buildProductionStatusReport(workspaceDir string) (productionStatusReport, e
 			report.NextAction = "open " + finalizer.Path
 		}
 	}
+	report.ExternalSetupRequired = productionStatusExternalSetupRequired(report)
 	return report, nil
+}
+
+func productionStatusExternalSetupRequired(report productionStatusReport) bool {
+	if !report.LocalProductionReady || report.PublicProductionReady || report.BlockedCount == 0 {
+		return false
+	}
+	if report.FinalizerNextActions == nil {
+		return false
+	}
+	if report.FinalizerNextActions.RunnableCommandCount != 0 {
+		return false
+	}
+	return report.FinalizerNextActions.BlockedCommandCount > 0
 }
 
 func latestProviderSetupPreflightStatus(evidenceRoot string) (*providerSetupPreflightStatus, error) {
@@ -461,6 +476,9 @@ func renderProductionStatusText(report productionStatusReport) string {
 	fmt.Fprintf(&builder, "Production status: %s\n", report.Status)
 	fmt.Fprintf(&builder, "Local ready: %t\n", report.LocalProductionReady)
 	fmt.Fprintf(&builder, "Public ready: %t\n", report.PublicProductionReady)
+	if report.ExternalSetupRequired {
+		fmt.Fprintf(&builder, "External setup required: true\n")
+	}
 	fmt.Fprintf(&builder, "Blocked checks: %d\n", report.BlockedCount)
 	for _, check := range report.BlockedChecks {
 		fmt.Fprintf(&builder, "- %s\n", check)

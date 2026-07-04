@@ -201,6 +201,78 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 	}
 }
 
+func Test_Run_production_status_marks_external_setup_required(t *testing.T) {
+	root := t.TempDir()
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-r1", "summary.json"), `{
+  "status": "blocked",
+  "local_production_ready": true,
+  "public_production_ready": false,
+  "blocked_count": 2,
+  "blocked_checks": ["release.public_release_ready", "provider.openai_http_provider"]
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "summary.json"), `{
+  "status": "blocked",
+  "skipped_steps": [],
+  "next_actions": {
+    "path": "next-actions.md",
+    "json_path": "next-actions.json",
+    "required_action_count": 2
+  }
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "next-actions.json"), `{
+  "status": "blocked",
+  "actions": [
+    {
+      "id": "release-readiness",
+      "kind": "release_proof",
+      "evidence": "`+filepath.ToSlash(filepath.Join(root, ".omo", "evidence", "release-readiness-final", "index.md"))+`",
+      "command": ["sh", "scripts/release-readiness.sh"]
+    },
+    {
+      "id": "provider-openai",
+      "kind": "provider_proof",
+      "required_env": "OPENAI_API_KEY",
+      "evidence": "`+filepath.ToSlash(filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "index.md"))+`",
+      "command": ["sh", "scripts/provider-proof.sh", "--provider", "openai"]
+    }
+  ]
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "release-readiness-final", "summary.json"), `{
+  "status": "blocked",
+  "public_release_ready": false,
+  "blocked_count": 1,
+  "blocked_checks": ["remote_release_url"],
+  "publish_actions_performed": false,
+  "secret_value_saved": false
+}`)
+
+	var out bytes.Buffer
+	if err := Run(context.Background(), &out, []string{"production-status", "--workspace", root, "--format", "text"}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	text := out.String()
+	for _, want := range []string{
+		"External setup required: true",
+		"Finalizer commands: runnable=0 blocked=2",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("production status text missing %q:\n%s", want, text)
+		}
+	}
+
+	out.Reset()
+	if err := Run(context.Background(), &out, []string{"production-status", "--workspace", root}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	var body productionStatusReport
+	if err := json.Unmarshal(out.Bytes(), &body); err != nil {
+		t.Fatalf("decode production status: %v\n%s", err, out.String())
+	}
+	if !body.ExternalSetupRequired {
+		t.Fatalf("ExternalSetupRequired = false, want true: %+v", body)
+	}
+}
+
 func sha256Text(body string) string {
 	sum := sha256.Sum256([]byte(body))
 	return fmt.Sprintf("%x", sum[:])
