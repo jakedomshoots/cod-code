@@ -76,6 +76,18 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 	if !strings.Contains(commands, " reason: ") {
 		t.Fatalf("production action command artifact should include blocker reasons:\n%s", commands)
 	}
+	providerCommands := readTextFile(t, filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "commands.sh"))
+	for _, want := range []string{
+		"Do not paste secret values into this file or any evidence artifact.",
+		"scripts/provider-proof.sh --provider openai",
+	} {
+		if !strings.Contains(providerCommands, want) {
+			t.Fatalf("provider command artifact missing %q:\n%s", want, providerCommands)
+		}
+	}
+	if strings.Contains(providerCommands, "OPENAI_API_KEY=") || strings.Contains(providerCommands, "<redacted>") {
+		t.Fatalf("provider command artifact should not include secret assignments:\n%s", providerCommands)
+	}
 	actions := readTextFile(t, filepath.Join(outputDir, "production-actions.json"))
 	for _, want := range []string{
 		`"path":`,
