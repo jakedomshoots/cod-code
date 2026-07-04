@@ -91,6 +91,14 @@ go run ./cmd/ceo-packet production-finalize --workspace . --run-comparison
 go run ./cmd/ceo-packet production-status --workspace . --format text
 ```
 
+## OAuth Boundary
+
+CEO Harness does not store OAuth tokens. CLI OAuth providers use local vendor CLIs and whatever login state those tools already manage. Harness config stores only command paths such as `scripts/kimi-model-command.sh`.
+
+## Evidence Boundary
+
+Evidence may store provider names, env var names, command exit codes, and SHA-256 fingerprints. Evidence must not store secret values, bearer tokens, OAuth refresh tokens, or copied key files.
+
 ## Secret Scan
 
 Before release or proof publication, scan source, docs, scripts, and workflow files for committed secret values:

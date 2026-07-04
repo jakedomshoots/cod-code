@@ -8,8 +8,8 @@ usage() {
   cat <<'USAGE'
 Usage: sh scripts/secret-scan.sh [--root path]
 
-Scans source, docs, scripts, and workflow files for committed secret values.
-Placeholders such as OPENAI_API_KEY=... are allowed. Test fixtures are skipped.
+Scans source, docs, scripts, workflows, and provider command evidence files for committed secret values.
+Placeholders such as OPENAI_API_KEY=... are allowed in docs, but real key assignments, bearer values, OAuth token filenames, and copied token files are blocked.
 USAGE
 }
 
@@ -65,11 +65,29 @@ find "$scan_root" \
   ! -name '*_test.go' \
   -print >"$tmp"
 
-secret_pattern='(OPENAI_API_KEY|OPENROUTER_API_KEY|KIMI_CODE_API_KEY|MOONSHOT_API_KEY|MINIMAX_API_KEY|ANTHROPIC_API_KEY)[[:space:]]*=[[:space:]]*(sk-[A-Za-z0-9_-]{16,}|sk-proj-[A-Za-z0-9_-]{16,}|sk-or-v1-[A-Za-z0-9_-]{16,}|[A-Za-z0-9_.-]{40,})|gh[opsu]_[A-Za-z0-9_]{20,}'
+if [ -d "$scan_root/.omo/evidence" ]; then
+  find "$scan_root/.omo/evidence" \
+    -type f \
+    \( -name 'commands.sh' -o -name 'command.txt' -o -name 'command.argv' -o -name 'command.json' \
+      -o -name 'env.template' -o -name 'setup-checklist.md' -o -name 'blocked.md' \) \
+    -print >>"$tmp"
+fi
+
+secret_pattern='(OPENAI_API_KEY|OPENROUTER_API_KEY|KIMI_CODE_API_KEY|MOONSHOT_API_KEY|MINIMAX_API_KEY|ANTHROPIC_API_KEY)[[:space:]]*=[[:space:]]*['\''"]?(sk-[A-Za-z0-9_-]{16,}|sk-proj-[A-Za-z0-9_-]{16,}|sk-or-v1-[A-Za-z0-9_-]{16,}|[A-Za-z0-9_.-]{40,})|Authorization:[[:space:]]*Bearer[[:space:]]+[A-Za-z0-9._~+/=-]{16,}|gh[opsu]_[A-Za-z0-9_]{20,}'
+oauth_token_filename_pattern='(^|/)(oauth|access|refresh)[A-Za-z0-9_.-]*(token|credential)[A-Za-z0-9_.-]*$|(^|/)[A-Za-z0-9_.-]*(token|credential)[A-Za-z0-9_.-]*(oauth|refresh)[A-Za-z0-9_.-]*$'
 
 failed=0
 while IFS= read -r file; do
   [ -n "$file" ] || continue
+  rel="$file"
+  case "$file" in
+    "$scan_root"/*) rel="${file#"$scan_root"/}" ;;
+  esac
+  if printf '%s\n' "$rel" | LC_ALL=C grep -Eq "$oauth_token_filename_pattern"; then
+    failed=1
+    printf '%s\n' "secret-scan: possible OAuth token file committed at $rel" >&2
+    continue
+  fi
   if LC_ALL=C grep -nE "$secret_pattern" "$file" >/tmp/ceo-secret-scan-match.$$ 2>/dev/null; then
     failed=1
     rel="$file"

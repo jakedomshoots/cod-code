@@ -1,0 +1,439 @@
+{
+  "path": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize/next-actions.json",
+  "status": "planned",
+  "required_action_count": 6,
+  "env_ready_action_count": 4,
+  "provider_env_ready_action_count": 1,
+  "provider_env_blocked_action_count": 2,
+  "ready_action_count": 2,
+  "runnable_command_count": 2,
+  "blocked_command_count": 4,
+  "evidence_declared_match_count": 7,
+  "evidence_declared_mismatch_count": 0,
+  "action_state_counts": {
+    "empty_env": 1,
+    "missing_env": 1,
+    "ready": 2,
+    "setup_blocked": 1,
+    "waiting": 1
+  },
+  "actions": [
+    {
+      "action_reason": "release setup blocked: git_remote, remote_release_url, github_release_assets, homebrew_formula_url, artifact_signatures",
+      "action_state": "setup_blocked",
+      "command": [
+        "sh",
+        "scripts/release-readiness.sh",
+        "--dist",
+        "dist",
+        "--output-dir",
+        ".omo/evidence/release-readiness-final"
+      ],
+      "declared_evidence_files": [
+        {
+          "exists": true,
+          "field": "evidence",
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/release-readiness-final/index.md",
+          "sha256": "0bba820ebd63919f843d59c358ac80fffe1b4e64f53995fd4053da560e62f5bb",
+          "size_bytes": 670
+        }
+      ],
+      "env_ready": true,
+      "evidence": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/release-readiness-final/index.md",
+      "evidence_files": [
+        {
+          "declared_exists": true,
+          "declared_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/release-readiness-final/index.md",
+          "declared_sha256": "0bba820ebd63919f843d59c358ac80fffe1b4e64f53995fd4053da560e62f5bb",
+          "declared_size_bytes": 670,
+          "exists": true,
+          "field": "evidence",
+          "matches_declared": true,
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/release-readiness-final/index.md",
+          "sha256": "0bba820ebd63919f843d59c358ac80fffe1b4e64f53995fd4053da560e62f5bb",
+          "size_bytes": 670
+        }
+      ],
+      "id": "release-readiness",
+      "kind": "release_proof",
+      "release_summary": {
+        "blocked_checks": [
+          "git_remote",
+          "remote_release_url",
+          "github_release_assets",
+          "homebrew_formula_url",
+          "artifact_signatures"
+        ],
+        "blocked_count": 5,
+        "github_auth_status": "pass",
+        "origin_remote_configured": false,
+        "preflight_status": "blocked",
+        "public_release_ready": false,
+        "publish_actions_performed": false,
+        "release_artifacts_verified": true,
+        "secret_value_saved": false,
+        "setup_action_count": 5,
+        "setup_action_items": [
+          {
+            "check": "git_remote",
+            "text": "configure an origin remote for the public repo, for example `git remote add origin git@github.com:\u003cowner\u003e/\u003crepo\u003e.git`, or set `GH_REPO=owner/name` for release-only verification."
+          },
+          {
+            "check": "remote_release_url",
+            "text": "set `RELEASE_URL` or `PUBLIC_RELEASE_URL` to the public HTTPS release page."
+          },
+          {
+            "check": "github_release_assets",
+            "text": "push a `v*` tag, let the release workflow upload archives, `checksums.txt`, and `release-manifest.json`, then set `GH_RELEASE_TAG` and `GH_REPO` if no GitHub origin is configured."
+          },
+          {
+            "check": "homebrew_formula_url",
+            "text": "after release archives are public, run `sh scripts/release-homebrew-formula.sh --dist dist --repo-url \u003crepo-url\u003e --homebrew-archive-base-url \u003carchive-base-url\u003e` or update the tap formula so it uses that remote archive URL."
+          },
+          {
+            "check": "artifact_signatures",
+            "text": "run `sh scripts/release-signatures.sh --dist dist --private-key \u003ckey.pem\u003e` and rerun preflight with `RELEASE_SIGNING_PUBLIC_KEY=\u003cpublic.pem\u003e`, or set `ALLOW_CHECKSUM_ONLY_RELEASE=1` with a public `CHECKSUM_ONLY_RELEASE_NOTES_URL`."
+          }
+        ],
+        "setup_actions": "setup-actions.md",
+        "setup_actions_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/release-readiness-final/setup-actions.md",
+        "setup_actions_sha256": "4456878c9d1e0fc8561726259ca4485450cd0642275c9216a70368c842372bfd",
+        "setup_command_policy": "no_publish_no_secret_assignment",
+        "setup_commands": "setup-commands.sh",
+        "setup_commands_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/release-readiness-final/setup-commands.sh",
+        "setup_commands_sha256": "d138b73b820d4c218f1e3dddc54fd974130a73380be1aa82d3cc19fd32f814d1",
+        "status": "blocked"
+      },
+      "status": "planned",
+      "text": "Publish and verify release evidence: set public release metadata, then rerun `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final`. Evidence: `.omo/evidence/release-readiness-final/index.md`."
+    },
+    {
+      "action_reason": "missing required env: OPENAI_API_KEY",
+      "action_state": "missing_env",
+      "command": [
+        "sh",
+        "scripts/provider-proof.sh",
+        "--provider",
+        "openai",
+        "--output-dir",
+        ".omo/evidence/provider-proof-openai",
+        "--timeout-seconds",
+        "600"
+      ],
+      "declared_evidence_files": [
+        {
+          "exists": true,
+          "field": "evidence",
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openai/index.md",
+          "sha256": "c6c0fa45238ef1fae721262c990dcecd6394ac59290a60f5018f04930ab81d78",
+          "size_bytes": 425
+        }
+      ],
+      "env_ready": false,
+      "evidence": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openai/index.md",
+      "evidence_files": [
+        {
+          "declared_exists": true,
+          "declared_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openai/index.md",
+          "declared_sha256": "c6c0fa45238ef1fae721262c990dcecd6394ac59290a60f5018f04930ab81d78",
+          "declared_size_bytes": 425,
+          "exists": true,
+          "field": "evidence",
+          "matches_declared": true,
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openai/index.md",
+          "sha256": "c6c0fa45238ef1fae721262c990dcecd6394ac59290a60f5018f04930ab81d78",
+          "size_bytes": 425
+        }
+      ],
+      "id": "provider-openai",
+      "kind": "provider_proof",
+      "missing_required_env": "OPENAI_API_KEY",
+      "provider": "openai",
+      "provider_summary": {
+        "api_key_env": "OPENAI_API_KEY",
+        "blocked_reason": "missing_api_key_env",
+        "checklist_items": [
+          {
+            "step": "1",
+            "text": "Export `OPENAI_API_KEY` in the shell or local secret manager."
+          },
+          {
+            "step": "2",
+            "text": "Keep the key out of git, logs, reports, and evidence folders."
+          },
+          {
+            "step": "3",
+            "text": "Run `sh scripts/provider-setup-preflight.sh --providers openai --output-dir .omo/evidence/provider-setup-preflight-openai`."
+          },
+          {
+            "step": "4",
+            "text": "Run `commands.sh` from the repo root."
+          },
+          {
+            "step": "5",
+            "text": "Confirm `index.md` says `- Overall: pass`."
+          },
+          {
+            "step": "6",
+            "text": "Re-run production readiness."
+          }
+        ],
+        "checklist_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openai/setup-checklist.md",
+        "command_script_secret_policy": "no_secret_assignment",
+        "commands_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openai/commands.sh",
+        "env_template_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openai/env.template",
+        "http_model": "gpt-5",
+        "http_preset": "openai",
+        "provider": "openai",
+        "provider_mode": "http-provider",
+        "secret_value_saved": false,
+        "setup_artifacts_sha256": {
+          "blocked.md": "7eb74b6ade3285bb8d23f44c7246a3f5fbba4bf3bc640c53afac79878ac11476",
+          "commands.sh": "ae2e420a553e83f2d1635806dd7aef9d945275274a8d4c9cdda6e2905e9cdd8e",
+          "env.template": "01b19dba878e57fd9eeed4a6a1839c2d77145368eac1acb3743a844680ef6445",
+          "setup-checklist.md": "b0545fddc94063da8e115428cb36741eec42279aeca3ca4293630f3144915a90"
+        },
+        "setup_checklist_item_count": 6,
+        "status": "blocked"
+      },
+      "required_env": "OPENAI_API_KEY",
+      "required_env_set": false,
+      "status": "planned",
+      "text": "Prove OpenAI HTTP provider: export `OPENAI_API_KEY`, run `sh scripts/provider-setup-preflight.sh --providers openai --output-dir .omo/evidence/provider-setup-preflight-openai`, then rerun `sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai --timeout-seconds 600`. Evidence: `.omo/evidence/provider-proof-openai/index.md`."
+    },
+    {
+      "action_reason": "provider proof already passed",
+      "action_state": "ready",
+      "command": [
+        "sh",
+        "scripts/provider-proof.sh",
+        "--provider",
+        "openrouter",
+        "--output-dir",
+        ".omo/evidence/provider-proof-openrouter",
+        "--timeout-seconds",
+        "600"
+      ],
+      "declared_evidence_files": [
+        {
+          "exists": true,
+          "field": "evidence",
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openrouter/index.md",
+          "sha256": "8c9b06c1f1d976d18849460f4d4c8fe291e23464f427a07e0f1ea7d244f41d36",
+          "size_bytes": 585
+        }
+      ],
+      "env_ready": true,
+      "evidence": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openrouter/index.md",
+      "evidence_files": [
+        {
+          "declared_exists": true,
+          "declared_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openrouter/index.md",
+          "declared_sha256": "8c9b06c1f1d976d18849460f4d4c8fe291e23464f427a07e0f1ea7d244f41d36",
+          "declared_size_bytes": 585,
+          "exists": true,
+          "field": "evidence",
+          "matches_declared": true,
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-openrouter/index.md",
+          "sha256": "8c9b06c1f1d976d18849460f4d4c8fe291e23464f427a07e0f1ea7d244f41d36",
+          "size_bytes": 585
+        }
+      ],
+      "id": "provider-openrouter",
+      "kind": "provider_proof",
+      "provider": "openrouter",
+      "provider_summary": {
+        "api_key_env": "OPENROUTER_API_KEY",
+        "blocked_reason": "",
+        "command_script_secret_policy": "no_secret_assignment",
+        "http_model": "openai/gpt-5",
+        "http_preset": "openrouter",
+        "provider": "openrouter",
+        "provider_mode": "http-provider",
+        "secret_value_saved": false,
+        "status": "pass"
+      },
+      "required_env": "OPENROUTER_API_KEY",
+      "required_env_satisfied_by_evidence": true,
+      "required_env_set": true,
+      "status": "planned",
+      "text": "Prove OpenRouter HTTP provider: export `OPENROUTER_API_KEY`, run `sh scripts/provider-setup-preflight.sh --providers openrouter --output-dir .omo/evidence/provider-setup-preflight-openrouter`, then rerun `sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter --timeout-seconds 600`. Evidence: `.omo/evidence/provider-proof-openrouter/index.md`."
+    },
+    {
+      "action_reason": "required env is set but empty: MOONSHOT_API_KEY",
+      "action_state": "empty_env",
+      "command": [
+        "sh",
+        "scripts/provider-proof.sh",
+        "--provider",
+        "moonshot",
+        "--output-dir",
+        ".omo/evidence/provider-proof-moonshot",
+        "--timeout-seconds",
+        "600"
+      ],
+      "declared_evidence_files": [
+        {
+          "exists": true,
+          "field": "evidence",
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-moonshot/index.md",
+          "sha256": "8b3b519560625bb1732c7043c2bfea106ae0e12f267300e47adc0b05d0fed449",
+          "size_bytes": 481
+        }
+      ],
+      "empty_required_env": "MOONSHOT_API_KEY",
+      "env_ready": false,
+      "evidence": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-moonshot/index.md",
+      "evidence_files": [
+        {
+          "declared_exists": true,
+          "declared_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-moonshot/index.md",
+          "declared_sha256": "8b3b519560625bb1732c7043c2bfea106ae0e12f267300e47adc0b05d0fed449",
+          "declared_size_bytes": 481,
+          "exists": true,
+          "field": "evidence",
+          "matches_declared": true,
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/provider-proof-moonshot/index.md",
+          "sha256": "8b3b519560625bb1732c7043c2bfea106ae0e12f267300e47adc0b05d0fed449",
+          "size_bytes": 481
+        }
+      ],
+      "id": "provider-moonshot",
+      "kind": "provider_proof",
+      "provider": "moonshot",
+      "provider_summary": {
+        "api_key_env": "MOONSHOT_API_KEY",
+        "blocked_reason": "",
+        "command_script_secret_policy": "no_secret_assignment",
+        "http_model": "moonshot-v1-128k",
+        "http_preset": "moonshot",
+        "provider": "moonshot",
+        "provider_mode": "http-provider",
+        "secret_value_saved": false,
+        "status": "fail"
+      },
+      "required_env": "MOONSHOT_API_KEY",
+      "required_env_set": true,
+      "status": "planned",
+      "text": "Prove Moonshot HTTP provider: export `MOONSHOT_API_KEY`, run `sh scripts/provider-setup-preflight.sh --providers moonshot --output-dir .omo/evidence/provider-setup-preflight-moonshot`, then rerun `sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot --timeout-seconds 600`. Evidence: `.omo/evidence/provider-proof-moonshot/index.md`."
+    },
+    {
+      "action_reason": "status is planned",
+      "action_state": "ready",
+      "command": [
+        "go",
+        "run",
+        "./cmd/ceo-packet",
+        "production-finalize",
+        "--workspace",
+        ".",
+        "--dry-run"
+      ],
+      "competitor_summary": {
+        "blockers": [],
+        "competitors": 6,
+        "setup_actions": "",
+        "setup_blocked": 0,
+        "skipped": 0,
+        "smoke_failed": 0,
+        "smoke_passed": 6
+      },
+      "declared_evidence_files": [
+        {
+          "exists": true,
+          "field": "evidence",
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/production-finalize/competitor-smoke/summary.json",
+          "sha256": "712930a72ca42202420563adfadd9dabd2c85e27271cb9b796c8d96fa916b53e",
+          "size_bytes": 17986
+        },
+        {
+          "exists": true,
+          "field": "inspect",
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/production-finalize/competitor-smoke/summary.json",
+          "sha256": "712930a72ca42202420563adfadd9dabd2c85e27271cb9b796c8d96fa916b53e",
+          "size_bytes": 17986
+        }
+      ],
+      "env_ready": true,
+      "evidence": "competitor-smoke/summary.json",
+      "evidence_files": [
+        {
+          "declared_exists": true,
+          "declared_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/production-finalize/competitor-smoke/summary.json",
+          "declared_sha256": "712930a72ca42202420563adfadd9dabd2c85e27271cb9b796c8d96fa916b53e",
+          "declared_size_bytes": 17986,
+          "exists": true,
+          "field": "evidence",
+          "matches_declared": true,
+          "path": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize/competitor-smoke/summary.json",
+          "sha256": "712930a72ca42202420563adfadd9dabd2c85e27271cb9b796c8d96fa916b53e",
+          "size_bytes": 17986
+        },
+        {
+          "declared_exists": true,
+          "declared_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/production-finalize/competitor-smoke/summary.json",
+          "declared_sha256": "712930a72ca42202420563adfadd9dabd2c85e27271cb9b796c8d96fa916b53e",
+          "declared_size_bytes": 17986,
+          "exists": true,
+          "field": "inspect",
+          "matches_declared": true,
+          "path": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize/competitor-smoke/summary.json",
+          "sha256": "712930a72ca42202420563adfadd9dabd2c85e27271cb9b796c8d96fa916b53e",
+          "size_bytes": 17986
+        }
+      ],
+      "id": "competitor-smoke-command",
+      "inspect": "competitor-smoke/summary.json",
+      "kind": "competitor_setup",
+      "status": "planned",
+      "text": "Fix competitor setup before final comparison: inspect `.omo/evidence/production-finalize/competitor-smoke/summary.json`, install missing binaries or fix provider auth/quota, then rerun `go run ./cmd/ceo-packet production-finalize --workspace . --dry-run` or the full finalizer."
+    },
+    {
+      "action_reason": "waiting on: release-readiness, provider-openai, provider-moonshot, competitor-smoke-command",
+      "action_state": "waiting",
+      "blocked_by": [
+        "release-readiness",
+        "provider-openai",
+        "provider-moonshot",
+        "competitor-smoke-command"
+      ],
+      "command": [
+        "sh",
+        "scripts/production-readiness.sh",
+        "--dist",
+        "dist",
+        "--output-dir",
+        ".omo/evidence/production-readiness-final"
+      ],
+      "declared_evidence_files": [
+        {
+          "exists": true,
+          "field": "evidence",
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/production-readiness-final/index.md",
+          "sha256": "2168ed36da5bd547de1fb2859af32e646db3a8f978adac53102baf1fac1d346e",
+          "size_bytes": 2419
+        }
+      ],
+      "env_ready": true,
+      "evidence": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/production-readiness-final/index.md",
+      "evidence_files": [
+        {
+          "declared_exists": true,
+          "declared_path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/production-readiness-final/index.md",
+          "declared_sha256": "2168ed36da5bd547de1fb2859af32e646db3a8f978adac53102baf1fac1d346e",
+          "declared_size_bytes": 2419,
+          "exists": true,
+          "field": "evidence",
+          "matches_declared": true,
+          "path": "/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/.omo/evidence/production-readiness-final/index.md",
+          "sha256": "2168ed36da5bd547de1fb2859af32e646db3a8f978adac53102baf1fac1d346e",
+          "size_bytes": 2419
+        }
+      ],
+      "id": "production-readiness",
+      "kind": "final_readiness",
+      "status": "planned",
+      "text": "Re-run the final readiness aggregate after release, provider, smoke, and comparison proof are clean: `sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-final`. Evidence: `.omo/evidence/production-readiness-final/index.md`."
+    }
+  ]
+}

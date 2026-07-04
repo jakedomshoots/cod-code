@@ -1,0 +1,2 @@
+production-readiness: wrote /Users/jakedom/Documents/cod code/.omo/evidence/security-production-final/index.md
+production-readiness: blocked

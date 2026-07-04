@@ -5,10 +5,11 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 dist=${DIST:-"$root/dist"}
 output_dir=${OUTPUT_DIR:-"$root/.omo/evidence/production-local-gate"}
 evidence_root=${EVIDENCE_ROOT:-"$root/.omo/evidence"}
+workspace=${WORKSPACE:-"$root"}
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/production-local-gate.sh [--dist dir] [--output-dir dir] [--evidence-root dir]
+Usage: sh scripts/production-local-gate.sh [--workspace dir] [--dist dir] [--output-dir dir] [--evidence-root dir]
 
 Runs production-readiness and fails only when local production readiness is not
 green. Public release/provider/comparison blockers are allowed here because CI
@@ -18,6 +19,14 @@ USAGE
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    --workspace)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "production-local-gate: --workspace requires a value" >&2
+        exit 2
+      }
+      workspace="$2"
+      shift 2
+      ;;
     --dist)
       [ "$#" -ge 2 ] || {
         printf '%s\n' "production-local-gate: --dist requires a value" >&2
@@ -69,7 +78,22 @@ case "$evidence_root" in
   *) evidence_root="$(pwd)/$evidence_root" ;;
 esac
 
+case "$workspace" in
+  /*) ;;
+  *) workspace="$(pwd)/$workspace" ;;
+esac
+
 mkdir -p "$output_dir"
+
+set +e
+sh "$root/scripts/secret-scan.sh" --root "$workspace" >"$output_dir/secret-scan.stdout.txt" 2>"$output_dir/secret-scan.stderr.txt"
+secret_scan_status=$?
+set -e
+if [ "$secret_scan_status" -ne 0 ]; then
+  printf '%s\n' "production-local-gate: fail secret scan"
+  exit 1
+fi
+printf '%s\n' "production-local-gate: secret_scan=pass"
 
 set +e
 sh "$root/scripts/production-readiness.sh" --dist "$dist" --evidence-root "$evidence_root" --output-dir "$output_dir" >"$output_dir/production-readiness.stdout.txt" 2>"$output_dir/production-readiness.stderr.txt"
@@ -106,11 +130,11 @@ print(f"production-local-gate: checklist_actions={checklist.get('required_action
 PY
 
 set +e
-go run "$root/cmd/ceo-packet" production-actions --workspace "$root" --format json >"$output_dir/production-actions.json" 2>"$output_dir/production-actions.stderr.txt"
+go run "$root/cmd/ceo-packet" production-actions --workspace "$workspace" --format json >"$output_dir/production-actions.json" 2>"$output_dir/production-actions.stderr.txt"
 actions_status=$?
-go run "$root/cmd/ceo-packet" production-actions --workspace "$root" --commands-only >"$output_dir/production-actions.commands.sh" 2>>"$output_dir/production-actions.stderr.txt"
+go run "$root/cmd/ceo-packet" production-actions --workspace "$workspace" --commands-only >"$output_dir/production-actions.commands.sh" 2>>"$output_dir/production-actions.stderr.txt"
 commands_status=$?
-go run "$root/cmd/ceo-packet" production-status --workspace "$root" --format json >"$output_dir/production-status.json" 2>"$output_dir/production-status.stderr.txt"
+go run "$root/cmd/ceo-packet" production-status --workspace "$workspace" --format json >"$output_dir/production-status.json" 2>"$output_dir/production-status.stderr.txt"
 status_status=$?
 set -e
 

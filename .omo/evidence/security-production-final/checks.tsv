@@ -1,0 +1,12 @@
+security	secret_scan	pass	secret-scan.txt	No committed secret values found
+release	public_release_readiness_run	blocked	release-readiness/index.md	Public release preflight still has blockers
+release	public_release_ready	blocked	/Users/jakedom/Documents/cod code/.omo/evidence/security-production-final/release-readiness/summary.json	Remote/release/Homebrew/signing evidence is not complete
+eval	ceo_29_task_production_core	pass	/Users/jakedom/Documents/cod code/.omo/evidence/production-core-29-ceo-r1/summary.json	CEO Harness passed the current 29-task suite
+eval	full_fixture_catalog	pass	/Users/jakedom/Documents/cod code/.omo/evidence/benchmark-fixtures-31-r1/summary.json	Full deterministic task catalog scores cleanly
+comparison	all_agent_29_task_comparison	pass	/Users/jakedom/Documents/cod code/.omo/evidence/external-agent-production-core-29-final-result-retry-r1/summary.json	All configured agents have clean current-suite evidence
+provider	kimi_real_provider	pass	/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-r2/index.md	Kimi provider proof passed
+provider	codex_real_provider	pass	/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-codex-r1/index.md	Codex provider proof passed
+provider	openrouter_http_provider	blocked	/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/index.md	openrouter HTTP provider proof is blocked by setup
+provider	kimi-code_http_provider	blocked	/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/index.md	kimi-code HTTP provider proof is blocked by setup
+provider	minimax_http_provider	blocked	/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-minimax/index.md	minimax HTTP provider proof is blocked by setup
+endurance	thirty_loop_local_endurance	pass	/Users/jakedom/Documents/cod code/.omo/evidence/endurance-local-r3/index.md	30 local loops passed
