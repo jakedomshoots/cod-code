@@ -132,9 +132,21 @@ func Test_ProductionFinalizeScript_marksSetupBlockedCompetitorSmokeBlocked(t *te
 		"| competitor-smoke-command | pass |",
 		"| competitor-smoke | blocked |",
 		"Smoke summary has failed or setup-blocked competitors",
+		"Open `next-actions.md`",
 	} {
 		if !strings.Contains(index, want) {
 			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+
+	nextActions := readTextFile(t, filepath.Join(outputDir, "next-actions.md"))
+	for _, want := range []string{
+		"# Production Finalize Next Actions",
+		"Fix competitor setup before final comparison",
+		"ceo-packet production-finalize --workspace . --run-comparison",
+	} {
+		if !strings.Contains(nextActions, want) {
+			t.Fatalf("next-actions.md missing %q:\n%s", want, nextActions)
 		}
 	}
 
@@ -142,6 +154,8 @@ func Test_ProductionFinalizeScript_marksSetupBlockedCompetitorSmokeBlocked(t *te
 	for _, want := range []string{
 		`"status": "blocked"`,
 		`"competitor-smoke"`,
+		`"next_actions": {`,
+		`"required_action_count": 2`,
 	} {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("summary.json missing %q:\n%s", want, summary)

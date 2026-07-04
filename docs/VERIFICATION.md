@@ -40,6 +40,9 @@ Status date: 2026-07-03
 - Latest semantic competitor-smoke finalizer proof:
   - `sh scripts/production-finalize.sh --output-dir .omo/evidence/production-finalize-smoke-semantic-r2 --dist dist --skip-release-readiness --skip-provider-proofs --skip-production-readiness`
   - Result: command exits blocked because `competitor-smoke/summary.json` has `setup_blocked: 1`; the finalizer records `competitor-smoke-command: pass` and `competitor-smoke: blocked`.
+- Latest finalizer next-actions proof:
+  - `sh scripts/production-finalize.sh --output-dir .omo/evidence/production-finalize-next-actions-r1 --dist dist --skip-release-readiness --skip-provider-proofs --skip-production-readiness`
+  - Result: writes `next-actions.md` with the exact competitor setup and all-agent comparison follow-up commands, and records `next_actions.required_action_count`.
 - Latest release workflow guard:
   - `go test ./internal/cli -run Test_ReleaseWorkflow_publishesGitHubReleaseAssets -count=1`
   - Result: verifies the tag-triggered GitHub release workflow has write permission, derives the version from `GITHUB_REF_NAME`, runs local release plus verification, creates the GitHub Release, and attaches archives, checksums, and the manifest.

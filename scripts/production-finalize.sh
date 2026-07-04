@@ -322,9 +322,53 @@ if [ "$dry_run" -eq 1 ]; then
   overall="planned"
 fi
 
-python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" <<'PY'
+{
+  printf '%s\n' "# Production Finalize Next Actions"
+  printf '\n'
+  printf '%s\n' "Status: $overall"
+  printf '\n'
+  action_count=0
+  while IFS='	' read -r name status evidence detail; do
+    case "$status" in
+      pass|skipped) continue ;;
+    esac
+    action_count=$((action_count + 1))
+    case "$name" in
+      release-readiness)
+        printf '%s\n' "- Publish and verify release evidence: set public release metadata, then rerun \`sh scripts/release-readiness.sh --dist $(quote_command_arg "$dist") --output-dir $(quote_command_arg "$evidence_root/release-readiness-final")\`. Evidence: \`$evidence\`."
+        ;;
+      provider-openai)
+        printf '%s\n' "- Prove OpenAI HTTP provider: export \`OPENAI_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider openai --output-dir $(quote_command_arg "$evidence_root/provider-proof-openai") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$evidence\`."
+        ;;
+      provider-openrouter)
+        printf '%s\n' "- Prove OpenRouter HTTP provider: export \`OPENROUTER_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider openrouter --output-dir $(quote_command_arg "$evidence_root/provider-proof-openrouter") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$evidence\`."
+        ;;
+      provider-moonshot)
+        printf '%s\n' "- Prove Moonshot HTTP provider: export \`MOONSHOT_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider moonshot --output-dir $(quote_command_arg "$evidence_root/provider-proof-moonshot") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$evidence\`."
+        ;;
+      competitor-smoke|competitor-smoke-command)
+        printf '%s\n' "- Fix competitor setup before final comparison: inspect \`$output_dir/competitor-smoke/summary.json\`, install missing binaries or fix provider auth/quota, then rerun \`ceo-packet production-finalize --workspace . --dry-run\` or the full finalizer."
+        ;;
+      all-agent-29-comparison)
+        printf '%s\n' "- Run the final all-agent 29-task comparison after setup is clean: \`ceo-packet production-finalize --workspace . --run-comparison\`."
+        ;;
+      production-readiness)
+        printf '%s\n' "- Re-run the final readiness aggregate after release, provider, smoke, and comparison proof are clean: \`sh scripts/production-readiness.sh --dist $(quote_command_arg "$dist") --output-dir $(quote_command_arg "$evidence_root/production-readiness-final")\`. Evidence: \`$evidence\`."
+        ;;
+      *)
+        printf '%s\n' "- Resolve \`$name\`: $detail. Evidence: \`$evidence\`."
+        ;;
+    esac
+  done <"$output_dir/steps.tsv"
+  if [ "$action_count" -eq 0 ]; then
+    printf '%s\n' "- No next actions remain."
+  fi
+} >"$output_dir/next-actions.md"
+
+python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output_dir/next-actions.md" <<'PY'
 import json
 import sys
+import pathlib
 
 steps = []
 with open(sys.argv[1], "r", encoding="utf-8") as handle:
@@ -346,6 +390,13 @@ summary = {
     "skipped_steps": [step["name"] for step in steps if step["status"] == "skipped"],
     "secret_value_saved": False,
     "publish_actions_performed": False,
+    "next_actions": {
+        "path": "next-actions.md",
+        "required_action_count": sum(
+            1 for line in pathlib.Path(sys.argv[4]).read_text(encoding="utf-8").splitlines()
+            if line.startswith("- ") and line != "- No next actions remain."
+        ),
+    },
     "steps": steps,
 }
 with open(sys.argv[2], "w", encoding="utf-8") as handle:
@@ -365,6 +416,10 @@ PY
   while IFS='	' read -r name status evidence detail; do
     printf '| %s | %s | `%s` | %s |\n' "$name" "$status" "$evidence" "$detail"
   done <"$output_dir/steps.tsv"
+  printf '\n'
+  printf '%s\n' "## Next Actions"
+  printf '\n'
+  printf '%s\n' "Open \`next-actions.md\` for the exact remaining commands and setup steps."
   printf '\n'
   printf '%s\n' "## Commands"
   printf '\n'
