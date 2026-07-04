@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -290,6 +291,8 @@ func annotateReleaseProof(action map[string]any) {
 		BlockedCount             int      `json:"blocked_count"`
 		BlockedChecks            []string `json:"blocked_checks"`
 		SetupActions             string   `json:"setup_actions"`
+		SetupActionCount         int      `json:"setup_action_count"`
+		SetupActionsSHA256       string   `json:"setup_actions_sha256"`
 		OriginRemoteConfigured   bool     `json:"origin_remote_configured"`
 		GitHubAuthStatus         string   `json:"github_auth_status"`
 	}
@@ -305,6 +308,8 @@ func annotateReleaseProof(action map[string]any) {
 		"blocked_count":              summary.BlockedCount,
 		"blocked_checks":             summary.BlockedChecks,
 		"setup_actions":              summary.SetupActions,
+		"setup_action_count":         summary.SetupActionCount,
+		"setup_actions_sha256":       summary.SetupActionsSHA256,
 		"origin_remote_configured":   summary.OriginRemoteConfigured,
 		"github_auth_status":         summary.GitHubAuthStatus,
 	}
@@ -362,15 +367,17 @@ func annotateProviderProof(action map[string]any) {
 		return
 	}
 	var summary struct {
-		Status           string `json:"status"`
-		Provider         string `json:"provider"`
-		ProviderMode     string `json:"provider_mode"`
-		HTTPPreset       string `json:"http_preset"`
-		HTTPModel        string `json:"http_model"`
-		APIKeyEnv        string `json:"api_key_env"`
-		BlockedReason    string `json:"blocked_reason"`
-		SecretValueSaved bool   `json:"secret_value_saved"`
-		Artifacts        struct {
+		Status                  string            `json:"status"`
+		Provider                string            `json:"provider"`
+		ProviderMode            string            `json:"provider_mode"`
+		HTTPPreset              string            `json:"http_preset"`
+		HTTPModel               string            `json:"http_model"`
+		APIKeyEnv               string            `json:"api_key_env"`
+		BlockedReason           string            `json:"blocked_reason"`
+		SecretValueSaved        bool              `json:"secret_value_saved"`
+		SetupChecklistItemCount int               `json:"setup_checklist_item_count"`
+		SetupArtifactsSHA256    map[string]string `json:"setup_artifacts_sha256"`
+		Artifacts               struct {
 			Checklist   string `json:"checklist"`
 			Commands    string `json:"commands"`
 			EnvTemplate string `json:"env_template"`
@@ -389,6 +396,12 @@ func annotateProviderProof(action map[string]any) {
 		"api_key_env":        summary.APIKeyEnv,
 		"blocked_reason":     summary.BlockedReason,
 		"secret_value_saved": summary.SecretValueSaved,
+	}
+	if summary.SetupChecklistItemCount > 0 {
+		providerSummary["setup_checklist_item_count"] = summary.SetupChecklistItemCount
+	}
+	if len(summary.SetupArtifactsSHA256) > 0 {
+		providerSummary["setup_artifacts_sha256"] = summary.SetupArtifactsSHA256
 	}
 	if summary.Artifacts.Checklist != "" {
 		checklistPath := filepath.Join(filepath.Dir(summaryPath), summary.Artifacts.Checklist)
@@ -846,6 +859,12 @@ func writeReleaseProofText(builder *strings.Builder, action map[string]any) {
 	if setupActions := stringValue(summary["setup_actions_path"]); setupActions != "" {
 		fmt.Fprintf(builder, "  Setup actions: %s\n", setupActions)
 	}
+	if count := int(numberValue(summary["setup_action_count"])); count > 0 {
+		fmt.Fprintf(builder, "  Setup action count: %d\n", count)
+	}
+	if sha := stringValue(summary["setup_actions_sha256"]); sha != "" {
+		fmt.Fprintf(builder, "  Setup actions sha256: %s\n", sha)
+	}
 	if items, _ := summary["setup_action_items"].([]map[string]string); len(items) > 0 {
 		fmt.Fprintf(builder, "  Setup action items:\n")
 		for _, item := range items {
@@ -868,11 +887,17 @@ func writeProviderProofText(builder *strings.Builder, action map[string]any) {
 	if checklist := stringValue(summary["checklist_path"]); checklist != "" {
 		fmt.Fprintf(builder, "  Setup checklist: %s\n", checklist)
 	}
+	if count := int(numberValue(summary["setup_checklist_item_count"])); count > 0 {
+		fmt.Fprintf(builder, "  Setup checklist count: %d\n", count)
+	}
 	if items, _ := summary["checklist_items"].([]map[string]string); len(items) > 0 {
 		fmt.Fprintf(builder, "  Setup checklist items:\n")
 		for _, item := range items {
 			fmt.Fprintf(builder, "  %s. %s\n", item["step"], item["text"])
 		}
+	}
+	if hashes := stringStringMap(summary["setup_artifacts_sha256"]); len(hashes) > 0 {
+		fmt.Fprintf(builder, "  Setup artifact hashes: %s\n", renderStringMap(hashes))
 	}
 	if commands := stringValue(summary["commands_path"]); commands != "" {
 		fmt.Fprintf(builder, "  Setup command file: %s\n", commands)
@@ -992,6 +1017,36 @@ func stringValue(value any) string {
 func boolValue(value any) bool {
 	typed, _ := value.(bool)
 	return typed
+}
+
+func stringStringMap(value any) map[string]string {
+	switch typed := value.(type) {
+	case map[string]string:
+		return typed
+	case map[string]any:
+		result := map[string]string{}
+		for key, value := range typed {
+			if text := stringValue(value); text != "" {
+				result[key] = text
+			}
+		}
+		return result
+	default:
+		return nil
+	}
+}
+
+func renderStringMap(values map[string]string) string {
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	parts := make([]string, 0, len(keys))
+	for _, key := range keys {
+		parts = append(parts, key+"="+values[key])
+	}
+	return strings.Join(parts, " ")
 }
 
 func evidenceFileEntries(value any) []map[string]any {

@@ -93,6 +93,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
   "blocked_count": 2,
   "blocked_checks": ["git_remote", "github_release_assets"],
   "setup_actions": "setup-actions.md",
+  "setup_action_count": 2,
+  "setup_actions_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
   "origin_remote_configured": false,
   "github_auth_status": "pass"
 }`)
@@ -126,6 +128,12 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
   "api_key_env": "OPENAI_API_KEY",
   "blocked_reason": "missing_api_key_env",
   "secret_value_saved": false,
+  "setup_checklist_item_count": 3,
+  "setup_artifacts_sha256": {
+    "blocked.md": "2222222222222222222222222222222222222222222222222222222222222222",
+    "commands.sh": "3333333333333333333333333333333333333333333333333333333333333333",
+    "setup-checklist.md": "4444444444444444444444444444444444444444444444444444444444444444"
+  },
   "artifacts": {
     "checklist": "setup-checklist.md",
     "commands": "commands.sh",
@@ -159,10 +167,12 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Provider blocker: missing_api_key_env",
 		"Provider model: gpt-5",
 		"Setup checklist:",
+		"Setup checklist count: 3",
 		"provider-proof-openai",
 		"Setup checklist items:",
 		"1. Export `OPENAI_API_KEY` in the shell or local secret manager.",
 		"2. Keep the key out of git, logs, reports, and evidence folders.",
+		"Setup artifact hashes: blocked.md=2222222222222222222222222222222222222222222222222222222222222222 commands.sh=3333333333333333333333333333333333333333333333333333333333333333 setup-checklist.md=4444444444444444444444444444444444444444444444444444444444444444",
 		"Setup command file:",
 		"Evidence file:",
 		"sha256=",
@@ -174,6 +184,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Blocked checks: git_remote, github_release_assets",
 		"Setup actions:",
 		"release-readiness-final",
+		"Setup action count: 2",
+		"Setup actions sha256: 1111111111111111111111111111111111111111111111111111111111111111",
 		"Setup action items:",
 		"git_remote: configure an origin remote for the public repo.",
 		"github_release_assets: push a v* tag and upload release assets.",
@@ -216,10 +228,19 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if len(checklistItems) != 3 {
 		t.Fatalf("checklist_items = %#v, want three structured provider checklist items", providerSummary["checklist_items"])
 	}
+	if numberValue(providerSummary["setup_checklist_item_count"]) != 3 {
+		t.Fatalf("setup_checklist_item_count = %#v, want 3", providerSummary["setup_checklist_item_count"])
+	}
+	if hashes := stringStringMap(providerSummary["setup_artifacts_sha256"]); hashes["commands.sh"] != "3333333333333333333333333333333333333333333333333333333333333333" {
+		t.Fatalf("setup_artifacts_sha256 = %#v, want commands hash", providerSummary["setup_artifacts_sha256"])
+	}
 	releaseSummary, _ := body.Actions[1]["release_summary"].(map[string]any)
 	setupItems, _ := releaseSummary["setup_action_items"].([]any)
 	if len(setupItems) != 2 {
 		t.Fatalf("setup_action_items = %#v, want two structured release setup items", releaseSummary["setup_action_items"])
+	}
+	if numberValue(releaseSummary["setup_action_count"]) != 2 || releaseSummary["setup_actions_sha256"] != "1111111111111111111111111111111111111111111111111111111111111111" {
+		t.Fatalf("release setup proof = %#v, want count and sha", releaseSummary)
 	}
 	if blockedBy := stringSlice(body.Actions[3]["blocked_by"]); len(blockedBy) != 1 || blockedBy[0] != "competitor-smoke" {
 		t.Fatalf("comparison blocked_by = %#v, want competitor-smoke", body.Actions[3]["blocked_by"])
