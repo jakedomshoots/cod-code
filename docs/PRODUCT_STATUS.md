@@ -51,12 +51,12 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 
 ## Current Weak Spots
 
-- Public production readiness is still blocked by external setup, not by the local CLI gate.
-- Public release proof still needs real release metadata/assets: public release URL, GitHub release assets, remote Homebrew archive URL, and signatures or explicit checksum-only notes.
-- HTTP provider proof now targets the default public-readiness set: `OPENROUTER_API_KEY`, `KIMI_CODE_API_KEY`, and `MINIMAX_API_KEY`.
-- The secure OpenAI key setup app currently requires reauthentication before Codex can create/write an OpenAI key from this workspace.
-- `production-status` currently reports `Local ready: true`, `Public ready: false`, `External setup required: true`, five blocked public checks, zero runnable finalizer commands, and five commented blocked commands.
-- Public 10/10 production status is tracked in `docs/PRODUCTION_10_10.md`; the release/provider/finalizer gates must be green before making public production claims.
+- Public production readiness is green in the final evidence set.
+- Public release proof is complete for GitHub release `v0.1.0` with release assets, checksums, release manifest, and checksum-only release notes.
+- HTTP provider proof passes for the default public-readiness set: `OPENROUTER_API_KEY`, `KIMI_CODE_API_KEY`, and `MINIMAX_API_KEY`, with secret values omitted from evidence.
+- The secure OpenAI key setup app still requires reauthentication before Codex can create/write an OpenAI key from this workspace, but OpenAI HTTP is not part of the default public-readiness gate.
+- `production-status` currently reports `Production status: pass`, `Local ready: true`, `Public ready: true`, and zero blocked checks.
+- Public 10/10 production status is tracked in `docs/PRODUCTION_10_10.md`; release, provider, comparison, finalizer, and readiness gates are green.
 
 ## Market Roadmap Result 2026-07-03
 

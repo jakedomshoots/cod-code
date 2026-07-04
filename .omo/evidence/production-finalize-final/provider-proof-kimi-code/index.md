@@ -1,13 +1,13 @@
 # Provider Proof Evidence
 
-- Generated: 2026-07-04T20:09:25Z
+- Generated: 2026-07-04T20:48:30Z
 - Mode: live
-- Provider: minimax
+- Provider: kimi-code
 - Provider mode: http-provider
-- Evidence root: .omo/evidence/provider-proof-minimax
-- HTTP preset: minimax
-- HTTP model: MiniMax-M3
-- API key env: MINIMAX_API_KEY
+- Evidence root: .omo/evidence/production-finalize-final/provider-proof-kimi-code
+- HTTP preset: kimi-code
+- HTTP model: kimi-for-coding
+- API key env: KIMI_CODE_API_KEY
 - Timeout seconds: 600
 
 ## Task Results

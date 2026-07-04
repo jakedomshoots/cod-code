@@ -1,13 +1,13 @@
 # Provider Proof Evidence
 
-- Generated: 2026-07-04T20:09:25Z
+- Generated: 2026-07-04T20:46:19Z
 - Mode: live
-- Provider: minimax
+- Provider: openrouter
 - Provider mode: http-provider
-- Evidence root: .omo/evidence/provider-proof-minimax
-- HTTP preset: minimax
-- HTTP model: MiniMax-M3
-- API key env: MINIMAX_API_KEY
+- Evidence root: .omo/evidence/production-finalize-final/provider-proof-openrouter
+- HTTP preset: openrouter
+- HTTP model: openai/gpt-5
+- API key env: OPENROUTER_API_KEY
 - Timeout seconds: 600
 
 ## Task Results

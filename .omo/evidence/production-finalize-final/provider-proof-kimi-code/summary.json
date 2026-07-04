@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "status": "pass",
-  "provider": "minimax",
+  "provider": "kimi-code",
   "provider_mode": "http-provider",
-  "http_preset": "minimax",
-  "http_model": "MiniMax-M3",
-  "api_key_env": "MINIMAX_API_KEY",
+  "http_preset": "kimi-code",
+  "http_model": "kimi-for-coding",
+  "api_key_env": "KIMI_CODE_API_KEY",
   "command_script_secret_policy": "no_secret_assignment",
   "secret_value_saved": false,
   "artifacts": {

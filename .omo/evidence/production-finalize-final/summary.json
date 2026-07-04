@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "step_count": 8,
+  "blocked_steps": [],
+  "planned_steps": [],
+  "skipped_steps": [],
+  "secret_value_saved": false,
+  "publish_actions_performed": false,
+  "next_actions": {
+    "path": "next-actions.md",
+    "json_path": "next-actions.json",
+    "required_action_count": 0
+  },
+  "setup_actions": {
+    "path": "setup-actions.md",
+    "required_action_count": 5,
+    "sha256": "6ff2e544e30dcad53d7996a7d7a9ece92111cae8cf609a23ae7541a568fbf2b0"
+  },
+  "steps": [
+    {
+      "name": "release-readiness",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize-final/release-readiness-final/index.md",
+      "detail": "Command exited 0"
+    },
+    {
+      "name": "provider-openrouter",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize-final/provider-proof-openrouter/index.md",
+      "detail": "Command exited 0"
+    },
+    {
+      "name": "provider-kimi-code",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize-final/provider-proof-kimi-code/index.md",
+      "detail": "Command exited 0"
+    },
+    {
+      "name": "provider-minimax",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize-final/provider-proof-minimax/index.md",
+      "detail": "Command exited 0"
+    },
+    {
+      "name": "competitor-smoke-command",
+      "status": "pass",
+      "evidence": "competitor-smoke/summary.json",
+      "detail": "Command exited 0"
+    },
+    {
+      "name": "competitor-smoke",
+      "status": "pass",
+      "evidence": "competitor-smoke/summary.json",
+      "detail": "Smoke summary has no failed or setup-blocked competitors"
+    },
+    {
+      "name": "all-agent-29-comparison",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize-final/external-agent-production-core-29-final-result-retry-r1/summary.json",
+      "detail": "Command exited 0"
+    },
+    {
+      "name": "production-readiness",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize-final/production-readiness-final/index.md",
+      "detail": "Command exited 0"
+    }
+  ]
+}

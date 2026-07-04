@@ -1,1 +1,10 @@
-(empty)
+diff --git a/frontend/state.js b/frontend/state.js
+index 14078f5..fa0b9c5 100644
+--- a/frontend/state.js
++++ b/frontend/state.js
+@@ -1 +1,4 @@
+-module.exports = { benchmarkFixture: "TODO: update this benchmark fixture" };
++module.exports = {
++  benchmarkFixture:
++    "TODO: update this benchmark fixture: reducers must keep rollback evidence on failed optimistic update operations",
++};

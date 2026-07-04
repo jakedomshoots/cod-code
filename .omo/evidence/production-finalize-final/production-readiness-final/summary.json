@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "local_production_ready": true,
+  "public_production_ready": true,
+  "check_count": 12,
+  "blocked_count": 0,
+  "blocked_checks": [],
+  "launch_checklist": {
+    "path": "launch-checklist.md",
+    "sha256": "8acb9d531ad56375c9c1e9a2c5415f059f79ff815e384e7126a017569b21e106",
+    "required_action_count": 1,
+    "status": "pass"
+  },
+  "checks": [
+    {
+      "category": "security",
+      "name": "secret_scan",
+      "status": "pass",
+      "evidence": "secret-scan.txt",
+      "detail": "No committed secret values found"
+    },
+    {
+      "category": "release",
+      "name": "public_release_readiness_run",
+      "status": "pass",
+      "evidence": "release-readiness/index.md",
+      "detail": "Public release preflight passed"
+    },
+    {
+      "category": "release",
+      "name": "public_release_ready",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/production-finalize-final/production-readiness-final/release-readiness/summary.json",
+      "detail": "Public release evidence is green"
+    },
+    {
+      "category": "eval",
+      "name": "ceo_29_task_production_core",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/production-core-29-ceo-r1/summary.json",
+      "detail": "CEO Harness passed the current 29-task suite"
+    },
+    {
+      "category": "eval",
+      "name": "full_fixture_catalog",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/benchmark-fixtures-31-r1/summary.json",
+      "detail": "Full deterministic task catalog scores cleanly"
+    },
+    {
+      "category": "comparison",
+      "name": "all_agent_29_task_comparison",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/external-agent-production-core-29-final-result-retry-r1/summary.json",
+      "detail": "All configured agents have clean current-suite evidence"
+    },
+    {
+      "category": "provider",
+      "name": "kimi_real_provider",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-r2/index.md",
+      "detail": "Kimi provider proof passed"
+    },
+    {
+      "category": "provider",
+      "name": "codex_real_provider",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-codex-r1/index.md",
+      "detail": "Codex provider proof passed"
+    },
+    {
+      "category": "provider",
+      "name": "openrouter_http_provider",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/index.md",
+      "detail": "openrouter HTTP provider proof passed"
+    },
+    {
+      "category": "provider",
+      "name": "kimi-code_http_provider",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/index.md",
+      "detail": "kimi-code HTTP provider proof passed"
+    },
+    {
+      "category": "provider",
+      "name": "minimax_http_provider",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-minimax/index.md",
+      "detail": "minimax HTTP provider proof passed"
+    },
+    {
+      "category": "endurance",
+      "name": "thirty_loop_local_endurance",
+      "status": "pass",
+      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/endurance-local-r3/index.md",
+      "detail": "30 local loops passed"
+    }
+  ]
+}

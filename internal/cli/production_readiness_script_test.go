@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Test_ProductionReadinessScript_reportsCurrentPublicBlockers(t *testing.T) {
+func Test_ProductionReadinessScript_reportsCurrentPublicState(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {
 		t.Fatalf("resolve repo root: %v", err)
@@ -25,16 +25,15 @@ func Test_ProductionReadinessScript_reportsCurrentPublicBlockers(t *testing.T) {
 	)
 	cmd.Dir = root
 	output, err := cmd.CombinedOutput()
-	if err == nil {
-		t.Fatalf("production readiness unexpectedly passed with known public blockers:\n%s", string(output))
+	if err != nil {
+		t.Fatalf("production readiness failed with current public evidence: %v\n%s", err, string(output))
 	}
 
 	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
 	for _, want := range []string{
 		"# Production Readiness Evidence",
 		"Local production ready: true",
-		"Public production ready: false",
-		"Next public-production actions are in `launch-checklist.md`.",
+		"Public production ready: true",
 		"| comparison | all_agent_29_task_comparison | pass |",
 		"| provider | openrouter_http_provider |",
 		"| provider | kimi-code_http_provider |",
@@ -48,22 +47,18 @@ func Test_ProductionReadinessScript_reportsCurrentPublicBlockers(t *testing.T) {
 	checklist := readTextFile(t, filepath.Join(outputDir, "launch-checklist.md"))
 	for _, want := range []string{
 		"# Launch Checklist",
-		"Public production ready: false",
-		"sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness",
+		"Public production ready: true",
 	} {
 		if !strings.Contains(checklist, want) {
 			t.Fatalf("launch-checklist.md missing %q:\n%s", want, checklist)
 		}
 	}
-	if !strings.Contains(checklist, "Publish release proof") && !strings.Contains(checklist, "minimax") {
-		t.Fatalf("launch-checklist.md missing a known public blocker:\n%s", checklist)
-	}
 
 	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
 	for _, want := range []string{
-		`"status": "blocked"`,
+		`"status": "pass"`,
 		`"local_production_ready": true`,
-		`"public_production_ready": false`,
+		`"public_production_ready": true`,
 		`"launch_checklist": {`,
 		`"path": "launch-checklist.md"`,
 		`"required_action_count":`,

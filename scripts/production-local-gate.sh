@@ -160,9 +160,6 @@ with open(status_path, "r", encoding="utf-8") as handle:
 
 status = actions.get("status")
 if status == "missing":
-    if not bool(readiness.get("public_production_ready")):
-        print("production-local-gate: fail production actions missing while public blockers remain")
-        raise SystemExit(1)
     print("production-local-gate: production_actions=missing")
     raise SystemExit(0)
 

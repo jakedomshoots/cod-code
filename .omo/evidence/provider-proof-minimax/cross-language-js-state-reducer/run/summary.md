@@ -11,12 +11,12 @@ Runs: 1
 
 | Task | Run | Retry | Agent | Status | Score | Exit | Duration ms | Extra files | Changed files | Evidence |
 | --- | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| `cross-language-js-state-reducer` | 1 | 1 | CEO Harness | `setup_blocked` | 0/6 | 1 | 658 | 0 | `` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-minimax/cross-language-js-state-reducer/run/ceo_harness/score.json` |
+| `cross-language-js-state-reducer` | 1 | 1 | CEO Harness | `pass` | 6/6 | 0 | 9615 | 0 | `frontend/state.js, .omo/evidence/cross-language-js-state-reducer.md` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-minimax/cross-language-js-state-reducer/run/ceo_harness/score.json` |
 
-Passed: 0
+Passed: 1
 Partial: 0
 Failed: 0
 Timed out: 0
-Setup blocked: 1
+Setup blocked: 0
 Skipped: 0
 Incomplete evidence: 0
