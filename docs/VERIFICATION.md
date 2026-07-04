@@ -34,6 +34,9 @@ Status date: 2026-07-03
 - Latest production finalizer CLI dry-run:
   - `go run ./cmd/ceo-packet production-finalize --workspace . --dry-run --output-dir .omo/evidence/production-finalize-cli-dry-run-r1 --dist dist`
   - Result: CLI wrapper runs the guarded finalizer and writes a planned evidence packet without publishing or saving secrets.
+- Latest replay-safe production finalizer dry-run:
+  - `sh scripts/production-finalize.sh --dry-run --output-dir .omo/evidence/production-finalize-dry-run-r2 --evidence-root '.omo/evidence/root with spaces' --dist dist`
+  - Result: generated `commands.sh` shell-quotes paths with spaces and still writes planned evidence without publishing or saving secrets.
 - Latest release workflow guard:
   - `go test ./internal/cli -run Test_ReleaseWorkflow_publishesGitHubReleaseAssets -count=1`
   - Result: verifies the tag-triggered GitHub release workflow has write permission, derives the version from `GITHUB_REF_NAME`, runs local release plus verification, creates the GitHub Release, and attaches archives, checksums, and the manifest.

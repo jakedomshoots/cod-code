@@ -15,12 +15,14 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		t.Fatalf("resolve repo root: %v", err)
 	}
 	outputDir := filepath.Join(t.TempDir(), "production-finalize")
+	evidenceRoot := filepath.Join(t.TempDir(), "evidence root")
 
 	cmd := exec.Command(
 		"sh",
 		filepath.Join(root, "scripts", "production-finalize.sh"),
 		"--dry-run",
 		"--output-dir", outputDir,
+		"--evidence-root", evidenceRoot,
 		"--dist", filepath.Join(root, "dist"),
 	)
 	cmd.Dir = root
@@ -55,6 +57,7 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		"--comparison-smoke",
 		"--local-agent-benchmark-task production-core",
 		"scripts/production-readiness.sh",
+		"evidence root/provider-proof-openai",
 	} {
 		if !strings.Contains(commands, want) {
 			t.Fatalf("commands.sh missing %q:\n%s", want, commands)

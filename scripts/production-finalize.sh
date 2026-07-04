@@ -146,8 +146,33 @@ mkdir -p "$output_dir"
 : >"$output_dir/commands.sh"
 chmod +x "$output_dir/commands.sh"
 
+quote_command_arg() {
+  case "$1" in
+    '')
+      printf "%s" "''"
+      ;;
+    *[!abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_./:=,+@%-]*)
+      printf "'"
+      printf "%s" "$1" | sed "s/'/'\\\\''/g"
+      printf "'"
+      ;;
+    *)
+      printf "%s" "$1"
+      ;;
+  esac
+}
+
 write_command() {
-  printf '%s\n' "$*" >>"$output_dir/commands.sh"
+  first=1
+  for arg in "$@"; do
+    if [ "$first" -eq 1 ]; then
+      first=0
+    else
+      printf ' ' >>"$output_dir/commands.sh"
+    fi
+    quote_command_arg "$arg" >>"$output_dir/commands.sh"
+  done
+  printf '\n' >>"$output_dir/commands.sh"
 }
 
 add_step() {
@@ -164,7 +189,7 @@ run_step() {
   shift 2
   step_dir="$output_dir/$name"
   mkdir -p "$step_dir"
-  write_command "$*"
+  write_command "$@"
   if [ "$dry_run" -eq 1 ]; then
     add_step "$name" "planned" "$evidence_rel" "Dry-run only"
     return 0
@@ -239,7 +264,18 @@ if [ "$run_comparison" -eq 1 ]; then
     overall="blocked"
   fi
 else
-  write_command "go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-29-final --timeout-seconds $comparison_timeout_seconds --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '[\"sh\",\"$root/scripts/benchmark-model-command.sh\"]'"
+  write_command go run ./cmd/ceo-eval \
+    --local-agent-benchmark \
+    --local-agents ceo_harness,codex_cli,opencode,pi \
+    --local-agent-benchmark-task production-core \
+    --local-agent-benchmark-repeat 1 \
+    --local-agent-benchmark-concurrency 4 \
+    --ceo-binary ./bin/ceo-packet \
+    --tasks evals/tasks \
+    --output-dir .omo/evidence/external-agent-production-core-29-final \
+    --timeout-seconds "$comparison_timeout_seconds" \
+    --ceo-benchmark-mode model-command \
+    --ceo-benchmark-model-command-json "[\"sh\",\"$root/scripts/benchmark-model-command.sh\"]"
   add_step "all-agent-29-comparison" "planned" "commands.sh" "Use --run-comparison to execute the expensive all-agent suite"
   if [ "$dry_run" -eq 0 ]; then
     overall="blocked"
