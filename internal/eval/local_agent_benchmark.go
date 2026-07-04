@@ -32,19 +32,21 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 	agentIDs := normalizeLocalAgentIDs(req.Agents)
 	repeatCount := normalizeLocalAgentBenchmarkRepeat(req.RepeatCount)
 	concurrency := normalizeLocalAgentBenchmarkConcurrency(req.Concurrency)
+	timeoutRetries := normalizeLocalAgentBenchmarkTimeoutRetries(req.TimeoutRetries)
 	multiRun := len(tasks) > 1 || repeatCount > 1
 	summary := LocalAgentBenchmarkSummary{
-		SchemaVersion: localAgentSchemaVersion,
-		Mode:          localAgentBenchmarkMode,
-		TaskID:        tasks[0].ID,
-		TaskTitle:     tasks[0].Title,
-		TaskIDs:       localAgentBenchmarkTaskIDs(tasks),
-		TaskCount:     len(tasks),
-		RepeatCount:   repeatCount,
-		Concurrency:   concurrency,
-		RunCount:      len(tasks) * repeatCount * len(agentIDs),
-		AgentCount:    len(agentIDs),
-		Results:       make([]LocalAgentBenchmarkResult, 0, len(tasks)*repeatCount*len(agentIDs)),
+		SchemaVersion:  localAgentSchemaVersion,
+		Mode:           localAgentBenchmarkMode,
+		TaskID:         tasks[0].ID,
+		TaskTitle:      tasks[0].Title,
+		TaskIDs:        localAgentBenchmarkTaskIDs(tasks),
+		TaskCount:      len(tasks),
+		RepeatCount:    repeatCount,
+		Concurrency:    concurrency,
+		TimeoutRetries: timeoutRetries,
+		RunCount:       len(tasks) * repeatCount * len(agentIDs),
+		AgentCount:     len(agentIDs),
+		Results:        make([]LocalAgentBenchmarkResult, 0, len(tasks)*repeatCount*len(agentIDs)),
 	}
 	jobs, err := buildLocalAgentBenchmarkJobs(tasks, agentIDs, req, repeatCount, multiRun)
 	if err != nil {
@@ -198,10 +200,35 @@ func normalizeLocalAgentBenchmarkConcurrency(concurrency int) int {
 	return concurrency
 }
 
+func normalizeLocalAgentBenchmarkTimeoutRetries(retries int) int {
+	if retries < 0 {
+		return 0
+	}
+	return retries
+}
+
 func runLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest, task Task, spec localAgentSpec, attempt int, multiRun bool) LocalAgentBenchmarkResult {
-	resultDir := localAgentBenchmarkResultDir(req.OutputDir, task, spec, attempt, multiRun)
+	maxRunAttempts := normalizeLocalAgentBenchmarkTimeoutRetries(req.TimeoutRetries) + 1
+	prior := make([]RetryAttempt, 0, maxRunAttempts-1)
+	for runAttempt := 1; runAttempt <= maxRunAttempts; runAttempt++ {
+		result := runLocalAgentBenchmarkAttempt(ctx, req, task, spec, attempt, multiRun, runAttempt, maxRunAttempts)
+		result.PriorAttempts = append([]RetryAttempt(nil), prior...)
+		if result.Status != localAgentStatusTimeout || runAttempt == maxRunAttempts {
+			if runAttempt > 1 && result.Status == localAgentStatusPass {
+				result.Note = fmt.Sprintf("%s after %d timed-out attempt(s)", result.Note, len(prior))
+			}
+			return result
+		}
+		prior = append(prior, retryAttemptFromResult(result))
+	}
+	return LocalAgentBenchmarkResult{}
+}
+
+func runLocalAgentBenchmarkAttempt(ctx context.Context, req LocalAgentBenchmarkRequest, task Task, spec localAgentSpec, attempt int, multiRun bool, runAttempt int, maxRunAttempts int) LocalAgentBenchmarkResult {
+	resultDir := localAgentBenchmarkAttemptResultDir(req.OutputDir, task, spec, attempt, multiRun, runAttempt, maxRunAttempts)
 	workspaceDir := filepath.Join(resultDir, "workspace")
 	result := newLocalAgentBenchmarkResult(spec, task, attempt, workspaceDir, resultDir)
+	result.RunAttempt = runAttempt
 	if err := prepareLocalAgentBenchmarkWorkspace(ctx, workspaceDir, task, spec.workspaceConfig); err != nil {
 		result.Status = localAgentStatusFail
 		result.Error = err.Error()
@@ -267,6 +294,27 @@ func runLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest,
 	result.EvidenceStatus = localAgentBenchmarkEvidenceStatus(result.Status, result.FailedScoreChecks)
 	result.Note = localAgentBenchmarkNote(result.Status)
 	return result
+}
+
+func localAgentBenchmarkAttemptResultDir(outputDir string, task Task, spec localAgentSpec, attempt int, multiRun bool, runAttempt int, maxRunAttempts int) string {
+	base := localAgentBenchmarkResultDir(outputDir, task, spec, attempt, multiRun)
+	if maxRunAttempts <= 1 {
+		return base
+	}
+	return filepath.Join(base, fmt.Sprintf("attempt-%02d", runAttempt))
+}
+
+func retryAttemptFromResult(result LocalAgentBenchmarkResult) RetryAttempt {
+	return RetryAttempt{
+		RunAttempt:     result.RunAttempt,
+		Status:         result.Status,
+		EvidenceStatus: result.EvidenceStatus,
+		ScorePath:      result.ScorePath,
+		StdoutPath:     result.StdoutPath,
+		StderrPath:     result.StderrPath,
+		TimingPath:     result.TimingPath,
+		Note:           result.Note,
+	}
 }
 
 func newLocalAgentBenchmarkResult(spec localAgentSpec, task Task, attempt int, workspaceDir string, resultDir string) LocalAgentBenchmarkResult {

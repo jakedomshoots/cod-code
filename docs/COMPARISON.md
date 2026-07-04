@@ -107,6 +107,23 @@ Latest CEO-only production-core result:
 
 Use `--concurrency N` on long comparisons to shard independent task/agent runs while keeping the final summary in planned task order.
 
+Use bounded timeout retries when comparing flaky external CLIs:
+
+```sh
+go run ./cmd/ceo-eval \
+  --local-agent-benchmark \
+  --local-agent-benchmark-task production-core \
+  --local-agent-benchmark-timeout-retries 1 \
+  --local-agents ceo_harness,codex_cli,opencode,pi \
+  --ceo-binary ./bin/ceo-packet \
+  --tasks evals/tasks \
+  --output-dir .omo/evidence/external-agent-production-core-29-retry \
+  --concurrency 4 \
+  --timeout-seconds 240
+```
+
+Retries only apply to timed-out runs. Each retry gets its own `attempt-XX` evidence folder, and the summary keeps prior timed-out attempts under `prior_attempts`.
+
 Run the focused cross-language suite against CEO Harness:
 
 ```sh
@@ -139,6 +156,12 @@ Latest focused multi-file external result:
 | Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | `multi-file-operator-safety-flow` | pass 13/13 | pass 13/13 | pass 13/13 | pass 13/13 | `.omo/evidence/external-agent-operator-safety-flow-r1/summary.json` |
+
+Latest timeout-retry evidence:
+
+| Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| 5 timeout-heavy current-suite tasks with 1 retry | 5/5 pass | 5/5 pass | 0/5 pass, 5 exhausted timeouts | 5/5 pass | `.omo/evidence/external-agent-timeout-retry-r1/summary.json` |
 
 Latest saved benchmark result:
 

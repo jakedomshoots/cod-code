@@ -110,15 +110,17 @@ func writeLocalAgentBenchmarkMarkdown(path string, summary LocalAgentBenchmarkSu
 	fmt.Fprintf(&builder, "Tasks: %d\n", summary.TaskCount)
 	fmt.Fprintf(&builder, "Repeats: %d\n", summary.RepeatCount)
 	fmt.Fprintf(&builder, "Concurrency: %d\n", summary.Concurrency)
+	fmt.Fprintf(&builder, "Timeout retries: %d\n", summary.TimeoutRetries)
 	fmt.Fprintf(&builder, "Runs: %d\n\n", summary.RunCount)
-	fmt.Fprintf(&builder, "| Task | Run | Agent | Status | Score | Exit | Duration ms | Extra files | Changed files | Evidence |\n")
-	fmt.Fprintf(&builder, "| --- | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | --- |\n")
+	fmt.Fprintf(&builder, "| Task | Run | Retry | Agent | Status | Score | Exit | Duration ms | Extra files | Changed files | Evidence |\n")
+	fmt.Fprintf(&builder, "| --- | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | --- |\n")
 	for _, result := range summary.Results {
 		fmt.Fprintf(
 			&builder,
-			"| `%s` | %d | %s | `%s` | %d/%d | %d | %d | %d | `%s` | `%s` |\n",
+			"| `%s` | %d | %d | %s | `%s` | %d/%d | %d | %d | %d | `%s` | `%s` |\n",
 			result.TaskID,
 			result.Attempt,
+			result.RunAttempt,
 			result.Name,
 			result.Status,
 			result.PassedChecks,

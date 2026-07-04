@@ -31,6 +31,7 @@ type cliOptions struct {
 	localAgentBenchmarkTask           string
 	localAgentBenchmarkRepeat         int
 	localAgentBenchmarkConcurrency    int
+	localAgentBenchmarkTimeoutRetries int
 	ceoHarnessBinary                  string
 	ceoBenchmarkMode                  string
 	ceoBenchmarkModelCommand          string
@@ -201,6 +202,7 @@ func runLocalAgentBenchmarkCLI(ctx context.Context, out io.Writer, opts cliOptio
 		BenchmarkTaskID:                   opts.localAgentBenchmarkTask,
 		RepeatCount:                       opts.localAgentBenchmarkRepeat,
 		Concurrency:                       opts.localAgentBenchmarkConcurrency,
+		TimeoutRetries:                    opts.localAgentBenchmarkTimeoutRetries,
 	})
 	if err != nil {
 		return err

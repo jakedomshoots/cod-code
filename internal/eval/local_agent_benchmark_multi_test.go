@@ -81,6 +81,53 @@ func Test_RunLocalAgentBenchmark_runs_jobs_in_parallel_when_concurrency_is_set(t
 	}
 }
 
+func Test_RunLocalAgentBenchmark_retries_timed_out_agent_run(t *testing.T) {
+	// Given
+	binDir := t.TempDir()
+	markerPath := filepath.Join(t.TempDir(), "first-run-marker")
+	writeExecutableContent(t, filepath.Join(binDir, "codex"), retryAfterTimeoutAgentScript())
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	t.Setenv("BENCHMARK_RETRY_MARKER", markerPath)
+	root := t.TempDir()
+	tasksDir := filepath.Join(root, "tasks")
+	writeTaskSpec(t, tasksDir, `{
+		"id":"docs-one",
+		"category":"docs",
+		"title":"Update one",
+		"objective":"Refresh docs one.",
+		"required_changed_files":["docs/ONE.md"],
+		"required_artifacts":[".omo/evidence/docs-one.md"],
+		"required_diff_terms":["one-term"],
+		"required_report_fields":["changed_files"]
+	}`)
+
+	// When
+	summary, err := RunLocalAgentBenchmark(context.Background(), LocalAgentBenchmarkRequest{
+		TasksDir:        tasksDir,
+		OutputDir:       filepath.Join(root, "benchmark"),
+		TimeoutSeconds:  1,
+		Agents:          []string{"codex_cli"},
+		BenchmarkTaskID: "docs-one",
+		TimeoutRetries:  1,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
+	}
+	if summary.TimeoutRetries != 1 || summary.RunCount != 1 || summary.Passed != 1 || summary.TimedOut != 0 {
+		t.Fatalf("summary = %+v, want one final passing result after retry", summary)
+	}
+	result := summary.Results[0]
+	if result.RunAttempt != 2 || result.Status != localAgentStatusPass {
+		t.Fatalf("result = %+v, want second run attempt pass", result)
+	}
+	if len(result.PriorAttempts) != 1 || result.PriorAttempts[0].Status != localAgentStatusTimeout {
+		t.Fatalf("prior attempts = %+v, want first timeout preserved", result.PriorAttempts)
+	}
+	requireFile(t, filepath.Join(root, "benchmark", "codex_cli", "attempt-01", "timing.txt"))
+	requireFile(t, filepath.Join(root, "benchmark", "codex_cli", "attempt-02", "score.json"))
+}
+
 func Test_LocalAgentBenchmarkTasks_expands_market_parity_core_suite(t *testing.T) {
 	// Given
 	root := t.TempDir()
@@ -331,6 +378,21 @@ if [ -f docs/TWO.md ]; then
   mkdir -p .omo/evidence
   printf 'agent evidence\n' > .omo/evidence/docs-two.md
 fi
+printf 'done\n'
+`
+}
+
+func retryAfterTimeoutAgentScript() string {
+	return `#!/bin/sh
+set -eu
+marker="${BENCHMARK_RETRY_MARKER:?}"
+if [ ! -f "$marker" ]; then
+  : > "$marker"
+  sleep 3
+fi
+printf '# Benchmark Fixture\n\none-term\n' > docs/ONE.md
+mkdir -p .omo/evidence
+printf 'agent evidence\n' > .omo/evidence/docs-one.md
 printf 'done\n'
 `
 }
