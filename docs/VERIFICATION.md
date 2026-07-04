@@ -18,6 +18,9 @@ Status date: 2026-07-03
   - `sh scripts/secret-scan.sh`
   - `sh -n` over shell scripts when ShellCheck is unavailable.
   - `sh scripts/strict-checks.sh`
+- Latest production-readiness aggregate gate:
+  - `sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-r1`
+  - Result: local production checks pass; public production readiness remains blocked until public release, HTTP provider, and 29-task all-agent evidence are complete.
 - Latest live external-agent comparison:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-25-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 100 runs / 99 pass / 0 partial / 0 fail / 1 timed out / 0 skipped / 1 incomplete evidence.
@@ -129,6 +132,7 @@ Status date: 2026-07-03
 - `sh scripts/verify-release.sh dist`
 - `sh scripts/release-preflight.sh dist` blocks public release claims when remote URL, public release URL, Homebrew URL, and signature or checksum-only notes are missing.
 - `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1` writes a blocked/pass public-release evidence packet without publishing anything.
+- `sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-r1` writes one release/provider/eval/security/endurance/comparison readiness packet without publishing, pushing, tagging, uploading, or calling paid providers.
 - `shasum -a 256 -c checksums.txt` from `dist/`
 - Temporary install QA via `scripts/install-local.sh`
 - Local markdown link check from [Trust Surface](TRUST.md)

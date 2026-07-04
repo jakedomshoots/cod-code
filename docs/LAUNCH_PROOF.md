@@ -43,6 +43,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - First-class Codex provider proof evidence: `.omo/evidence/provider-proof-codex-r1/index.md`
 - HTTP provider blocked-key evidence: `.omo/evidence/provider-proof-openrouter-blocked-r1/index.md`
 - Public release readiness evidence: `.omo/evidence/release-readiness-r1/index.md`
+- Production-readiness aggregate evidence: `.omo/evidence/production-readiness-r1/index.md`
 - Endurance eval evidence: `.omo/evidence/endurance-local-r1/index.md`
 - Longer endurance eval evidence: `.omo/evidence/endurance-local-r2/index.md`
 - Extended endurance eval evidence: `.omo/evidence/endurance-local-r3/index.md`

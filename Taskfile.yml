@@ -75,6 +75,11 @@ tasks:
     cmds:
       - sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
 
+  production:readiness:
+    desc: Write the full production-readiness evidence packet without publishing or calling paid providers
+    cmds:
+      - sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness
+
   eval:nightly:
     desc: Run the no-key nightly eval proof suite
     cmds:

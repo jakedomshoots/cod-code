@@ -111,6 +111,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Added release manifest and verifier through `dist/release-manifest.json` and `scripts/verify-release.sh`.
 - Added public release preflight through `scripts/release-preflight.sh`; it blocks public claims until remote URL, Homebrew URL, and signature/checksum posture are explicit.
 - Added public release readiness evidence through `scripts/release-readiness.sh`; it writes `index.md`, `summary.json`, preflight output, git remote state, and GitHub auth state without publishing anything.
+- Added production-readiness aggregate evidence through `scripts/production-readiness.sh`; it summarizes release, provider, eval, security, endurance, and all-agent comparison proof in one packet without publishing or calling paid providers.
 - Strict checks now run `sh -n` across shell scripts even when ShellCheck is not installed; ShellCheck remains an optional deeper lint layer.
 - Rollback now covers created-file model patches as well as normal replacement patches; created-file rollback refuses to delete if the file content changed after creation.
 - Default `--help` is now compact and points advanced users to `--help-advanced`; the full reference remains available without loading the first screen with every flag.
