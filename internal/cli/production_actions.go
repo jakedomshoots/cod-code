@@ -658,9 +658,29 @@ func renderProductionActionCommandsOnly(report productionActionsReport) string {
 			}
 			builder.WriteString("\n")
 		}
+		writeActionSetupComments(&builder, action)
 		fmt.Fprintf(&builder, "%s\n", shellCommandLine(command))
 	}
 	return builder.String()
+}
+
+func writeActionSetupComments(builder *strings.Builder, action map[string]any) {
+	if summary, _ := action["release_summary"].(map[string]any); summary != nil {
+		if items, _ := summary["setup_action_items"].([]map[string]string); len(items) > 0 {
+			fmt.Fprintf(builder, "# setup actions:\n")
+			for _, item := range items {
+				fmt.Fprintf(builder, "# - %s: %s\n", item["check"], item["text"])
+			}
+		}
+	}
+	if summary, _ := action["provider_summary"].(map[string]any); summary != nil {
+		if items, _ := summary["checklist_items"].([]map[string]string); len(items) > 0 {
+			fmt.Fprintf(builder, "# setup checklist:\n")
+			for _, item := range items {
+				fmt.Fprintf(builder, "# %s. %s\n", item["step"], item["text"])
+			}
+		}
+	}
 }
 
 func writeReleaseProofText(builder *strings.Builder, action map[string]any) {

@@ -387,6 +387,9 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	text = out.String()
 	for _, want := range []string{
 		"# provider-openai [provider_proof] missing env: OPENAI_API_KEY state: missing_env",
+		"# setup checklist:",
+		"# 1. Export `OPENAI_API_KEY` in the shell or local secret manager.",
+		"# 2. Keep the key out of git, logs, reports, and evidence folders.",
 		"sh scripts/provider-proof.sh --provider openai",
 	} {
 		if !strings.Contains(text, want) {
@@ -395,6 +398,23 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	if strings.Contains(text, "secret-value") || strings.Contains(text, "Production actions:") {
 		t.Fatalf("commands-only output leaked value or included normal header:\n%s", text)
+	}
+
+	out.Reset()
+	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--action-id", "release-readiness", "--commands-only"}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	text = out.String()
+	for _, want := range []string{
+		"# release-readiness [release_proof] state: setup_blocked",
+		"# setup actions:",
+		"# - git_remote: configure an origin remote for the public repo.",
+		"# - github_release_assets: push a v* tag and upload release assets.",
+		"sh scripts/release-readiness.sh",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("release commands-only text missing %q:\n%s", want, text)
+		}
 	}
 
 	t.Setenv("OPENAI_API_KEY", "test-key")
