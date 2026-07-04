@@ -23,12 +23,13 @@ type productionStatusReport struct {
 }
 
 type productionChecklistStatus struct {
-	Path                string `json:"path"`
-	JSONPath            string `json:"json_path,omitempty"`
-	SetupPath           string `json:"setup_path,omitempty"`
-	SHA256              string `json:"sha256,omitempty"`
-	RequiredActionCount int    `json:"required_action_count"`
-	Status              string `json:"status"`
+	Path                string         `json:"path"`
+	JSONPath            string         `json:"json_path,omitempty"`
+	SetupPath           string         `json:"setup_path,omitempty"`
+	SHA256              string         `json:"sha256,omitempty"`
+	RequiredActionCount int            `json:"required_action_count"`
+	ActionStateCounts   map[string]int `json:"action_state_counts,omitempty"`
+	Status              string         `json:"status"`
 }
 
 func runProductionStatus(out io.Writer, opts options) error {
@@ -181,11 +182,29 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 	}
 	if raw.NextActions.JSONPath != "" {
 		status.JSONPath = filepath.Join(finalizerDir, raw.NextActions.JSONPath)
+		if counts, err := productionActionStateCountsFromJSON(status.JSONPath); err == nil {
+			status.ActionStateCounts = counts
+		}
 	}
 	if raw.SetupActions != nil && raw.SetupActions.Path != "" {
 		status.SetupPath = filepath.Join(finalizerDir, raw.SetupActions.Path)
 	}
 	return status, nil
+}
+
+func productionActionStateCountsFromJSON(path string) (map[string]int, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var raw struct {
+		Actions []map[string]any `json:"actions"`
+	}
+	if err := json.Unmarshal(content, &raw); err != nil {
+		return nil, err
+	}
+	annotated := annotateProductionActions(raw.Actions, filepath.Dir(path))
+	return countProductionActionStates(annotated), nil
 }
 
 func productionFinalizerSummaryHasSkippedSteps(path string) bool {
@@ -238,6 +257,9 @@ func renderProductionStatusText(report productionStatusReport) string {
 		fmt.Fprintf(&builder, "Finalizer next actions: %s (%d actions)\n", report.FinalizerNextActions.Path, report.FinalizerNextActions.RequiredActionCount)
 		if report.FinalizerNextActions.JSONPath != "" {
 			fmt.Fprintf(&builder, "Finalizer actions JSON: %s\n", report.FinalizerNextActions.JSONPath)
+		}
+		if len(report.FinalizerNextActions.ActionStateCounts) > 0 {
+			fmt.Fprintf(&builder, "Finalizer action states: %s\n", renderActionStateCounts(report.FinalizerNextActions.ActionStateCounts))
 		}
 		if report.FinalizerNextActions.SetupPath != "" {
 			fmt.Fprintf(&builder, "Finalizer setup actions: %s\n", report.FinalizerNextActions.SetupPath)

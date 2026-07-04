@@ -91,6 +91,33 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
     "path": "setup-actions.md"
   }
 }`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "next-actions.json"), `{
+  "status": "blocked",
+  "actions": [
+    {
+      "id": "provider-openai",
+      "kind": "provider_proof",
+      "required_env": "OPENAI_API_KEY",
+      "evidence": "`+filepath.ToSlash(filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "index.md"))+`"
+    },
+    {
+      "id": "production-readiness",
+      "kind": "final_readiness",
+      "status": "blocked"
+    }
+  ]
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "summary.json"), `{
+  "status": "blocked",
+  "provider": "openai",
+  "provider_mode": "http-provider",
+  "http_preset": "openai",
+  "http_model": "gpt-5",
+  "api_key_env": "OPENAI_API_KEY",
+  "blocked_reason": "missing_api_key_env",
+  "secret_value_saved": false,
+  "artifacts": {}
+}`)
 
 	var out bytes.Buffer
 	if err := Run(context.Background(), &out, []string{"production-status", "--workspace", root, "--format", "text"}); err != nil {
@@ -103,6 +130,7 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 		"production-finalize-r1/next-actions.md (2 actions)",
 		"Finalizer actions JSON:",
 		"production-finalize-r1/next-actions.json",
+		"Finalizer action states: missing_env=1 waiting=1",
 		"Finalizer setup actions:",
 		"production-finalize-r1/setup-actions.md",
 		"Next action: open ",
