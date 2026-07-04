@@ -211,9 +211,10 @@ http_blocked=0
 for provider in openai openrouter moonshot; do
   index="$evidence_root/provider-proof-$provider/index.md"
   blocked_index="$evidence_root/provider-proof-$provider-blocked-r1/index.md"
+  blocked_summary="$evidence_root/provider-proof-$provider-blocked-r1/summary.json"
   if provider_index_has_pass "$index"; then
     add_check "provider" "${provider}_http_provider" "pass" "$index" "$provider HTTP provider proof passed"
-  elif provider_index_has_blocked "$blocked_index"; then
+  elif provider_index_has_blocked "$blocked_index" && json_check "$blocked_summary" "data.get('status') == 'blocked' and data.get('blocked_reason') == 'missing_api_key_env' and data.get('secret_value_saved') is False"; then
     add_check "provider" "${provider}_http_provider" "blocked" "$blocked_index" "$provider HTTP provider proof is blocked by setup"
     http_blocked=1
   else

@@ -152,6 +152,34 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
 	if !strings.Contains(blocked, "OPENROUTER_API_KEY") {
 		t.Fatalf("blocked.md missing key guidance:\n%s", blocked)
 	}
+	for _, path := range []string{
+		filepath.Join(outputDir, "summary.json"),
+		filepath.Join(outputDir, "env.template"),
+		filepath.Join(outputDir, "commands.sh"),
+		filepath.Join(outputDir, "setup-checklist.md"),
+	} {
+		requireTextFile(t, path)
+	}
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	for _, want := range []string{
+		`"status": "blocked"`,
+		`"provider": "openrouter"`,
+		`"api_key_env": "OPENROUTER_API_KEY"`,
+		`"blocked_reason": "missing_api_key_env"`,
+		`"secret_value_saved": false`,
+	} {
+		if !strings.Contains(summary, want) {
+			t.Fatalf("summary.json missing %q:\n%s", want, summary)
+		}
+	}
+	envTemplate := readTextFile(t, filepath.Join(outputDir, "env.template"))
+	if !strings.Contains(envTemplate, "OPENROUTER_API_KEY=") {
+		t.Fatalf("env.template missing OPENROUTER_API_KEY:\n%s", envTemplate)
+	}
+	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
+	if !strings.Contains(commands, "scripts/provider-proof.sh --provider openrouter") {
+		t.Fatalf("commands.sh missing rerun command:\n%s", commands)
+	}
 }
 
 func Test_ProviderProofScript_liveFailsWhenBenchmarkSummaryFails(t *testing.T) {

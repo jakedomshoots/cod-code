@@ -282,6 +282,67 @@ write_plan() {
   append_result "$task_id" "planned" "$task_id/plan.md"
 }
 
+write_http_setup_blocked() {
+  {
+    printf '%s\n' "# Provider Proof Blocked"
+    printf '\n'
+    printf '%s\n' "Provider \`$provider\` requires \`$api_key_env\` for HTTP benchmark mode."
+    printf '%s\n' "Set the environment variable, then rerun this command. The key value is not printed or saved."
+    printf '\n'
+    printf '%s\n' "## Next Command"
+    printf '\n'
+    printf '%s\n' "\`\`\`sh"
+    printf '%s\n' "$api_key_env=<redacted> sh scripts/provider-proof.sh --provider $provider --output-dir .omo/evidence/provider-proof-$provider"
+    printf '%s\n' "\`\`\`"
+  } >"$output_dir/blocked.md"
+
+  {
+    printf '%s\n' "$api_key_env="
+    printf '%s\n' "CEO_PROVIDER_PROOF_$(printf '%s' "$provider" | tr '[:lower:]' '[:upper:]')_MODEL=$http_model"
+  } >"$output_dir/env.template"
+
+  {
+    printf '%s\n' "#!/bin/sh"
+    printf '%s\n' "set -eu"
+    printf '\n'
+    printf '%s\n' "# Fill $api_key_env in the environment before running."
+    printf '%s\n' "sh scripts/provider-proof.sh --provider $provider --output-dir .omo/evidence/provider-proof-$provider --timeout-seconds $timeout_seconds"
+    printf '%s\n' "sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness"
+  } >"$output_dir/commands.sh"
+  chmod +x "$output_dir/commands.sh"
+
+  {
+    printf '%s\n' "# Provider Setup Checklist"
+    printf '\n'
+    printf '%s\n' "1. Export \`$api_key_env\` in the shell or local secret manager."
+    printf '%s\n' "2. Keep the key out of git, logs, reports, and evidence folders."
+    printf '%s\n' "3. Run \`commands.sh\` from the repo root."
+    printf '%s\n' "4. Confirm \`index.md\` says \`- Overall: pass\`."
+    printf '%s\n' "5. Re-run production readiness."
+  } >"$output_dir/setup-checklist.md"
+
+  cat >"$output_dir/summary.json" <<JSON
+{
+  "schema_version": 1,
+  "status": "blocked",
+  "provider": "$provider",
+  "provider_mode": "$provider_mode",
+  "http_preset": "$http_preset",
+  "http_model": "$http_model",
+  "api_key_env": "$api_key_env",
+  "blocked_reason": "missing_api_key_env",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md",
+    "blocked": "blocked.md",
+    "env_template": "env.template",
+    "commands": "commands.sh",
+    "checklist": "setup-checklist.md"
+  }
+}
+JSON
+}
+
 run_task() {
   task_id="$1"
   task_dir="$output_dir/$task_id"
@@ -362,12 +423,7 @@ else
   else
     eval "configured_api_key=\${$api_key_env:-}"
     if [ -z "$configured_api_key" ]; then
-      {
-        printf '%s\n' "# Provider Proof Blocked"
-        printf '\n'
-        printf '%s\n' "Provider \`$provider\` requires \`$api_key_env\` for HTTP benchmark mode."
-        printf '%s\n' "Set the environment variable, then rerun this command. The key value is not printed or saved."
-      } >"$output_dir/blocked.md"
+      write_http_setup_blocked
       append_result "provider_setup" "blocked_missing_key" "blocked.md"
       overall="blocked"
     fi
