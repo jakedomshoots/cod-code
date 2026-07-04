@@ -190,6 +190,7 @@ Advanced flags:
   --action-provider <name>        Filter production-actions by provider
   --env-ready-only                Show production actions whose required env is present
   --ready-only                    Show production actions with env and dependencies ready
+  --next                          Show the first ready production action after filters
   --commands-only                 Print only production action command lines
   --production-finalize           Run guarded final production evidence sequence
   --run-comparison                Include the expensive 29-task all-agent comparison

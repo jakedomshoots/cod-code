@@ -64,6 +64,7 @@ type options struct {
 	productionActionProvider                   string
 	productionActionsEnvReadyOnly              bool
 	productionActionsReadyOnly                 bool
+	productionActionsNextOnly                  bool
 	productionActionsCommandsOnly              bool
 	showProductionFinalize                     bool
 	productionFinalizeRunComparison            bool

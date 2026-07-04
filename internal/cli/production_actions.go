@@ -15,6 +15,7 @@ type productionActionsReport struct {
 	RequiredActionCount int               `json:"required_action_count"`
 	EnvReadyActionCount int               `json:"env_ready_action_count"`
 	ReadyActionCount    int               `json:"ready_action_count"`
+	NextOnly            bool              `json:"next_only,omitempty"`
 	CommandsOnly        bool              `json:"commands_only,omitempty"`
 	Filter              map[string]string `json:"filter,omitempty"`
 	Actions             []map[string]any  `json:"actions"`
@@ -52,15 +53,16 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 		return productionActionsReport{}, fmt.Errorf("decode production actions: %w", err)
 	}
 	annotated := annotateProductionActions(raw.Actions, filepath.Dir(status.FinalizerNextActions.JSONPath))
-	actions := filterProductionActions(annotated, opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly)
+	actions := filterProductionActions(annotated, opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly, opts.productionActionsNextOnly)
 	return productionActionsReport{
 		Path:                status.FinalizerNextActions.JSONPath,
 		Status:              raw.Status,
 		RequiredActionCount: len(actions),
 		EnvReadyActionCount: countEnvReadyProductionActions(actions),
 		ReadyActionCount:    countReadyProductionActions(actions),
+		NextOnly:            opts.productionActionsNextOnly,
 		CommandsOnly:        opts.productionActionsCommandsOnly,
-		Filter:              productionActionFilter(opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly),
+		Filter:              productionActionFilter(opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly, opts.productionActionsNextOnly),
 		Actions:             actions,
 	}, nil
 }
@@ -290,8 +292,8 @@ func actionReady(action map[string]any) bool {
 	return envReady && len(stringSlice(action["blocked_by"])) == 0
 }
 
-func filterProductionActions(actions []map[string]any, id string, kind string, provider string, envReadyOnly bool, readyOnly bool) []map[string]any {
-	if id == "" && kind == "" && provider == "" && !envReadyOnly && !readyOnly {
+func filterProductionActions(actions []map[string]any, id string, kind string, provider string, envReadyOnly bool, readyOnly bool, nextOnly bool) []map[string]any {
+	if id == "" && kind == "" && provider == "" && !envReadyOnly && !readyOnly && !nextOnly {
 		return actions
 	}
 	filtered := make([]map[string]any, 0, len(actions))
@@ -316,10 +318,22 @@ func filterProductionActions(actions []map[string]any, id string, kind string, p
 		}
 		filtered = append(filtered, action)
 	}
+	if nextOnly {
+		return firstReadyAction(filtered)
+	}
 	return filtered
 }
 
-func productionActionFilter(id string, kind string, provider string, envReadyOnly bool, readyOnly bool) map[string]string {
+func firstReadyAction(actions []map[string]any) []map[string]any {
+	for _, action := range actions {
+		if actionReady(action) {
+			return []map[string]any{action}
+		}
+	}
+	return []map[string]any{}
+}
+
+func productionActionFilter(id string, kind string, provider string, envReadyOnly bool, readyOnly bool, nextOnly bool) map[string]string {
 	filter := map[string]string{}
 	if id != "" {
 		filter["id"] = id
@@ -335,6 +349,9 @@ func productionActionFilter(id string, kind string, provider string, envReadyOnl
 	}
 	if readyOnly {
 		filter["ready"] = "true"
+	}
+	if nextOnly {
+		filter["next"] = "true"
 	}
 	if len(filter) == 0 {
 		return nil
@@ -396,6 +413,9 @@ func renderProductionActionsText(report productionActionsReport) string {
 		}
 		if report.Filter["ready"] != "" {
 			parts = append(parts, "ready="+report.Filter["ready"])
+		}
+		if report.Filter["next"] != "" {
+			parts = append(parts, "next="+report.Filter["next"])
 		}
 		fmt.Fprintf(&builder, "Filter: %s\n", strings.Join(parts, " "))
 	}

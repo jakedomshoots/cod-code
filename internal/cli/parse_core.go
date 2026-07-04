@@ -79,6 +79,9 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 	case "--ready-only":
 		opts.productionActionsReadyOnly = true
 		return true, index, nil
+	case "--next":
+		opts.productionActionsNextOnly = true
+		return true, index, nil
 	case "--commands-only":
 		opts.productionActionsCommandsOnly = true
 		return true, index, nil
