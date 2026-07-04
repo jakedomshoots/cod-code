@@ -302,7 +302,8 @@ write_http_setup_blocked() {
     printf '%s\n' "## Next Command"
     printf '\n'
     printf '%s\n' "\`\`\`sh"
-    printf '%s\n' "$api_key_env=<redacted> sh scripts/provider-proof.sh --provider $provider --output-dir .omo/evidence/provider-proof-$provider"
+    printf '%s\n' "# Export $api_key_env in your shell or local secret manager first."
+    printf '%s\n' "sh scripts/provider-proof.sh --provider $provider --output-dir .omo/evidence/provider-proof-$provider --timeout-seconds $timeout_seconds"
     printf '%s\n' "\`\`\`"
   } >"$output_dir/blocked.md"
 
@@ -315,7 +316,8 @@ write_http_setup_blocked() {
     printf '%s\n' "#!/bin/sh"
     printf '%s\n' "set -eu"
     printf '\n'
-    printf '%s\n' "# Fill $api_key_env in the environment before running."
+    printf '%s\n' "# Export $api_key_env in your shell or local secret manager before running."
+    printf '%s\n' "# Do not paste secret values into this file or any evidence artifact."
     printf '%s\n' "sh scripts/provider-proof.sh --provider $provider --output-dir .omo/evidence/provider-proof-$provider --timeout-seconds $timeout_seconds"
     printf '%s\n' "sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness"
   } >"$output_dir/commands.sh"
@@ -359,6 +361,7 @@ PY
   "setup_result_status": "$result_status",
   "setup_checklist_item_count": $setup_checklist_item_count,
   "setup_artifacts_sha256": $setup_artifacts_sha256,
+  "command_script_secret_policy": "no_secret_assignment",
   "secret_value_saved": false,
   "artifacts": {
     "index": "index.md",

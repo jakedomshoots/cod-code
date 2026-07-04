@@ -224,7 +224,7 @@ for provider in openai openrouter moonshot; do
   summary="$evidence_root/provider-proof-$provider/summary.json"
   if provider_index_has_pass "$index"; then
     add_check "provider" "${provider}_http_provider" "pass" "$index" "$provider HTTP provider proof passed"
-  elif provider_index_has_blocked "$index" && json_check "$summary" "data.get('status') == 'blocked' and data.get('blocked_reason') in ['missing_api_key_env', 'empty_api_key_env'] and data.get('secret_value_saved') is False"; then
+  elif provider_index_has_blocked "$index" && json_check "$summary" "data.get('status') == 'blocked' and data.get('blocked_reason') in ['missing_api_key_env', 'empty_api_key_env'] and data.get('secret_value_saved') is False and data.get('command_script_secret_policy') == 'no_secret_assignment'"; then
     add_check "provider" "${provider}_http_provider" "blocked" "$index" "$provider HTTP provider proof is blocked by setup"
     http_blocked=1
   else

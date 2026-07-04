@@ -161,6 +161,7 @@ func Test_ProductionReadinessScript_usesCanonicalBlockedProviderEvidence(t *test
 	writeProductionReadinessJSON(t, filepath.Join(evidenceRoot, "provider-proof-openrouter", "summary.json"), `{
   "status": "blocked",
   "blocked_reason": "empty_api_key_env",
+  "command_script_secret_policy": "no_secret_assignment",
   "secret_value_saved": false
 }`)
 

@@ -172,6 +172,7 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
 		`"commands.sh": "`,
 		`"env.template": "`,
 		`"setup-checklist.md": "`,
+		`"command_script_secret_policy": "no_secret_assignment"`,
 		`"secret_value_saved": false`,
 	} {
 		if !strings.Contains(summary, want) {
@@ -185,6 +186,9 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
 	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
 	if !strings.Contains(commands, "scripts/provider-proof.sh --provider openrouter") {
 		t.Fatalf("commands.sh missing rerun command:\n%s", commands)
+	}
+	if strings.Contains(commands, "OPENROUTER_API_KEY=") || strings.Contains(commands, "<redacted>") {
+		t.Fatalf("commands.sh should not include key assignment, even redacted:\n%s", commands)
 	}
 }
 
@@ -222,6 +226,7 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyEmpty(t *testing.T) {
 		`"setup_result_status": "blocked_empty_key"`,
 		`"setup_checklist_item_count": 5`,
 		`"setup_artifacts_sha256": {`,
+		`"command_script_secret_policy": "no_secret_assignment"`,
 		`"secret_value_saved": false`,
 	} {
 		if !strings.Contains(summary, want) {

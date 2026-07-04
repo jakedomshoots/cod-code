@@ -413,17 +413,18 @@ func annotateProviderProof(action map[string]any) {
 		return
 	}
 	var summary struct {
-		Status                  string            `json:"status"`
-		Provider                string            `json:"provider"`
-		ProviderMode            string            `json:"provider_mode"`
-		HTTPPreset              string            `json:"http_preset"`
-		HTTPModel               string            `json:"http_model"`
-		APIKeyEnv               string            `json:"api_key_env"`
-		BlockedReason           string            `json:"blocked_reason"`
-		SecretValueSaved        bool              `json:"secret_value_saved"`
-		SetupChecklistItemCount int               `json:"setup_checklist_item_count"`
-		SetupArtifactsSHA256    map[string]string `json:"setup_artifacts_sha256"`
-		Artifacts               struct {
+		Status                    string            `json:"status"`
+		Provider                  string            `json:"provider"`
+		ProviderMode              string            `json:"provider_mode"`
+		HTTPPreset                string            `json:"http_preset"`
+		HTTPModel                 string            `json:"http_model"`
+		APIKeyEnv                 string            `json:"api_key_env"`
+		BlockedReason             string            `json:"blocked_reason"`
+		SecretValueSaved          bool              `json:"secret_value_saved"`
+		CommandScriptSecretPolicy string            `json:"command_script_secret_policy"`
+		SetupChecklistItemCount   int               `json:"setup_checklist_item_count"`
+		SetupArtifactsSHA256      map[string]string `json:"setup_artifacts_sha256"`
+		Artifacts                 struct {
 			Checklist   string `json:"checklist"`
 			Commands    string `json:"commands"`
 			EnvTemplate string `json:"env_template"`
@@ -442,6 +443,9 @@ func annotateProviderProof(action map[string]any) {
 		"api_key_env":        summary.APIKeyEnv,
 		"blocked_reason":     summary.BlockedReason,
 		"secret_value_saved": summary.SecretValueSaved,
+	}
+	if summary.CommandScriptSecretPolicy != "" {
+		providerSummary["command_script_secret_policy"] = summary.CommandScriptSecretPolicy
 	}
 	if summary.SetupChecklistItemCount > 0 {
 		providerSummary["setup_checklist_item_count"] = summary.SetupChecklistItemCount
@@ -936,6 +940,9 @@ func writeProviderProofText(builder *strings.Builder, action map[string]any) {
 	}
 	if model := stringValue(summary["http_model"]); model != "" {
 		fmt.Fprintf(builder, "  Provider model: %s\n", model)
+	}
+	if policy := stringValue(summary["command_script_secret_policy"]); policy != "" {
+		fmt.Fprintf(builder, "  Command secret policy: %s\n", policy)
 	}
 	if checklist := stringValue(summary["checklist_path"]); checklist != "" {
 		fmt.Fprintf(builder, "  Setup checklist: %s\n", checklist)

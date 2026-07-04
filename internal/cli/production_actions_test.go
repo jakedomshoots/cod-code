@@ -128,6 +128,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
   "api_key_env": "OPENAI_API_KEY",
   "blocked_reason": "missing_api_key_env",
   "secret_value_saved": false,
+  "command_script_secret_policy": "no_secret_assignment",
   "setup_checklist_item_count": 3,
   "setup_artifacts_sha256": {
     "blocked.md": "2222222222222222222222222222222222222222222222222222222222222222",
@@ -168,6 +169,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Reason: missing required env: OPENAI_API_KEY",
 		"Provider blocker: missing_api_key_env",
 		"Provider model: gpt-5",
+		"Command secret policy: no_secret_assignment",
 		"Setup checklist:",
 		"Setup checklist count: 3",
 		"provider-proof-openai",
@@ -242,6 +244,9 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	if hashes := stringStringMap(providerSummary["setup_artifacts_sha256"]); hashes["commands.sh"] != "3333333333333333333333333333333333333333333333333333333333333333" {
 		t.Fatalf("setup_artifacts_sha256 = %#v, want commands hash", providerSummary["setup_artifacts_sha256"])
+	}
+	if providerSummary["command_script_secret_policy"] != "no_secret_assignment" {
+		t.Fatalf("command_script_secret_policy = %#v, want no_secret_assignment", providerSummary["command_script_secret_policy"])
 	}
 	releaseSummary, _ := body.Actions[1]["release_summary"].(map[string]any)
 	setupItems, _ := releaseSummary["setup_action_items"].([]any)

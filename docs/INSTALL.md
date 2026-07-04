@@ -71,7 +71,7 @@ sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/prov
 ```
 
 HTTP proof gates require non-empty `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, or `MOONSHOT_API_KEY`. Missing keys are recorded as `blocked_missing_key`; blank keys are recorded as `blocked_empty_key`.
-When a key is missing, the proof gate also writes `summary.json`, `env.template`, `commands.sh`, and `setup-checklist.md` so setup blockers can be resolved without saving secret values. The summary records the setup checklist count and SHA-256 fingerprints for the setup artifacts.
+When a key is missing, the proof gate also writes `summary.json`, `env.template`, `commands.sh`, and `setup-checklist.md` so setup blockers can be resolved without saving secret values. The summary records the setup checklist count, SHA-256 fingerprints for the setup artifacts, and a `no_secret_assignment` command-script policy.
 
 ## Market Gauntlet
 
