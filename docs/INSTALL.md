@@ -101,6 +101,14 @@ ceo-packet rollback .ceo-harness/history/job-000001.json --workspace /path/to/re
 
 `production-status` reads the latest `.omo/evidence/production-readiness*/summary.json` packet and reports local readiness, public readiness, blockers, and the launch checklist next action.
 
+For the final public-production evidence sequence, run:
+
+```sh
+sh scripts/production-finalize.sh --dry-run
+```
+
+Remove `--dry-run` after release metadata and provider key environment variables are ready. The script writes evidence and command files, but it does not publish, tag, upload, or save secret values.
+
 `rollback` supports saved JSON reports for normal replacements and created files produced by CEO Harness. It refuses to remove a created file if the file content no longer matches the saved report.
 
 ## Requirements

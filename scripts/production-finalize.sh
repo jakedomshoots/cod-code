@@ -1,0 +1,317 @@
+#!/bin/sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+invocation_dir=$(pwd)
+output_dir="$root/.omo/evidence/production-finalize"
+evidence_root="$root/.omo/evidence"
+dist="$root/dist"
+provider_timeout_seconds=600
+comparison_timeout_seconds=240
+dry_run=0
+run_comparison=0
+skip_release_readiness=0
+skip_provider_proofs=0
+skip_competitor_smoke=0
+skip_production_readiness=0
+
+usage() {
+  cat <<'USAGE'
+Usage: sh scripts/production-finalize.sh [options]
+
+Runs the guarded final production evidence sequence. This command does not
+publish, push, tag, upload, create releases, or print provider secret values.
+
+Options:
+  --dry-run                         Write commands and summary without running them.
+  --run-comparison                  Run the expensive 29-task all-agent comparison.
+  --output-dir dir                  Evidence directory. Default: .omo/evidence/production-finalize
+  --evidence-root dir               Canonical evidence root. Default: .omo/evidence
+  --dist dir                        Release dist directory. Default: dist
+  --provider-timeout-seconds n      Provider proof timeout. Default: 600
+  --comparison-timeout-seconds n    All-agent comparison timeout. Default: 240
+  --skip-release-readiness          Skip release-readiness step.
+  --skip-provider-proofs            Skip HTTP provider proof steps.
+  --skip-competitor-smoke           Skip competitor smoke preflight.
+  --skip-production-readiness       Skip final production-readiness aggregate.
+  --help                            Show this help.
+USAGE
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --dry-run)
+      dry_run=1
+      shift
+      ;;
+    --run-comparison)
+      run_comparison=1
+      shift
+      ;;
+    --output-dir)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "production-finalize: --output-dir requires a value" >&2
+        exit 2
+      }
+      output_dir="$2"
+      shift 2
+      ;;
+    --evidence-root)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "production-finalize: --evidence-root requires a value" >&2
+        exit 2
+      }
+      evidence_root="$2"
+      shift 2
+      ;;
+    --dist)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "production-finalize: --dist requires a value" >&2
+        exit 2
+      }
+      dist="$2"
+      shift 2
+      ;;
+    --provider-timeout-seconds)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "production-finalize: --provider-timeout-seconds requires a value" >&2
+        exit 2
+      }
+      provider_timeout_seconds="$2"
+      shift 2
+      ;;
+    --comparison-timeout-seconds)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "production-finalize: --comparison-timeout-seconds requires a value" >&2
+        exit 2
+      }
+      comparison_timeout_seconds="$2"
+      shift 2
+      ;;
+    --skip-release-readiness)
+      skip_release_readiness=1
+      shift
+      ;;
+    --skip-provider-proofs)
+      skip_provider_proofs=1
+      shift
+      ;;
+    --skip-competitor-smoke)
+      skip_competitor_smoke=1
+      shift
+      ;;
+    --skip-production-readiness)
+      skip_production_readiness=1
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      printf '%s\n' "production-finalize: unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+case "$provider_timeout_seconds" in
+  ''|*[!0-9]*|0)
+    printf '%s\n' "production-finalize: --provider-timeout-seconds must be a positive integer" >&2
+    exit 2
+    ;;
+esac
+
+case "$comparison_timeout_seconds" in
+  ''|*[!0-9]*|0)
+    printf '%s\n' "production-finalize: --comparison-timeout-seconds must be a positive integer" >&2
+    exit 2
+    ;;
+esac
+
+abspath() {
+  case "$1" in
+    /*) printf '%s\n' "$1" ;;
+    *) printf '%s\n' "$invocation_dir/$1" ;;
+  esac
+}
+
+output_dir=$(abspath "$output_dir")
+evidence_root=$(abspath "$evidence_root")
+dist=$(abspath "$dist")
+
+mkdir -p "$output_dir"
+: >"$output_dir/steps.tsv"
+: >"$output_dir/commands.sh"
+chmod +x "$output_dir/commands.sh"
+
+write_command() {
+  printf '%s\n' "$*" >>"$output_dir/commands.sh"
+}
+
+add_step() {
+  name="$1"
+  status="$2"
+  evidence="$3"
+  detail="$4"
+  printf '%s\t%s\t%s\t%s\n' "$name" "$status" "$evidence" "$detail" >>"$output_dir/steps.tsv"
+}
+
+run_step() {
+  name="$1"
+  evidence_rel="$2"
+  shift 2
+  step_dir="$output_dir/$name"
+  mkdir -p "$step_dir"
+  write_command "$*"
+  if [ "$dry_run" -eq 1 ]; then
+    add_step "$name" "planned" "$evidence_rel" "Dry-run only"
+    return 0
+  fi
+  set +e
+  "$@" >"$step_dir/stdout.txt" 2>"$step_dir/stderr.txt"
+  code=$?
+  set -e
+  printf '%s\n' "$code" >"$step_dir/exit-code.txt"
+  if [ "$code" -eq 0 ]; then
+    add_step "$name" "pass" "$evidence_rel" "Command exited 0"
+    return 0
+  fi
+  add_step "$name" "blocked" "$evidence_rel" "Command exited $code; see stdout/stderr"
+  return 1
+}
+
+{
+  printf '%s\n' "#!/bin/sh"
+  printf '%s\n' "set -eu"
+  printf '\n'
+  printf '%s\n' "# Generated by scripts/production-finalize.sh."
+  printf '%s\n' "# Fill provider API key environment variables before running provider proof commands."
+} >"$output_dir/commands.sh"
+
+overall="pass"
+
+release_readiness_output="$evidence_root/release-readiness-final"
+if [ "$skip_release_readiness" -eq 1 ]; then
+  add_step "release-readiness" "skipped" "not-run" "Skipped by flag"
+else
+  if ! run_step "release-readiness" "$release_readiness_output/index.md" sh "$root/scripts/release-readiness.sh" --dist "$dist" --output-dir "$release_readiness_output"; then
+    overall="blocked"
+  fi
+fi
+
+if [ "$skip_provider_proofs" -eq 1 ]; then
+  add_step "provider-openai" "skipped" "not-run" "Skipped by flag"
+  add_step "provider-openrouter" "skipped" "not-run" "Skipped by flag"
+  add_step "provider-moonshot" "skipped" "not-run" "Skipped by flag"
+else
+  for provider in openai openrouter moonshot; do
+    provider_output="$evidence_root/provider-proof-$provider"
+    if ! run_step "provider-$provider" "$provider_output/index.md" sh "$root/scripts/provider-proof.sh" --provider "$provider" --output-dir "$provider_output" --timeout-seconds "$provider_timeout_seconds"; then
+      overall="blocked"
+    fi
+  done
+fi
+
+if [ "$skip_competitor_smoke" -eq 1 ]; then
+  add_step "competitor-smoke" "skipped" "not-run" "Skipped by flag"
+else
+  if ! run_step "competitor-smoke" "competitor-smoke/summary.json" go run "$root/cmd/ceo-eval" --comparison-smoke --competitors "$root/evals/competitors.json" --output-dir "$output_dir/competitor-smoke" --timeout-seconds 25; then
+    overall="blocked"
+  fi
+fi
+
+comparison_output="$evidence_root/external-agent-production-core-29-final"
+if [ "$run_comparison" -eq 1 ]; then
+  if ! run_step "all-agent-29-comparison" "$comparison_output/summary.json" go run "$root/cmd/ceo-eval" \
+    --local-agent-benchmark \
+    --local-agents ceo_harness,codex_cli,opencode,pi \
+    --local-agent-benchmark-task production-core \
+    --local-agent-benchmark-repeat 1 \
+    --local-agent-benchmark-concurrency 4 \
+    --ceo-binary "$root/bin/ceo-packet" \
+    --tasks "$root/evals/tasks" \
+    --output-dir "$comparison_output" \
+    --timeout-seconds "$comparison_timeout_seconds" \
+    --ceo-benchmark-mode model-command \
+    --ceo-benchmark-model-command-json "[\"sh\",\"$root/scripts/benchmark-model-command.sh\"]"; then
+    overall="blocked"
+  fi
+else
+  write_command "go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-29-final --timeout-seconds $comparison_timeout_seconds --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '[\"sh\",\"$root/scripts/benchmark-model-command.sh\"]'"
+  add_step "all-agent-29-comparison" "planned" "commands.sh" "Use --run-comparison to execute the expensive all-agent suite"
+  if [ "$dry_run" -eq 0 ]; then
+    overall="blocked"
+  fi
+fi
+
+production_readiness_output="$evidence_root/production-readiness-final"
+if [ "$skip_production_readiness" -eq 1 ]; then
+  add_step "production-readiness" "skipped" "not-run" "Skipped by flag"
+else
+  if ! run_step "production-readiness" "$production_readiness_output/index.md" sh "$root/scripts/production-readiness.sh" --dist "$dist" --output-dir "$production_readiness_output"; then
+    overall="blocked"
+  fi
+fi
+
+if [ "$dry_run" -eq 1 ]; then
+  overall="planned"
+fi
+
+python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" <<'PY'
+import json
+import sys
+
+steps = []
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    for line in handle:
+        name, status, evidence, detail = line.rstrip("\n").split("\t", 3)
+        steps.append({
+            "name": name,
+            "status": status,
+            "evidence": evidence,
+            "detail": detail,
+        })
+
+summary = {
+    "schema_version": 1,
+    "status": sys.argv[3],
+    "step_count": len(steps),
+    "blocked_steps": [step["name"] for step in steps if step["status"] == "blocked"],
+    "planned_steps": [step["name"] for step in steps if step["status"] == "planned"],
+    "skipped_steps": [step["name"] for step in steps if step["status"] == "skipped"],
+    "secret_value_saved": False,
+    "publish_actions_performed": False,
+    "steps": steps,
+}
+with open(sys.argv[2], "w", encoding="utf-8") as handle:
+    json.dump(summary, handle, indent=2)
+    handle.write("\n")
+PY
+
+{
+  printf '%s\n' "# Production Finalize Evidence"
+  printf '\n'
+  printf '%s\n' "Status: $overall"
+  printf '%s\n' "Publishes or tags: false"
+  printf '%s\n' "Secret values saved: false"
+  printf '\n'
+  printf '%s\n' "| Step | Status | Evidence |"
+  printf '%s\n' "| --- | --- | --- |"
+  while IFS='	' read -r name status evidence detail; do
+    printf '| %s | %s | `%s` |\n' "$name" "$status" "$evidence"
+  done <"$output_dir/steps.tsv"
+  printf '\n'
+  printf '%s\n' "## Commands"
+  printf '\n'
+  printf '%s\n' "Replay or inspect the generated command list in \`commands.sh\`."
+} >"$output_dir/index.md"
+
+printf '%s\n' "production-finalize: wrote $output_dir/index.md"
+printf '%s\n' "production-finalize: $overall"
+
+case "$overall" in
+  pass|planned) exit 0 ;;
+  *) exit 1 ;;
+esac

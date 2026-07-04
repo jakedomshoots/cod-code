@@ -85,6 +85,11 @@ tasks:
     cmds:
       - sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness
 
+  production:finalize:
+    desc: Run the guarded final production evidence sequence without publishing or printing secrets
+    cmds:
+      - sh scripts/production-finalize.sh --dist dist --output-dir .omo/evidence/production-finalize
+
   production:local-gate:
     desc: Fail only when local production readiness regresses; public blockers are allowed
     cmds:
