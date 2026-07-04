@@ -139,6 +139,21 @@ go run ./cmd/ceo-eval \
 
 The override is recorded in `summary.json` as `agent_timeouts`.
 
+Use per-agent model overrides when a competitor CLI has multiple configured providers and the default provider is stale, quota-blocked, or the wrong model family:
+
+```sh
+go run ./cmd/ceo-eval \
+  --local-agent-benchmark \
+  --local-agent-benchmark-task docs-product-status-weak-spots \
+  --local-agent-benchmark-agent-models opencode=openai/gpt-5.4-mini \
+  --local-agents opencode \
+  --tasks evals/tasks \
+  --output-dir .omo/evidence/opencode-model-override \
+  --timeout-seconds 240
+```
+
+The selected model is recorded in `summary.json` as `agent_models`. OpenCode benchmark runs also include `--print-logs --log-level INFO` so provider quota/auth failures are visible in `stderr.log`.
+
 Run the focused cross-language suite against CEO Harness:
 
 ```sh

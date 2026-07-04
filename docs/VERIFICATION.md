@@ -53,6 +53,9 @@ Status date: 2026-07-03
 - Latest per-agent timeout override proof:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents opencode --local-agent-benchmark-task docs-product-status-weak-spots --local-agent-benchmark-agent-timeouts opencode=600 --tasks evals/tasks --output-dir .omo/evidence/opencode-agent-timeout-r1 --timeout-seconds 240`
   - Result: OpenCode timed out at 600s with no required file changes; `agent_timeouts.opencode` is recorded in `summary.json`.
+- Latest OpenCode provider-error visibility proof:
+  - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents opencode --local-agent-benchmark-task docs-product-status-weak-spots --tasks evals/tasks --output-dir .omo/evidence/opencode-provider-error-visible-r1 --timeout-seconds 25`
+  - Result: OpenCode still timed out, but benchmark evidence now records provider logs; `stderr.log` shows `Token Plan usage limit reached` for `minimax-coding-plan/MiniMax-M3`.
 - Latest comparison report decision smoke:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task docs-roadmap-cli-first --output-dir .omo/evidence/comparison-report-decision-smoke-r1 ...`
   - Result: comparison report includes `Overall comparison: pass`, `CEO Harness result: clean`, and `External blockers: none`.

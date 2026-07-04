@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -164,6 +165,45 @@ func Test_RunLocalAgentBenchmark_uses_agent_timeout_override(t *testing.T) {
 	}
 }
 
+func Test_RunLocalAgentBenchmark_records_agent_model_override(t *testing.T) {
+	// Given
+	binDir := t.TempDir()
+	writeExecutableContent(t, filepath.Join(binDir, "codex"), slowPassingAgentScript())
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	root := t.TempDir()
+	tasksDir := filepath.Join(root, "tasks")
+	writeTaskSpec(t, tasksDir, `{
+		"id":"docs-one",
+		"category":"docs",
+		"title":"Update one",
+		"objective":"Refresh docs one.",
+		"required_changed_files":["docs/ONE.md"],
+		"required_artifacts":[".omo/evidence/docs-one.md"],
+		"required_diff_terms":["one-term"],
+		"required_report_fields":["changed_files"]
+	}`)
+
+	// When
+	summary, err := RunLocalAgentBenchmark(context.Background(), LocalAgentBenchmarkRequest{
+		TasksDir:        tasksDir,
+		OutputDir:       filepath.Join(root, "benchmark"),
+		TimeoutSeconds:  5,
+		Agents:          []string{"codex_cli"},
+		BenchmarkTaskID: "docs-one",
+		AgentModels:     map[string]string{"codex_cli": "openai/gpt-5.4-mini"},
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
+	}
+	if summary.AgentModels["codex_cli"] != "openai/gpt-5.4-mini" {
+		t.Fatalf("agent models = %+v, want codex_cli override", summary.AgentModels)
+	}
+	if !slices.Contains(summary.Results[0].Command, "--model") || !slices.Contains(summary.Results[0].Command, "openai/gpt-5.4-mini") {
+		t.Fatalf("command = %+v, want model override", summary.Results[0].Command)
+	}
+}
+
 func Test_ParseLocalAgentBenchmarkAgentTimeouts_validatesInput(t *testing.T) {
 	// When
 	timeouts, err := parseLocalAgentBenchmarkAgentTimeouts("opencode=600, pi = 360")
@@ -179,6 +219,24 @@ func Test_ParseLocalAgentBenchmarkAgentTimeouts_validatesInput(t *testing.T) {
 	}
 	if _, err := parseLocalAgentBenchmarkAgentTimeouts("opencode"); err == nil {
 		t.Fatalf("parseLocalAgentBenchmarkAgentTimeouts accepted malformed timeout")
+	}
+}
+
+func Test_ParseLocalAgentBenchmarkAgentModels_validatesInput(t *testing.T) {
+	// When
+	models, err := parseLocalAgentBenchmarkAgentModels("opencode=openai/gpt-5.4-mini, pi = kimi/k2")
+	// Then
+	if err != nil {
+		t.Fatalf("parseLocalAgentBenchmarkAgentModels returned error: %v", err)
+	}
+	if models["opencode"] != "openai/gpt-5.4-mini" || models["pi"] != "kimi/k2" {
+		t.Fatalf("models = %+v, want parsed overrides", models)
+	}
+	if _, err := parseLocalAgentBenchmarkAgentModels("opencode"); err == nil {
+		t.Fatalf("parseLocalAgentBenchmarkAgentModels accepted malformed model")
+	}
+	if _, err := parseLocalAgentBenchmarkAgentModels("opencode="); err == nil {
+		t.Fatalf("parseLocalAgentBenchmarkAgentModels accepted empty model")
 	}
 }
 

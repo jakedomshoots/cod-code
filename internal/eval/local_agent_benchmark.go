@@ -35,6 +35,7 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 	concurrency := normalizeLocalAgentBenchmarkConcurrency(req.Concurrency)
 	timeoutRetries := normalizeLocalAgentBenchmarkTimeoutRetries(req.TimeoutRetries)
 	agentTimeouts := normalizeLocalAgentBenchmarkAgentTimeouts(req.AgentTimeoutSeconds)
+	agentModels := normalizeLocalAgentBenchmarkAgentModels(req.AgentModels)
 	multiRun := len(tasks) > 1 || repeatCount > 1
 	summary := LocalAgentBenchmarkSummary{
 		SchemaVersion:  localAgentSchemaVersion,
@@ -47,6 +48,7 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 		Concurrency:    concurrency,
 		TimeoutRetries: timeoutRetries,
 		AgentTimeouts:  agentTimeouts,
+		AgentModels:    agentModels,
 		RunCount:       len(tasks) * repeatCount * len(agentIDs),
 		AgentCount:     len(agentIDs),
 		Results:        make([]LocalAgentBenchmarkResult, 0, len(tasks)*repeatCount*len(agentIDs)),

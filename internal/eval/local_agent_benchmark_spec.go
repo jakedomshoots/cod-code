@@ -21,32 +21,52 @@ func buildLocalAgentBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, tas
 	case "ceo_harness":
 		return buildCEOBenchmarkSpec(id, req, task, prompt)
 	case "codex_cli":
+		args := []string{"exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--sandbox", "workspace-write", "--skip-git-repo-check"}
+		args = appendAgentModelArgs(args, req.AgentModels, id)
+		args = append(args, prompt)
 		return localAgentSpec{
 			id:        id,
 			name:      "OpenAI Codex CLI",
 			binary:    "codex",
-			args:      []string{"exec", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--sandbox", "workspace-write", "--skip-git-repo-check", prompt},
+			args:      args,
 			setupHint: "Install and authenticate Codex CLI before benchmark runs.",
 		}, nil
 	case "opencode":
+		args := []string{"run", "--print-logs", "--log-level", "INFO", "--pure", "--auto", "--format", "json"}
+		args = appendAgentModelArgs(args, req.AgentModels, id)
+		args = append(args, prompt)
 		return localAgentSpec{
 			id:        id,
 			name:      "OpenCode",
 			binary:    "opencode",
-			args:      []string{"run", "--pure", "--auto", "--format", "json", prompt},
+			args:      args,
 			setupHint: "Install and authenticate OpenCode before benchmark runs.",
 		}, nil
 	case "pi":
+		args := []string{"--no-session", "--approve"}
+		args = appendAgentModelArgs(args, req.AgentModels, id)
+		args = append(args, "-p", prompt)
 		return localAgentSpec{
 			id:        id,
 			name:      "Pi",
 			binary:    "pi",
-			args:      []string{"--no-session", "--approve", "-p", prompt},
+			args:      args,
 			setupHint: "Install Pi and configure a provider key before benchmark runs.",
 		}, nil
 	default:
 		return localAgentSpec{}, fmt.Errorf("%w: unknown local agent %q", ErrInvalidCompetitor, id)
 	}
+}
+
+func appendAgentModelArgs(args []string, models map[string]string, agentID string) []string {
+	if len(models) == 0 {
+		return args
+	}
+	model := strings.TrimSpace(models[agentID])
+	if model == "" {
+		return args
+	}
+	return append(args, "--model", model)
 }
 
 func buildCEOBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, task Task, prompt string) (localAgentSpec, error) {

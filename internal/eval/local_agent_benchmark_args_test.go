@@ -156,6 +156,31 @@ func Test_BuildLocalAgentBenchmarkSpec_syntheticModePassesRequiredCheck(t *testi
 	}
 }
 
+func Test_BuildLocalAgentBenchmarkSpec_appliesAgentModelOverrideAndOpenCodeLogs(t *testing.T) {
+	task := Task{
+		ID:                   "docs-roadmap-cli-first",
+		Title:                "Keep roadmap CLI-first",
+		Objective:            "Refresh roadmap wording.",
+		RequiredChangedFiles: []string{"docs/ROADMAP.md"},
+		RequiredDiffTerms:    []string{"CLI-first"},
+	}
+
+	spec, err := buildLocalAgentBenchmarkSpec("opencode", LocalAgentBenchmarkRequest{
+		AgentModels: map[string]string{"opencode": "openai/gpt-5.4-mini"},
+	}, task)
+	if err != nil {
+		t.Fatalf("buildLocalAgentBenchmarkSpec returned error: %v", err)
+	}
+	for _, want := range []string{"--print-logs", "--log-level", "INFO", "--model", "openai/gpt-5.4-mini"} {
+		if !slices.Contains(spec.args, want) {
+			t.Fatalf("args = %+v, want %q", spec.args, want)
+		}
+	}
+	if spec.args[len(spec.args)-1] != localAgentBenchmarkPrompt(task) {
+		t.Fatalf("last arg = %q, want benchmark prompt", spec.args[len(spec.args)-1])
+	}
+}
+
 func Test_LocalAgentBenchmarkPrompt_names_required_artifact_contract(t *testing.T) {
 	task := Task{
 		ID:                   "docs-roadmap-cli-first",
