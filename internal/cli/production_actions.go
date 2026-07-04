@@ -231,8 +231,42 @@ func annotateReleaseProof(action map[string]any) {
 		"github_auth_status":         summary.GitHubAuthStatus,
 	}
 	if summary.SetupActions != "" {
-		action["release_summary"].(map[string]any)["setup_actions_path"] = filepath.Join(filepath.Dir(summaryPath), summary.SetupActions)
+		setupActionsPath := filepath.Join(filepath.Dir(summaryPath), summary.SetupActions)
+		releaseSummary := action["release_summary"].(map[string]any)
+		releaseSummary["setup_actions_path"] = setupActionsPath
+		if setupActionItems, err := readReleaseSetupActionItems(setupActionsPath); err == nil && len(setupActionItems) > 0 {
+			releaseSummary["setup_action_items"] = setupActionItems
+		}
 	}
+}
+
+func readReleaseSetupActionItems(path string) ([]map[string]string, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	items := []map[string]string{}
+	for _, line := range strings.Split(string(content), "\n") {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line, "- ") {
+			continue
+		}
+		body := strings.TrimSpace(strings.TrimPrefix(line, "- "))
+		check, text, ok := strings.Cut(body, ":")
+		if !ok {
+			continue
+		}
+		check = strings.TrimSpace(strings.Trim(check, "`"))
+		text = strings.TrimSpace(text)
+		if check == "" || text == "" {
+			continue
+		}
+		items = append(items, map[string]string{
+			"check": check,
+			"text":  text,
+		})
+	}
+	return items, nil
 }
 
 func annotateProviderProof(action map[string]any) {
@@ -610,6 +644,12 @@ func writeReleaseProofText(builder *strings.Builder, action map[string]any) {
 	}
 	if setupActions := stringValue(summary["setup_actions_path"]); setupActions != "" {
 		fmt.Fprintf(builder, "  Setup actions: %s\n", setupActions)
+	}
+	if items, _ := summary["setup_action_items"].([]map[string]string); len(items) > 0 {
+		fmt.Fprintf(builder, "  Setup action items:\n")
+		for _, item := range items {
+			fmt.Fprintf(builder, "  - %s: %s\n", item["check"], item["text"])
+		}
 	}
 }
 

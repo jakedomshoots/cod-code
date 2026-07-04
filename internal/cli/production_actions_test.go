@@ -87,6 +87,11 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
   "origin_remote_configured": false,
   "github_auth_status": "pass"
 }`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "release-readiness-final", "setup-actions.md"), `# Release Setup Actions
+
+- git_remote: configure an origin remote for the public repo.
+- github_release_assets: push a v* tag and upload release assets.
+`)
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "competitor-smoke", "summary.json"), `{
   "competitors": 3,
   "smoke_passed": 1,
@@ -141,6 +146,9 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Blocked checks: git_remote, github_release_assets",
 		"Setup actions:",
 		"release-readiness-final",
+		"Setup action items:",
+		"git_remote: configure an origin remote for the public repo.",
+		"github_release_assets: push a v* tag and upload release assets.",
 		"Command: sh scripts/release-readiness.sh",
 		"competitor-smoke [competitor_setup]: Fix competitor setup",
 		"Competitor setup: 1 pass, 1 blocked, 1 skipped, 0 failed",
@@ -171,6 +179,11 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	if body.Actions[0]["action_state"] != "missing_env" || body.Actions[1]["action_state"] != "setup_blocked" || body.Actions[2]["action_state"] != "setup_blocked" || body.Actions[3]["action_state"] != "waiting" {
 		t.Fatalf("action states = %#v/%#v/%#v/%#v, want missing_env/setup_blocked/setup_blocked/waiting", body.Actions[0]["action_state"], body.Actions[1]["action_state"], body.Actions[2]["action_state"], body.Actions[3]["action_state"])
+	}
+	releaseSummary, _ := body.Actions[1]["release_summary"].(map[string]any)
+	setupItems, _ := releaseSummary["setup_action_items"].([]any)
+	if len(setupItems) != 2 {
+		t.Fatalf("setup_action_items = %#v, want two structured release setup items", releaseSummary["setup_action_items"])
 	}
 	if blockedBy := stringSlice(body.Actions[3]["blocked_by"]); len(blockedBy) != 1 || blockedBy[0] != "competitor-smoke" {
 		t.Fatalf("comparison blocked_by = %#v, want competitor-smoke", body.Actions[3]["blocked_by"])
