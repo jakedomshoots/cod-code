@@ -165,6 +165,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"States: missing_env=1 setup_blocked=2 waiting=2",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 		"(missing env: OPENAI_API_KEY)",
+		"Reason: missing required env: OPENAI_API_KEY",
 		"Provider blocker: missing_api_key_env",
 		"Provider model: gpt-5",
 		"Setup checklist:",
@@ -181,6 +182,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Requires env: OPENAI_API_KEY",
 		"Command: sh scripts/provider-proof.sh --provider openai",
 		"release-readiness [release_proof]: Prove public release readiness",
+		"Reason: release setup blocked: git_remote, github_release_assets",
 		"Release readiness: blocked, public_ready=false, artifacts_verified=true, blocked=2",
 		"Blocked checks: git_remote, github_release_assets",
 		"Setup actions:",
@@ -192,14 +194,17 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"github_release_assets: push a v* tag and upload release assets.",
 		"Command: sh scripts/release-readiness.sh",
 		"competitor-smoke [competitor_setup]: Fix competitor setup",
+		"Reason: competitor setup blocked: opencode, aider",
 		"Competitor setup: 1 pass, 1 blocked, 1 skipped, 0 failed",
 		"opencode: setup_blocked - provider setup is blocked",
 		"aider: skipped_missing_binary - Install Aider",
 		"Setup actions:",
 		"setup-actions.md",
 		"all-agent-29-comparison [comparison]: Run comparison",
+		"Reason: waiting on: competitor-smoke",
 		"Waiting on: competitor-smoke",
 		"production-readiness [final_readiness]: Run final readiness",
+		"Reason: waiting on: provider-openai, release-readiness, competitor-smoke, all-agent-29-comparison",
 		"Waiting on: provider-openai, release-readiness, competitor-smoke, all-agent-29-comparison",
 	} {
 		if !strings.Contains(text, want) {
@@ -223,6 +228,9 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	if body.Actions[0]["action_state"] != "missing_env" || body.Actions[1]["action_state"] != "setup_blocked" || body.Actions[2]["action_state"] != "setup_blocked" || body.Actions[3]["action_state"] != "waiting" {
 		t.Fatalf("action states = %#v/%#v/%#v/%#v, want missing_env/setup_blocked/setup_blocked/waiting", body.Actions[0]["action_state"], body.Actions[1]["action_state"], body.Actions[2]["action_state"], body.Actions[3]["action_state"])
+	}
+	if body.Actions[0]["action_reason"] != "missing required env: OPENAI_API_KEY" || body.Actions[1]["action_reason"] != "release setup blocked: git_remote, github_release_assets" || body.Actions[2]["action_reason"] != "competitor setup blocked: opencode, aider" || body.Actions[3]["action_reason"] != "waiting on: competitor-smoke" {
+		t.Fatalf("action reasons = %#v/%#v/%#v/%#v, want specific blocker reasons", body.Actions[0]["action_reason"], body.Actions[1]["action_reason"], body.Actions[2]["action_reason"], body.Actions[3]["action_reason"])
 	}
 	providerSummary, _ := body.Actions[0]["provider_summary"].(map[string]any)
 	checklistItems, _ := providerSummary["checklist_items"].([]any)
@@ -443,7 +451,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	text = out.String()
 	for _, want := range []string{
-		"# provider-openai [provider_proof] missing env: OPENAI_API_KEY state: missing_env",
+		"# provider-openai [provider_proof] missing env: OPENAI_API_KEY state: missing_env reason: missing required env: OPENAI_API_KEY",
 		"# setup checklist:",
 		"# 1. Export `OPENAI_API_KEY` in the shell or local secret manager.",
 		"# 2. Keep the key out of git, logs, reports, and evidence folders.",
@@ -463,7 +471,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	text = out.String()
 	for _, want := range []string{
-		"# release-readiness [release_proof] state: setup_blocked",
+		"# release-readiness [release_proof] state: setup_blocked reason: release setup blocked: git_remote, github_release_assets",
 		"# setup actions:",
 		"# - git_remote: configure an origin remote for the public repo.",
 		"# - github_release_assets: push a v* tag and upload release assets.",
@@ -544,7 +552,7 @@ func TestProductionActionsTreatsEmptyEnvAsNotReady(t *testing.T) {
 	}
 	report := productionActionsReport{Actions: actions, CommandsOnly: true}
 	text := renderProductionActionCommandsOnly(report)
-	if !strings.Contains(text, "# provider-openrouter [provider_proof] empty env: OPENROUTER_API_KEY state: empty_env") {
+	if !strings.Contains(text, "# provider-openrouter [provider_proof] empty env: OPENROUTER_API_KEY state: empty_env reason: required env is set but empty: OPENROUTER_API_KEY") {
 		t.Fatalf("commands-only output missing empty env state:\n%s", text)
 	}
 	if strings.Contains(text, "missing env: OPENROUTER_API_KEY") {

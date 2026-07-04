@@ -177,6 +177,7 @@ func annotateDeclaredEvidence(action map[string]any, sourceDir string) {
 func annotateProductionActionStates(actions []map[string]any) {
 	for _, action := range actions {
 		action["action_state"] = productionActionState(action)
+		action["action_reason"] = productionActionReason(action)
 	}
 }
 
@@ -194,6 +195,46 @@ func productionActionState(action map[string]any) string {
 		return "waiting"
 	}
 	return "ready"
+}
+
+func productionActionReason(action map[string]any) string {
+	if emptyEnv := actionString(action, "empty_required_env"); emptyEnv != "" {
+		return "required env is set but empty: " + emptyEnv
+	}
+	if missingEnv := actionString(action, "missing_required_env"); missingEnv != "" {
+		return "missing required env: " + missingEnv
+	}
+	if summary, _ := action["release_summary"].(map[string]any); summary != nil {
+		if checks, _ := summary["blocked_checks"].([]string); len(checks) > 0 {
+			return "release setup blocked: " + strings.Join(checks, ", ")
+		}
+		if numberValue(summary["blocked_count"]) > 0 || !boolValue(summary["public_release_ready"]) {
+			return "release setup blocked"
+		}
+	}
+	if summary, _ := action["competitor_summary"].(map[string]any); summary != nil {
+		if blockers, _ := summary["blockers"].([]map[string]string); len(blockers) > 0 {
+			parts := make([]string, 0, len(blockers))
+			for _, blocker := range blockers {
+				if id := blocker["id"]; id != "" {
+					parts = append(parts, id)
+				}
+			}
+			if len(parts) > 0 {
+				return "competitor setup blocked: " + strings.Join(parts, ", ")
+			}
+		}
+		if numberValue(summary["setup_blocked"]) > 0 || numberValue(summary["skipped"]) > 0 || numberValue(summary["smoke_failed"]) > 0 {
+			return "competitor setup blocked"
+		}
+	}
+	if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
+		return "waiting on: " + strings.Join(blockedBy, ", ")
+	}
+	if status := actionString(action, "status"); status != "" && status != "pass" {
+		return "status is " + status
+	}
+	return "ready to run"
 }
 
 func validProductionActionState(state string) bool {
@@ -755,6 +796,9 @@ func renderProductionActionsText(report productionActionsReport) string {
 		} else {
 			fmt.Fprintf(&builder, "- %s: %s%s\n", id, text, suffix)
 		}
+		if reason := actionString(action, "action_reason"); reason != "" {
+			fmt.Fprintf(&builder, "  Reason: %s\n", reason)
+		}
 		writeReleaseProofText(&builder, action)
 		writeProviderProofText(&builder, action)
 		writeCompetitorSetupText(&builder, action)
@@ -809,6 +853,9 @@ func renderProductionActionCommandsOnly(report productionActionsReport) string {
 			}
 			if state := actionString(action, "action_state"); state != "" {
 				fmt.Fprintf(&builder, " state: %s", state)
+			}
+			if reason := actionString(action, "action_reason"); reason != "" {
+				fmt.Fprintf(&builder, " reason: %s", reason)
 			}
 			if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
 				fmt.Fprintf(&builder, " waiting on: %s", strings.Join(blockedBy, ", "))
