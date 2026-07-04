@@ -28,6 +28,7 @@ make ci
 make test-race
 VERSION=0.1.0 make release-local
 sh scripts/verify-release.sh dist
+sh scripts/release-bootstrap.sh --dist dist --output-dir .omo/evidence/release-bootstrap
 sh scripts/release-preflight.sh dist
 sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
 ```
@@ -39,6 +40,7 @@ task ci
 task test:race
 VERSION=0.1.0 task release:local
 sh scripts/verify-release.sh dist
+task release:bootstrap
 task release:preflight
 ```
 
@@ -50,6 +52,8 @@ sed -n '1,80p' dist/homebrew/ceo-packet.rb
 
 `scripts/verify-release.sh` checks `checksums.txt`, verifies every archive hash and size against `release-manifest.json`, and fails if any artifact is missing or mismatched.
 
+`scripts/release-bootstrap.sh` prepares the public release packet without publishing anything. It writes `index.md`, `summary.json`, `commands.sh`, `env.template`, `release-checklist.md`, `remote-homebrew-formula.rb`, and `verify-release.txt`. It exits non-zero until public repo, release, Homebrew archive, and signing/checksum policy inputs are explicit.
+
 `scripts/release-preflight.sh` checks whether a release can honestly be called public. It verifies local artifacts, then blocks until a git remote, public release URL, remote Homebrew archive URL, and archive signatures or explicit checksum-only release notes are handled. It does not tag, push, upload, or publish anything.
 
 `scripts/release-readiness.sh` writes the durable evidence packet for that decision: `index.md`, `summary.json`, `preflight.md`, `verify-release.txt`, `git-remote.txt`, and `github-auth.txt`. It exits non-zero while public release blockers remain, but still writes the evidence folder so the next action is obvious.
@@ -58,6 +62,18 @@ For an unsigned checksum-only first release, the preflight must be explicit:
 
 ```sh
 ALLOW_CHECKSUM_ONLY_RELEASE=1 CHECKSUM_ONLY_RELEASE_NOTES_URL=https://<release-notes-url> sh scripts/release-preflight.sh dist
+```
+
+Bootstrap a first public release plan:
+
+```sh
+sh scripts/release-bootstrap.sh \
+  --dist dist \
+  --output-dir .omo/evidence/release-bootstrap \
+  --repo-url https://github.com/<owner>/<repo> \
+  --release-url https://github.com/<owner>/<repo>/releases/tag/v0.1.0 \
+  --homebrew-archive-base-url https://github.com/<owner>/<repo>/releases/download/v0.1.0 \
+  --checksum-notes-url https://github.com/<owner>/<repo>/releases/tag/v0.1.0
 ```
 
 ## Signing

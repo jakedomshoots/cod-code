@@ -48,6 +48,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 - First-class Codex provider proof evidence: `.omo/evidence/provider-proof-codex-r1/index.md`
 - HTTP provider blocked-key evidence: `.omo/evidence/provider-proof-openrouter-blocked-r1/index.md`
 - Public release readiness evidence: `.omo/evidence/release-readiness-r1/index.md`
+- Public release bootstrap evidence: `.omo/evidence/release-bootstrap-r1/index.md`
 - Production-readiness aggregate evidence: `.omo/evidence/production-readiness-r1/index.md`
 - Endurance eval evidence: `.omo/evidence/endurance-local-r1/index.md`
 - Longer endurance eval evidence: `.omo/evidence/endurance-local-r2/index.md`
@@ -65,6 +66,7 @@ The live competitor proof gap is now materially stronger. CEO Harness, Codex CLI
 | Go LOC ceiling | `awk` pure-LOC scan over `internal/eval/*.go` | Every Go file is <=250 pure LOC; `benchmark.go` is 124 | `.omo/evidence/task-14-ceo-harness-10-out-of-10/pure-loc-task14-fix.log` |
 | Race/shuffle | `go test -race -shuffle=on -count=1 ./...` | Exit 0 on fresh 2026-07-02 rerun after adapter timeout-proof stabilization | `.omo/evidence/final-adapter-version-timeout-fix/go-test-race-shuffle-all.log` |
 | Release + manifest verification | `VERSION=0.1.0-dev sh scripts/release-local.sh && sh scripts/verify-release.sh dist` | All three archives verified against `checksums.txt` and `release-manifest.json` | `.omo/evidence/task-14-ceo-harness-10-out-of-10/release-local-checksums.log`, `dist/checksums.txt`, `dist/release-manifest.json` |
+| Public release bootstrap packet | `sh scripts/release-bootstrap.sh --dist dist --output-dir .omo/evidence/release-bootstrap-r1` | Local artifacts verified; public release inputs are converted into commands, env, checklist, and a remote Homebrew formula draft without publishing | `.omo/evidence/release-bootstrap-r1/index.md`, `.omo/evidence/release-bootstrap-r1/summary.json` |
 | Public release readiness packet | `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1` | Local artifacts verified and GitHub auth passed; public release remains blocked by missing origin remote, release URL, remote Homebrew URL, and signatures/checksum-only notes | `.omo/evidence/release-readiness-r1/index.md`, `.omo/evidence/release-readiness-r1/summary.json` |
 | Eval catalog | `go run ./cmd/ceo-eval --list` | 31 task IDs listed | `.omo/evidence/benchmark-fixtures-31-r1/summary.json` |
 | Eval rubric | `go run ./cmd/ceo-eval --rubric` | `rubric_valid=true` | `.omo/evidence/task-14-ceo-harness-10-out-of-10/eval-rubric.txt` |

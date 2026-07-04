@@ -190,3 +190,114 @@ func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 		t.Fatalf("readiness index did not record blocked status:\n%s", string(index))
 	}
 }
+
+func Test_ReleaseBootstrapScript_writesBlockedEvidencePacket(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	tmp := t.TempDir()
+	dist := filepath.Join(tmp, "dist")
+	outputDir := filepath.Join(tmp, "release-bootstrap")
+
+	release := exec.Command("sh", filepath.Join(root, "scripts", "release-local.sh"))
+	release.Dir = root
+	release.Env = append(release.Environ(), "DIST="+dist, "VERSION=0.2.0-test", "COMMIT=abc123")
+	output, err := release.CombinedOutput()
+	if err != nil {
+		t.Fatalf("release-local failed: %v\n%s", err, string(output))
+	}
+
+	bootstrap := exec.Command("sh", filepath.Join(root, "scripts", "release-bootstrap.sh"), "--dist", dist, "--output-dir", outputDir)
+	bootstrap.Dir = root
+	bootstrapOutput, err := bootstrap.CombinedOutput()
+	if err == nil {
+		t.Fatalf("release-bootstrap unexpectedly passed without public metadata:\n%s", string(bootstrapOutput))
+	}
+
+	for _, path := range []string{
+		filepath.Join(outputDir, "index.md"),
+		filepath.Join(outputDir, "summary.json"),
+		filepath.Join(outputDir, "commands.sh"),
+		filepath.Join(outputDir, "env.template"),
+		filepath.Join(outputDir, "release-checklist.md"),
+		filepath.Join(outputDir, "remote-homebrew-formula.rb"),
+		filepath.Join(outputDir, "verify-release.txt"),
+	} {
+		if _, err := os.Stat(path); err != nil {
+			t.Fatalf("expected evidence file %s: %v\nscript output:\n%s", path, err, string(bootstrapOutput))
+		}
+	}
+
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	for _, want := range []string{
+		`"status": "blocked"`,
+		`"release_bootstrap_ready": false`,
+		`"local_release_artifacts": "pass"`,
+		`"public_repo_url"`,
+		`"public_release_url"`,
+		`"homebrew_archive_base_url"`,
+		`"signing_or_checksum_policy"`,
+	} {
+		if !strings.Contains(summary, want) {
+			t.Fatalf("bootstrap summary missing %q:\n%s", want, summary)
+		}
+	}
+}
+
+func Test_ReleaseBootstrapScript_passesWithPublicMetadata(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	tmp := t.TempDir()
+	dist := filepath.Join(tmp, "dist")
+	outputDir := filepath.Join(tmp, "release-bootstrap")
+
+	release := exec.Command("sh", filepath.Join(root, "scripts", "release-local.sh"))
+	release.Dir = root
+	release.Env = append(release.Environ(), "DIST="+dist, "VERSION=0.2.0-test", "COMMIT=abc123")
+	output, err := release.CombinedOutput()
+	if err != nil {
+		t.Fatalf("release-local failed: %v\n%s", err, string(output))
+	}
+
+	bootstrap := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "release-bootstrap.sh"),
+		"--dist", dist,
+		"--output-dir", outputDir,
+		"--repo-url", "https://github.com/acme/ceo-harness",
+		"--release-url", "https://github.com/acme/ceo-harness/releases/tag/v0.2.0-test",
+		"--homebrew-archive-base-url", "https://github.com/acme/ceo-harness/releases/download/v0.2.0-test",
+		"--checksum-notes-url", "https://github.com/acme/ceo-harness/releases/tag/v0.2.0-test",
+	)
+	bootstrap.Dir = root
+	bootstrapOutput, err := bootstrap.CombinedOutput()
+	if err != nil {
+		t.Fatalf("release-bootstrap failed with complete metadata: %v\n%s", err, string(bootstrapOutput))
+	}
+
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	for _, want := range []string{
+		`"status": "pass"`,
+		`"release_bootstrap_ready": true`,
+		`"version": "0.2.0-test"`,
+		`"blocked_count": 0`,
+	} {
+		if !strings.Contains(summary, want) {
+			t.Fatalf("bootstrap summary missing %q:\n%s", want, summary)
+		}
+	}
+
+	formula := readTextFile(t, filepath.Join(outputDir, "remote-homebrew-formula.rb"))
+	for _, want := range []string{
+		`homepage "https://github.com/acme/ceo-harness"`,
+		`url "https://github.com/acme/ceo-harness/releases/download/v0.2.0-test/ceo-packet_0.2.0-test_darwin_arm64.tar.gz"`,
+		`version "0.2.0-test"`,
+	} {
+		if !strings.Contains(formula, want) {
+			t.Fatalf("remote formula missing %q:\n%s", want, formula)
+		}
+	}
+}

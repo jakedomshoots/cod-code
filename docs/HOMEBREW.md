@@ -27,7 +27,8 @@ Before publishing:
 1. Create a public repository and release.
 2. Build release archives with `scripts/release-local.sh` or CI.
 3. Verify `dist/checksums.txt` from inside `dist/`.
-4. Replace the placeholder URL and checksum.
-5. Verify the local formula with Homebrew after every placeholder has been replaced.
+4. Run `scripts/release-bootstrap.sh` with the public repo, release, archive base URL, and checksum/signing policy.
+5. Review the generated `remote-homebrew-formula.rb`.
+6. Verify the local formula with Homebrew after every placeholder has been replaced.
 
 Do not publish the formula, create a tap, tag, push, or announce remote install support until those placeholders are gone and the remote archive checksum has been rechecked.

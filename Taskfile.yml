@@ -70,6 +70,11 @@ tasks:
     cmds:
       - sh scripts/release-preflight.sh dist
 
+  release:bootstrap:
+    desc: Write the public release bootstrap packet without publishing
+    cmds:
+      - sh scripts/release-bootstrap.sh --dist dist --output-dir .omo/evidence/release-bootstrap
+
   release:readiness:
     desc: Write a public release readiness evidence packet without publishing
     cmds:

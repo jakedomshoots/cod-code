@@ -144,6 +144,7 @@ Status date: 2026-07-03
 - `go test -race -shuffle=on -count=1 ./...`
 - `VERSION=0.1.0-dev sh scripts/release-local.sh`
 - `sh scripts/verify-release.sh dist`
+- `sh scripts/release-bootstrap.sh --dist dist --output-dir .omo/evidence/release-bootstrap` writes a blocked/pass public-release bootstrap packet without publishing anything.
 - `sh scripts/release-preflight.sh dist` blocks public release claims when remote URL, public release URL, Homebrew URL, and signature or checksum-only notes are missing.
 - `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1` writes a blocked/pass public-release evidence packet without publishing anything.
 - `sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-r1` writes one release/provider/eval/security/endurance/comparison readiness packet without publishing, pushing, tagging, uploading, or calling paid providers.
