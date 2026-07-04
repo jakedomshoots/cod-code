@@ -273,7 +273,7 @@ fi
       esac
       case "$category.$name" in
         release.public_release_readiness_run|release.public_release_ready)
-          printf '%s\n' "- Publish release proof: push an explicit \`v*\` tag so the GitHub release workflow publishes verified tarballs, \`checksums.txt\`, and \`release-manifest.json\`; then rerun \`sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-r1\` with the public release/Homebrew/signing inputs in place."
+          printf '%s\n' "- Publish release proof: push an explicit \`v*\` tag so the GitHub release workflow publishes verified tarballs, \`checksums.txt\`, and \`release-manifest.json\`; then rerun \`sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final\` with the public release/Homebrew/signing inputs in place."
           ;;
         comparison.all_agent_29_task_comparison)
           printf '%s\n' "- Refresh market comparison: rerun the 29-task all-agent gauntlet after external CLI auth/timeout setup, then confirm \`comparison-report.md\` says \`Overall comparison: pass\`."
