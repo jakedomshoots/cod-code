@@ -219,6 +219,7 @@ func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 		filepath.Join(outputDir, "preflight.md"),
 		filepath.Join(outputDir, "git-remote.txt"),
 		filepath.Join(outputDir, "github-auth.txt"),
+		filepath.Join(outputDir, "setup-actions.md"),
 	} {
 		if _, err := os.Stat(path); err != nil {
 			t.Fatalf("expected evidence file %s: %v\nscript output:\n%s", path, err, string(readinessOutput))
@@ -235,6 +236,7 @@ func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 		`"release_artifacts_verified": true`,
 		`"preflight_exit_code": 1`,
 		`"blocked_checks": [`,
+		`"setup_actions": "setup-actions.md"`,
 		`"remote_release_url"`,
 		`"github_release_assets"`,
 		`"homebrew_formula_url"`,
@@ -251,6 +253,21 @@ func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 	}
 	if !strings.Contains(string(index), "release readiness: blocked") {
 		t.Fatalf("readiness index did not record blocked status:\n%s", string(index))
+	}
+	setupActions, err := os.ReadFile(filepath.Join(outputDir, "setup-actions.md"))
+	if err != nil {
+		t.Fatalf("read setup actions: %v", err)
+	}
+	for _, want := range []string{
+		"# Release Setup Actions",
+		"remote_release_url: set `RELEASE_URL`",
+		"github_release_assets: push a `v*` tag",
+		"artifact_signatures: add `.sig`, `.minisig`, or `.asc`",
+		"sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final",
+	} {
+		if !strings.Contains(string(setupActions), want) {
+			t.Fatalf("setup-actions.md missing %q:\n%s", want, string(setupActions))
+		}
 	}
 }
 

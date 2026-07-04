@@ -193,6 +193,7 @@ func annotateReleaseProof(action map[string]any) {
 		PreflightStatus          string   `json:"preflight_status"`
 		BlockedCount             int      `json:"blocked_count"`
 		BlockedChecks            []string `json:"blocked_checks"`
+		SetupActions             string   `json:"setup_actions"`
 		OriginRemoteConfigured   bool     `json:"origin_remote_configured"`
 		GitHubAuthStatus         string   `json:"github_auth_status"`
 	}
@@ -207,8 +208,12 @@ func annotateReleaseProof(action map[string]any) {
 		"preflight_status":           summary.PreflightStatus,
 		"blocked_count":              summary.BlockedCount,
 		"blocked_checks":             summary.BlockedChecks,
+		"setup_actions":              summary.SetupActions,
 		"origin_remote_configured":   summary.OriginRemoteConfigured,
 		"github_auth_status":         summary.GitHubAuthStatus,
+	}
+	if summary.SetupActions != "" {
+		action["release_summary"].(map[string]any)["setup_actions_path"] = filepath.Join(filepath.Dir(summaryPath), summary.SetupActions)
 	}
 }
 
@@ -524,6 +529,9 @@ func writeReleaseProofText(builder *strings.Builder, action map[string]any) {
 	checks, _ := summary["blocked_checks"].([]string)
 	if len(checks) > 0 {
 		fmt.Fprintf(builder, "  Blocked checks: %s\n", strings.Join(checks, ", "))
+	}
+	if setupActions := stringValue(summary["setup_actions_path"]); setupActions != "" {
+		fmt.Fprintf(builder, "  Setup actions: %s\n", setupActions)
 	}
 }
 

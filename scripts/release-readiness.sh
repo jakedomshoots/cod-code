@@ -128,6 +128,51 @@ json_array() {
 
 blocked_checks_json=$(json_array "$blocked_checks_file")
 
+setup_actions_file="$output_dir/setup-actions.md"
+write_setup_action() {
+  check="$1"
+  case "$check" in
+    git_remote)
+      printf '%s\n' "- git_remote: configure an origin remote for the public repo, for example \`git remote add origin git@github.com:<owner>/<repo>.git\`."
+      ;;
+    remote_release_url)
+      printf '%s\n' "- remote_release_url: set \`RELEASE_URL\` or \`PUBLIC_RELEASE_URL\` to the public HTTPS release page."
+      ;;
+    github_release_assets)
+      printf '%s\n' "- github_release_assets: push a \`v*\` tag, let the release workflow upload archives, \`checksums.txt\`, and \`release-manifest.json\`, then set \`GH_RELEASE_TAG\` and \`GH_REPO\` if no GitHub origin is configured."
+      ;;
+    homebrew_formula_url)
+      printf '%s\n' "- homebrew_formula_url: publish the release archives to a stable HTTPS URL and update \`dist/homebrew/ceo-packet.rb\` or the tap formula so it uses that remote archive URL."
+      ;;
+    artifact_signatures)
+      printf '%s\n' "- artifact_signatures: add \`.sig\`, \`.minisig\`, or \`.asc\` signatures for every archive, or set \`ALLOW_CHECKSUM_ONLY_RELEASE=1\` with a public \`CHECKSUM_ONLY_RELEASE_NOTES_URL\`."
+      ;;
+    *)
+      printf '%s\n' "- $check: inspect \`preflight.md\` and resolve this blocked release preflight check."
+      ;;
+  esac
+}
+
+if [ "$blocked_count" -gt 0 ]; then
+  {
+    printf '%s\n' "# Release Setup Actions"
+    printf '\n'
+    printf '%s\n' "Run these before making a public production release claim."
+    printf '\n'
+    while IFS= read -r check; do
+      [ -n "$check" ] || continue
+      write_setup_action "$check"
+    done <"$blocked_checks_file"
+    printf '\n'
+    printf '%s\n' "After setup is complete, rerun:"
+    printf '\n'
+    printf '%s\n' '```sh'
+    printf '%s\n' 'sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final'
+    printf '%s\n' 'ceo-packet production-finalize --workspace . --dry-run'
+    printf '%s\n' '```'
+  } >"$setup_actions_file"
+fi
+
 cat >"$output_dir/summary.json" <<JSON
 {
   "schema_version": 1,
@@ -139,6 +184,7 @@ cat >"$output_dir/summary.json" <<JSON
   "preflight_exit_code": $preflight_exit,
   "blocked_count": $blocked_count,
   "blocked_checks": $blocked_checks_json,
+  "setup_actions": "$(if [ "$blocked_count" -gt 0 ]; then printf 'setup-actions.md'; fi)",
   "origin_remote_configured": $(if [ -n "$remote_url" ]; then printf true; else printf false; fi),
   "github_auth_status": "$github_auth_status",
   "artifacts": {
@@ -147,7 +193,8 @@ cat >"$output_dir/summary.json" <<JSON
     "preflight": "preflight.md",
     "verify_release": "verify-release.txt",
     "git_remote": "git-remote.txt",
-    "github_auth": "github-auth.txt"
+    "github_auth": "github-auth.txt",
+    "setup_actions": "$(if [ "$blocked_count" -gt 0 ]; then printf 'setup-actions.md'; fi)"
   }
 }
 JSON
@@ -171,6 +218,8 @@ JSON
       [ -n "$check" ] || continue
       printf -- '- `%s`\n' "$check"
     done <"$blocked_checks_file"
+    printf '\n'
+    printf '%s\n' "Setup actions: \`setup-actions.md\`"
     printf '\n'
   fi
   printf '%s\n' "## Publish Boundary"

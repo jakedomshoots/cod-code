@@ -82,6 +82,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
   "preflight_status": "blocked",
   "blocked_count": 2,
   "blocked_checks": ["git_remote", "github_release_assets"],
+  "setup_actions": "setup-actions.md",
   "origin_remote_configured": false,
   "github_auth_status": "pass"
 }`)
@@ -116,6 +117,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"release-readiness [release_proof]: Prove public release readiness",
 		"Release readiness: blocked, public_ready=false, artifacts_verified=true, blocked=2",
 		"Blocked checks: git_remote, github_release_assets",
+		"Setup actions:",
+		"release-readiness-final",
 		"Command: sh scripts/release-readiness.sh",
 		"competitor-smoke [competitor_setup]: Fix competitor setup",
 		"Competitor setup: 1 pass, 1 blocked, 1 skipped, 0 failed",
