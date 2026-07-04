@@ -347,11 +347,11 @@ else
 fi
 
 if [ "$skip_provider_proofs" -eq 1 ]; then
-  add_step "provider-openai" "skipped" "not-run" "Skipped by flag"
   add_step "provider-openrouter" "skipped" "not-run" "Skipped by flag"
-  add_step "provider-moonshot" "skipped" "not-run" "Skipped by flag"
+  add_step "provider-kimi-code" "skipped" "not-run" "Skipped by flag"
+  add_step "provider-minimax" "skipped" "not-run" "Skipped by flag"
 else
-  for provider in openai openrouter moonshot; do
+  for provider in openrouter kimi-code minimax; do
     provider_output="$evidence_root/provider-proof-$provider"
     if ! run_step "provider-$provider" "$provider_output/index.md" sh "$root/scripts/provider-proof.sh" --provider "$provider" --output-dir "$provider_output" --timeout-seconds "$provider_timeout_seconds"; then
       overall="blocked"
@@ -444,14 +444,14 @@ fi
       release-readiness)
         printf '%s\n' "- Publish and verify release evidence: set public release metadata, then rerun \`sh scripts/release-readiness.sh --dist $(quote_display_path "$dist") --output-dir $(quote_display_path "$evidence_root/release-readiness-final")\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
-      provider-openai)
-        printf '%s\n' "- Prove OpenAI HTTP provider: export \`OPENAI_API_KEY\`, run \`sh scripts/provider-setup-preflight.sh --providers openai --output-dir .omo/evidence/provider-setup-preflight-openai\`, then rerun \`sh scripts/provider-proof.sh --provider openai --output-dir $(quote_display_path "$evidence_root/provider-proof-openai") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
-        ;;
       provider-openrouter)
         printf '%s\n' "- Prove OpenRouter HTTP provider: export \`OPENROUTER_API_KEY\`, run \`sh scripts/provider-setup-preflight.sh --providers openrouter --output-dir .omo/evidence/provider-setup-preflight-openrouter\`, then rerun \`sh scripts/provider-proof.sh --provider openrouter --output-dir $(quote_display_path "$evidence_root/provider-proof-openrouter") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
-      provider-moonshot)
-        printf '%s\n' "- Prove Moonshot HTTP provider: export \`MOONSHOT_API_KEY\`, run \`sh scripts/provider-setup-preflight.sh --providers moonshot --output-dir .omo/evidence/provider-setup-preflight-moonshot\`, then rerun \`sh scripts/provider-proof.sh --provider moonshot --output-dir $(quote_display_path "$evidence_root/provider-proof-moonshot") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
+      provider-kimi-code)
+        printf '%s\n' "- Prove Kimi Code HTTP provider: export \`KIMI_CODE_API_KEY\`, run \`sh scripts/provider-setup-preflight.sh --providers kimi-code --output-dir .omo/evidence/provider-setup-preflight-kimi-code\`, then rerun \`sh scripts/provider-proof.sh --provider kimi-code --output-dir $(quote_display_path "$evidence_root/provider-proof-kimi-code") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
+        ;;
+      provider-minimax)
+        printf '%s\n' "- Prove MiniMax HTTP provider: export \`MINIMAX_API_KEY\`, run \`sh scripts/provider-setup-preflight.sh --providers minimax --output-dir .omo/evidence/provider-setup-preflight-minimax\`, then rerun \`sh scripts/provider-proof.sh --provider minimax --output-dir $(quote_display_path "$evidence_root/provider-proof-minimax") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       competitor-smoke|competitor-smoke-command)
         printf '%s\n' "- Fix competitor setup before final comparison: inspect \`$(display_path "$output_dir/competitor-smoke/summary.json")\`, install missing binaries or fix provider auth/quota, then rerun \`$ceo_packet_cmd production-finalize --workspace . --dry-run\` or the full finalizer."
@@ -485,7 +485,7 @@ fi
   fi
   printf '%s\n' "## Providers"
   printf '\n'
-  for provider in openai openrouter moonshot; do
+  for provider in openrouter kimi-code minimax; do
     checklist="$evidence_root/provider-proof-$provider/setup-checklist.md"
     commands_file="$evidence_root/provider-proof-$provider/commands.sh"
     if [ -f "$checklist" ]; then
@@ -576,21 +576,21 @@ def action_for_step(step):
     if name == "release-readiness":
         action["kind"] = "release_proof"
         action["command"] = ["sh", "scripts/release-readiness.sh", "--dist", "dist", "--output-dir", ".omo/evidence/release-readiness-final"]
-    elif name == "provider-openai":
-        action["kind"] = "provider_proof"
-        action["provider"] = "openai"
-        action["required_env"] = "OPENAI_API_KEY"
-        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "openai", "--output-dir", ".omo/evidence/provider-proof-openai", "--timeout-seconds", provider_timeout]
     elif name == "provider-openrouter":
         action["kind"] = "provider_proof"
         action["provider"] = "openrouter"
         action["required_env"] = "OPENROUTER_API_KEY"
         action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "openrouter", "--output-dir", ".omo/evidence/provider-proof-openrouter", "--timeout-seconds", provider_timeout]
-    elif name == "provider-moonshot":
+    elif name == "provider-kimi-code":
         action["kind"] = "provider_proof"
-        action["provider"] = "moonshot"
-        action["required_env"] = "MOONSHOT_API_KEY"
-        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "moonshot", "--output-dir", ".omo/evidence/provider-proof-moonshot", "--timeout-seconds", provider_timeout]
+        action["provider"] = "kimi-code"
+        action["required_env"] = "KIMI_CODE_API_KEY"
+        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "kimi-code", "--output-dir", ".omo/evidence/provider-proof-kimi-code", "--timeout-seconds", provider_timeout]
+    elif name == "provider-minimax":
+        action["kind"] = "provider_proof"
+        action["provider"] = "minimax"
+        action["required_env"] = "MINIMAX_API_KEY"
+        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "minimax", "--output-dir", ".omo/evidence/provider-proof-minimax", "--timeout-seconds", provider_timeout]
     elif name in {"competitor-smoke", "competitor-smoke-command"}:
         action["kind"] = "competitor_setup"
         action["inspect"] = "competitor-smoke/summary.json"

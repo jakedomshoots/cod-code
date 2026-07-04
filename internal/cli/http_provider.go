@@ -31,6 +31,7 @@ func newHTTPProviderClient(provider config.HTTPProvider, apiKey string) (model.C
 		TimeoutMS:                  provider.TimeoutMS,
 		MaxOutputTokens:            provider.MaxOutputTokens,
 		ResponseFormat:             provider.ResponseFormat,
+		DisableThinking:            provider.DisableThinking,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create http model client: %w", err)

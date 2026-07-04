@@ -278,7 +278,7 @@ func sha256Text(body string) string {
 	return fmt.Sprintf("%x", sum[:])
 }
 
-func Test_Run_production_status_ignores_skipped_finalizer_next_actions(t *testing.T) {
+func Test_Run_production_status_prefers_latest_non_skipped_finalizer_next_actions(t *testing.T) {
 	root := t.TempDir()
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-r1", "summary.json"), `{
   "status": "blocked",
@@ -323,14 +323,14 @@ func Test_Run_production_status_ignores_skipped_finalizer_next_actions(t *testin
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
 	}
 	text := out.String()
-	if !strings.Contains(text, "production-finalize-complete/next-actions.md (6 actions)") {
-		t.Fatalf("production status did not prefer complete finalizer:\n%s", text)
+	if !strings.Contains(text, "production-finalize-planned/next-actions.md (9 actions)") {
+		t.Fatalf("production status did not prefer latest non-skipped finalizer:\n%s", text)
 	}
 	if strings.Contains(text, "production-finalize-skipped/next-actions.md") {
 		t.Fatalf("production status used skipped finalizer:\n%s", text)
 	}
-	if strings.Contains(text, "production-finalize-planned/next-actions.md") {
-		t.Fatalf("production status used planned finalizer:\n%s", text)
+	if strings.Contains(text, "production-finalize-complete/next-actions.md") {
+		t.Fatalf("production status used stale complete finalizer:\n%s", text)
 	}
 }
 

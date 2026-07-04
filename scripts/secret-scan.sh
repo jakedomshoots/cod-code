@@ -65,7 +65,7 @@ find "$scan_root" \
   ! -name '*_test.go' \
   -print >"$tmp"
 
-secret_pattern='(OPENAI_API_KEY|OPENROUTER_API_KEY|MOONSHOT_API_KEY|ANTHROPIC_API_KEY)[[:space:]]*=[[:space:]]*sk-[A-Za-z0-9_-]{16,}|sk-proj-[A-Za-z0-9_-]{16,}|sk-or-v1-[A-Za-z0-9_-]{16,}|gh[opsu]_[A-Za-z0-9_]{20,}'
+secret_pattern='(OPENAI_API_KEY|OPENROUTER_API_KEY|KIMI_CODE_API_KEY|MOONSHOT_API_KEY|MINIMAX_API_KEY|ANTHROPIC_API_KEY)[[:space:]]*=[[:space:]]*(sk-[A-Za-z0-9_-]{16,}|sk-proj-[A-Za-z0-9_-]{16,}|sk-or-v1-[A-Za-z0-9_-]{16,}|[A-Za-z0-9_.-]{40,})|gh[opsu]_[A-Za-z0-9_]{20,}'
 
 failed=0
 while IFS= read -r file; do

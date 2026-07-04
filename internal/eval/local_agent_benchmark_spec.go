@@ -82,7 +82,7 @@ func buildCEOBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, task Task,
 		if len(req.CEOBenchmarkModelCommand) == 0 {
 			return localAgentSpec{}, fmt.Errorf("%w: --ceo-benchmark-mode model-command requires --ceo-benchmark-model-command-json", ErrInvalidCompetitor)
 		}
-		args := []string{"--write-policy", "trusted-local", "--apply-model-patches", "--subagent-attempts", "2", "--no-progress-stop", "2", "--format", "json", "--model-command"}
+		args := []string{"--write-policy", "trusted-local", "--apply-model-patches", "--check-fix-attempts", "2", "--subagent-attempts", "2", "--no-progress-stop", "2", "--format", "json", "--model-command"}
 		args = append(args, req.CEOBenchmarkModelCommand...)
 		args = append(args, "--")
 		args = append(args, "--ceo-model-command")
@@ -103,7 +103,7 @@ func buildCEOBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, task Task,
 		if err != nil {
 			return localAgentSpec{}, err
 		}
-		args := appendCEORequiredCheckArgs([]string{"--write-policy", "trusted-local", "--apply-model-patches", "--format", "json"}, task, prompt)
+		args := appendCEORequiredCheckArgs([]string{"--write-policy", "trusted-local", "--apply-model-patches", "--check-fix-attempts", "2", "--max-subagents", "1", "--subagent-attempts", "2", "--no-progress-stop", "2", "--format", "json"}, task, prompt)
 		return localAgentSpec{
 			id:              id,
 			name:            "CEO Harness",
@@ -146,6 +146,10 @@ func ceoBenchmarkHTTPProviderConfig(req LocalAgentBenchmarkRequest) ([]byte, err
 	if apiKeyEnv == "" {
 		apiKeyEnv = preset.apiKeyEnv
 	}
+	responseFormat := preset.responseFormat
+	if responseFormat == "" && !preset.allowUnstructured {
+		responseFormat = "json_object"
+	}
 	cfg := config.Config{
 		Providers: map[string]config.Provider{
 			name: {
@@ -154,7 +158,8 @@ func ceoBenchmarkHTTPProviderConfig(req LocalAgentBenchmarkRequest) ([]byte, err
 					Model:           model,
 					APIKeyEnv:       apiKeyEnv,
 					MaxOutputTokens: req.CEOBenchmarkProviderMaxOutputToks,
-					ResponseFormat:  "json_object",
+					ResponseFormat:  responseFormat,
+					DisableThinking: preset.disableThinking,
 				},
 			},
 		},
@@ -174,8 +179,11 @@ func ceoBenchmarkHTTPProviderConfig(req LocalAgentBenchmarkRequest) ([]byte, err
 }
 
 type ceoBenchmarkProviderPreset struct {
-	url       string
-	apiKeyEnv string
+	url               string
+	apiKeyEnv         string
+	responseFormat    string
+	allowUnstructured bool
+	disableThinking   bool
 }
 
 func ceoBenchmarkHTTPProviderPreset(raw string) (ceoBenchmarkProviderPreset, error) {
@@ -190,10 +198,22 @@ func ceoBenchmarkHTTPProviderPreset(raw string) (ceoBenchmarkProviderPreset, err
 			url:       "https://api.openai.com/v1/chat/completions",
 			apiKeyEnv: "OPENAI_API_KEY",
 		}, nil
-	case "kimi", "moonshot":
+	case "kimi", "kimi-code", "kimicode":
+		return ceoBenchmarkProviderPreset{
+			url:               "https://api.kimi.com/coding/v1/chat/completions",
+			apiKeyEnv:         "KIMI_CODE_API_KEY",
+			allowUnstructured: true,
+		}, nil
+	case "moonshot":
 		return ceoBenchmarkProviderPreset{
 			url:       "https://api.moonshot.ai/v1/chat/completions",
 			apiKeyEnv: "MOONSHOT_API_KEY",
+		}, nil
+	case "minimax":
+		return ceoBenchmarkProviderPreset{
+			url:             "https://api.minimax.io/v1/chat/completions",
+			apiKeyEnv:       "MINIMAX_API_KEY",
+			disableThinking: true,
 		}, nil
 	default:
 		return ceoBenchmarkProviderPreset{}, fmt.Errorf("%w: unknown --ceo-benchmark-provider-preset %q", ErrInvalidCompetitor, raw)

@@ -157,9 +157,9 @@ sh scripts/dogfood-real.sh --copy-workspace --multi-file-app-code-probe --repo "
 sh scripts/provider-setup-preflight.sh --output-dir .omo/evidence/provider-setup-preflight
 sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi
 sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex
-sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai
 sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter
-sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot
+sh scripts/provider-proof.sh --provider kimi-code --output-dir .omo/evidence/provider-proof-kimi-code
+sh scripts/provider-proof.sh --provider minimax --output-dir .omo/evidence/provider-proof-minimax
 ceo-packet explain-failure latest --workspace .
 ceo-packet retry latest --workspace .
 ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
@@ -167,13 +167,13 @@ ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
 
 Quickstart auto-detects Go, Rust, package.json, pytest Python, and Makefile workspaces (`go.mod`, `Cargo.toml`, a `scripts.test` entry, pytest config, or a `test` target), writes the default test command, and enables `require_checks` so coding runs cannot pass without verification. Package workspaces use `bun test`, `pnpm test`, `yarn test`, or `npm test` based on the lockfile. Python workspaces use `uv run pytest` when `uv.lock` is present, otherwise `python -m pytest`. Makefile workspaces use `make test`.
 
-Create a real-provider workspace config where the CEO and default subagents use an OpenAI-compatible endpoint:
+Create a real-provider workspace config where the CEO and default subagents use a Kimi Code-compatible endpoint:
 
 ```sh
-export OPENAI_API_KEY=...
+export KIMI_CODE_API_KEY=...
 ceo-packet --workspace /path/to/repo \
-  --provider-wizard openai \
-  --http-model gpt-5 \
+  --provider-wizard kimi-code \
+  --http-model kimi-for-coding \
   --format text
 ```
 
@@ -700,7 +700,7 @@ go run ./cmd/ceo-packet \
   --fallback-provider premium
 ```
 
-Repeat `--http-provider` to create multiple routes in one config. Presets currently fill only the endpoint and default API-key env var: `openai` uses `OPENAI_API_KEY`, `openrouter` uses `OPENROUTER_API_KEY`, and `kimi`/`moonshot` use `MOONSHOT_API_KEY`.
+Repeat `--http-provider` to create multiple routes in one config. Presets currently fill the endpoint and default API-key env var: `openai` uses `OPENAI_API_KEY`, `openrouter` uses `OPENROUTER_API_KEY`, `kimi`/`kimi-code` uses `KIMI_CODE_API_KEY`, `moonshot` uses `MOONSHOT_API_KEY`, and `minimax` uses `MINIMAX_API_KEY`.
 
 Set `--ceo-provider <name>` during config init or quickstart when that provider should own CEO delegation and final review. Explicit `ceo_provider` wins over the bundled example CEO adapter in quickstarted workspaces.
 

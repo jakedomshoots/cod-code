@@ -2,6 +2,7 @@ package ceo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -74,11 +75,14 @@ func buildRuntimeArtifacts(ctx context.Context, input runtimeArtifactsInput) (ru
 	if input.Request.ApplyModelPatches && !input.Request.DryRun {
 		applied, audit, err := applyRuntimeModelPatches(ctx, input)
 		if err != nil {
-			return runtimeArtifacts{}, err
+			if !errors.Is(err, workspace.ErrTextNotFound) {
+				return runtimeArtifacts{}, err
+			}
+		} else {
+			artifacts.PatchResults = append(artifacts.PatchResults, applied...)
+			artifacts.PatchAudit = append(artifacts.PatchAudit, audit...)
+			artifacts.ChangedFiles = appendChangedPatchFiles(artifacts.ChangedFiles, applied)
 		}
-		artifacts.PatchResults = append(artifacts.PatchResults, applied...)
-		artifacts.PatchAudit = append(artifacts.PatchAudit, audit...)
-		artifacts.ChangedFiles = appendChangedPatchFiles(artifacts.ChangedFiles, applied)
 	}
 
 	if input.ArtifactStore.Enabled && !input.Request.DryRun {

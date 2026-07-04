@@ -31,6 +31,7 @@ type HTTPConfig struct {
 	TimeoutMS                  int
 	MaxOutputTokens            int
 	ResponseFormat             string
+	DisableThinking            bool
 }
 
 type HTTPClient struct {
@@ -42,6 +43,7 @@ type HTTPClient struct {
 	outputCostPerMillionTokens float64
 	maxOutputTokens            int
 	responseFormat             string
+	disableThinking            bool
 }
 
 func NewHTTPClient(cfg HTTPConfig) (HTTPClient, error) {
@@ -69,6 +71,7 @@ func NewHTTPClient(cfg HTTPConfig) (HTTPClient, error) {
 		outputCostPerMillionTokens: cfg.OutputCostPerMillionTokens,
 		maxOutputTokens:            cfg.MaxOutputTokens,
 		responseFormat:             strings.TrimSpace(cfg.ResponseFormat),
+		disableThinking:            cfg.DisableThinking,
 	}, nil
 }
 
@@ -84,6 +87,7 @@ func (c HTTPClient) Complete(ctx context.Context, req Request) (Response, error)
 		Model:          c.model,
 		MaxTokens:      c.maxOutputTokens,
 		ResponseFormat: c.chatResponseFormat(),
+		Thinking:       c.chatThinking(),
 		Messages: []chatMessage{
 			{Role: "user", Content: req.Prompt},
 		},
@@ -148,6 +152,13 @@ func (c HTTPClient) chatResponseFormat() *chatResponseFormat {
 	return &chatResponseFormat{Type: c.responseFormat}
 }
 
+func (c HTTPClient) chatThinking() *chatThinking {
+	if !c.disableThinking {
+		return nil
+	}
+	return &chatThinking{Type: "disabled"}
+}
+
 func (c HTTPClient) requiresStructuredOutput() bool {
 	return strings.EqualFold(c.responseFormat, "json_object")
 }
@@ -156,10 +167,15 @@ type chatCompletionRequest struct {
 	Model          string              `json:"model"`
 	MaxTokens      int                 `json:"max_tokens,omitempty"`
 	ResponseFormat *chatResponseFormat `json:"response_format,omitempty"`
+	Thinking       *chatThinking       `json:"thinking,omitempty"`
 	Messages       []chatMessage       `json:"messages"`
 }
 
 type chatResponseFormat struct {
+	Type string `json:"type"`
+}
+
+type chatThinking struct {
 	Type string `json:"type"`
 }
 

@@ -76,16 +76,26 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 	if !strings.Contains(commands, " reason: ") {
 		t.Fatalf("production action command artifact should include blocker reasons:\n%s", commands)
 	}
-	providerCommands := readTextFile(t, filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "commands.sh"))
+	providerCommands := ""
+	for _, provider := range []string{"openrouter", "kimi-code", "minimax"} {
+		path := filepath.Join(root, ".omo", "evidence", "provider-proof-"+provider, "commands.sh")
+		if _, err := os.Stat(path); err == nil {
+			providerCommands = readTextFile(t, path)
+			break
+		}
+	}
+	if providerCommands == "" {
+		t.Fatalf("expected at least one default provider command artifact")
+	}
 	for _, want := range []string{
 		"Do not paste secret values into this file or any evidence artifact.",
-		"scripts/provider-proof.sh --provider openai",
+		"scripts/provider-proof.sh --provider ",
 	} {
 		if !strings.Contains(providerCommands, want) {
 			t.Fatalf("provider command artifact missing %q:\n%s", want, providerCommands)
 		}
 	}
-	if strings.Contains(providerCommands, "OPENAI_API_KEY=") || strings.Contains(providerCommands, "<redacted>") {
+	if strings.Contains(providerCommands, "OPENROUTER_API_KEY=") || strings.Contains(providerCommands, "KIMI_CODE_API_KEY=") || strings.Contains(providerCommands, "MINIMAX_API_KEY=") || strings.Contains(providerCommands, "<redacted>") {
 		t.Fatalf("provider command artifact should not include secret assignments:\n%s", providerCommands)
 	}
 	releaseSetup := readTextFile(t, filepath.Join(root, ".omo", "evidence", "release-readiness-final", "setup-actions.md"))

@@ -222,7 +222,7 @@ func Test_BuildLocalAgentBenchmarkSpec_httpProviderModeWritesWorkspaceConfig(t *
 		CEOBenchmarkMode:                  ceoBenchmarkModeHTTPProvider,
 		CEOBenchmarkProviderName:          "main",
 		CEOBenchmarkProviderPreset:        "openrouter",
-		CEOBenchmarkProviderModel:         "openai/gpt-5-mini",
+		CEOBenchmarkProviderModel:         "openai/gpt-5",
 		CEOBenchmarkProviderAPIKeyEnv:     "OPENROUTER_API_KEY",
 		CEOBenchmarkProviderMaxOutputToks: 2048,
 	}, task)
@@ -235,6 +235,15 @@ func Test_BuildLocalAgentBenchmarkSpec_httpProviderModeWritesWorkspaceConfig(t *
 	if !slices.Contains(spec.args, "--apply-model-patches") || !slices.Contains(spec.args, "--check") {
 		t.Fatalf("args = %+v, want apply-model-patches and required check", spec.args)
 	}
+	if got := commandFlagValue(spec.args, "--max-subagents"); got != "1" {
+		t.Fatalf("args = %+v, want --max-subagents 1, got %q", spec.args, got)
+	}
+	if got := commandFlagValue(spec.args, "--subagent-attempts"); got != "2" {
+		t.Fatalf("args = %+v, want --subagent-attempts 2, got %q", spec.args, got)
+	}
+	if got := commandFlagValue(spec.args, "--no-progress-stop"); got != "2" {
+		t.Fatalf("args = %+v, want --no-progress-stop 2, got %q", spec.args, got)
+	}
 	var cfg config.Config
 	if err := json.Unmarshal(spec.workspaceConfig, &cfg); err != nil {
 		t.Fatalf("workspace config must decode: %v", err)
@@ -243,11 +252,42 @@ func Test_BuildLocalAgentBenchmarkSpec_httpProviderModeWritesWorkspaceConfig(t *
 	if cfg.CEOProvider != "main" || cfg.ProviderPolicy.DefaultProvider != "main" {
 		t.Fatalf("config = %#v, want main routed as CEO and default provider", cfg)
 	}
-	if provider.Model != "openai/gpt-5-mini" || provider.APIKeyEnv != "OPENROUTER_API_KEY" || provider.ResponseFormat != "json_object" {
+	if provider.Model != "openai/gpt-5" || provider.APIKeyEnv != "OPENROUTER_API_KEY" || provider.ResponseFormat != "json_object" {
 		t.Fatalf("http provider = %#v, want OpenRouter JSON provider", provider)
 	}
 	if provider.MaxOutputTokens != 2048 {
 		t.Fatalf("max output tokens = %d, want 2048", provider.MaxOutputTokens)
+	}
+}
+
+func Test_BuildLocalAgentBenchmarkSpec_kimiCodeHTTPProviderDoesNotForceJSONMode(t *testing.T) {
+	task := Task{
+		ID:                   "safety-policy-path-escape",
+		Title:                "Reject path escape writes",
+		Objective:            "Ensure patch/create requests cannot write outside the workspace root.",
+		RequiredChangedFiles: []string{"internal/workspace/workspace.go"},
+		RequiredDiffTerms:    []string{"ErrPathEscapesWorkspace"},
+	}
+
+	spec, err := buildLocalAgentBenchmarkSpec("ceo_harness", LocalAgentBenchmarkRequest{
+		CEOBenchmarkMode:              ceoBenchmarkModeHTTPProvider,
+		CEOBenchmarkProviderPreset:    "kimi-code",
+		CEOBenchmarkProviderModel:     "kimi-for-coding",
+		CEOBenchmarkProviderAPIKeyEnv: "KIMI_CODE_API_KEY",
+	}, task)
+	if err != nil {
+		t.Fatalf("buildLocalAgentBenchmarkSpec returned error: %v", err)
+	}
+	var cfg config.Config
+	if err := json.Unmarshal(spec.workspaceConfig, &cfg); err != nil {
+		t.Fatalf("workspace config must decode: %v", err)
+	}
+	provider := cfg.Providers["main"].HTTP
+	if provider.URL != "https://api.kimi.com/coding/v1/chat/completions" || provider.APIKeyEnv != "KIMI_CODE_API_KEY" {
+		t.Fatalf("http provider = %#v, want Kimi Code endpoint and env", provider)
+	}
+	if provider.ResponseFormat != "" {
+		t.Fatalf("response format = %q, want blank for Kimi Code", provider.ResponseFormat)
 	}
 }
 

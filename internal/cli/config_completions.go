@@ -56,6 +56,10 @@ func productionActionStateWords() string {
 	return "ready missing_env empty_env setup_blocked waiting"
 }
 
+func productionActionProviderWords() string {
+	return "openai openrouter kimi-code moonshot minimax kimi codex"
+}
+
 func zshCompletion() string {
 	return `#compdef ceo-packet
 local -a commands
@@ -73,7 +77,7 @@ case $words[2] in
     _arguments \
       '--action-state[action state]:state:(` + productionActionStateWords() + `)' \
       '--action-kind[action kind]:kind:(release_proof provider_proof competitor_setup comparison final_readiness)' \
-      '--action-provider[provider]:provider:(openai openrouter moonshot kimi codex)' \
+      '--action-provider[provider]:provider:(` + productionActionProviderWords() + `)' \
       '--format[output format]:format:(json text events)'
     ;;
 esac
@@ -107,7 +111,7 @@ func bashCompletion() string {
     return 0
   fi
   if [[ "${COMP_WORDS[1]}" == production-actions && "$prev" == --action-provider ]]; then
-    COMPREPLY=( $(compgen -W "openai openrouter moonshot kimi codex" -- "$cur") )
+    COMPREPLY=( $(compgen -W "` + productionActionProviderWords() + `" -- "$cur") )
     return 0
   fi
   if [[ "$prev" == --shell ]]; then
@@ -126,7 +130,7 @@ complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l agents -a "c
 complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l output-dir -r
 complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-state -a "` + productionActionStateWords() + `"
 complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-kind -a "release_proof provider_proof competitor_setup comparison final_readiness"
-complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-provider -a "openai openrouter moonshot kimi codex"
+complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-provider -a "` + productionActionProviderWords() + `"
 complete -c ceo-packet -n "__fish_seen_subcommand_from completions" -l shell -a "zsh bash fish"
 complete -c ceo-packet -n "__fish_seen_subcommand_from completions" -l output-dir -r
 `

@@ -101,8 +101,12 @@ func providerWizardDefaultModel(preset string) string {
 		return "gpt-5"
 	case "openrouter":
 		return "openai/gpt-5"
-	case "kimi", "moonshot":
+	case "kimi", "kimi-code", "kimicode":
+		return "kimi-for-coding"
+	case "moonshot":
 		return "moonshot-v1-128k"
+	case "minimax":
+		return "MiniMax-M3"
 	default:
 		return ""
 	}

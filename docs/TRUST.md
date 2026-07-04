@@ -73,7 +73,9 @@ Paid HTTP provider proof is setup-blocked until these env vars are present and n
 ```sh
 OPENAI_API_KEY
 OPENROUTER_API_KEY
+KIMI_CODE_API_KEY
 MOONSHOT_API_KEY
+MINIMAX_API_KEY
 ```
 
 Check setup without printing or saving secret values:

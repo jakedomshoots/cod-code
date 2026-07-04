@@ -10,6 +10,7 @@ import (
 var ErrTaskRequired = errors.New("prompt task is required")
 
 const responseContract = `response_contract: return one JSON object only: {"status":"pass|fail|needs_input","summary":"short result","confidence":0.0,"evidence":[],"questions":[],"tool_requests":[],"patches":[]}`
+const toolRules = `tool_rules: use allowed_actions directly; do not ask permission for them. To read a file, return {"tool_requests":[{"action":"read_workspace","path":"relative/file"}]}. To search, use {"action":"search_workspace","query":"text"}. To edit when propose_patch is allowed, return patches with path plus old/new or full content.`
 
 type Request struct {
 	Task           string
@@ -79,12 +80,13 @@ func Build(ctx context.Context, req Request) (Prompt, error) {
 		toolResults = "\ntool_results: " + toolResultsValue
 	}
 	text := fmt.Sprintf(
-		"agent: %s\nrole: %s%s\nmode: %s\nallowed_actions: %s\ntask:\n%s\n%s%s%s%s",
+		"agent: %s\nrole: %s%s\nmode: %s\nallowed_actions: %s\n%s\ntask:\n%s\n%s%s%s%s",
 		strings.TrimSpace(req.AgentName),
 		strings.TrimSpace(req.Role),
 		assignment,
 		strings.TrimSpace(req.ContextMode),
 		strings.Join(req.AllowedActions, ", "),
+		toolRules,
 		task,
 		responseContract,
 		workspaceBrief,

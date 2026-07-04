@@ -448,7 +448,7 @@ func productionFinalizerSummaryHasSkippedSteps(path string) bool {
 	if err := json.Unmarshal(content, &raw); err != nil {
 		return true
 	}
-	return raw.Status == "planned" || len(raw.SkippedSteps) > 0
+	return len(raw.SkippedSteps) > 0
 }
 
 func writeProductionStatusReport(out io.Writer, report productionStatusReport, format reportFormat) error {

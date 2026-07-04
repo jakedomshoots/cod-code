@@ -38,9 +38,9 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		"Status: planned",
 		"Publishes or tags: false",
 		"Secret values saved: false",
-		"| provider-openai | planned |",
 		"| provider-openrouter | planned |",
-		"| provider-moonshot | planned |",
+		"| provider-kimi-code | planned |",
+		"| provider-minimax | planned |",
 		"| all-agent-29-comparison | planned |",
 		"`commands.sh`",
 		"`setup-actions.md`",
@@ -53,15 +53,15 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
 	for _, want := range []string{
 		"scripts/release-readiness.sh",
-		"scripts/provider-proof.sh --provider openai",
 		"scripts/provider-proof.sh --provider openrouter",
-		"scripts/provider-proof.sh --provider moonshot",
+		"scripts/provider-proof.sh --provider kimi-code",
+		"scripts/provider-proof.sh --provider minimax",
 		"--comparison-smoke",
 		"--local-agent-benchmark-task production-core",
 		"--local-agent-benchmark-timeout-retries 1",
 		"--local-agent-benchmark-result-retries 1",
 		"scripts/production-readiness.sh",
-		"evidence root/provider-proof-openai",
+		"evidence root/provider-proof-kimi-code",
 	} {
 		if !strings.Contains(commands, want) {
 			t.Fatalf("commands.sh missing %q:\n%s", want, commands)
@@ -77,7 +77,7 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		`"path": "setup-actions.md"`,
 		`"required_action_count":`,
 		`"sha256": "`,
-		`"provider-openai"`,
+		`"provider-kimi-code"`,
 		`"all-agent-29-comparison"`,
 	} {
 		if !strings.Contains(summary, want) {
@@ -103,10 +103,10 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 
 	nextActions := readTextFile(t, filepath.Join(outputDir, "next-actions.md"))
 	for _, want := range []string{
-		"scripts/provider-setup-preflight.sh --providers openai",
 		"scripts/provider-setup-preflight.sh --providers openrouter",
-		"scripts/provider-setup-preflight.sh --providers moonshot",
-		"scripts/provider-proof.sh --provider openai",
+		"scripts/provider-setup-preflight.sh --providers kimi-code",
+		"scripts/provider-setup-preflight.sh --providers minimax",
+		"scripts/provider-proof.sh --provider kimi-code",
 	} {
 		if !strings.Contains(nextActions, want) {
 			t.Fatalf("next-actions.md missing %q:\n%s", want, nextActions)
@@ -117,7 +117,7 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 	for _, want := range []string{
 		"# Production Setup Actions",
 		"## Providers",
-		"openai:",
+		"kimi-code:",
 		"## Final Rerun",
 		"go run ./cmd/ceo-packet production-finalize --workspace . --run-comparison",
 	} {
@@ -145,7 +145,7 @@ func Test_ProductionFinalizeScript_commentsBlockedReplayCommands(t *testing.T) {
 		"--skip-production-readiness",
 	)
 	cmd.Dir = root
-	cmd.Env = withoutEnv(withoutEnv(withoutEnv(cmd.Environ(), "OPENAI_API_KEY"), "OPENROUTER_API_KEY"), "MOONSHOT_API_KEY")
+	cmd.Env = withoutEnv(withoutEnv(withoutEnv(cmd.Environ(), "OPENROUTER_API_KEY"), "KIMI_CODE_API_KEY"), "MINIMAX_API_KEY")
 	output, err := cmd.CombinedOutput()
 	if err == nil {
 		t.Fatalf("production-finalize unexpectedly passed without public release/provider setup:\n%s", string(output))
@@ -154,10 +154,10 @@ func Test_ProductionFinalizeScript_commentsBlockedReplayCommands(t *testing.T) {
 	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
 	for _, want := range []string{
 		"# blocked command: sh " + filepath.Join(root, "scripts", "release-readiness.sh"),
-		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openai",
 		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openrouter",
-		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider moonshot",
-		"# reason: step provider-openai exited 1;",
+		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider kimi-code",
+		"# blocked command: sh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider minimax",
+		"# reason: step provider-openrouter exited 1;",
 	} {
 		if !strings.Contains(commands, want) {
 			t.Fatalf("commands.sh missing blocked replay detail %q:\n%s", want, commands)
@@ -165,9 +165,9 @@ func Test_ProductionFinalizeScript_commentsBlockedReplayCommands(t *testing.T) {
 	}
 	for _, blockedRunnable := range []string{
 		"\nsh " + filepath.Join(root, "scripts", "release-readiness.sh"),
-		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openai",
 		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider openrouter",
-		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider moonshot",
+		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider kimi-code",
+		"\nsh " + filepath.Join(root, "scripts", "provider-proof.sh") + " --provider minimax",
 	} {
 		if strings.Contains(commands, blockedRunnable) {
 			t.Fatalf("commands.sh should not contain runnable blocked command %q:\n%s", blockedRunnable, commands)

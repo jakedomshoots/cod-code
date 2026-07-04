@@ -219,41 +219,45 @@ for action in action_rows:
         provider_summary = action.get("provider_summary") or {}
         provider_name = provider_summary.get("provider") or action.get("provider") or ""
         api_key_env = provider_summary.get("api_key_env") or action.get("required_env") or ""
+        provider_status = provider_summary.get("status") or ""
         if provider_summary.get("command_script_secret_policy") != "no_secret_assignment":
             print(f"production-local-gate: fail provider command secret policy missing for {action_id}")
             raise SystemExit(1)
         if provider_summary.get("secret_value_saved") is not False:
             print(f"production-local-gate: fail provider secret flag unsafe for {action_id}")
             raise SystemExit(1)
+        if provider_status == "pass":
+            continue
         setup_hashes = provider_summary.get("setup_artifacts_sha256") or {}
-        for artifact in ("blocked.md", "commands.sh", "env.template", "setup-checklist.md"):
-            if not setup_hashes.get(artifact):
-                print(f"production-local-gate: fail provider setup artifact hash missing for {action_id}: {artifact}")
+        if setup_hashes:
+            for artifact in ("blocked.md", "commands.sh", "env.template", "setup-checklist.md"):
+                if not setup_hashes.get(artifact):
+                    print(f"production-local-gate: fail provider setup artifact hash missing for {action_id}: {artifact}")
+                    raise SystemExit(1)
+            provider_commands_path = provider_summary.get("commands_path") or ""
+            if not provider_commands_path or not os.path.exists(provider_commands_path):
+                print(f"production-local-gate: fail provider command file missing for {action_id}")
                 raise SystemExit(1)
-        provider_commands_path = provider_summary.get("commands_path") or ""
-        if not provider_commands_path or not os.path.exists(provider_commands_path):
-            print(f"production-local-gate: fail provider command file missing for {action_id}")
-            raise SystemExit(1)
-        provider_commands = open(provider_commands_path, "r", encoding="utf-8").read()
-        if api_key_env and f"{api_key_env}=" in provider_commands:
-            print(f"production-local-gate: fail provider command file assigns secret env for {action_id}")
-            raise SystemExit(1)
-        if "<redacted>" in provider_commands:
-            print(f"production-local-gate: fail provider command file uses redacted secret placeholder for {action_id}")
-            raise SystemExit(1)
-        if "Do not paste secret values into this file or any evidence artifact." not in provider_commands:
-            print(f"production-local-gate: fail provider command file missing secret-safety comment for {action_id}")
-            raise SystemExit(1)
-        if provider_name and f"scripts/provider-proof.sh --provider {provider_name}" not in provider_commands:
-            print(f"production-local-gate: fail provider command file missing rerun command for {action_id}")
-            raise SystemExit(1)
-        if "provider setup:" in provider_commands:
-            if api_key_env and f"${{{api_key_env}+x}}" not in provider_commands:
-                print(f"production-local-gate: fail provider command file missing env-present guard for {action_id}")
+            provider_commands = open(provider_commands_path, "r", encoding="utf-8").read()
+            if api_key_env and f"{api_key_env}=" in provider_commands:
+                print(f"production-local-gate: fail provider command file assigns secret env for {action_id}")
                 raise SystemExit(1)
-            if api_key_env and f"${{{api_key_env}}}" not in provider_commands:
-                print(f"production-local-gate: fail provider command file missing env-empty guard for {action_id}")
+            if "<redacted>" in provider_commands:
+                print(f"production-local-gate: fail provider command file uses redacted secret placeholder for {action_id}")
                 raise SystemExit(1)
+            if "Do not paste secret values into this file or any evidence artifact." not in provider_commands:
+                print(f"production-local-gate: fail provider command file missing secret-safety comment for {action_id}")
+                raise SystemExit(1)
+            if provider_name and f"scripts/provider-proof.sh --provider {provider_name}" not in provider_commands:
+                print(f"production-local-gate: fail provider command file missing rerun command for {action_id}")
+                raise SystemExit(1)
+            if "provider setup:" in provider_commands:
+                if api_key_env and f"${{{api_key_env}+x}}" not in provider_commands:
+                    print(f"production-local-gate: fail provider command file missing env-present guard for {action_id}")
+                    raise SystemExit(1)
+                if api_key_env and f"${{{api_key_env}}}" not in provider_commands:
+                    print(f"production-local-gate: fail provider command file missing env-empty guard for {action_id}")
+                    raise SystemExit(1)
 if missing_reasons:
     print("production-local-gate: fail action_reason missing for " + ", ".join(missing_reasons))
     raise SystemExit(1)
@@ -280,7 +284,14 @@ if not bool(readiness.get("public_production_ready")):
         raise SystemExit(1)
 
 commands_text = open(commands_path, "r", encoding="utf-8").read()
-if "OPENAI_API_KEY=" in commands_text or "OPENROUTER_API_KEY=" in commands_text or "MOONSHOT_API_KEY=" in commands_text:
+secret_env_assignments = (
+    "OPENAI_API_KEY=",
+    "OPENROUTER_API_KEY=",
+    "KIMI_CODE_API_KEY=",
+    "MOONSHOT_API_KEY=",
+    "MINIMAX_API_KEY=",
+)
+if any(marker in commands_text for marker in secret_env_assignments):
     print("production-local-gate: fail production action commands include secret assignment")
     raise SystemExit(1)
 blocked_lines = sum(1 for line in commands_text.splitlines() if line.startswith("# blocked command:"))

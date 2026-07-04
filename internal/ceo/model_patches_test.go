@@ -48,6 +48,63 @@ func (r modelCreateFilePatchRunner) Run(ctx context.Context, packet subagent.Tas
 	}, nil
 }
 
+type modelFullFileContentPatchRunner struct{}
+
+func (r modelFullFileContentPatchRunner) Run(ctx context.Context, packet subagent.TaskPacket) (subagent.Result, error) {
+	summary := "ok"
+	if packet.AgentName == "coder" {
+		summary = `{"patches":[{"path":"app.txt","content":"hello new\n"}]}`
+	}
+	return subagent.Result{
+		AgentName:       packet.AgentName,
+		Role:            packet.Role,
+		Status:          "pass",
+		Attempts:        1,
+		ContextReceived: packet.ContextMode,
+		ContextBytes:    len(packet.Task),
+		Summary:         summary,
+		Evidence:        []string{"ok"},
+	}, nil
+}
+
+type modelLooseWholeFilePatchRunner struct{}
+
+func (r modelLooseWholeFilePatchRunner) Run(ctx context.Context, packet subagent.TaskPacket) (subagent.Result, error) {
+	summary := "ok"
+	if packet.AgentName == "coder" {
+		summary = `{"patches":[{"path":"frontend/state.js","old":"module.exports = { benchmarkFixture: \"TODO: update this benchmark fixture\" }","new":"module.exports = { benchmarkFixture: \"optimistic update keeps rollback evidence\" };"}]}`
+	}
+	return subagent.Result{
+		AgentName:       packet.AgentName,
+		Role:            packet.Role,
+		Status:          "pass",
+		Attempts:        1,
+		ContextReceived: packet.ContextMode,
+		ContextBytes:    len(packet.Task),
+		Summary:         summary,
+		Evidence:        []string{"ok"},
+	}, nil
+}
+
+type modelToolRequestPatchRunner struct{}
+
+func (r modelToolRequestPatchRunner) Run(ctx context.Context, packet subagent.TaskPacket) (subagent.Result, error) {
+	summary := "ok"
+	if packet.AgentName == "coder" {
+		summary = `{"tool_requests":[{"action":"propose_patch","path":"app.txt","old":"old","new":"new"}]}`
+	}
+	return subagent.Result{
+		AgentName:       packet.AgentName,
+		Role:            packet.Role,
+		Status:          "pass",
+		Attempts:        1,
+		ContextReceived: packet.ContextMode,
+		ContextBytes:    len(packet.Task),
+		Summary:         summary,
+		Evidence:        []string{"ok"},
+	}, nil
+}
+
 func Test_Runtime_RunJob_applies_coder_model_patch_when_enabled(t *testing.T) {
 	// Given
 	runtime := NewRuntimeWithSubagentRunner(modelPatchRunner{})
@@ -88,6 +145,37 @@ func Test_Runtime_RunJob_applies_coder_model_patch_when_enabled(t *testing.T) {
 	}
 }
 
+func Test_Runtime_RunJob_applies_coder_tool_request_patch_when_enabled(t *testing.T) {
+	// Given
+	runtime := NewRuntimeWithSubagentRunner(modelToolRequestPatchRunner{})
+	root := t.TempDir()
+	target := filepath.Join(root, "app.txt")
+	if err := os.WriteFile(target, []byte("hello old"), 0o644); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+
+	// When
+	report, err := runtime.RunJob(context.Background(), JobRequest{
+		Task:              "Patch app text",
+		WorkspaceDir:      root,
+		ApplyModelPatches: true,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunJob returned error: %v", err)
+	}
+	got, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("read patched file: %v", err)
+	}
+	if string(got) != "hello new" {
+		t.Fatalf("content = %q, want hello new", string(got))
+	}
+	if len(report.PatchResults) != 1 || report.PatchResults[0].Path != "app.txt" {
+		t.Fatalf("PatchResults = %+v, want app.txt patch from tool request", report.PatchResults)
+	}
+}
+
 func Test_Runtime_RunJob_applies_coder_model_create_file_patch_when_enabled(t *testing.T) {
 	// Given
 	runtime := NewRuntimeWithSubagentRunner(modelCreateFilePatchRunner{})
@@ -112,6 +200,71 @@ func Test_Runtime_RunJob_applies_coder_model_create_file_patch_when_enabled(t *t
 	}
 	if len(report.PatchResults) != 1 || report.PatchResults[0].Path != "docs/notes.md" {
 		t.Fatalf("PatchResults = %+v, want docs/notes.md", report.PatchResults)
+	}
+}
+
+func Test_Runtime_RunJob_applies_coder_model_content_patch_to_existing_file(t *testing.T) {
+	// Given
+	runtime := NewRuntimeWithSubagentRunner(modelFullFileContentPatchRunner{})
+	root := t.TempDir()
+	target := filepath.Join(root, "app.txt")
+	if err := os.WriteFile(target, []byte("hello old\n"), 0o644); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+
+	// When
+	report, err := runtime.RunJob(context.Background(), JobRequest{
+		Task:              "Replace app text",
+		WorkspaceDir:      root,
+		ApplyModelPatches: true,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunJob returned error: %v", err)
+	}
+	got, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("read patched file: %v", err)
+	}
+	if string(got) != "hello new\n" {
+		t.Fatalf("content = %q, want full-file replacement", string(got))
+	}
+	if len(report.PatchResults) != 1 || report.PatchResults[0].Old != "hello old\n" || report.PatchResults[0].New != "hello new\n" {
+		t.Fatalf("PatchResults = %+v, want full-file old/new", report.PatchResults)
+	}
+}
+
+func Test_Runtime_RunJob_applies_loose_whole_file_model_patch(t *testing.T) {
+	// Given
+	runtime := NewRuntimeWithSubagentRunner(modelLooseWholeFilePatchRunner{})
+	root := t.TempDir()
+	target := filepath.Join(root, "frontend", "state.js")
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		t.Fatalf("mkdir fixture: %v", err)
+	}
+	if err := os.WriteFile(target, []byte("module.exports = { benchmarkFixture: \"TODO: update this benchmark fixture\" };\n"), 0o644); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+
+	// When
+	report, err := runtime.RunJob(context.Background(), JobRequest{
+		Task:              "Patch benchmark fixture",
+		WorkspaceDir:      root,
+		ApplyModelPatches: true,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunJob returned error: %v", err)
+	}
+	got, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("read patched file: %v", err)
+	}
+	if !strings.Contains(string(got), "optimistic update keeps rollback evidence") {
+		t.Fatalf("content = %q, want loose whole-file replacement", string(got))
+	}
+	if len(report.PatchResults) != 1 || report.PatchResults[0].Path != "frontend/state.js" || report.PatchResults[0].Diff == "" {
+		t.Fatalf("PatchResults = %+v, want loose patch result", report.PatchResults)
 	}
 }
 
@@ -191,6 +344,56 @@ func Test_proposedModelPatches_reads_typed_create_file_proposals_when_summary_is
 	}
 	if len(patches) != 1 || patches[0].Content != "# Notes\n" {
 		t.Fatalf("patches = %+v, want create file content", patches)
+	}
+}
+
+func Test_proposedModelPatches_treats_new_without_old_as_full_file_content(t *testing.T) {
+	// Given
+	results := []subagent.Result{
+		{
+			AgentName:      "coder",
+			Status:         "pass",
+			AllowedActions: []string{"propose_patch"},
+			Summary:        "patch ready",
+			PatchProposals: []subagent.PatchProposal{
+				{Path: "app.txt", New: "full file\n"},
+			},
+		},
+	}
+
+	// When
+	patches, err := proposedModelPatches(results)
+	// Then
+	if err != nil {
+		t.Fatalf("proposedModelPatches returned error: %v", err)
+	}
+	if len(patches) != 1 || patches[0].Content != "full file\n" || patches[0].New != "" {
+		t.Fatalf("patches = %+v, want normalized full-file content", patches)
+	}
+}
+
+func Test_proposedModelPatches_ignores_empty_path_only_patch(t *testing.T) {
+	// Given
+	results := []subagent.Result{
+		{
+			AgentName:      "coder",
+			Status:         "pass",
+			AllowedActions: []string{"propose_patch"},
+			Summary:        "patch ready",
+			PatchProposals: []subagent.PatchProposal{
+				{Path: "app.txt"},
+			},
+		},
+	}
+
+	// When
+	patches, err := proposedModelPatches(results)
+	// Then
+	if err != nil {
+		t.Fatalf("proposedModelPatches returned error: %v", err)
+	}
+	if len(patches) != 0 {
+		t.Fatalf("patches = %+v, want empty path-only proposal ignored", patches)
 	}
 }
 

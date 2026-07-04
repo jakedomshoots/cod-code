@@ -21,7 +21,7 @@ func registerLocalAgentFlags(flags *flag.FlagSet, opts *cliOptions) {
 	flags.StringVar(&opts.ceoBenchmarkMode, "ceo-benchmark-mode", ceoBenchmarkModeSynthetic, "CEO Harness benchmark mode: synthetic, model-command, or http-provider")
 	flags.StringVar(&opts.ceoBenchmarkModelCommand, "ceo-benchmark-model-command-json", "", "JSON argv array for CEO Harness model-command benchmark mode")
 	flags.StringVar(&opts.ceoBenchmarkProviderName, "ceo-benchmark-provider-name", "main", "provider name for CEO Harness http-provider benchmark mode")
-	flags.StringVar(&opts.ceoBenchmarkProviderPreset, "ceo-benchmark-provider-preset", "openrouter", "provider preset for CEO Harness http-provider benchmark mode: openrouter, openai, kimi")
+	flags.StringVar(&opts.ceoBenchmarkProviderPreset, "ceo-benchmark-provider-preset", "openrouter", "provider preset for CEO Harness http-provider benchmark mode: openrouter, kimi-code, minimax, openai, or moonshot")
 	flags.StringVar(&opts.ceoBenchmarkProviderModel, "ceo-benchmark-provider-model", "", "provider model for CEO Harness http-provider benchmark mode")
 	flags.StringVar(&opts.ceoBenchmarkProviderAPIKeyEnv, "ceo-benchmark-provider-api-key-env", "", "API key env var for CEO Harness http-provider benchmark mode")
 	flags.IntVar(&opts.ceoBenchmarkProviderMaxOutputToks, "ceo-benchmark-provider-max-output-tokens", 2048, "max output tokens for CEO Harness http-provider benchmark mode")

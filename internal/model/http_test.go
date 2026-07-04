@@ -18,6 +18,7 @@ func Test_HTTPClient_Complete_posts_chat_completion_request(t *testing.T) {
 	var gotPrompt string
 	var gotMaxTokens int
 	var gotResponseFormat string
+	var gotThinking string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotAuth = r.Header.Get("Authorization")
 		var body struct {
@@ -26,6 +27,9 @@ func Test_HTTPClient_Complete_posts_chat_completion_request(t *testing.T) {
 			ResponseFormat struct {
 				Type string `json:"type"`
 			} `json:"response_format"`
+			Thinking struct {
+				Type string `json:"type"`
+			} `json:"thinking"`
 			Messages []struct {
 				Role    string `json:"role"`
 				Content string `json:"content"`
@@ -37,6 +41,7 @@ func Test_HTTPClient_Complete_posts_chat_completion_request(t *testing.T) {
 		gotModel = body.Model
 		gotMaxTokens = body.MaxTokens
 		gotResponseFormat = body.ResponseFormat.Type
+		gotThinking = body.Thinking.Type
 		if len(body.Messages) != 1 {
 			t.Fatalf("messages length = %d, want 1", len(body.Messages))
 		}
@@ -57,6 +62,7 @@ func Test_HTTPClient_Complete_posts_chat_completion_request(t *testing.T) {
 		OutputCostPerMillionTokens: 8,
 		MaxOutputTokens:            64,
 		ResponseFormat:             "json_object",
+		DisableThinking:            true,
 	})
 	if err != nil {
 		t.Fatalf("NewHTTPClient returned error: %v", err)
@@ -94,6 +100,9 @@ func Test_HTTPClient_Complete_posts_chat_completion_request(t *testing.T) {
 	}
 	if gotResponseFormat != "json_object" {
 		t.Fatalf("response_format.type = %q, want json_object", gotResponseFormat)
+	}
+	if gotThinking != "disabled" {
+		t.Fatalf("thinking.type = %q, want disabled", gotThinking)
 	}
 }
 

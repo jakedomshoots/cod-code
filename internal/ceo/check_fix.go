@@ -36,6 +36,8 @@ type checkFixState struct {
 type checkFixRequest struct {
 	Packet         jobpacket.Packet
 	Request        JobRequest
+	Space          workspace.Workspace
+	HasWorkspace   bool
 	Checks         []checkrunner.Result
 	Attempt        int
 	WorkspaceBrief string
@@ -70,6 +72,8 @@ func (r Runtime) runCheckFixLoop(ctx context.Context, state checkFixState) (chec
 		result, err := r.runCoderCheckFix(ctx, checkFixRequest{
 			Packet:         state.Packet,
 			Request:        state.Request,
+			Space:          state.Space,
+			HasWorkspace:   state.HasWorkspace,
 			Checks:         state.CheckResults,
 			Attempt:        attempt,
 			WorkspaceBrief: state.WorkspaceBrief,
@@ -173,10 +177,15 @@ func (r Runtime) runCheckFixLoop(ctx context.Context, state checkFixState) (chec
 func (r Runtime) runCoderCheckFix(ctx context.Context, req checkFixRequest) (subagent.Result, error) {
 	packet := req.Packet
 	packet.Task = buildCheckFixTask(req.Packet.Task, req.Checks, req.Attempt, req.FailedChecks)
+	toolResults := checkFixRequiredFileToolResults(ctx, req)
+	allowedActions := jobpacket.DefaultActionsForAgent("coder")
+	if len(toolResults) > 0 {
+		allowedActions = []jobpacket.Action{jobpacket.ActionProposePatch}
+	}
 	agent := jobpacket.Subagent{
 		Name:           "coder",
 		Role:           checkFixRole,
-		AllowedActions: jobpacket.DefaultActionsForAgent("coder"),
+		AllowedActions: allowedActions,
 	}
 	attempts := req.Request.SubagentAttempts
 	if attempts < 1 {
@@ -190,7 +199,96 @@ func (r Runtime) runCoderCheckFix(ctx context.Context, req checkFixRequest) (sub
 		Backoff:        backoff,
 		NoProgressStop: req.Request.NoProgressStop,
 		WorkspaceBrief: req.WorkspaceBrief,
+		ToolResults:    toolResults,
 	})
+}
+
+func checkFixRequiredFileToolResults(ctx context.Context, req checkFixRequest) []subagent.ToolResult {
+	if !req.HasWorkspace {
+		return nil
+	}
+	paths := checkFixContextPaths(req)
+	results := make([]subagent.ToolResult, 0, len(paths))
+	for _, path := range paths {
+		result := subagent.ToolResult{
+			Action: "read_workspace",
+			Path:   path,
+		}
+		read, err := req.Space.ReadText(ctx, workspace.ReadTextRequest{
+			Path: path,
+		})
+		if err != nil {
+			result.Status = "fail"
+			result.Error = err.Error()
+		} else {
+			result.Status = "pass"
+			result.Path = read.Path
+			result.Output = read.Content
+			result.Bytes = read.Bytes
+			result.Truncated = read.Truncated
+		}
+		results = append(results, result)
+	}
+	return results
+}
+
+func checkFixContextPaths(req checkFixRequest) []string {
+	seen := map[string]struct{}{}
+	var paths []string
+	add := func(path string) {
+		clean := cleanCheckFixPathToken(path)
+		if clean == "" {
+			return
+		}
+		if _, ok := seen[clean]; ok {
+			return
+		}
+		seen[clean] = struct{}{}
+		paths = append(paths, clean)
+	}
+	for _, path := range requiredChangedFilePaths(req.Packet.Task) {
+		add(path)
+	}
+	for _, check := range req.Checks {
+		for _, arg := range check.Argv {
+			for _, field := range strings.Fields(arg) {
+				add(field)
+			}
+		}
+	}
+	return paths
+}
+
+func cleanCheckFixPathToken(token string) string {
+	clean := strings.Trim(token, " \t\n\r\"'`()[]{}.,;")
+	if clean == "" || strings.HasPrefix(clean, "-") {
+		return ""
+	}
+	if index := strings.Index(clean, ":"); index > 0 {
+		clean = clean[:index]
+	}
+	if marker := "/workspace/"; strings.Contains(clean, marker) {
+		clean = clean[strings.LastIndex(clean, marker)+len(marker):]
+	}
+	if !strings.Contains(clean, "/") {
+		return ""
+	}
+	switch {
+	case strings.HasSuffix(clean, ".go"),
+		strings.HasSuffix(clean, ".js"),
+		strings.HasSuffix(clean, ".ts"),
+		strings.HasSuffix(clean, ".tsx"),
+		strings.HasSuffix(clean, ".jsx"),
+		strings.HasSuffix(clean, ".py"),
+		strings.HasSuffix(clean, ".rs"),
+		strings.HasSuffix(clean, ".md"),
+		strings.HasSuffix(clean, ".json"),
+		strings.HasSuffix(clean, ".yaml"),
+		strings.HasSuffix(clean, ".yml"):
+		return clean
+	default:
+		return ""
+	}
 }
 
 func buildCheckFixTask(task string, checks []checkrunner.Result, attempt int, failureDetails ...[]RepairFailureDetail) string {
@@ -207,7 +305,7 @@ func buildCheckFixTask(task string, checks []checkrunner.Result, attempt int, fa
 		scorerDetails = "\n" + scorerDetails
 	}
 	return fmt.Sprintf(
-		"%s\n\nVerification failed. Fix attempt %d.\n%s%s\nStdout:\n%s\nStderr:\n%s\nReturn only coder patch JSON.",
+		"%s\n\nVerification failed. Fix attempt %d.\n%s%s\nStdout:\n%s\nStderr:\n%s\nUse supplied tool_results as the file context. Do not request tools or more reads. Return only coder patch JSON.",
 		task,
 		attempt,
 		renderCheckFixMetadata(last),

@@ -14,14 +14,14 @@ api_key_env=""
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/provider-proof.sh [--dry-run] [--provider kimi|codex|openai|openrouter|moonshot] [--timeout-seconds n] [--output-dir path]
+Usage: sh scripts/provider-proof.sh [--dry-run] [--provider kimi|codex|openai|openrouter|kimi-code|moonshot|minimax] [--timeout-seconds n] [--output-dir path]
 
 Runs real-provider benchmark proofs and writes durable evidence.
 
 Options:
   --dry-run            Write the provider proof plan without running commands.
   --provider name      Provider bridge to use. Supported: kimi, codex, openai,
-                       openrouter, moonshot.
+                       openrouter, kimi-code, moonshot, minimax.
   --http-model name    Override the default HTTP provider model.
   --api-key-env name   Override the default HTTP provider API key env var.
   --timeout-seconds n  Timeout for each benchmark command. Default: 600.
@@ -142,14 +142,27 @@ case "$provider" in
   openrouter)
     provider_mode="http-provider"
     http_preset="openrouter"
-    default_http_model="${CEO_PROVIDER_PROOF_OPENROUTER_MODEL:-openai/gpt-5-mini}"
+    default_http_model="${CEO_PROVIDER_PROOF_OPENROUTER_MODEL:-openai/gpt-5}"
     default_api_key_env="OPENROUTER_API_KEY"
+    ;;
+  kimi-code|kimicode)
+    provider="kimi-code"
+    provider_mode="http-provider"
+    http_preset="kimi-code"
+    default_http_model="${CEO_PROVIDER_PROOF_KIMI_CODE_MODEL:-kimi-for-coding}"
+    default_api_key_env="KIMI_CODE_API_KEY"
     ;;
   moonshot)
     provider_mode="http-provider"
     http_preset="moonshot"
     default_http_model="${CEO_PROVIDER_PROOF_MOONSHOT_MODEL:-moonshot-v1-128k}"
     default_api_key_env="MOONSHOT_API_KEY"
+    ;;
+  minimax)
+    provider_mode="http-provider"
+    http_preset="minimax"
+    default_http_model="${CEO_PROVIDER_PROOF_MINIMAX_MODEL:-MiniMax-M3}"
+    default_api_key_env="MINIMAX_API_KEY"
     ;;
   *)
     printf '%s\n' "provider-proof: unsupported provider: $provider" >&2
@@ -233,6 +246,10 @@ run_capture() {
   return "$command_status"
 }
 
+provider_env_suffix() {
+  printf '%s' "$1" | tr '[:lower:]' '[:upper:]' | tr -c 'A-Z0-9_' '_'
+}
+
 write_index_header() {
   {
     printf '%s\n' "# Provider Proof Evidence"
@@ -310,7 +327,7 @@ write_http_setup_blocked() {
 
   {
     printf '%s\n' "$api_key_env="
-    printf '%s\n' "CEO_PROVIDER_PROOF_$(printf '%s' "$provider" | tr '[:lower:]' '[:upper:]')_MODEL=$http_model"
+    printf '%s\n' "CEO_PROVIDER_PROOF_$(provider_env_suffix "$provider")_MODEL=$http_model"
   } >"$output_dir/env.template"
 
   {
@@ -496,6 +513,41 @@ fi
   printf '\n'
   printf '%s\n' "- Overall: $overall"
 } >>"$index"
+
+if [ "$overall" != "blocked" ]; then
+  if [ "$provider_mode" = "http-provider" ]; then
+    cat >"$output_dir/summary.json" <<JSON
+{
+  "schema_version": 1,
+  "status": "$overall",
+  "provider": "$provider",
+  "provider_mode": "$provider_mode",
+  "http_preset": "$http_preset",
+  "http_model": "$http_model",
+  "api_key_env": "$api_key_env",
+  "command_script_secret_policy": "no_secret_assignment",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md"
+  }
+}
+JSON
+  else
+    cat >"$output_dir/summary.json" <<JSON
+{
+  "schema_version": 1,
+  "status": "$overall",
+  "provider": "$provider",
+  "provider_mode": "$provider_mode",
+  "model_command": "$model_command_display",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md"
+  }
+}
+JSON
+  fi
+fi
 
 printf '%s\n' "provider-proof: mode=$mode"
 printf '%s\n' "provider-proof: evidence=$index"

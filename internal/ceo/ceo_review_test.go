@@ -96,6 +96,32 @@ func Test_Runtime_RunJob_keeps_failed_guard_when_model_ceo_recommends_pass(t *te
 	}
 }
 
+func Test_Runtime_RunJob_falls_back_when_model_ceo_returns_invalid_json(t *testing.T) {
+	// Given
+	reviewer := &fakeCEOReviewClient{
+		text: `not json`,
+	}
+	runtime := NewRuntimeWithCEOReviewer(reviewer)
+
+	// When
+	report, err := runtime.RunJob(context.Background(), JobRequest{
+		Task: "Summarize passing work",
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunJob returned error: %v", err)
+	}
+	if report.Verdict != "pass" {
+		t.Fatalf("Verdict = %q, want guard pass fallback", report.Verdict)
+	}
+	if report.CEOReview.Source != "fallback" || report.CEOReview.RecommendedVerdict != "pass" {
+		t.Fatalf("CEOReview = %+v, want fallback pass", report.CEOReview)
+	}
+	if !strings.Contains(report.CEOReview.Summary, "CEO review unavailable") {
+		t.Fatalf("CEOReview summary = %q, want fallback reason", report.CEOReview.Summary)
+	}
+}
+
 type ceoReviewEvidenceRunner struct{}
 
 func (r ceoReviewEvidenceRunner) Run(ctx context.Context, packet subagent.TaskPacket) (subagent.Result, error) {

@@ -101,6 +101,147 @@ func Test_Runtime_RunJob_executes_allowed_subagent_tool_requests(t *testing.T) {
 	}
 }
 
+type genericWorkspaceReadRunner struct{}
+
+func (r genericWorkspaceReadRunner) Run(ctx context.Context, packet subagent.TaskPacket) (subagent.Result, error) {
+	if err := ctx.Err(); err != nil {
+		return subagent.Result{}, err
+	}
+	if len(packet.ToolResults) > 0 {
+		return subagent.Result{
+			AgentName:          packet.AgentName,
+			Role:               packet.Role,
+			Status:             "pass",
+			Attempts:           1,
+			ContextReceived:    packet.ContextMode,
+			ContextBytes:       len(packet.Task),
+			Summary:            "used workspace list: " + packet.ToolResults[0].Output,
+			ToolFeedbackPasses: 1,
+			Evidence:           []string{"workspace list used"},
+		}, nil
+	}
+	return subagent.Result{
+		AgentName:       packet.AgentName,
+		Role:            packet.Role,
+		Status:          "needs_input",
+		Attempts:        1,
+		ContextReceived: packet.ContextMode,
+		ContextBytes:    len(packet.Task),
+		Summary:         "request generic workspace read",
+		ToolRequests: []subagent.ToolRequest{
+			{Action: "read_workspace", Path: "read_workspace"},
+		},
+		Evidence: []string{"requested workspace list"},
+	}, nil
+}
+
+func Test_Runtime_RunJob_returns_workspace_brief_for_generic_read_workspace_request(t *testing.T) {
+	// Given
+	runtime := NewRuntimeWithSubagentRunner(genericWorkspaceReadRunner{})
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "frontend.js"), []byte("hello"), 0o644); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+
+	// When
+	report, err := runtime.RunJob(context.Background(), JobRequest{
+		Task:         "Inspect workspace",
+		WorkspaceDir: root,
+		Subagents: []jobpacket.Subagent{
+			{
+				Name:           "scanner",
+				Role:           "read only",
+				AllowedActions: []jobpacket.Action{jobpacket.ActionReadWorkspace},
+			},
+		},
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunJob returned error: %v", err)
+	}
+	result := report.SubagentResults[0]
+	if result.ToolFeedbackPasses != 1 {
+		t.Fatalf("ToolFeedbackPasses = %d, want 1", result.ToolFeedbackPasses)
+	}
+	if len(result.ToolResults) != 1 || result.ToolResults[0].Status != "pass" || result.ToolResults[0].Path != "workspace" {
+		t.Fatalf("ToolResults = %+v, want passing workspace brief", result.ToolResults)
+	}
+	if !strings.Contains(result.Summary, "frontend.js") || !strings.Contains(result.Summary, "hello") {
+		t.Fatalf("Summary = %q, want workspace file list and small file content", result.Summary)
+	}
+}
+
+type inferredWorkspaceReadRunner struct{}
+
+func (r inferredWorkspaceReadRunner) Run(ctx context.Context, packet subagent.TaskPacket) (subagent.Result, error) {
+	if err := ctx.Err(); err != nil {
+		return subagent.Result{}, err
+	}
+	if len(packet.ToolResults) > 0 {
+		return subagent.Result{
+			AgentName:          packet.AgentName,
+			Role:               packet.Role,
+			Status:             "pass",
+			Attempts:           1,
+			ContextReceived:    packet.ContextMode,
+			ContextBytes:       len(packet.Task),
+			Summary:            "read inferred files: " + packet.ToolResults[0].Output,
+			ToolFeedbackPasses: 1,
+			Evidence:           []string{"inferred read used"},
+		}, nil
+	}
+	return subagent.Result{
+		AgentName:       packet.AgentName,
+		Role:            packet.Role,
+		Status:          "needs_input",
+		Attempts:        1,
+		ContextReceived: packet.ContextMode,
+		ContextBytes:    len(packet.Task),
+		Summary:         "Need frontend/state.js before patching.",
+		Questions:       []string{"Please provide frontend/state.js."},
+		Evidence:        []string{"asked for file"},
+	}, nil
+}
+
+func Test_Runtime_RunJob_infers_read_workspace_request_from_needs_input_file_question(t *testing.T) {
+	// Given
+	runtime := NewRuntimeWithSubagentRunner(inferredWorkspaceReadRunner{})
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "frontend"), 0o755); err != nil {
+		t.Fatalf("mkdir fixture: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "frontend", "state.js"), []byte("module.exports = 'state'"), 0o644); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+
+	// When
+	report, err := runtime.RunJob(context.Background(), JobRequest{
+		Task:         "Patch state",
+		WorkspaceDir: root,
+		Subagents: []jobpacket.Subagent{
+			{
+				Name:           "coder",
+				Role:           "patch",
+				AllowedActions: []jobpacket.Action{jobpacket.ActionReadWorkspace, jobpacket.ActionProposePatch},
+			},
+		},
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunJob returned error: %v", err)
+	}
+	result := report.SubagentResults[0]
+	if result.Status != "pass" || result.ToolFeedbackPasses != 1 {
+		t.Fatalf("result = %+v, want pass after inferred file read", result)
+	}
+	if len(result.ToolRequests) != 1 || result.ToolRequests[0].Path != "frontend/state.js" {
+		t.Fatalf("ToolRequests = %+v, want inferred frontend/state.js read", result.ToolRequests)
+	}
+	if !strings.Contains(result.Summary, "module.exports") {
+		t.Fatalf("Summary = %q, want file content from inferred read", result.Summary)
+	}
+}
+
 type deniedToolRequestRunner struct{}
 
 func (r deniedToolRequestRunner) Run(ctx context.Context, packet subagent.TaskPacket) (subagent.Result, error) {

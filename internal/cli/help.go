@@ -52,7 +52,7 @@ Common flags:
   --plan-only                     Preview packet/routes/checks without model calls
   --write-policy <policy>         observe, preview, dry-run, approved-write, or trusted-local
   --dry-run                       Preview patch writes without workspace artifacts/history; write intent previews by default
-  --provider-wizard <preset>      Create a main provider for openai, openrouter, kimi, or moonshot
+  --provider-wizard <preset>      Create a main provider for openai, openrouter, kimi-code, moonshot, or minimax
   --adapter <name>                Use external worker adapter: codex, kimi, claude, opencode, aider, goose
   --format <json|text>            Print JSON or compact text
   --version                       Print version
@@ -63,6 +63,8 @@ Provider quick start:
   Codex CLI: ceo-packet config init --adapter codex
   Kimi CLI: ceo-packet config init --adapter kimi
   OpenRouter: use --provider-wizard openrouter; missing OPENROUTER_API_KEY is blocked setup, not a failed benchmark
+  Kimi Code API: use --provider-wizard kimi-code with KIMI_CODE_API_KEY, or use --adapter kimi for OAuth CLI
+  MiniMax API: use --provider-wizard minimax with MINIMAX_API_KEY
 
 Examples:
   ceo-packet start .
@@ -235,6 +237,8 @@ Provider quick start:
   Codex CLI: ceo-packet config init --adapter codex
   Kimi CLI: ceo-packet config init --adapter kimi
   OpenRouter: use --provider-wizard openrouter; missing OPENROUTER_API_KEY is blocked setup, not a failed benchmark
+  Kimi Code API: use --provider-wizard kimi-code with KIMI_CODE_API_KEY, or use --adapter kimi for OAuth CLI
+  MiniMax API: use --provider-wizard minimax with MINIMAX_API_KEY
 
 Model:
 	  --model-command <command...> -- Run a local model command
@@ -247,9 +251,9 @@ Model:
 	  create patch JSON: {"patches":[{"path":"docs/notes.md","content":"# Notes\n"}]}
 
 HTTP provider setup:
-  --provider-wizard <preset>      Create a main provider for openai, openrouter, kimi, or moonshot
+  --provider-wizard <preset>      Create a main provider for openai, openrouter, kimi-code, moonshot, or minimax
   --http-provider <name>          Provider name for --init-config
-  --http-preset <name>            openai, openrouter, kimi, or moonshot
+  --http-preset <name>            openai, openrouter, kimi-code, moonshot, or minimax
   --http-url <url>                Chat completions endpoint
   --http-model <model>            Provider model name
   --http-api-key-env <name>       Env var containing API key

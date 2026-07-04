@@ -45,7 +45,7 @@ func Test_Run_config_completions_writes_shell_files_when_requested(t *testing.T)
 					t.Fatalf("%s completion content missing primary command %q:\n%s", tt.shell, command, string(content))
 				}
 			}
-			for _, want := range []string{"production-actions", "action-state", "ready missing_env empty_env setup_blocked waiting", "release_proof provider_proof competitor_setup comparison final_readiness", "openai openrouter moonshot kimi codex"} {
+			for _, want := range []string{"production-actions", "action-state", "ready missing_env empty_env setup_blocked waiting", "release_proof provider_proof competitor_setup comparison final_readiness", "openai openrouter kimi-code moonshot minimax kimi codex"} {
 				if !strings.Contains(string(content), want) {
 					t.Fatalf("%s completion content missing production action completion %q:\n%s", tt.shell, want, string(content))
 				}

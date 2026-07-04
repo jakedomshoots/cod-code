@@ -115,6 +115,80 @@ func Test_ProviderProofScript_dryRunWritesOpenAIHTTPPlan(t *testing.T) {
 	}
 }
 
+func Test_ProviderProofScript_dryRunWritesKimiCodeHTTPPlan(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "provider-proof")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "provider-proof.sh"),
+		"--dry-run",
+		"--provider", "kimi-code",
+		"--output-dir", outputDir,
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("provider proof kimi-code dry-run failed: %v\n%s", err, string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"# Provider Proof Evidence",
+		"- Provider: kimi-code",
+		"- Provider mode: http-provider",
+		"- HTTP preset: kimi-code",
+		"- HTTP model: kimi-for-coding",
+		"- API key env: KIMI_CODE_API_KEY",
+		"| cross-language-js-state-reducer | planned |",
+		"| cross-language-python-retry-policy | planned |",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+}
+
+func Test_ProviderProofScript_dryRunWritesMiniMaxHTTPPlan(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "provider-proof")
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "provider-proof.sh"),
+		"--dry-run",
+		"--provider", "minimax",
+		"--output-dir", outputDir,
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("provider proof minimax dry-run failed: %v\n%s", err, string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"# Provider Proof Evidence",
+		"- Provider: minimax",
+		"- Provider mode: http-provider",
+		"- HTTP preset: minimax",
+		"- HTTP model: MiniMax-M3",
+		"- API key env: MINIMAX_API_KEY",
+		"| cross-language-js-state-reducer | planned |",
+		"| cross-language-python-retry-policy | planned |",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
+		}
+	}
+}
+
 func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {
@@ -215,14 +289,14 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyEmpty(t *testing.T) {
 	cmd := exec.Command(
 		"sh",
 		filepath.Join(root, "scripts", "provider-proof.sh"),
-		"--provider", "moonshot",
+		"--provider", "minimax",
 		"--output-dir", outputDir,
 	)
 	cmd.Dir = root
-	cmd.Env = append(withoutEnv(os.Environ(), "MOONSHOT_API_KEY"), "MOONSHOT_API_KEY=")
+	cmd.Env = append(withoutEnv(os.Environ(), "MINIMAX_API_KEY"), "MINIMAX_API_KEY=")
 	output, err := cmd.CombinedOutput()
 	if err == nil {
-		t.Fatalf("provider proof unexpectedly passed with empty MOONSHOT_API_KEY:\n%s", string(output))
+		t.Fatalf("provider proof unexpectedly passed with empty MINIMAX_API_KEY:\n%s", string(output))
 	}
 
 	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
@@ -230,7 +304,7 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyEmpty(t *testing.T) {
 		t.Fatalf("index.md missing empty key blocker:\n%s", index)
 	}
 	blocked := readTextFile(t, filepath.Join(outputDir, "blocked.md"))
-	if !strings.Contains(blocked, "has `MOONSHOT_API_KEY` set, but it is empty") {
+	if !strings.Contains(blocked, "has `MINIMAX_API_KEY` set, but it is empty") {
 		t.Fatalf("blocked.md missing empty key guidance:\n%s", blocked)
 	}
 	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
@@ -258,12 +332,12 @@ func Test_ProviderSetupPreflightScript_writesBlockedEvidenceWithoutSecretValues(
 	cmd := exec.Command(
 		"sh",
 		filepath.Join(root, "scripts", "provider-setup-preflight.sh"),
-		"--providers", "openai,openrouter,moonshot",
+		"--providers", "openrouter,kimi-code,minimax",
 		"--output-dir", outputDir,
 	)
 	cmd.Dir = root
 	cmd.Env = append(
-		withoutEnv(withoutEnv(withoutEnv(os.Environ(), "OPENAI_API_KEY"), "OPENROUTER_API_KEY"), "MOONSHOT_API_KEY"),
+		withoutEnv(withoutEnv(withoutEnv(os.Environ(), "OPENROUTER_API_KEY"), "KIMI_CODE_API_KEY"), "MINIMAX_API_KEY"),
 		"OPENROUTER_API_KEY=",
 	)
 	output, err := cmd.CombinedOutput()
@@ -283,9 +357,9 @@ func Test_ProviderSetupPreflightScript_writesBlockedEvidenceWithoutSecretValues(
 	for _, want := range []string{
 		"Status: blocked",
 		"| Provider | Status | Env | Model |\n| --- | --- | --- | --- |",
-		"| openai | missing_env | `OPENAI_API_KEY` |",
 		"| openrouter | empty_env | `OPENROUTER_API_KEY` |",
-		"| moonshot | missing_env | `MOONSHOT_API_KEY` |",
+		"| kimi-code | missing_env | `KIMI_CODE_API_KEY` |",
+		"| minimax | missing_env | `MINIMAX_API_KEY` |",
 		"Secret values were not printed or saved.",
 	} {
 		if !strings.Contains(index, want) {
@@ -306,27 +380,27 @@ func Test_ProviderSetupPreflightScript_writesBlockedEvidenceWithoutSecretValues(
 			t.Fatalf("summary.json missing %q:\n%s", want, summary)
 		}
 	}
-	if strings.Contains(summary, "secret-openai") || strings.Contains(index, "secret-openai") {
+	if strings.Contains(summary, "secret-openrouter") || strings.Contains(index, "secret-openrouter") {
 		t.Fatalf("provider setup preflight leaked secret-like value")
 	}
 
 	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
 	for _, want := range []string{
-		"# blocked command: sh scripts/provider-proof.sh --provider openai",
-		"# reason: OPENAI_API_KEY is missing or empty; export it before running provider proof.",
 		"# blocked command: sh scripts/provider-proof.sh --provider openrouter",
 		"# reason: OPENROUTER_API_KEY is missing or empty; export it before running provider proof.",
-		"# blocked command: sh scripts/provider-proof.sh --provider moonshot",
-		"# reason: MOONSHOT_API_KEY is missing or empty; export it before running provider proof.",
+		"# blocked command: sh scripts/provider-proof.sh --provider kimi-code",
+		"# reason: KIMI_CODE_API_KEY is missing or empty; export it before running provider proof.",
+		"# blocked command: sh scripts/provider-proof.sh --provider minimax",
+		"# reason: MINIMAX_API_KEY is missing or empty; export it before running provider proof.",
 	} {
 		if !strings.Contains(commands, want) {
 			t.Fatalf("commands.sh missing %q:\n%s", want, commands)
 		}
 	}
 	for _, blockedRunnable := range []string{
-		"\nsh scripts/provider-proof.sh --provider openai",
 		"\nsh scripts/provider-proof.sh --provider openrouter",
-		"\nsh scripts/provider-proof.sh --provider moonshot",
+		"\nsh scripts/provider-proof.sh --provider kimi-code",
+		"\nsh scripts/provider-proof.sh --provider minimax",
 	} {
 		if strings.Contains(commands, blockedRunnable) {
 			t.Fatalf("commands.sh should not contain runnable blocked provider command %q:\n%s", blockedRunnable, commands)
@@ -344,15 +418,15 @@ func Test_ProviderSetupPreflightScript_passesWhenHTTPKeysArePresent(t *testing.T
 	cmd := exec.Command(
 		"sh",
 		filepath.Join(root, "scripts", "provider-setup-preflight.sh"),
-		"--providers", "openai openrouter moonshot",
+		"--providers", "openrouter kimi-code minimax",
 		"--output-dir", outputDir,
 	)
 	cmd.Dir = root
 	cmd.Env = append(
-		withoutEnv(withoutEnv(withoutEnv(os.Environ(), "OPENAI_API_KEY"), "OPENROUTER_API_KEY"), "MOONSHOT_API_KEY"),
-		"OPENAI_API_KEY=secret-openai",
+		withoutEnv(withoutEnv(withoutEnv(os.Environ(), "OPENROUTER_API_KEY"), "KIMI_CODE_API_KEY"), "MINIMAX_API_KEY"),
 		"OPENROUTER_API_KEY=secret-openrouter",
-		"MOONSHOT_API_KEY=secret-moonshot",
+		"KIMI_CODE_API_KEY=secret-kimi",
+		"MINIMAX_API_KEY=secret-minimax",
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -371,15 +445,15 @@ func Test_ProviderSetupPreflightScript_passesWhenHTTPKeysArePresent(t *testing.T
 			t.Fatalf("summary.json missing %q:\n%s", want, summary)
 		}
 	}
-	if strings.Contains(summary, "secret-openai") || strings.Contains(summary, "secret-openrouter") || strings.Contains(summary, "secret-moonshot") {
+	if strings.Contains(summary, "secret-openrouter") || strings.Contains(summary, "secret-kimi") || strings.Contains(summary, "secret-minimax") {
 		t.Fatalf("provider setup preflight leaked secret values:\n%s", summary)
 	}
 
 	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
 	for _, want := range []string{
-		"sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai --timeout-seconds 600",
 		"sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter --timeout-seconds 600",
-		"sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot --timeout-seconds 600",
+		"sh scripts/provider-proof.sh --provider kimi-code --output-dir .omo/evidence/provider-proof-kimi-code --timeout-seconds 600",
+		"sh scripts/provider-proof.sh --provider minimax --output-dir .omo/evidence/provider-proof-minimax --timeout-seconds 600",
 	} {
 		if !strings.Contains(commands, want) {
 			t.Fatalf("commands.sh missing runnable command %q:\n%s", want, commands)
@@ -443,6 +517,10 @@ exit 1
 	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
 	if !strings.Contains(index, "| cross-language-js-state-reducer | fail |") {
 		t.Fatalf("index.md missing failing benchmark row:\n%s", index)
+	}
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	if !strings.Contains(summary, `"status": "fail"`) || strings.Contains(summary, `"blocked_reason"`) {
+		t.Fatalf("summary.json = %s, want fresh fail summary without stale blocked metadata", summary)
 	}
 }
 

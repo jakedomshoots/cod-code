@@ -84,6 +84,74 @@ func Test_Run_writes_default_provider_policy_when_init_config_default_provider_i
 	}
 }
 
+func Test_Run_writes_kimi_code_provider_from_http_preset(t *testing.T) {
+	// Given
+	var out bytes.Buffer
+	root := t.TempDir()
+	args := []string{
+		"--workspace",
+		root,
+		"--init-config",
+		"--http-provider",
+		"kimi",
+		"--http-preset",
+		"kimi-code",
+		"--http-model",
+		"kimi-for-coding",
+		"--default-provider",
+		"kimi",
+	}
+
+	// When
+	err := Run(context.Background(), &out, args)
+	// Then
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	cfg, loadErr := config.LoadWorkspace(context.Background(), root)
+	if loadErr != nil {
+		t.Fatalf("LoadWorkspace returned error: %v", loadErr)
+	}
+	provider := cfg.Providers["kimi"].HTTP
+	if provider.URL != "https://api.kimi.com/coding/v1/chat/completions" || provider.APIKeyEnv != "KIMI_CODE_API_KEY" {
+		t.Fatalf("kimi-code provider = %#v, want Kimi Code URL and env", provider)
+	}
+}
+
+func Test_Run_writes_minimax_provider_from_http_preset(t *testing.T) {
+	// Given
+	var out bytes.Buffer
+	root := t.TempDir()
+	args := []string{
+		"--workspace",
+		root,
+		"--init-config",
+		"--http-provider",
+		"minimax",
+		"--http-preset",
+		"minimax",
+		"--http-model",
+		"MiniMax-M3",
+		"--default-provider",
+		"minimax",
+	}
+
+	// When
+	err := Run(context.Background(), &out, args)
+	// Then
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	cfg, loadErr := config.LoadWorkspace(context.Background(), root)
+	if loadErr != nil {
+		t.Fatalf("LoadWorkspace returned error: %v", loadErr)
+	}
+	provider := cfg.Providers["minimax"].HTTP
+	if provider.URL != "https://api.minimax.io/v1/chat/completions" || provider.APIKeyEnv != "MINIMAX_API_KEY" || !provider.DisableThinking {
+		t.Fatalf("minimax provider = %#v, want MiniMax URL, env, and disabled thinking", provider)
+	}
+}
+
 func Test_Run_writes_multiple_http_providers_when_init_config_http_provider_repeats(t *testing.T) {
 	// Given
 	var out bytes.Buffer

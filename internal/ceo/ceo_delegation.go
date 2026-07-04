@@ -73,7 +73,7 @@ func renderCEODelegationPrompt(packet jobpacket.Packet) string {
 		builder.WriteString(candidate.Role)
 		builder.WriteString("\n")
 	}
-	builder.WriteString(fmt.Sprintf("rules: select at least one subagent; select the smallest useful set; for narrow code edits usually select the patch owner only; prefer candidates; add new_subagents only for narrow specialist work; total selected subagents must stay at %d or fewer; assignments are optional and must stay lean\n", packet.MaxSubagents))
+	builder.WriteString(fmt.Sprintf("rules: select at least one subagent; select the smallest useful set; for narrow code edits usually select the patch owner only; prefer candidates; do not recreate candidate names in new_subagents; add new_subagents only for narrow specialist work; total selected subagents must stay at %d or fewer; assignments are optional and must stay lean\n", packet.MaxSubagents))
 	return builder.String()
 }
 
@@ -107,16 +107,33 @@ func selectedDelegationSubagents(names []string, rawNewSubagents []jobpacket.Sub
 	if maxSubagents > 0 && len(names) > maxSubagents {
 		return nil, nil, nil, nil, fmt.Errorf("selected_subagents count: %w", ErrInvalidCEODelegation)
 	}
-	newSubagents, err := jobpacket.NormalizeCustomSubagents(rawNewSubagents)
+	selectedNameSet := map[string]struct{}{}
+	for _, rawName := range names {
+		name := strings.TrimSpace(rawName)
+		if name != "" {
+			selectedNameSet[name] = struct{}{}
+		}
+	}
+	candidateByName := map[string]jobpacket.Subagent{}
+	for _, candidate := range candidates {
+		candidateByName[candidate.Name] = candidate
+	}
+	selectedRawNewSubagents := make([]jobpacket.Subagent, 0, len(rawNewSubagents))
+	for _, subagent := range rawNewSubagents {
+		name := strings.TrimSpace(subagent.Name)
+		if _, exists := candidateByName[name]; exists {
+			continue
+		}
+		if _, selectedNew := selectedNameSet[name]; selectedNew {
+			selectedRawNewSubagents = append(selectedRawNewSubagents, subagent)
+		}
+	}
+	newSubagents, err := jobpacket.NormalizeCustomSubagents(selectedRawNewSubagents)
 	if err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("new_subagents: %w", err)
 	}
 	if len(candidates)+len(newSubagents) > jobpacket.MaxDelegatedSubagents {
 		return nil, nil, nil, nil, fmt.Errorf("new_subagents count: %w", ErrInvalidCEODelegation)
-	}
-	candidateByName := map[string]jobpacket.Subagent{}
-	for _, candidate := range candidates {
-		candidateByName[candidate.Name] = candidate
 	}
 	for _, subagent := range newSubagents {
 		if _, duplicate := candidateByName[subagent.Name]; duplicate {
@@ -139,11 +156,6 @@ func selectedDelegationSubagents(names []string, rawNewSubagents []jobpacket.Sub
 		seen[name] = struct{}{}
 		selected = append(selected, candidate)
 		selectedNames = append(selectedNames, name)
-	}
-	for index, subagent := range newSubagents {
-		if _, selectedNew := seen[subagent.Name]; !selectedNew {
-			return nil, nil, nil, nil, fmt.Errorf("new_subagents[%d] %q: %w", index, subagent.Name, ErrInvalidCEODelegation)
-		}
 	}
 	assignments, err := selectedDelegationAssignments(rawAssignments, seen)
 	if err != nil {

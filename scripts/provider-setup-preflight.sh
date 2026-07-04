@@ -3,7 +3,7 @@ set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 output_dir=${OUTPUT_DIR:-"$root/.omo/evidence/provider-setup-preflight"}
-providers=${PROVIDERS:-"openai openrouter moonshot"}
+providers=${PROVIDERS:-"openrouter kimi-code minimax"}
 
 usage() {
   cat <<'USAGE'
@@ -14,7 +14,7 @@ non-empty without printing or saving secret values.
 
 Options:
   --output-dir DIR       Evidence output directory.
-  --providers LIST       Space or comma separated providers. Default: openai openrouter moonshot.
+  --providers LIST       Space or comma separated providers. Default: openrouter kimi-code minimax.
   --help                 Show this help.
 USAGE
 }
@@ -55,7 +55,10 @@ provider_list_file="$output_dir/providers.txt"
 
 for provider in $providers_normalized; do
   case "$provider" in
-    openai|openrouter|moonshot)
+    openai|openrouter|kimi-code|kimicode|moonshot|minimax)
+      if [ "$provider" = "kimicode" ]; then
+        provider="kimi-code"
+      fi
       printf '%s\n' "$provider" >>"$provider_list_file"
       ;;
     "")
@@ -76,15 +79,19 @@ provider_env() {
   case "$1" in
     openai) printf '%s\n' "OPENAI_API_KEY" ;;
     openrouter) printf '%s\n' "OPENROUTER_API_KEY" ;;
+    kimi-code) printf '%s\n' "KIMI_CODE_API_KEY" ;;
     moonshot) printf '%s\n' "MOONSHOT_API_KEY" ;;
+    minimax) printf '%s\n' "MINIMAX_API_KEY" ;;
   esac
 }
 
 provider_model() {
   case "$1" in
     openai) printf '%s\n' "${CEO_PROVIDER_PROOF_OPENAI_MODEL:-gpt-5}" ;;
-    openrouter) printf '%s\n' "${CEO_PROVIDER_PROOF_OPENROUTER_MODEL:-openai/gpt-5-mini}" ;;
+    openrouter) printf '%s\n' "${CEO_PROVIDER_PROOF_OPENROUTER_MODEL:-openai/gpt-5}" ;;
+    kimi-code) printf '%s\n' "${CEO_PROVIDER_PROOF_KIMI_CODE_MODEL:-kimi-for-coding}" ;;
     moonshot) printf '%s\n' "${CEO_PROVIDER_PROOF_MOONSHOT_MODEL:-moonshot-v1-128k}" ;;
+    minimax) printf '%s\n' "${CEO_PROVIDER_PROOF_MINIMAX_MODEL:-MiniMax-M3}" ;;
   esac
 }
 

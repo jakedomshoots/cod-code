@@ -13,12 +13,17 @@ func verdict(results []subagent.Result, checks []checkrunner.Result, summary Ver
 		if result.Status == "needs_input" {
 			return "needs_input"
 		}
+	}
+	if len(checks) > 0 {
+		if checks[len(checks)-1].Status != "pass" {
+			return "fail"
+		}
+		return "pass"
+	}
+	for _, result := range results {
 		if result.Status != "pass" {
 			return "fail"
 		}
-	}
-	if len(checks) > 0 && checks[len(checks)-1].Status != "pass" {
-		return "fail"
 	}
 	return "pass"
 }

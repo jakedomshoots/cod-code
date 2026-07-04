@@ -15,6 +15,7 @@ type HTTPProvider struct {
 	TimeoutMS                  int     `json:"timeout_ms"`
 	MaxOutputTokens            int     `json:"max_output_tokens"`
 	ResponseFormat             string  `json:"response_format"`
+	DisableThinking            bool    `json:"disable_thinking,omitempty"`
 }
 
 func (p HTTPProvider) IsZero() bool {
@@ -25,7 +26,8 @@ func (p HTTPProvider) IsZero() bool {
 		p.OutputCostPerMillionTokens == 0 &&
 		p.TimeoutMS == 0 &&
 		p.MaxOutputTokens == 0 &&
-		strings.TrimSpace(p.ResponseFormat) == ""
+		strings.TrimSpace(p.ResponseFormat) == "" &&
+		!p.DisableThinking
 }
 
 func (cfg Config) AgentHTTPProviders() map[string]HTTPProvider {

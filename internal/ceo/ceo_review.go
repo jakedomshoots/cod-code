@@ -45,22 +45,48 @@ func (r Runtime) runCEOReview(ctx context.Context, input ceoReviewInput) (*CEORe
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("complete CEO review: %w", err)
+		if ctx.Err() != nil {
+			return nil, fmt.Errorf("complete CEO review: %w", err)
+		}
+		return r.fallbackCEOReview(input, prompt, response, fmt.Errorf("complete CEO review: %w", err)), nil
 	}
 	review, err := parseCEOReviewResponse(response)
 	if err != nil {
-		return nil, err
+		return r.fallbackCEOReview(input, prompt, response, err), nil
 	}
 	if review.PromptBytes == 0 {
 		review.PromptBytes = len(prompt)
 	}
+	r.annotateCEOReviewRoute(review)
+	return review, nil
+}
+
+func (r Runtime) fallbackCEOReview(input ceoReviewInput, prompt string, response model.Response, cause error) *CEOReview {
+	verdict := "fail"
+	if input.GuardVerdict == "pass" {
+		verdict = "pass"
+	}
+	promptBytes := response.PromptBytes
+	if promptBytes == 0 {
+		promptBytes = len(prompt)
+	}
+	review := &CEOReview{
+		Source:             "fallback",
+		RecommendedVerdict: verdict,
+		Summary:            compactCEOReviewText("CEO review unavailable; using guard verdict. " + cause.Error()),
+		PromptBytes:        promptBytes,
+	}
+	r.annotateCEOReviewRoute(review)
+	return review
+}
+
+func (r Runtime) annotateCEOReviewRoute(review *CEOReview) {
 	if r.ceoReviewerRoute.Source != "" {
 		review.ModelSource = r.ceoReviewerRoute.Source
 	}
 	if r.ceoReviewerRoute.ProviderName != "" {
 		review.ProviderName = r.ceoReviewerRoute.ProviderName
 	}
-	return review, nil
 }
 
 func renderCEOReviewPrompt(input ceoReviewInput) string {

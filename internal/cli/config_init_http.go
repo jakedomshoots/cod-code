@@ -67,6 +67,7 @@ func buildHTTPProviderFromInit(opts options, init httpInitOptions) (string, conf
 			TimeoutMS:                  init.timeoutMS,
 			MaxOutputTokens:            init.maxOutputTokens,
 			ResponseFormat:             responseFormat,
+			DisableThinking:            preset.DisableThinking,
 		},
 	}, agent, nil
 }

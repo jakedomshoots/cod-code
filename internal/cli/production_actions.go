@@ -119,6 +119,7 @@ func annotateProductionActions(actions []map[string]any, sourceDir string) []map
 		annotateDeclaredEvidence(next, sourceDir)
 		annotateReleaseProof(next)
 		annotateProviderProof(next)
+		markPassedProviderProofSatisfied(next)
 		annotateCompetitorSetup(next, sourceDir)
 		annotated = append(annotated, next)
 	}
@@ -242,6 +243,9 @@ func productionActionReason(action map[string]any) string {
 			return "competitor setup blocked"
 		}
 	}
+	if providerProofPassed(action) {
+		return "provider proof already passed"
+	}
 	if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
 		return "waiting on: " + strings.Join(blockedBy, ", ")
 	}
@@ -311,6 +315,9 @@ func actionHasOpenBlocker(action map[string]any) bool {
 	}
 	if hasSetupBlocker(action) {
 		return true
+	}
+	if providerProofPassed(action) {
+		return false
 	}
 	status := actionString(action, "status")
 	return status != "" && status != "pass"
@@ -495,6 +502,26 @@ func annotateProviderProof(action map[string]any) {
 		providerSummary["env_template_path"] = filepath.Join(filepath.Dir(summaryPath), summary.Artifacts.EnvTemplate)
 	}
 	action["provider_summary"] = providerSummary
+}
+
+func markPassedProviderProofSatisfied(action map[string]any) {
+	if !providerProofPassed(action) {
+		return
+	}
+	if requiredEnv := actionString(action, "required_env"); requiredEnv != "" {
+		action["required_env_satisfied_by_evidence"] = true
+	}
+	action["env_ready"] = true
+	delete(action, "missing_required_env")
+	delete(action, "empty_required_env")
+}
+
+func providerProofPassed(action map[string]any) bool {
+	if actionString(action, "kind") != "provider_proof" {
+		return false
+	}
+	summary, _ := action["provider_summary"].(map[string]any)
+	return summary != nil && actionString(summary, "status") == "pass"
 }
 
 func readNumberedChecklistItems(path string) ([]map[string]string, error) {

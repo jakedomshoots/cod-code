@@ -12,7 +12,16 @@ import (
 const defaultMaxModelPatches = 5
 
 type modelPatchEnvelope struct {
-	Patches []PatchRequest `json:"patches"`
+	Patches      []PatchRequest          `json:"patches"`
+	ToolRequests []modelPatchToolRequest `json:"tool_requests"`
+}
+
+type modelPatchToolRequest struct {
+	Action  string `json:"action"`
+	Path    string `json:"path"`
+	Old     string `json:"old"`
+	New     string `json:"new"`
+	Content string `json:"content"`
 }
 
 type modelPatchSelection struct {
@@ -62,7 +71,7 @@ func hasPatchAction(actions []string) bool {
 
 func coderPatchProposals(result subagent.Result) ([]PatchRequest, error) {
 	if len(result.PatchProposals) > 0 {
-		patches := patchRequestsFromProposals(result.PatchProposals)
+		patches := normalizeModelPatchRequests(patchRequestsFromProposals(result.PatchProposals))
 		return patches, validatePatchRequests(patches)
 	}
 	return parseCoderPatchProposal(result.Summary)
@@ -91,10 +100,44 @@ func parseCoderPatchProposal(summary string) ([]PatchRequest, error) {
 	if err := json.Unmarshal([]byte(cleanSummary), &envelope); err != nil {
 		return nil, fmt.Errorf("parse coder patch proposal: %w", err)
 	}
+	for _, request := range envelope.ToolRequests {
+		if strings.TrimSpace(request.Action) != string(jobpacket.ActionProposePatch) {
+			continue
+		}
+		envelope.Patches = append(envelope.Patches, PatchRequest{
+			Path:    request.Path,
+			Old:     request.Old,
+			New:     request.New,
+			Content: request.Content,
+		})
+	}
+	envelope.Patches = normalizeModelPatchRequests(envelope.Patches)
 	if err := validatePatchRequests(envelope.Patches); err != nil {
 		return nil, err
 	}
 	return envelope.Patches, nil
+}
+
+func normalizeModelPatchRequests(patches []PatchRequest) []PatchRequest {
+	normalized := make([]PatchRequest, 0, len(patches))
+	for _, patch := range patches {
+		if isEmptyModelPatchRequest(patch) {
+			continue
+		}
+		if patch.Content == "" && patch.Old == "" && patch.New != "" {
+			patch.Content = patch.New
+			patch.New = ""
+		}
+		normalized = append(normalized, patch)
+	}
+	return normalized
+}
+
+func isEmptyModelPatchRequest(patch PatchRequest) bool {
+	return strings.TrimSpace(patch.Path) != "" &&
+		patch.Content == "" &&
+		patch.Old == "" &&
+		patch.New == ""
 }
 
 func validatePatchRequests(patches []PatchRequest) error {

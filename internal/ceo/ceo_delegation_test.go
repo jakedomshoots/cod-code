@@ -103,6 +103,32 @@ func Test_Runtime_RunJob_lets_model_ceo_select_default_subagents(t *testing.T) {
 	}
 }
 
+func Test_Runtime_RunJob_ignores_duplicate_candidate_in_new_subagents(t *testing.T) {
+	// Given
+	client := &sequenceCEOModelClient{
+		responses: []string{
+			`{"selected_subagents":["coder"],"new_subagents":[{"name":"coder","role":"apply patches"}],"summary":"Use coder."}`,
+			`{"recommended_verdict":"pass","summary":"Coder lane passed."}`,
+		},
+	}
+	runtime := NewRuntimeWithCEOReviewer(client)
+
+	// When
+	report, err := runtime.RunJob(context.Background(), JobRequest{
+		Task: "Fix a failing test",
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunJob returned error: %v", err)
+	}
+	if len(report.CEODelegation.NewSubagents) != 0 {
+		t.Fatalf("new subagents = %#v, want duplicate candidate ignored", report.CEODelegation.NewSubagents)
+	}
+	if len(report.JobPacket.Subagents) != 1 || report.JobPacket.Subagents[0].Name != "coder" {
+		t.Fatalf("job packet subagents = %#v, want existing coder selected", report.JobPacket.Subagents)
+	}
+}
+
 func Test_Runtime_RunJob_records_ceo_delegation_route_metadata(t *testing.T) {
 	// Given
 	client := &sequenceCEOModelClient{
@@ -200,11 +226,38 @@ func Test_Runtime_RunJob_lets_model_ceo_create_and_select_specialist_subagent(t 
 	}
 }
 
-func Test_Runtime_RunJob_rejects_ceo_created_subagent_when_it_is_not_selected(t *testing.T) {
+func Test_Runtime_RunJob_ignores_ceo_created_subagent_when_it_is_not_selected(t *testing.T) {
 	// Given
 	client := &sequenceCEOModelClient{
 		responses: []string{
 			`{"selected_subagents":["planner"],"new_subagents":[{"name":"db_reviewer","role":"review migrations"}],"summary":"Created but not selected."}`,
+			`{"recommended_verdict":"pass","summary":"Planner lane passed."}`,
+		},
+	}
+	runtime := NewRuntimeWithCEOReviewer(client)
+
+	// When
+	report, err := runtime.RunJob(context.Background(), JobRequest{
+		Task: "Plan a database migration",
+	})
+
+	// Then
+	if err != nil {
+		t.Fatalf("RunJob returned error: %v", err)
+	}
+	if len(report.CEODelegation.NewSubagents) != 0 {
+		t.Fatalf("new subagents = %#v, want ignored unselected subagent", report.CEODelegation.NewSubagents)
+	}
+	if len(report.JobPacket.Subagents) != 1 || report.JobPacket.Subagents[0].Name != "planner" {
+		t.Fatalf("job packet subagents = %#v, want planner only", report.JobPacket.Subagents)
+	}
+}
+
+func Test_Runtime_RunJob_rejects_invalid_ceo_created_subagent_when_selected(t *testing.T) {
+	// Given
+	client := &sequenceCEOModelClient{
+		responses: []string{
+			`{"selected_subagents":["planner","specialist"],"new_subagents":[{"name":"specialist"}],"summary":"Selected invalid specialist."}`,
 		},
 	}
 	runtime := NewRuntimeWithCEOReviewer(client)
@@ -215,7 +268,7 @@ func Test_Runtime_RunJob_rejects_ceo_created_subagent_when_it_is_not_selected(t 
 	})
 
 	// Then
-	if err == nil || !strings.Contains(err.Error(), "new_subagents[0]") {
-		t.Fatalf("RunJob error = %v, want rejected unselected created subagent", err)
+	if err == nil || !strings.Contains(err.Error(), "new_subagents") {
+		t.Fatalf("RunJob error = %v, want selected invalid new_subagents rejection", err)
 	}
 }

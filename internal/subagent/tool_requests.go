@@ -1,6 +1,7 @@
 package subagent
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -73,10 +74,45 @@ type modelOutputEnvelope struct {
 	Status       string          `json:"status"`
 	Summary      string          `json:"summary"`
 	Confidence   *float64        `json:"confidence,omitempty"`
-	Evidence     []string        `json:"evidence"`
-	Questions    []string        `json:"questions"`
+	Evidence     stringList      `json:"evidence"`
+	Questions    stringList      `json:"questions"`
 	ToolRequests []ToolRequest   `json:"tool_requests"`
 	Patches      []PatchProposal `json:"patches"`
+}
+
+type stringList []string
+
+func (l *stringList) UnmarshalJSON(data []byte) error {
+	var one string
+	if err := json.Unmarshal(data, &one); err == nil {
+		*l = stringList{one}
+		return nil
+	}
+
+	var many []json.RawMessage
+	if err := json.Unmarshal(data, &many); err == nil {
+		values := make([]string, 0, len(many))
+		for _, item := range many {
+			values = append(values, rawJSONText(item))
+		}
+		*l = stringList(values)
+		return nil
+	}
+
+	*l = stringList{rawJSONText(data)}
+	return nil
+}
+
+func rawJSONText(data []byte) string {
+	var text string
+	if err := json.Unmarshal(data, &text); err == nil {
+		return text
+	}
+	var compact bytes.Buffer
+	if err := json.Compact(&compact, data); err == nil {
+		return compact.String()
+	}
+	return strings.TrimSpace(string(data))
 }
 
 type toolResultEnvelope struct {

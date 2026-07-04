@@ -221,7 +221,7 @@ else
 fi
 
 http_blocked=0
-for provider in openai openrouter moonshot; do
+for provider in openrouter kimi-code minimax; do
   index="$evidence_root/provider-proof-$provider/index.md"
   summary="$evidence_root/provider-proof-$provider/summary.json"
   if provider_index_has_pass "$index"; then
@@ -280,14 +280,14 @@ fi
         comparison.all_agent_29_task_comparison)
           printf '%s\n' "- Refresh market comparison: rerun the 29-task all-agent gauntlet after external CLI auth/timeout setup, then confirm \`comparison-report.md\` says \`Overall comparison: pass\`."
           ;;
-        provider.openai_http_provider)
-          printf '%s\n' "- Prove OpenAI provider: export \`OPENAI_API_KEY\`, run \`sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai\`, and keep the key out of evidence."
-          ;;
         provider.openrouter_http_provider)
           printf '%s\n' "- Prove OpenRouter provider: export \`OPENROUTER_API_KEY\`, run \`sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter\`, and keep the key out of evidence."
           ;;
-        provider.moonshot_http_provider)
-          printf '%s\n' "- Prove Moonshot provider: export \`MOONSHOT_API_KEY\`, run \`sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot\`, and keep the key out of evidence."
+        provider.kimi-code_http_provider)
+          printf '%s\n' "- Prove Kimi Code provider: export \`KIMI_CODE_API_KEY\`, run \`sh scripts/provider-proof.sh --provider kimi-code --output-dir .omo/evidence/provider-proof-kimi-code\`, and keep the key out of evidence."
+          ;;
+        provider.minimax_http_provider)
+          printf '%s\n' "- Prove MiniMax provider: export \`MINIMAX_API_KEY\`, run \`sh scripts/provider-proof.sh --provider minimax --output-dir .omo/evidence/provider-proof-minimax\`, and keep the key out of evidence."
           ;;
         *)
           printf -- '- Resolve `%s.%s`: %s Evidence: `%s`.\n' "$category" "$name" "$detail" "$evidence"

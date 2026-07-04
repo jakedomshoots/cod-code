@@ -12,7 +12,7 @@ The current full-benchmark proof gap is closed for the eval scorer: all 31 bench
 
 The live competitor proof gap is closed for the controlled local suite. CEO Harness, Codex CLI, OpenCode, and Pi completed the final 29-task production-core head-to-head run with 116 live runs: 116 pass / 0 partial / 0 fail / 0 timeout / 0 incomplete evidence. This supports controlled-suite parity on this benchmark, not a broad public market-win claim.
 
-Public production remains blocked until real external release and paid HTTP provider evidence exists: public release URL/assets/Homebrew/signing or checksum notes, plus non-empty `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, and `MOONSHOT_API_KEY` provider proofs.
+Public production remains blocked until real external release and paid HTTP provider evidence exists: public release URL/assets/Homebrew/signing or checksum notes, plus non-empty `OPENROUTER_API_KEY`, `KIMI_CODE_API_KEY`, and `MINIMAX_API_KEY` provider proofs.
 
 ## Evidence Root
 

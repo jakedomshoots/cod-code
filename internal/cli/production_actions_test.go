@@ -602,6 +602,47 @@ func TestProductionActionsTreatsEmptyEnvAsNotReady(t *testing.T) {
 	}
 }
 
+func TestProductionActionsTreatsPassedProviderProofAsReadyWithoutEnv(t *testing.T) {
+	t.Setenv("OPENROUTER_API_KEY", "")
+	root := t.TempDir()
+	proofDir := filepath.Join(root, "provider-proof-openrouter")
+	writeProductionStatusSummary(t, filepath.Join(proofDir, "index.md"), "# Provider Proof\n\n- Overall: pass\n")
+	writeProductionStatusSummary(t, filepath.Join(proofDir, "summary.json"), `{
+  "status": "pass",
+  "provider": "openrouter",
+  "provider_mode": "http-provider",
+  "http_preset": "openrouter",
+  "http_model": "openai/gpt-5",
+  "api_key_env": "OPENROUTER_API_KEY",
+  "command_script_secret_policy": "no_secret_assignment",
+  "secret_value_saved": false
+}`)
+
+	actions := annotateProductionActions([]map[string]any{{
+		"id":           "provider-openrouter",
+		"kind":         "provider_proof",
+		"provider":     "openrouter",
+		"required_env": "OPENROUTER_API_KEY",
+		"evidence":     filepath.Join(proofDir, "index.md"),
+		"command":      []any{"sh", "scripts/provider-proof.sh", "--provider", "openrouter"},
+	}}, "")
+	if len(actions) != 1 {
+		t.Fatalf("actions length = %d, want 1", len(actions))
+	}
+	if actions[0]["env_ready"] != true || actions[0]["required_env_satisfied_by_evidence"] != true || actions[0]["action_state"] != "ready" {
+		t.Fatalf("actions = %+v, want passed provider proof to be ready from evidence", actions)
+	}
+	if _, ok := actions[0]["empty_required_env"]; ok {
+		t.Fatalf("actions = %+v, did not want empty env blocker when proof already passed", actions)
+	}
+	if actions[0]["action_reason"] != "provider proof already passed" {
+		t.Fatalf("action_reason = %q, want provider proof already passed", actions[0]["action_reason"])
+	}
+	if actionHasOpenBlocker(actions[0]) {
+		t.Fatalf("actionHasOpenBlocker = true, want false for passed provider proof")
+	}
+}
+
 func TestProductionActionsShellCommandLineQuotesUnsafeArgs(t *testing.T) {
 	got := shellCommandLine([]string{"sh", "scripts/run check.sh", "it's", ""})
 	want := "sh 'scripts/run check.sh' 'it'\"'\"'s' ''"

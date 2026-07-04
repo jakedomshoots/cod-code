@@ -133,6 +133,42 @@ func Test_Runner_Run_parses_structured_model_output_when_model_returns_full_json
 	}
 }
 
+type objectEvidenceModelClient struct{}
+
+func (c objectEvidenceModelClient) Complete(ctx context.Context, req model.Request) (model.Response, error) {
+	if err := ctx.Err(); err != nil {
+		return model.Response{}, err
+	}
+	return model.Response{
+		Text: `{"summary":"patch ready","evidence":[{"file":"app.txt","reason":"old text found"}],"patches":[{"path":"app.txt","old":"old","new":"new"}]}`,
+	}, nil
+}
+
+func Test_Runner_Run_accepts_object_evidence_items(t *testing.T) {
+	// Given
+	runner := NewRunnerWithModel(objectEvidenceModelClient{})
+
+	// When
+	result, err := runner.Run(context.Background(), TaskPacket{
+		Task:            "Patch app",
+		AgentName:       "coder",
+		Role:            "apply bounded changes",
+		ContextMode:     "lean",
+		AllowedActions:  []string{"propose_patch"},
+		MaxContextBytes: 512,
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+	if len(result.Evidence) != 1 || !strings.Contains(result.Evidence[0], "old text found") {
+		t.Fatalf("Evidence = %+v, want object evidence normalized", result.Evidence)
+	}
+	if len(result.PatchProposals) != 1 || result.PatchProposals[0].Path != "app.txt" {
+		t.Fatalf("PatchProposals = %+v, want parsed patch despite object evidence", result.PatchProposals)
+	}
+}
+
 type emptyToolRequestWithPatchClient struct{}
 
 func (c emptyToolRequestWithPatchClient) Complete(ctx context.Context, req model.Request) (model.Response, error) {

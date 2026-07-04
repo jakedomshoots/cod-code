@@ -38,6 +38,9 @@ func Test_Build_returns_compact_prompt_with_role_when_budget_allows(t *testing.T
 	if strings.Contains(prompt.Text, "tool_request_format") {
 		t.Fatalf("prompt = %q, want no duplicate tool request format", prompt.Text)
 	}
+	if !strings.Contains(prompt.Text, "do not ask permission") || !strings.Contains(prompt.Text, `"action":"read_workspace"`) {
+		t.Fatalf("prompt = %q, want concise tool rules", prompt.Text)
+	}
 	if prompt.Bytes != len(prompt.Text) {
 		t.Fatalf("Bytes = %d, want text length", prompt.Bytes)
 	}

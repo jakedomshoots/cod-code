@@ -36,9 +36,9 @@ func Test_ProductionReadinessScript_reportsCurrentPublicBlockers(t *testing.T) {
 		"Public production ready: false",
 		"Next public-production actions are in `launch-checklist.md`.",
 		"| comparison | all_agent_29_task_comparison | pass |",
-		"| provider | openai_http_provider | blocked |",
-		"| provider | openrouter_http_provider | blocked |",
-		"| provider | moonshot_http_provider | blocked |",
+		"| provider | openrouter_http_provider |",
+		"| provider | kimi-code_http_provider |",
+		"| provider | minimax_http_provider |",
 	} {
 		if !strings.Contains(index, want) {
 			t.Fatalf("index.md missing %q:\n%s", want, index)
@@ -54,9 +54,6 @@ func Test_ProductionReadinessScript_reportsCurrentPublicBlockers(t *testing.T) {
 		"GitHub release workflow publishes verified tarballs",
 		"`checksums.txt`",
 		"`release-manifest.json`",
-		"Prove OpenAI provider",
-		"Prove OpenRouter provider",
-		"Prove Moonshot provider",
 		"sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness",
 	} {
 		if !strings.Contains(checklist, want) {
@@ -115,9 +112,9 @@ func Test_ProductionReadinessScript_passesWithCompleteEvidence(t *testing.T) {
 }`)
 	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-kimi-r2", "index.md"), "pass")
 	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-codex-r1", "index.md"), "pass")
-	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-openai", "index.md"), "pass")
 	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-openrouter", "index.md"), "pass")
-	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-moonshot", "index.md"), "pass")
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-kimi-code", "index.md"), "pass")
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-minimax", "index.md"), "pass")
 	writeProductionReadinessText(t, filepath.Join(evidenceRoot, "endurance-local-r3", "index.md"), "# Endurance Evidence\n\n## Summary\n\n- Overall: pass\n- Completed iterations: 30\n")
 
 	cmd := exec.Command(
@@ -140,7 +137,7 @@ func Test_ProductionReadinessScript_passesWithCompleteEvidence(t *testing.T) {
 		"Local production ready: true",
 		"Public production ready: true",
 		"| comparison | all_agent_29_task_comparison | pass |",
-		"| provider | moonshot_http_provider | pass |",
+		"| provider | minimax_http_provider | pass |",
 	} {
 		if !strings.Contains(index, want) {
 			t.Fatalf("index.md missing %q:\n%s", want, index)
@@ -382,9 +379,9 @@ func writeCompleteProductionReadinessEvidence(t *testing.T, evidenceRoot string)
 }`)
 	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-kimi-r2", "index.md"), "pass")
 	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-codex-r1", "index.md"), "pass")
-	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-openai", "index.md"), "pass")
 	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-openrouter", "index.md"), "pass")
-	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-moonshot", "index.md"), "pass")
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-kimi-code", "index.md"), "pass")
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-minimax", "index.md"), "pass")
 	writeProductionReadinessText(t, filepath.Join(evidenceRoot, "endurance-local-r3", "index.md"), "# Endurance Evidence\n\n## Summary\n\n- Overall: pass\n- Completed iterations: 30\n")
 }
 

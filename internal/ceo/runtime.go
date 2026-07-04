@@ -212,6 +212,11 @@ func (r Runtime) RunJob(ctx context.Context, req JobRequest) (Report, error) {
 			return Report{}, err
 		}
 		changedFiles = append(changedFiles, written...)
+		requiredEvidence, err := writeRequiredEvidenceArtifacts(ctx, space, packet, changedFiles, checkResults)
+		if err != nil {
+			return Report{}, err
+		}
+		changedFiles = append(changedFiles, requiredEvidence...)
 	}
 	verificationContract := NewVerificationContract(checkCommands(req), checkResults)
 	report := buildReport(reportBuildInput{
