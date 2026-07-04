@@ -56,6 +56,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - HTTP provider proof now targets the default public-readiness set: `OPENROUTER_API_KEY`, `KIMI_CODE_API_KEY`, and `MINIMAX_API_KEY`.
 - The secure OpenAI key setup app currently requires reauthentication before Codex can create/write an OpenAI key from this workspace.
 - `production-status` currently reports `Local ready: true`, `Public ready: false`, `External setup required: true`, five blocked public checks, zero runnable finalizer commands, and five commented blocked commands.
+- Public 10/10 production status is tracked in `docs/PRODUCTION_10_10.md`; the release/provider/finalizer gates must be green before making public production claims.
 
 ## Market Roadmap Result 2026-07-03
 
