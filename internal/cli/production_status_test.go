@@ -84,6 +84,7 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
   "status": "blocked",
   "next_actions": {
     "path": "next-actions.md",
+    "json_path": "next-actions.json",
     "required_action_count": 2
   }
 }`)
@@ -97,6 +98,8 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 		"Launch checklist: launch-checklist.md (5 actions)",
 		"Finalizer next actions:",
 		"production-finalize-r1/next-actions.md (2 actions)",
+		"Finalizer actions JSON:",
+		"production-finalize-r1/next-actions.json",
 		"Next action: open ",
 		"production-finalize-r1/next-actions.md",
 	} {
@@ -125,6 +128,7 @@ func Test_Run_production_status_ignores_skipped_finalizer_next_actions(t *testin
   "skipped_steps": [],
   "next_actions": {
     "path": "next-actions.md",
+    "json_path": "next-actions.json",
     "required_action_count": 6
   }
 }`)

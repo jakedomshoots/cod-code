@@ -24,6 +24,7 @@ type productionStatusReport struct {
 
 type productionChecklistStatus struct {
 	Path                string `json:"path"`
+	JSONPath            string `json:"json_path,omitempty"`
 	SHA256              string `json:"sha256,omitempty"`
 	RequiredActionCount int    `json:"required_action_count"`
 	Status              string `json:"status"`
@@ -158,6 +159,7 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 	var raw struct {
 		NextActions *struct {
 			Path                string `json:"path"`
+			JSONPath            string `json:"json_path"`
 			RequiredActionCount int    `json:"required_action_count"`
 		} `json:"next_actions"`
 	}
@@ -167,11 +169,16 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 	if raw.NextActions == nil || raw.NextActions.Path == "" {
 		return nil, nil
 	}
-	return &productionChecklistStatus{
-		Path:                filepath.Join(filepath.Dir(latest), raw.NextActions.Path),
+	finalizerDir := filepath.Dir(latest)
+	status := &productionChecklistStatus{
+		Path:                filepath.Join(finalizerDir, raw.NextActions.Path),
 		RequiredActionCount: raw.NextActions.RequiredActionCount,
 		Status:              "pass",
-	}, nil
+	}
+	if raw.NextActions.JSONPath != "" {
+		status.JSONPath = filepath.Join(finalizerDir, raw.NextActions.JSONPath)
+	}
+	return status, nil
 }
 
 func productionFinalizerSummaryHasSkippedSteps(path string) bool {
@@ -222,6 +229,9 @@ func renderProductionStatusText(report productionStatusReport) string {
 	}
 	if report.FinalizerNextActions != nil {
 		fmt.Fprintf(&builder, "Finalizer next actions: %s (%d actions)\n", report.FinalizerNextActions.Path, report.FinalizerNextActions.RequiredActionCount)
+		if report.FinalizerNextActions.JSONPath != "" {
+			fmt.Fprintf(&builder, "Finalizer actions JSON: %s\n", report.FinalizerNextActions.JSONPath)
+		}
 	}
 	fmt.Fprintf(&builder, "Next action: %s\n", report.NextAction)
 	return builder.String()
