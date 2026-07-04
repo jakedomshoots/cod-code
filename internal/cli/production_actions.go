@@ -25,6 +25,7 @@ type productionActionsReport struct {
 	NextOnly                      bool              `json:"next_only,omitempty"`
 	CommandsOnly                  bool              `json:"commands_only,omitempty"`
 	Filter                        map[string]string `json:"filter,omitempty"`
+	NextBlockedAction             map[string]any    `json:"next_blocked_action,omitempty"`
 	Actions                       []map[string]any  `json:"actions"`
 }
 
@@ -60,7 +61,15 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 		return productionActionsReport{}, fmt.Errorf("decode production actions: %w", err)
 	}
 	annotated := annotateProductionActions(raw.Actions, filepath.Dir(status.FinalizerNextActions.JSONPath))
-	actions := filterProductionActions(annotated, opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionState, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly, opts.productionActionsNextOnly)
+	filteredCandidates := filterProductionActions(annotated, opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionState, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly, false)
+	actions := filteredCandidates
+	var nextBlockedAction map[string]any
+	if opts.productionActionsNextOnly {
+		actions = firstReadyAction(filteredCandidates)
+		if len(actions) == 0 {
+			nextBlockedAction = firstBlockedAction(filteredCandidates)
+		}
+	}
 	evidenceMatches, evidenceMismatches := countProductionEvidenceDeclaredMatches(actions)
 	return productionActionsReport{
 		Path:                          status.FinalizerNextActions.JSONPath,
@@ -76,6 +85,7 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 		NextOnly:                      opts.productionActionsNextOnly,
 		CommandsOnly:                  opts.productionActionsCommandsOnly,
 		Filter:                        productionActionFilter(opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionState, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly, opts.productionActionsNextOnly),
+		NextBlockedAction:             nextBlockedAction,
 		Actions:                       actions,
 	}, nil
 }
@@ -698,6 +708,15 @@ func firstReadyAction(actions []map[string]any) []map[string]any {
 	return []map[string]any{}
 }
 
+func firstBlockedAction(actions []map[string]any) map[string]any {
+	for _, action := range actions {
+		if !actionReady(action) {
+			return action
+		}
+	}
+	return nil
+}
+
 func productionActionFilter(id string, kind string, provider string, state string, envReadyOnly bool, readyOnly bool, nextOnly bool) map[string]string {
 	filter := map[string]string{}
 	if id != "" {
@@ -799,6 +818,9 @@ func renderProductionActionsText(report productionActionsReport) string {
 	if report.Path != "" {
 		fmt.Fprintf(&builder, "Source: %s\n", report.Path)
 	}
+	if len(report.Actions) == 0 && report.NextBlockedAction != nil {
+		writeNextBlockedActionText(&builder, report.NextBlockedAction)
+	}
 	for _, action := range report.Actions {
 		id, _ := action["id"].(string)
 		kind, _ := action["kind"].(string)
@@ -825,6 +847,32 @@ func renderProductionActionsText(report productionActionsReport) string {
 		writeActionCommandText(&builder, action)
 	}
 	return builder.String()
+}
+
+func writeNextBlockedActionText(builder *strings.Builder, action map[string]any) {
+	id := actionString(action, "id")
+	kind := actionString(action, "kind")
+	state := actionString(action, "action_state")
+	reason := actionString(action, "action_reason")
+	if state == "" {
+		state = "unknown"
+	}
+	if kind != "" {
+		fmt.Fprintf(builder, "Next blocked action: %s [%s] state=%s\n", id, kind, state)
+	} else {
+		fmt.Fprintf(builder, "Next blocked action: %s state=%s\n", id, state)
+	}
+	if reason != "" {
+		fmt.Fprintf(builder, "Blocked reason: %s\n", reason)
+	}
+	if missingEnv := actionString(action, "missing_required_env"); missingEnv != "" {
+		fmt.Fprintf(builder, "Missing env: %s\n", missingEnv)
+	} else if emptyEnv := actionString(action, "empty_required_env"); emptyEnv != "" {
+		fmt.Fprintf(builder, "Empty env: %s\n", emptyEnv)
+	}
+	if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
+		fmt.Fprintf(builder, "Waiting on: %s\n", strings.Join(blockedBy, ", "))
+	}
 }
 
 func renderActionStateCounts(counts map[string]int) string {

@@ -451,6 +451,9 @@ set -eu
 		"Required actions: 0",
 		"Ready now: 0",
 		"Filter: next=true",
+		"Next blocked action: provider-openai [provider_proof] state=missing_env",
+		"Blocked reason: missing required env: OPENAI_API_KEY",
+		"Missing env: OPENAI_API_KEY",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("next production actions text missing %q:\n%s", want, text)
@@ -465,8 +468,11 @@ set -eu
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
 	}
 	text = out.String()
-	if !strings.Contains(text, "Required actions: 0") || strings.Contains(text, "provider-openai [provider_proof]") {
+	if !strings.Contains(text, "Required actions: 0") || !strings.Contains(text, "Next blocked action: provider-openai [provider_proof] state=missing_env") {
 		t.Fatalf("next provider queue should be empty while env is missing:\n%s", text)
+	}
+	if strings.Contains(text, "secret-value") {
+		t.Fatalf("next provider queue leaked secret value:\n%s", text)
 	}
 
 	out.Reset()
