@@ -67,7 +67,7 @@ sed -n '1,80p' dist/homebrew/ceo-packet.rb
 
 `scripts/verify-release.sh` checks `checksums.txt`, verifies every archive hash and size against `release-manifest.json`, and fails if any artifact is missing or mismatched.
 
-`scripts/release-bootstrap.sh` prepares the public release packet without publishing anything. It writes `index.md`, `summary.json`, `commands.sh`, `env.template`, `release-checklist.md`, `remote-homebrew-formula.rb`, and `verify-release.txt`. It exits non-zero until public repo, release, Homebrew archive, and signing/checksum policy inputs are explicit.
+`scripts/release-bootstrap.sh` prepares the public release packet without publishing anything. It writes `index.md`, `summary.json`, `commands.sh`, `env.template`, `release-checklist.md`, `remote-homebrew-formula.rb`, and `verify-release.txt`. It exits non-zero until public repo, release, Homebrew archive, and signing/checksum policy inputs are explicit. `summary.json` records the checklist item count and SHA-256 fingerprints for the bootstrap files.
 
 `scripts/release-preflight.sh` checks whether a release can honestly be called public. It verifies local artifacts, then blocks until a git remote, public release URL, remote Homebrew archive URL, and archive signatures or explicit checksum-only release notes are handled. It does not tag, push, upload, or publish anything.
 

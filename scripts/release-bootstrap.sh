@@ -281,6 +281,33 @@ blocked_json=$(awk '
   END { printf "]" }
 ' "$blocked_file")
 
+release_checklist_item_count=$(awk '/^[0-9][0-9]*[.] / { count++ } END { print count + 0 }' "$output_dir/release-checklist.md")
+bootstrap_artifacts_sha256=$(python3 - "$output_dir" <<'PY'
+import hashlib
+import json
+import pathlib
+import sys
+
+output_dir = pathlib.Path(sys.argv[1])
+artifacts = [
+    "blocked-checks.txt",
+    "commands.sh",
+    "env.template",
+    "release-checklist.md",
+    "remote-homebrew-formula.rb",
+    "verify-release.txt",
+]
+
+digests = {}
+for artifact in artifacts:
+    path = output_dir / artifact
+    if path.exists():
+        digests[artifact] = hashlib.sha256(path.read_bytes()).hexdigest()
+
+print(json.dumps(digests, sort_keys=True))
+PY
+)
+
 cat >"$output_dir/summary.json" <<JSON
 {
   "schema_version": 1,
@@ -299,6 +326,8 @@ cat >"$output_dir/summary.json" <<JSON
   "signing_or_checksum_policy": "$signing_status",
   "blocked_count": $blocked_count,
   "blocked_checks": $blocked_json,
+  "release_checklist_item_count": $release_checklist_item_count,
+  "bootstrap_artifacts_sha256": $bootstrap_artifacts_sha256,
   "artifacts": {
     "index": "index.md",
     "summary": "summary.json",

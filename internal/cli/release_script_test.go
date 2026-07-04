@@ -327,6 +327,10 @@ func Test_ReleaseBootstrapScript_writesBlockedEvidencePacket(t *testing.T) {
 		`"public_release_url"`,
 		`"homebrew_archive_base_url"`,
 		`"signing_or_checksum_policy"`,
+		`"release_checklist_item_count": 7`,
+		`"bootstrap_artifacts_sha256"`,
+		`"commands.sh"`,
+		`"release-checklist.md"`,
 	} {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("bootstrap summary missing %q:\n%s", want, summary)
@@ -373,6 +377,9 @@ func Test_ReleaseBootstrapScript_passesWithPublicMetadata(t *testing.T) {
 		`"release_bootstrap_ready": true`,
 		`"version": "0.2.0-test"`,
 		`"blocked_count": 0`,
+		`"release_checklist_item_count": 7`,
+		`"bootstrap_artifacts_sha256"`,
+		`"remote-homebrew-formula.rb"`,
 	} {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("bootstrap summary missing %q:\n%s", want, summary)
