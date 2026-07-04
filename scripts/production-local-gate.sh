@@ -182,6 +182,19 @@ for action in action_rows:
         if release_summary.get("secret_value_saved") is not False:
             print(f"production-local-gate: fail release secret flag unsafe for {action_id}")
             raise SystemExit(1)
+    if action.get("kind") == "provider_proof":
+        provider_summary = action.get("provider_summary") or {}
+        if provider_summary.get("command_script_secret_policy") != "no_secret_assignment":
+            print(f"production-local-gate: fail provider command secret policy missing for {action_id}")
+            raise SystemExit(1)
+        if provider_summary.get("secret_value_saved") is not False:
+            print(f"production-local-gate: fail provider secret flag unsafe for {action_id}")
+            raise SystemExit(1)
+        setup_hashes = provider_summary.get("setup_artifacts_sha256") or {}
+        for artifact in ("blocked.md", "commands.sh", "env.template", "setup-checklist.md"):
+            if not setup_hashes.get(artifact):
+                print(f"production-local-gate: fail provider setup artifact hash missing for {action_id}: {artifact}")
+                raise SystemExit(1)
 if missing_reasons:
     print("production-local-gate: fail action_reason missing for " + ", ".join(missing_reasons))
     raise SystemExit(1)
@@ -225,5 +238,6 @@ print(f"production-local-gate: runnable_commands={runnable}")
 print(f"production-local-gate: blocked_commands={blocked}")
 print(f"production-local-gate: action_reasons={len(action_rows)}")
 print("production-local-gate: release_setup_policy=verified")
+print("production-local-gate: provider_setup_policy=verified")
 print(f"production-local-gate: finalizer_setup_actions={finalizer.get('setup_required_action_count', 0)}")
 PY

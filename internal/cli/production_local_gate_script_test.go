@@ -46,6 +46,7 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		"production-local-gate: blocked_commands=",
 		"production-local-gate: action_reasons=",
 		"production-local-gate: release_setup_policy=verified",
+		"production-local-gate: provider_setup_policy=verified",
 		"production-local-gate: finalizer_setup_actions=",
 	} {
 		if !strings.Contains(body, want) {
@@ -82,8 +83,10 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		`"action_state":`,
 		`"action_state_counts":`,
 		`"setup_command_policy": "no_publish_no_secret_assignment"`,
+		`"command_script_secret_policy": "no_secret_assignment"`,
 		`"publish_actions_performed": false`,
 		`"secret_value_saved": false`,
+		`"setup_artifacts_sha256":`,
 		`"required_action_count":`,
 		`"runnable_command_count":`,
 		`"blocked_command_count":`,
