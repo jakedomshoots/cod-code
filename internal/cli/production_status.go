@@ -20,7 +20,16 @@ type productionStatusReport struct {
 	SummaryPath           string                     `json:"summary_path,omitempty"`
 	LaunchChecklist       *productionChecklistStatus `json:"launch_checklist,omitempty"`
 	FinalizerNextActions  *productionChecklistStatus `json:"finalizer_next_actions,omitempty"`
+	ReleaseBootstrap      *productionBootstrapStatus `json:"release_bootstrap,omitempty"`
 	NextAction            string                     `json:"next_action"`
+}
+
+type productionBootstrapStatus struct {
+	Path         string `json:"path"`
+	HandoffPath  string `json:"handoff_path,omitempty"`
+	Status       string `json:"status"`
+	BlockedCount int    `json:"blocked_count"`
+	Version      string `json:"version,omitempty"`
 }
 
 type productionChecklistStatus struct {
@@ -112,6 +121,11 @@ func buildProductionStatusReport(workspaceDir string) (productionStatusReport, e
 		report.LaunchChecklist.CurrentSHA256, report.LaunchChecklist.MatchesDeclared = checklistFingerprint(checklistPath, raw.LaunchChecklist.SHA256)
 	}
 	if !raw.PublicProductionReady {
+		bootstrap, err := latestReleaseBootstrapStatus(evidenceRoot)
+		if err != nil {
+			return productionStatusReport{}, err
+		}
+		report.ReleaseBootstrap = bootstrap
 		finalizer, err := latestProductionFinalizerNextActions(evidenceRoot)
 		if err != nil {
 			return productionStatusReport{}, err
@@ -122,6 +136,53 @@ func buildProductionStatusReport(workspaceDir string) (productionStatusReport, e
 		}
 	}
 	return report, nil
+}
+
+func latestReleaseBootstrapStatus(evidenceRoot string) (*productionBootstrapStatus, error) {
+	matches, err := filepath.Glob(filepath.Join(evidenceRoot, "release-bootstrap*", "summary.json"))
+	if err != nil {
+		return nil, err
+	}
+	var latest string
+	var latestMod time.Time
+	for _, candidate := range matches {
+		info, err := os.Stat(candidate)
+		if err != nil {
+			continue
+		}
+		if latest == "" || info.ModTime().After(latestMod) {
+			latest = candidate
+			latestMod = info.ModTime()
+		}
+	}
+	if latest == "" {
+		return nil, nil
+	}
+	content, err := os.ReadFile(latest)
+	if err != nil {
+		return nil, fmt.Errorf("read release bootstrap summary: %w", err)
+	}
+	var raw struct {
+		Status       string `json:"status"`
+		BlockedCount int    `json:"blocked_count"`
+		Version      string `json:"version"`
+		Artifacts    struct {
+			Handoff string `json:"handoff"`
+		} `json:"artifacts"`
+	}
+	if err := json.Unmarshal(content, &raw); err != nil {
+		return nil, fmt.Errorf("decode release bootstrap summary: %w", err)
+	}
+	status := &productionBootstrapStatus{
+		Path:         latest,
+		Status:       raw.Status,
+		BlockedCount: raw.BlockedCount,
+		Version:      raw.Version,
+	}
+	if raw.Artifacts.Handoff != "" {
+		status.HandoffPath = filepath.Join(filepath.Dir(latest), raw.Artifacts.Handoff)
+	}
+	return status, nil
 }
 
 func latestProductionReadinessSummary(evidenceRoot string) (string, error) {
@@ -374,6 +435,16 @@ func renderProductionStatusText(report productionStatusReport) string {
 				fmt.Fprintf(&builder, " declared_match=%t", *report.FinalizerNextActions.SetupMatchesDeclared)
 			}
 			builder.WriteString("\n")
+		}
+	}
+	if report.ReleaseBootstrap != nil {
+		fmt.Fprintf(&builder, "Release bootstrap: %s blocked=%d", report.ReleaseBootstrap.Status, report.ReleaseBootstrap.BlockedCount)
+		if report.ReleaseBootstrap.Version != "" {
+			fmt.Fprintf(&builder, " version=%s", report.ReleaseBootstrap.Version)
+		}
+		builder.WriteString("\n")
+		if report.ReleaseBootstrap.HandoffPath != "" {
+			fmt.Fprintf(&builder, "Release handoff: %s\n", report.ReleaseBootstrap.HandoffPath)
 		}
 	}
 	fmt.Fprintf(&builder, "Next action: %s\n", report.NextAction)

@@ -134,6 +134,16 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
   "secret_value_saved": false,
   "artifacts": {}
 }`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "release-bootstrap-r1", "summary.json"), `{
+  "status": "blocked",
+  "blocked_count": 3,
+  "version": "0.2.0-test",
+  "artifacts": {
+    "handoff": "release-handoff.md"
+  }
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "release-bootstrap-r1", "release-handoff.md"), `# Public Release Handoff
+`)
 
 	var out bytes.Buffer
 	if err := Run(context.Background(), &out, []string{"production-status", "--workspace", root, "--format", "text"}); err != nil {
@@ -154,12 +164,27 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 		"(4 actions)",
 		"sha256=" + setupSHA,
 		"declared_match=true",
+		"Release bootstrap: blocked blocked=3 version=0.2.0-test",
+		"Release handoff:",
+		"release-bootstrap-r1/release-handoff.md",
 		"Next action: open ",
 		"production-finalize-r1/next-actions.md",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("production status text missing %q:\n%s", want, text)
 		}
+	}
+
+	out.Reset()
+	if err := Run(context.Background(), &out, []string{"production-status", "--workspace", root}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	var body productionStatusReport
+	if err := json.Unmarshal(out.Bytes(), &body); err != nil {
+		t.Fatalf("decode production status: %v\n%s", err, out.String())
+	}
+	if body.ReleaseBootstrap == nil || body.ReleaseBootstrap.Status != "blocked" || body.ReleaseBootstrap.BlockedCount != 3 || !strings.Contains(body.ReleaseBootstrap.HandoffPath, "release-handoff.md") {
+		t.Fatalf("release bootstrap = %+v, want surfaced handoff", body.ReleaseBootstrap)
 	}
 }
 
