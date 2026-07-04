@@ -49,7 +49,15 @@ func completionForShell(shell string) (completionFile, error) {
 }
 
 func completionWords() string {
-	return "start run gauntlet doctor inbox status production-status production-actions production-finalize resume retry rollback explain-failure review context config eval"
+	return "start run gauntlet doctor inbox status oauth production-status production-actions production-finalize resume retry rollback explain-failure review context config eval"
+}
+
+func oauthCommandWords() string {
+	return "list doctor init"
+}
+
+func oauthProviderWords() string {
+	return "kimi codex claude opencode goose"
 }
 
 func productionActionStateWords() string {
@@ -65,7 +73,7 @@ func zshCompletion() string {
 local -a commands
 commands=(` + completionWords() + `)
 _arguments \
-  '1:command:((start run gauntlet doctor inbox status production-status production-actions production-finalize resume retry rollback explain-failure review context config eval))' \
+  '1:command:((start run gauntlet doctor inbox status oauth production-status production-actions production-finalize resume retry rollback explain-failure review context config eval))' \
   '*::arg:->args'
 case $words[2] in
   config)
@@ -79,6 +87,12 @@ case $words[2] in
       '--action-kind[action kind]:kind:(release_proof provider_proof competitor_setup comparison final_readiness)' \
       '--action-provider[provider]:provider:(` + productionActionProviderWords() + `)' \
       '--format[output format]:format:(json text events)'
+    ;;
+  oauth)
+    _arguments '2:oauth command:((` + oauthCommandWords() + `))' \
+      '3:oauth provider:((` + oauthProviderWords() + `))' \
+      '--workspace[workspace directory]:directory:_files -/' \
+      '--format[output format]:format:(json text)'
     ;;
 esac
 `
@@ -96,6 +110,14 @@ func bashCompletion() string {
   fi
   if [[ "${COMP_WORDS[1]}" == config && "${COMP_CWORD}" == 2 ]]; then
     COMPREPLY=( $(compgen -W "check doctor explain completions init" -- "$cur") )
+    return 0
+  fi
+  if [[ "${COMP_WORDS[1]}" == oauth && "${COMP_CWORD}" == 2 ]]; then
+    COMPREPLY=( $(compgen -W "` + oauthCommandWords() + `" -- "$cur") )
+    return 0
+  fi
+  if [[ "${COMP_WORDS[1]}" == oauth && "${COMP_CWORD}" == 3 ]]; then
+    COMPREPLY=( $(compgen -W "` + oauthProviderWords() + `" -- "$cur") )
     return 0
   fi
   if [[ "${COMP_WORDS[1]}" == gauntlet && "$prev" == --agents ]]; then
@@ -126,6 +148,8 @@ complete -F _ceo_packet ceo-packet
 func fishCompletion() string {
 	return `complete -c ceo-packet -f -n "__fish_use_subcommand" -a "` + completionWords() + `"
 complete -c ceo-packet -f -n "__fish_seen_subcommand_from config" -a "check doctor explain completions init"
+complete -c ceo-packet -f -n "__fish_seen_subcommand_from oauth" -a "` + oauthCommandWords() + `"
+complete -c ceo-packet -n "__fish_seen_subcommand_from oauth" -a "` + oauthProviderWords() + `"
 complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l agents -a "ceo_harness codex_cli opencode pi"
 complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l output-dir -r
 complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-state -a "` + productionActionStateWords() + `"

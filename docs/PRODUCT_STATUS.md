@@ -21,11 +21,11 @@ The core product loop already supports:
 - Local job history and review queue.
 - Resume, continue, rerun, and human final judgment.
 - Preview/dry-run patch approval with digest matching.
-- Provider routing, fallback, provider health, and route-decision reporting.
+- Provider routing, fallback, provider health, CLI OAuth doctor/init, and route-decision reporting.
 - JSON, compact text, and JSONL event output.
 - Primary operator commands: `start`, `run`, `gauntlet`, `doctor`, `inbox`, `status`, `resume`, `retry`, `rollback`, and `explain-failure`.
 - Public-readiness operator command: `production-status` reads the latest readiness packet and reports local/public readiness plus the next launch action.
-- Guided start, friendly inbox/status, provider wizard, golden demo repo generation, write policy presets, shell completions, external adapter presets, and lightweight interactive `tui`.
+- Guided start, friendly inbox/status, provider wizard, CLI OAuth provider setup, golden demo repo generation, write policy presets, shell completions, external adapter presets, and lightweight interactive `tui`.
 
 ## Positioning
 

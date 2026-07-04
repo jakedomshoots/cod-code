@@ -43,14 +43,21 @@ ceo-packet run --workspace /path/to/repo \
 
 ## Real Provider Setup
 
-Codex CLI and Kimi CLI use adapter presets:
+Use OAuth-backed local CLIs when you want the harness to use an already logged-in tool without storing tokens:
 
 ```sh
-ceo-packet config init --workspace /path/to/repo --adapter codex
-ceo-packet config init --workspace /path/to/repo --adapter kimi
+ceo-packet oauth list
+ceo-packet oauth doctor --format text
+ceo-packet oauth init kimi --workspace /path/to/repo --format text
+ceo-packet oauth init codex --workspace /path/to/repo --format text
+ceo-packet oauth init claude --workspace /path/to/repo --format text
+ceo-packet oauth init opencode --workspace /path/to/repo --format text
+ceo-packet oauth init goose --workspace /path/to/repo --format text
 ```
 
-OpenRouter uses the HTTP provider wizard and needs a real key:
+`oauth init` creates provider `main`, routes CEO/default/fallback work to it, and stores no OAuth token or API key. The local vendor CLI owns login state.
+
+OpenRouter and other API-key providers use the HTTP provider wizard and need a real key:
 
 ```sh
 export OPENROUTER_API_KEY=...

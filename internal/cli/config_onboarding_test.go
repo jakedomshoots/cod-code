@@ -40,9 +40,14 @@ func Test_Run_config_completions_writes_shell_files_when_requested(t *testing.T)
 			if !strings.Contains(string(content), tt.want) || !strings.Contains(string(content), "ceo-packet") {
 				t.Fatalf("%s completion content missing expected command:\n%s", tt.shell, string(content))
 			}
-			for _, command := range []string{"start", "run", "gauntlet", "doctor", "inbox", "status", "resume", "retry", "rollback", "explain-failure"} {
+			for _, command := range []string{"start", "run", "gauntlet", "doctor", "inbox", "status", "oauth", "resume", "retry", "rollback", "explain-failure"} {
 				if !strings.Contains(string(content), command) {
 					t.Fatalf("%s completion content missing primary command %q:\n%s", tt.shell, command, string(content))
+				}
+			}
+			for _, want := range []string{"list doctor init", "kimi codex claude opencode goose"} {
+				if !strings.Contains(string(content), want) {
+					t.Fatalf("%s completion content missing oauth completion %q:\n%s", tt.shell, want, string(content))
 				}
 			}
 			for _, want := range []string{"production-actions", "action-state", "ready missing_env empty_env setup_blocked waiting", "release_proof provider_proof competitor_setup comparison final_readiness", "openai openrouter kimi-code moonshot minimax kimi codex"} {

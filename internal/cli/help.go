@@ -14,6 +14,7 @@ Primary flow:
   doctor [flags]                  Run harness health checks
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
+  oauth list|doctor|init          Setup CLI-login model providers
   production-status [flags]       Print local/public production readiness
   production-actions [flags]      Print remaining production action checklist
   production-finalize [flags]     Run guarded final production evidence
@@ -31,6 +32,9 @@ Usage:
   ceo-packet doctor [flags]
   ceo-packet inbox [flags]
   ceo-packet status [flags]
+  ceo-packet oauth list
+  ceo-packet oauth doctor [provider]
+  ceo-packet oauth init <provider> --workspace <path>
   ceo-packet production-status [flags]
   ceo-packet production-actions [flags]
   ceo-packet production-finalize --dry-run [flags]
@@ -54,12 +58,19 @@ Common flags:
   --dry-run                       Preview patch writes without workspace artifacts/history; write intent previews by default
   --provider-wizard <preset>      Create a main provider for openai, openrouter, kimi-code, moonshot, or minimax
   --adapter <name>                Use external worker adapter: codex, kimi, claude, opencode, aider, goose
+  OAuth CLI: ceo-packet oauth init kimi --workspace .
   --format <json|text>            Print JSON or compact text
   --version                       Print version
   --help, -h                      Print this compact help
   --help-advanced                 Print all commands, provider flags, model flags, and history tools
 
 Provider quick start:
+  OAuth providers: ceo-packet oauth list
+  Kimi OAuth: ceo-packet oauth init kimi --workspace .
+  Codex OAuth: ceo-packet oauth init codex --workspace .
+  Claude OAuth: ceo-packet oauth init claude --workspace .
+  OpenCode OAuth: ceo-packet oauth init opencode --workspace .
+  Goose OAuth: ceo-packet oauth init goose --workspace .
   Codex CLI: ceo-packet config init --adapter codex
   Kimi CLI: ceo-packet config init --adapter kimi
   OpenRouter: use --provider-wizard openrouter; missing OPENROUTER_API_KEY is blocked setup, not a failed benchmark
@@ -76,6 +87,7 @@ Examples:
   ceo-packet production-actions --workspace . --format text --action-kind provider_proof
   ceo-packet production-actions --workspace . --format text --env-ready-only
   ceo-packet production-finalize --workspace . --dry-run
+  ceo-packet oauth doctor --format text
   ceo-packet retry latest --workspace .
   ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
   ceo-packet config check --workspace .
@@ -93,6 +105,7 @@ Primary flow:
   doctor [flags]                  Run harness health checks
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
+  oauth list|doctor|init          Setup CLI-login model providers
   production-status [flags]       Print local/public production readiness
   production-actions [flags]      Print remaining production action checklist
   production-finalize [flags]     Run guarded final production evidence
@@ -110,6 +123,9 @@ Usage:
   ceo-packet doctor [flags]
   ceo-packet inbox [flags]
   ceo-packet status [flags]
+  ceo-packet oauth list
+  ceo-packet oauth doctor [provider]
+  ceo-packet oauth init <provider> --workspace <path>
   ceo-packet production-status [flags]
   ceo-packet production-actions [flags]
   ceo-packet production-finalize --dry-run [flags]
@@ -122,6 +138,7 @@ Usage:
 Advanced commands:
   review [flags]                  Print review queue with details
   context [flags] <job>            Print per-agent context trace
+  oauth list|doctor|init          Setup CLI-login model providers
   config check|doctor|explain     Print config health and first-run help
   config completions [flags]      Write zsh, bash, or fish completion file
   config init [flags]             Create workspace config
@@ -234,6 +251,12 @@ Advanced flags:
   --help, -h                      Print this help
 
 Provider quick start:
+  OAuth providers: ceo-packet oauth list
+  Kimi OAuth: ceo-packet oauth init kimi --workspace .
+  Codex OAuth: ceo-packet oauth init codex --workspace .
+  Claude OAuth: ceo-packet oauth init claude --workspace .
+  OpenCode OAuth: ceo-packet oauth init opencode --workspace .
+  Goose OAuth: ceo-packet oauth init goose --workspace .
   Codex CLI: ceo-packet config init --adapter codex
   Kimi CLI: ceo-packet config init --adapter kimi
   OpenRouter: use --provider-wizard openrouter; missing OPENROUTER_API_KEY is blocked setup, not a failed benchmark
@@ -249,6 +272,16 @@ Model:
 	  config: model_command, ceo_model_command, research_command, model_command_timeout_ms, tool_command_timeout_ms
 	  coder patch JSON: {"patches":[{"path":"app.txt","old":"old","new":"new"}]}
 	  create patch JSON: {"patches":[{"path":"docs/notes.md","content":"# Notes\n"}]}
+
+OAuth CLI setup:
+  ceo-packet oauth list
+  ceo-packet oauth doctor --format text
+  ceo-packet oauth init kimi --workspace . --format text
+  ceo-packet oauth init codex --workspace . --format text
+  ceo-packet oauth init claude --workspace . --format text
+  ceo-packet oauth init opencode --workspace . --format text
+  ceo-packet oauth init goose --workspace . --format text
+  Built-in OAuth init stores no tokens. It creates a command provider that uses the local CLI login.
 
 HTTP provider setup:
   --provider-wizard <preset>      Create a main provider for openai, openrouter, kimi-code, moonshot, or minimax
@@ -285,6 +318,8 @@ Examples:
   ceo-packet config completions --shell zsh --output-dir /tmp/ceo-completions
   ceo-packet production-actions --workspace . --format text
   ceo-packet production-actions --workspace . --action-state empty_env --commands-only
+  ceo-packet oauth list
+  ceo-packet oauth init kimi --workspace . --format text
   ceo-packet --workspace . --provider-wizard openai --http-model gpt-5
   ceo-packet --init-demo-repo /tmp/ceo-demo
   ceo-packet run --workspace . --check go test ./... -- "Fix retry bug"

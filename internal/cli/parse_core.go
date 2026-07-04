@@ -151,6 +151,18 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 	case "--inbox":
 		opts.showInbox = true
 		return true, index, nil
+	case "--oauth":
+		value, err := parseNextValue(args, index, "--oauth requires list, doctor, or init")
+		if err != nil {
+			return true, index, err
+		}
+		opts.oauthCommand = value
+	case "--oauth-provider":
+		value, err := parseNextValue(args, index, "--oauth-provider requires a provider name")
+		if err != nil {
+			return true, index, err
+		}
+		opts.oauthProvider = value
 	case "--provider-wizard":
 		value, err := parseNextValue(args, index, "--provider-wizard requires a preset name")
 		if err != nil {

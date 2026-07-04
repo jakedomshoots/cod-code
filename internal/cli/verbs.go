@@ -36,6 +36,8 @@ func normalizeVerbArgs(args []string) ([]string, error) {
 		return append([]string{"--review-queue", "--review-details"}, rest...), nil
 	case "context":
 		return normalizeContextVerb(rest)
+	case "oauth":
+		return normalizeOAuthVerb(rest)
 	case "config":
 		return normalizeConfigVerb(rest)
 	case "doctor":
@@ -134,10 +136,44 @@ func contextVerbJobIndex(args []string) int {
 
 func isKnownVerb(verb string) bool {
 	switch verb {
-	case "start", "run", "gauntlet", "doctor", "inbox", "status", "production-status", "production-actions", "production-finalize", "resume", "retry", "rollback", "explain-failure", "review", "context", "tui", "eval":
+	case "start", "run", "gauntlet", "doctor", "inbox", "status", "production-status", "production-actions", "production-finalize", "resume", "retry", "rollback", "explain-failure", "review", "context", "oauth", "tui", "eval":
 		return true
 	default:
 		return false
+	}
+}
+
+func normalizeOAuthVerb(args []string) ([]string, error) {
+	if len(args) == 0 {
+		return nil, fmt.Errorf("oauth requires list, doctor, or init; run ceo-packet --help")
+	}
+	subcommand := args[0]
+	rest := args[1:]
+	switch subcommand {
+	case "list":
+		return append([]string{"--oauth", "list"}, rest...), nil
+	case "doctor":
+		normalized := []string{"--oauth", "doctor"}
+		providerIndex := firstValueIndex(rest)
+		if providerIndex >= 0 {
+			normalized = append(normalized, rest[:providerIndex]...)
+			normalized = append(normalized, "--oauth-provider", rest[providerIndex])
+			normalized = append(normalized, rest[providerIndex+1:]...)
+			return normalized, nil
+		}
+		return append(normalized, rest...), nil
+	case "init":
+		providerIndex := firstValueIndex(rest)
+		if providerIndex < 0 {
+			return nil, fmt.Errorf("oauth init requires a provider name")
+		}
+		normalized := []string{"--oauth", "init"}
+		normalized = append(normalized, rest[:providerIndex]...)
+		normalized = append(normalized, "--oauth-provider", rest[providerIndex])
+		normalized = append(normalized, rest[providerIndex+1:]...)
+		return normalized, nil
+	default:
+		return nil, fmt.Errorf("unknown oauth command %q; run ceo-packet --help", subcommand)
 	}
 }
 

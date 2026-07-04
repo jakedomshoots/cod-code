@@ -167,7 +167,21 @@ ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
 
 Quickstart auto-detects Go, Rust, package.json, pytest Python, and Makefile workspaces (`go.mod`, `Cargo.toml`, a `scripts.test` entry, pytest config, or a `test` target), writes the default test command, and enables `require_checks` so coding runs cannot pass without verification. Package workspaces use `bun test`, `pnpm test`, `yarn test`, or `npm test` based on the lockfile. Python workspaces use `uv run pytest` when `uv.lock` is present, otherwise `python -m pytest`. Makefile workspaces use `make test`.
 
-Create a real-provider workspace config where the CEO and default subagents use a Kimi Code-compatible endpoint:
+Create a real-provider workspace config from an already logged-in local CLI. This stores no OAuth token in the harness:
+
+```sh
+ceo-packet oauth list
+ceo-packet oauth doctor --format text
+ceo-packet oauth init kimi --workspace /path/to/repo --format text
+ceo-packet oauth init codex --workspace /path/to/repo --format text
+ceo-packet oauth init claude --workspace /path/to/repo --format text
+ceo-packet oauth init opencode --workspace /path/to/repo --format text
+ceo-packet oauth init goose --workspace /path/to/repo --format text
+```
+
+`oauth init` creates provider `main`, routes CEO/default/fallback work to it, and uses the local vendor CLI login. Kimi, Codex, Claude, OpenCode, and Goose have built-in model-command wrappers.
+
+Create a real-provider workspace config where the CEO and default subagents use a Kimi Code-compatible HTTP endpoint:
 
 ```sh
 export KIMI_CODE_API_KEY=...
@@ -557,7 +571,7 @@ go run ./cmd/ceo-packet --quickstart /path/to/repo
 
 This writes model, CEO, and research commands that point at the repo's `examples/` scripts, then runs `--doctor` from that workspace.
 
-For external coding tools, initialize a thin command adapter:
+For external coding tools that do not have a built-in OAuth wrapper yet, initialize a thin command adapter:
 
 ```sh
 go run ./cmd/ceo-packet --workspace /path/to/repo --init-config --adapter codex

@@ -85,6 +85,8 @@ type options struct {
 	showDemo                                   bool
 	startDir                                   string
 	showInbox                                  bool
+	oauthCommand                               string
+	oauthProvider                              string
 	providerWizardPreset                       string
 	repairPreset                               string
 	initDemoRepoDir                            string

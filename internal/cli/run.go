@@ -54,6 +54,9 @@ func RunWithIO(ctx context.Context, in io.Reader, out io.Writer, args []string) 
 	if opts.initDemoRepoDir != "" {
 		return runInitDemoRepo(ctx, out, opts)
 	}
+	if opts.oauthCommand != "" {
+		return runOAuth(ctx, out, opts)
+	}
 	if opts.providerWizardPreset != "" {
 		return runProviderWizard(ctx, out, opts)
 	}

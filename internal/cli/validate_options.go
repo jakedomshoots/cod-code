@@ -24,6 +24,15 @@ func validateOptions(opts options) error {
 	if opts.providerWizardPreset != "" && strings.TrimSpace(opts.task) != "" {
 		return errors.New("--provider-wizard cannot be combined with task text")
 	}
+	if opts.oauthCommand != "" && strings.TrimSpace(opts.task) != "" {
+		return errors.New("oauth cannot be combined with task text")
+	}
+	if opts.oauthCommand == "init" && strings.TrimSpace(opts.workspaceDir) == "" {
+		return errors.New("oauth init requires --workspace")
+	}
+	if opts.oauthCommand == "init" && strings.TrimSpace(opts.oauthProvider) == "" {
+		return errors.New("oauth init requires a provider name")
+	}
 	if opts.adapterName != "" && !opts.initConfig {
 		return errors.New("--adapter requires --init-config")
 	}
