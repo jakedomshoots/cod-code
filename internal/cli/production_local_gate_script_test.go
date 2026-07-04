@@ -79,6 +79,8 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		`"path":`,
 		`"action_reason":`,
 		`"action_state":`,
+		`"action_state_counts":`,
+		`"required_action_count":`,
 		`"runnable_command_count":`,
 		`"blocked_command_count":`,
 		`"evidence_declared_match_count":`,

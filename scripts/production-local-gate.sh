@@ -155,6 +155,14 @@ if required > 0 and runnable + blocked <= 0:
     raise SystemExit(1)
 
 action_rows = actions.get("actions") or []
+if required != len(action_rows):
+    print(f"production-local-gate: fail action rows={len(action_rows)} expected={required}")
+    raise SystemExit(1)
+state_counts = actions.get("action_state_counts") or {}
+state_total = sum(int(value or 0) for value in state_counts.values())
+if required > 0 and state_total != len(action_rows):
+    print(f"production-local-gate: fail action state counts={state_total} expected={len(action_rows)}")
+    raise SystemExit(1)
 missing_reasons = []
 for action in action_rows:
     action_id = action.get("id") or "<unknown>"
