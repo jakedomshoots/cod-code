@@ -71,6 +71,15 @@ When `RELEASE_SIGNING_PUBLIC_KEY` or `SIGNING_PUBLIC_KEY` is set, `scripts/verif
 
 `scripts/release-bootstrap.sh` prepares the public release packet without publishing anything. It writes `index.md`, `summary.json`, `commands.sh`, `env.template`, `release-checklist.md`, `remote-homebrew-formula.rb`, and `verify-release.txt`. It exits non-zero until public repo, release, Homebrew archive, and signing/checksum policy inputs are explicit. `summary.json` records the checklist item count and SHA-256 fingerprints for the bootstrap files.
 
+`scripts/release-homebrew-formula.sh` updates `dist/homebrew/ceo-packet.rb` so it points at the public HTTPS Darwin archive and matching checksum:
+
+```sh
+sh scripts/release-homebrew-formula.sh \
+  --dist dist \
+  --repo-url https://github.com/<owner>/<repo> \
+  --homebrew-archive-base-url https://github.com/<owner>/<repo>/releases/download/v0.1.0
+```
+
 `scripts/release-preflight.sh` checks whether a release can honestly be called public. It verifies local artifacts, then blocks until a git remote, public release URL, remote Homebrew archive URL, and archive signatures or explicit checksum-only release notes are handled. If `RELEASE_SIGNING_PUBLIC_KEY` is set, signature sidecars must verify with that key. It does not tag, push, upload, or publish anything.
 
 After the GitHub Release exists, preflight can verify the real release assets:

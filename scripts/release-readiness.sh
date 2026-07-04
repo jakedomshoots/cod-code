@@ -149,7 +149,7 @@ write_setup_action() {
       printf '%s\n' "- github_release_assets: push a \`v*\` tag, let the release workflow upload archives, \`checksums.txt\`, and \`release-manifest.json\`, then set \`GH_RELEASE_TAG\` and \`GH_REPO\` if no GitHub origin is configured."
       ;;
     homebrew_formula_url)
-      printf '%s\n' "- homebrew_formula_url: publish the release archives to a stable HTTPS URL and update \`dist/homebrew/ceo-packet.rb\` or the tap formula so it uses that remote archive URL."
+      printf '%s\n' "- homebrew_formula_url: after release archives are public, run \`sh scripts/release-homebrew-formula.sh --dist dist --repo-url <repo-url> --homebrew-archive-base-url <archive-base-url>\` or update the tap formula so it uses that remote archive URL."
       ;;
     artifact_signatures)
       printf '%s\n' "- artifact_signatures: run \`sh scripts/release-signatures.sh --dist dist --private-key <key.pem>\` and rerun preflight with \`RELEASE_SIGNING_PUBLIC_KEY=<public.pem>\`, or set \`ALLOW_CHECKSUM_ONLY_RELEASE=1\` with a public \`CHECKSUM_ONLY_RELEASE_NOTES_URL\`."
@@ -199,7 +199,7 @@ if [ "$blocked_count" -gt 0 ]; then
           printf '%s\n' '# blocked github_release_assets: push a v* tag and verify release assets with GH_RELEASE_TAG and GH_REPO.'
           ;;
         homebrew_formula_url)
-          printf '%s\n' '# blocked homebrew_formula_url: update the tap formula to use the public HTTPS archive URL.'
+          printf '%s\n' '# blocked homebrew_formula_url: run scripts/release-homebrew-formula.sh with the public repo URL and archive base URL.'
           ;;
         artifact_signatures)
           printf '%s\n' '# blocked artifact_signatures: sign archives with scripts/release-signatures.sh and set RELEASE_SIGNING_PUBLIC_KEY, or document checksum-only release notes.'

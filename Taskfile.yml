@@ -70,6 +70,11 @@ tasks:
     cmds:
       - sh scripts/release-signatures.sh --dist dist --private-key "$RELEASE_SIGNING_KEY"
 
+  release:homebrew-formula:
+    desc: Write dist/homebrew/ceo-packet.rb with public release archive URLs
+    cmds:
+      - sh scripts/release-homebrew-formula.sh --dist dist --repo-url "$REPO_URL" --homebrew-archive-base-url "$HOMEBREW_ARCHIVE_BASE_URL"
+
   release:preflight:
     desc: Check whether local artifacts are ready for a public release claim
     cmds:

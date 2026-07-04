@@ -3,7 +3,7 @@ PKG := ./cmd/ceo-packet
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || printf dev)
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || printf local)
 
-.PHONY: ci fmt test test-race vet smoke dogfood build secret-scan release-local release-signatures release-preflight release-bootstrap release-readiness production-readiness production-finalize production-local-gate eval-nightly eval-endurance eval-provider-kimi eval-provider-codex eval-provider-openai eval-provider-openrouter eval-provider-moonshot
+.PHONY: ci fmt test test-race vet smoke dogfood build secret-scan release-local release-signatures release-homebrew-formula release-preflight release-bootstrap release-readiness production-readiness production-finalize production-local-gate eval-nightly eval-endurance eval-provider-kimi eval-provider-codex eval-provider-openai eval-provider-openrouter eval-provider-moonshot
 
 ci: fmt test vet smoke dogfood build
 
@@ -37,6 +37,9 @@ release-local:
 
 release-signatures:
 	sh scripts/release-signatures.sh --dist dist --private-key "$$RELEASE_SIGNING_KEY"
+
+release-homebrew-formula:
+	sh scripts/release-homebrew-formula.sh --dist dist --repo-url "$$REPO_URL" --homebrew-archive-base-url "$$HOMEBREW_ARCHIVE_BASE_URL"
 
 release-preflight:
 	sh scripts/release-preflight.sh dist

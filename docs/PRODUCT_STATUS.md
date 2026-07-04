@@ -125,6 +125,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Added release manifest and verifier through `dist/release-manifest.json` and `scripts/verify-release.sh`.
 - Added public release bootstrap evidence through `scripts/release-bootstrap.sh`; it prepares commands, env, checklist, and a remote Homebrew formula draft without publishing anything.
 - Release bootstrap now writes `release-handoff.md`, listing required public assets, checksums, operator boundaries, and post-publish verification commands without including tag/push/upload commands.
+- Added `scripts/release-homebrew-formula.sh`, which updates `dist/homebrew/ceo-packet.rb` to use the real public archive URL and checksum without publishing a tap.
 - Added public release preflight through `scripts/release-preflight.sh`; it blocks public claims until remote URL, Homebrew URL, and signature/checksum posture are explicit.
 - Added `scripts/release-signatures.sh`, a local OpenSSL detached-signature helper for release archives; `verify-release` and preflight verify `.sig` files when `RELEASE_SIGNING_PUBLIC_KEY` or `SIGNING_PUBLIC_KEY` is supplied.
 - Added public release readiness evidence through `scripts/release-readiness.sh`; it writes `index.md`, `summary.json`, preflight output, git remote state, and GitHub auth state without publishing anything.

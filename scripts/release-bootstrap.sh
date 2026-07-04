@@ -177,31 +177,17 @@ case "$signing_mode" in
 esac
 check_status signing_or_checksum_policy "$signing_status"
 
-archive_name="ceo-packet_${version}_darwin_arm64.tar.gz"
-archive_sha=""
-if [ -f "$dist/checksums.txt" ]; then
-  archive_sha=$(awk -v archive="$archive_name" '$2 == archive {print $1}' "$dist/checksums.txt")
-fi
-
-if [ "$homebrew_status" = "pass" ] && [ -n "$archive_sha" ]; then
-  archive_base=$(slash_trim "$homebrew_archive_base_url")
-  cat >"$output_dir/remote-homebrew-formula.rb" <<EOF
-class CeoPacket < Formula
-  desc "Local CEO/subagent coding harness"
-  homepage "$repo_url"
-  url "$archive_base/$archive_name"
-  sha256 "$archive_sha"
-  version "$version"
-
-  def install
-    bin.install "ceo-packet"
-  end
-
-  test do
-    assert_match "ceo-packet $version", shell_output("#{bin}/ceo-packet --version")
-  end
-end
+if [ "$homebrew_status" = "pass" ]; then
+  if ! sh "$root/scripts/release-homebrew-formula.sh" \
+    --dist "$dist" \
+    --repo-url "$repo_url" \
+    --homebrew-archive-base-url "$homebrew_archive_base_url" \
+    --version "$version" \
+    --output "$output_dir/remote-homebrew-formula.rb" >"$output_dir/homebrew-formula.txt" 2>&1; then
+    cat >"$output_dir/remote-homebrew-formula.rb" <<'EOF'
+# Blocked: remote formula generation failed. Inspect homebrew-formula.txt.
 EOF
+  fi
 else
   cat >"$output_dir/remote-homebrew-formula.rb" <<'EOF'
 # Blocked: provide --homebrew-archive-base-url and verified local checksums first.
@@ -231,6 +217,10 @@ sh scripts/verify-release.sh dist
 
 # After remote artifacts exist, update the Homebrew tap formula from:
 # $output_dir/remote-homebrew-formula.rb
+sh scripts/release-homebrew-formula.sh \\
+  --dist dist \\
+  --repo-url "$repo_url" \\
+  --homebrew-archive-base-url "$homebrew_archive_base_url"
 
 ALLOW_CHECKSUM_ONLY_RELEASE=$(if [ "$signing_mode" = "checksum-only" ]; then printf 1; else printf 0; fi) \\
 CHECKSUM_ONLY_RELEASE_NOTES_URL="$checksum_notes_url" \\

@@ -125,6 +125,65 @@ func Test_ReleasePreflight_acceptsExplicitChecksumOnlyReleaseNotes(t *testing.T)
 	}
 }
 
+func Test_ReleaseHomebrewFormulaScript_writesRemoteFormula(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	dist := filepath.Join(t.TempDir(), "dist")
+
+	release := exec.Command("sh", filepath.Join(root, "scripts", "release-local.sh"))
+	release.Dir = root
+	release.Env = append(release.Environ(), "DIST="+dist, "VERSION=0.2.0-test", "COMMIT=abc123")
+	output, err := release.CombinedOutput()
+	if err != nil {
+		t.Fatalf("release-local failed: %v\n%s", err, string(output))
+	}
+
+	formulaCmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "release-homebrew-formula.sh"),
+		"--dist", dist,
+		"--repo-url", "https://github.com/acme/ceo-harness",
+		"--homebrew-archive-base-url", "https://github.com/acme/ceo-harness/releases/download/v0.2.0-test/",
+	)
+	formulaCmd.Dir = root
+	formulaOutput, err := formulaCmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("release-homebrew-formula failed: %v\n%s", err, string(formulaOutput))
+	}
+
+	formula := readTextFile(t, filepath.Join(dist, "homebrew", "ceo-packet.rb"))
+	for _, want := range []string{
+		`homepage "https://github.com/acme/ceo-harness"`,
+		`url "https://github.com/acme/ceo-harness/releases/download/v0.2.0-test/ceo-packet_0.2.0-test_darwin_arm64.tar.gz"`,
+		`version "0.2.0-test"`,
+	} {
+		if !strings.Contains(formula, want) {
+			t.Fatalf("remote formula missing %q:\n%s", want, formula)
+		}
+	}
+	if strings.Contains(formula, "file://") || strings.Contains(formula, "example.invalid") {
+		t.Fatalf("remote formula kept local or placeholder URL:\n%s", formula)
+	}
+
+	preflight := exec.Command("sh", filepath.Join(root, "scripts", "release-preflight.sh"), dist)
+	preflight.Dir = root
+	preflight.Env = append(
+		preflight.Environ(),
+		"ALLOW_CHECKSUM_ONLY_RELEASE=1",
+		"CHECKSUM_ONLY_RELEASE_NOTES_URL=https://github.com/acme/ceo-harness/releases/tag/v0.2.0-test",
+	)
+	preflightOutput, err := preflight.CombinedOutput()
+	if err == nil {
+		t.Fatalf("release-preflight unexpectedly passed while public release metadata is still missing:\n%s", string(preflightOutput))
+	}
+	body := string(preflightOutput)
+	if !strings.Contains(body, "| homebrew_formula_url | pass | formula uses a remote HTTPS archive URL |") {
+		t.Fatalf("preflight did not accept remote formula:\n%s", body)
+	}
+}
+
 func Test_ReleaseSignaturesScript_signsAndPreflightVerifiesArchives(t *testing.T) {
 	if _, err := exec.LookPath("openssl"); err != nil {
 		t.Skipf("openssl not available: %v", err)
