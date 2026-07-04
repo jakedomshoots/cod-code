@@ -72,6 +72,7 @@ Examples:
   ceo-packet production-status --workspace .
   ceo-packet production-actions --workspace . --format text
   ceo-packet production-actions --workspace . --format text --action-kind provider_proof
+  ceo-packet production-actions --workspace . --format text --env-ready-only
   ceo-packet production-finalize --workspace . --dry-run
   ceo-packet retry latest --workspace .
   ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
@@ -186,6 +187,7 @@ Advanced flags:
   --production-actions            Print latest production finalizer action checklist
   --action-kind <kind>            Filter production-actions by kind
   --action-provider <name>        Filter production-actions by provider
+  --env-ready-only                Show production actions whose required env is present
   --production-finalize           Run guarded final production evidence sequence
   --run-comparison                Include the expensive 29-task all-agent comparison
   --review-queue                  Print jobs needing human attention

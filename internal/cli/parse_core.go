@@ -67,6 +67,9 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 			return true, index, err
 		}
 		opts.productionActionProvider = value
+	case "--env-ready-only":
+		opts.productionActionsEnvReadyOnly = true
+		return true, index, nil
 	case "--production-finalize":
 		opts.showProductionFinalize = true
 		return true, index, nil

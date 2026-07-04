@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -62,7 +63,9 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	for _, want := range []string{
 		"Production actions: blocked",
 		"Required actions: 2",
+		"Env ready: 1",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
+		"(missing env: OPENAI_API_KEY)",
 		"release-readiness [release_proof]: Prove public release readiness",
 	} {
 		if !strings.Contains(text, want) {
@@ -78,7 +81,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &body); err != nil {
 		t.Fatalf("decode production actions: %v\n%s", err, out.String())
 	}
-	if body.RequiredActionCount != 2 || len(body.Actions) != 2 || body.Actions[0]["id"] != "provider-openai" {
+	if body.RequiredActionCount != 2 || body.EnvReadyActionCount != 1 || len(body.Actions) != 2 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
 		t.Fatalf("body = %+v, want two actions starting with provider-openai", body)
 	}
 
@@ -89,6 +92,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	text = out.String()
 	for _, want := range []string{
 		"Required actions: 1",
+		"Env ready: 0",
 		"Filter: kind=provider_proof",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 	} {
@@ -110,14 +114,61 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if body.RequiredActionCount != 1 || len(body.Actions) != 1 || body.Actions[0]["provider"] != "openai" || body.Filter["provider"] != "openai" {
 		t.Fatalf("filtered body = %+v, want one openai action", body)
 	}
+
+	out.Reset()
+	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--format", "text", "--env-ready-only"}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	text = out.String()
+	for _, want := range []string{
+		"Required actions: 1",
+		"Env ready: 1",
+		"Filter: env_ready=true",
+		"release-readiness [release_proof]: Prove public release readiness",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("env-ready production actions text missing %q:\n%s", want, text)
+		}
+	}
+	if strings.Contains(text, "provider-openai") {
+		t.Fatalf("env-ready production actions included missing-env provider:\n%s", text)
+	}
+
+	t.Setenv("OPENAI_API_KEY", "test-key")
+	out.Reset()
+	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--format", "text", "--action-provider", "openai", "--env-ready-only"}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	text = out.String()
+	if !strings.Contains(text, "Env ready: 1") || !strings.Contains(text, "provider-openai") || strings.Contains(text, "test-key") {
+		t.Fatalf("env-ready production actions text wrong or leaked value:\n%s", text)
+	}
 }
 
 func Test_ParseArgs_sets_production_actions_from_verb(t *testing.T) {
-	opts, err := parseArgs([]string{"production-actions", "--workspace", "/tmp/workspace", "--action-kind", "provider_proof", "--action-provider", "openai"})
+	opts, err := parseArgs([]string{"production-actions", "--workspace", "/tmp/workspace", "--action-kind", "provider_proof", "--action-provider", "openai", "--env-ready-only"})
 	if err != nil {
 		t.Fatalf("parseArgs: %v", err)
 	}
-	if !opts.showProductionActions || opts.workspaceDir != "/tmp/workspace" || opts.productionActionKind != "provider_proof" || opts.productionActionProvider != "openai" {
+	if !opts.showProductionActions || opts.workspaceDir != "/tmp/workspace" || opts.productionActionKind != "provider_proof" || opts.productionActionProvider != "openai" || !opts.productionActionsEnvReadyOnly {
 		t.Fatalf("opts = %+v, want production actions for workspace", opts)
+	}
+}
+
+func TestProductionActionsDoesNotReadSecretValuesIntoReport(t *testing.T) {
+	t.Setenv("OPENAI_API_KEY", "secret-value")
+	actions := annotateProductionActions([]map[string]any{{
+		"id":           "provider-openai",
+		"required_env": "OPENAI_API_KEY",
+	}})
+	encoded, err := json.Marshal(actions)
+	if err != nil {
+		t.Fatalf("marshal actions: %v", err)
+	}
+	if strings.Contains(string(encoded), os.Getenv("OPENAI_API_KEY")) {
+		t.Fatalf("annotated action leaked env value: %s", string(encoded))
+	}
+	if len(actions) != 1 || actions[0]["required_env_set"] != true || actions[0]["env_ready"] != true {
+		t.Fatalf("actions = %+v, want env presence only", actions)
 	}
 }

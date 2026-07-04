@@ -49,7 +49,8 @@ Status date: 2026-07-03
 - Latest production actions command proof:
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text`
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text --action-kind provider_proof`
-  - Result: prints seven structured finalizer actions from `.omo/evidence/production-finalize-full-next-actions-r4/next-actions.json`, including release, provider, competitor setup, comparison, and final readiness actions; filtered mode narrows that list to the provider-proof queue.
+  - `go run ./cmd/ceo-packet production-actions --workspace . --format text --env-ready-only`
+  - Result: prints seven structured finalizer actions from `.omo/evidence/production-finalize-full-next-actions-r4/next-actions.json`, including release, provider, competitor setup, comparison, and final readiness actions; filtered mode narrows that list to the provider-proof queue or env-ready queue without printing secret values.
 - Latest complete finalizer next-actions proof:
   - `sh scripts/production-finalize.sh --output-dir .omo/evidence/production-finalize-full-next-actions-r4 --dist dist`
   - Result: exits blocked as expected, records no skipped steps, and writes seven repo-relative remaining actions covering release, providers, competitor setup, comparison, and final readiness in `next-actions.md`; `next-actions.json` includes structured action ids, kinds, commands, provider names, required env vars, and evidence paths.
