@@ -1,6 +1,6 @@
 # Product Status
 
-Status date: 2026-07-03
+Status date: 2026-07-04
 
 ## Where It Stands
 
@@ -51,9 +51,11 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 
 ## Current Weak Spots
 
-- No public remote repository is configured yet.
-- The real proof still needs public release setup and additional key-backed HTTP provider proof beyond the current copied-app, Kimi, and Codex proofs.
-- External/provider gauntlets can still be blocked or incomplete when a provider key, CLI login, timeout log, git status snapshot, or scorer artifact is missing.
+- Public production readiness is still blocked by external setup, not by the local CLI gate.
+- Public release proof still needs real release metadata/assets: public release URL, GitHub release assets, remote Homebrew archive URL, and signatures or explicit checksum-only notes.
+- HTTP provider proof still needs real non-empty `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, and `MOONSHOT_API_KEY` values.
+- The secure OpenAI key setup app currently requires reauthentication before Codex can create/write an OpenAI key from this workspace.
+- `production-status` currently reports `Local ready: true`, `Public ready: false`, five blocked public checks, zero runnable finalizer commands, and five commented blocked commands.
 
 ## Market Roadmap Result 2026-07-03
 

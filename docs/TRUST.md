@@ -13,12 +13,16 @@ CEO Harness should be installable, reviewable, and honest about what has actuall
 - Secret leak scan through `scripts/secret-scan.sh`.
 - Checksum verification from inside `dist/`.
 - Smoke and dogfood scripts that drive the CLI surface.
+- Local production readiness through `production-status`: local ready is true while public ready remains blocked.
+- Guarded production finalizer evidence: release/provider/readiness commands stay commented while setup is blocked, with no publish/tag/upload or secret-saving behavior.
+- Final 29-task all-agent comparison evidence at `.omo/evidence/external-agent-production-core-29-final-result-retry-r1/summary.json`: 116 runs / 116 pass / 0 partial / 0 fail / 0 timeout / 0 incomplete evidence.
 
 ## Not Claimed Yet
 
 - No remote `curl | sh` installer is published.
 - No Homebrew tap is published.
 - No signed release artifacts are published.
+- No public production claim is made until release readiness and OpenAI/OpenRouter/Moonshot HTTP provider proofs pass with real external evidence.
 
 ## Release Integrity
 
@@ -48,6 +52,12 @@ sh scripts/release-preflight.sh dist
 sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
 ```
 
+If the checkout has no `origin` remote, release verification can use explicit GitHub metadata instead:
+
+```sh
+GH_REPO=owner/name GH_RELEASE_TAG=v0.1.0 RELEASE_URL=https://github.com/owner/name/releases/tag/v0.1.0 sh scripts/release-preflight.sh dist
+```
+
 Unsigned checksum-only releases must opt in explicitly:
 
 ```sh
@@ -55,6 +65,29 @@ ALLOW_CHECKSUM_ONLY_RELEASE=1 CHECKSUM_ONLY_RELEASE_NOTES_URL=https://<release-n
 ```
 
 Current releases are checksum-only. Signing is planned after a real release identity is chosen.
+
+## Provider Proof
+
+Paid HTTP provider proof is setup-blocked until these env vars are present and non-empty:
+
+```sh
+OPENAI_API_KEY
+OPENROUTER_API_KEY
+MOONSHOT_API_KEY
+```
+
+Check setup without printing or saving secret values:
+
+```sh
+sh scripts/provider-setup-preflight.sh --output-dir .omo/evidence/provider-setup-preflight
+```
+
+Then run the guarded finalizer:
+
+```sh
+go run ./cmd/ceo-packet production-finalize --workspace . --run-comparison
+go run ./cmd/ceo-packet production-status --workspace . --format text
+```
 
 ## Secret Scan
 
