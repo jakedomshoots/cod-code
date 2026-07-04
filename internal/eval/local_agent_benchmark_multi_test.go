@@ -128,6 +128,60 @@ func Test_RunLocalAgentBenchmark_retries_timed_out_agent_run(t *testing.T) {
 	requireFile(t, filepath.Join(root, "benchmark", "codex_cli", "attempt-02", "score.json"))
 }
 
+func Test_RunLocalAgentBenchmark_uses_agent_timeout_override(t *testing.T) {
+	// Given
+	binDir := t.TempDir()
+	writeExecutableContent(t, filepath.Join(binDir, "codex"), slowPassingAgentScript())
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	root := t.TempDir()
+	tasksDir := filepath.Join(root, "tasks")
+	writeTaskSpec(t, tasksDir, `{
+		"id":"docs-one",
+		"category":"docs",
+		"title":"Update one",
+		"objective":"Refresh docs one.",
+		"required_changed_files":["docs/ONE.md"],
+		"required_artifacts":[".omo/evidence/docs-one.md"],
+		"required_diff_terms":["one-term"],
+		"required_report_fields":["changed_files"]
+	}`)
+
+	// When
+	summary, err := RunLocalAgentBenchmark(context.Background(), LocalAgentBenchmarkRequest{
+		TasksDir:            tasksDir,
+		OutputDir:           filepath.Join(root, "benchmark"),
+		TimeoutSeconds:      1,
+		Agents:              []string{"codex_cli"},
+		BenchmarkTaskID:     "docs-one",
+		AgentTimeoutSeconds: map[string]int{"codex_cli": 5},
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
+	}
+	if summary.Passed != 1 || summary.TimedOut != 0 || summary.AgentTimeouts["codex_cli"] != 5 {
+		t.Fatalf("summary = %+v, want agent timeout override to allow pass", summary)
+	}
+}
+
+func Test_ParseLocalAgentBenchmarkAgentTimeouts_validatesInput(t *testing.T) {
+	// When
+	timeouts, err := parseLocalAgentBenchmarkAgentTimeouts("opencode=600, pi = 360")
+	// Then
+	if err != nil {
+		t.Fatalf("parseLocalAgentBenchmarkAgentTimeouts returned error: %v", err)
+	}
+	if timeouts["opencode"] != 600 || timeouts["pi"] != 360 {
+		t.Fatalf("timeouts = %+v, want parsed overrides", timeouts)
+	}
+	if _, err := parseLocalAgentBenchmarkAgentTimeouts("opencode=0"); err == nil {
+		t.Fatalf("parseLocalAgentBenchmarkAgentTimeouts accepted non-positive timeout")
+	}
+	if _, err := parseLocalAgentBenchmarkAgentTimeouts("opencode"); err == nil {
+		t.Fatalf("parseLocalAgentBenchmarkAgentTimeouts accepted malformed timeout")
+	}
+}
+
 func Test_LocalAgentBenchmarkTasks_expands_market_parity_core_suite(t *testing.T) {
 	// Given
 	root := t.TempDir()
@@ -390,6 +444,17 @@ if [ ! -f "$marker" ]; then
   : > "$marker"
   sleep 3
 fi
+printf '# Benchmark Fixture\n\none-term\n' > docs/ONE.md
+mkdir -p .omo/evidence
+printf 'agent evidence\n' > .omo/evidence/docs-one.md
+printf 'done\n'
+`
+}
+
+func slowPassingAgentScript() string {
+	return `#!/bin/sh
+set -eu
+sleep 2
 printf '# Benchmark Fixture\n\none-term\n' > docs/ONE.md
 mkdir -p .omo/evidence
 printf 'agent evidence\n' > .omo/evidence/docs-one.md

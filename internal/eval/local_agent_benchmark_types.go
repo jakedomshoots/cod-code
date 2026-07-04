@@ -17,6 +17,7 @@ type LocalAgentBenchmarkRequest struct {
 	RepeatCount                       int
 	Concurrency                       int
 	TimeoutRetries                    int
+	AgentTimeoutSeconds               map[string]int
 }
 
 type LocalAgentBenchmarkSummary struct {
@@ -29,6 +30,7 @@ type LocalAgentBenchmarkSummary struct {
 	RepeatCount        int                         `json:"repeat_count"`
 	Concurrency        int                         `json:"concurrency"`
 	TimeoutRetries     int                         `json:"timeout_retries"`
+	AgentTimeouts      map[string]int              `json:"agent_timeouts,omitempty"`
 	RunCount           int                         `json:"run_count"`
 	AgentCount         int                         `json:"agent_count"`
 	Passed             int                         `json:"passed"`

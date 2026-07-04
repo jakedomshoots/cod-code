@@ -2,6 +2,7 @@ package eval
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -111,6 +112,9 @@ func writeLocalAgentBenchmarkMarkdown(path string, summary LocalAgentBenchmarkSu
 	fmt.Fprintf(&builder, "Repeats: %d\n", summary.RepeatCount)
 	fmt.Fprintf(&builder, "Concurrency: %d\n", summary.Concurrency)
 	fmt.Fprintf(&builder, "Timeout retries: %d\n", summary.TimeoutRetries)
+	if len(summary.AgentTimeouts) > 0 {
+		fmt.Fprintf(&builder, "Agent timeouts: %s\n", formatAgentTimeouts(summary.AgentTimeouts))
+	}
 	fmt.Fprintf(&builder, "Runs: %d\n\n", summary.RunCount)
 	fmt.Fprintf(&builder, "| Task | Run | Retry | Agent | Status | Score | Exit | Duration ms | Extra files | Changed files | Evidence |\n")
 	fmt.Fprintf(&builder, "| --- | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | --- |\n")
@@ -139,6 +143,18 @@ func writeLocalAgentBenchmarkMarkdown(path string, summary LocalAgentBenchmarkSu
 	fmt.Fprintf(&builder, "Skipped: %d\n", summary.Skipped)
 	fmt.Fprintf(&builder, "Incomplete evidence: %d\n", summary.IncompleteEvidence)
 	return writeTextFile(path, builder.String())
+}
+
+func formatAgentTimeouts(timeouts map[string]int) string {
+	if len(timeouts) == 0 {
+		return ""
+	}
+	parts := make([]string, 0, len(timeouts))
+	for agent, seconds := range timeouts {
+		parts = append(parts, fmt.Sprintf("%s=%ds", agent, seconds))
+	}
+	sort.Strings(parts)
+	return strings.Join(parts, ", ")
 }
 
 func writeBenchmarkRunEvidence(result LocalAgentBenchmarkResult, run localAgentRunResult) error {

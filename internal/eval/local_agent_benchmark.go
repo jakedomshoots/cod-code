@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"sync"
+	"time"
 )
 
 const (
@@ -33,6 +34,7 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 	repeatCount := normalizeLocalAgentBenchmarkRepeat(req.RepeatCount)
 	concurrency := normalizeLocalAgentBenchmarkConcurrency(req.Concurrency)
 	timeoutRetries := normalizeLocalAgentBenchmarkTimeoutRetries(req.TimeoutRetries)
+	agentTimeouts := normalizeLocalAgentBenchmarkAgentTimeouts(req.AgentTimeoutSeconds)
 	multiRun := len(tasks) > 1 || repeatCount > 1
 	summary := LocalAgentBenchmarkSummary{
 		SchemaVersion:  localAgentSchemaVersion,
@@ -44,6 +46,7 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 		RepeatCount:    repeatCount,
 		Concurrency:    concurrency,
 		TimeoutRetries: timeoutRetries,
+		AgentTimeouts:  agentTimeouts,
 		RunCount:       len(tasks) * repeatCount * len(agentIDs),
 		AgentCount:     len(agentIDs),
 		Results:        make([]LocalAgentBenchmarkResult, 0, len(tasks)*repeatCount*len(agentIDs)),
@@ -207,6 +210,19 @@ func normalizeLocalAgentBenchmarkTimeoutRetries(retries int) int {
 	return retries
 }
 
+func normalizeLocalAgentBenchmarkAgentTimeouts(raw map[string]int) map[string]int {
+	clean := make(map[string]int)
+	for agent, seconds := range raw {
+		if seconds > 0 {
+			clean[agent] = seconds
+		}
+	}
+	if len(clean) == 0 {
+		return nil
+	}
+	return clean
+}
+
 func runLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest, task Task, spec localAgentSpec, attempt int, multiRun bool) LocalAgentBenchmarkResult {
 	maxRunAttempts := normalizeLocalAgentBenchmarkTimeoutRetries(req.TimeoutRetries) + 1
 	prior := make([]RetryAttempt, 0, maxRunAttempts-1)
@@ -267,7 +283,7 @@ func runLocalAgentBenchmarkAttempt(ctx context.Context, req LocalAgentBenchmarkR
 	if err := writeBenchmarkStatusFile(ctx, result.GitBeforePath, absWorkspace); err != nil {
 		return benchmarkResultError(task, result, "failed to capture pre-run git status", err)
 	}
-	run := runLocalAgentCommand(ctx, result.Command, absWorkspace, spec.env, localAgentTimeout(req.TimeoutSeconds))
+	run := runLocalAgentCommand(ctx, result.Command, absWorkspace, spec.env, localAgentBenchmarkTimeout(req, spec))
 	result.ExitCode = run.exitCode
 	result.DurationMS = run.duration.Milliseconds()
 	result.Error = run.errText
@@ -294,6 +310,13 @@ func runLocalAgentBenchmarkAttempt(ctx context.Context, req LocalAgentBenchmarkR
 	result.EvidenceStatus = localAgentBenchmarkEvidenceStatus(result.Status, result.FailedScoreChecks)
 	result.Note = localAgentBenchmarkNote(result.Status)
 	return result
+}
+
+func localAgentBenchmarkTimeout(req LocalAgentBenchmarkRequest, spec localAgentSpec) time.Duration {
+	if seconds, ok := req.AgentTimeoutSeconds[spec.id]; ok && seconds > 0 {
+		return localAgentTimeout(seconds)
+	}
+	return localAgentTimeout(req.TimeoutSeconds)
 }
 
 func localAgentBenchmarkAttemptResultDir(outputDir string, task Task, spec localAgentSpec, attempt int, multiRun bool, runAttempt int, maxRunAttempts int) string {

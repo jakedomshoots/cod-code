@@ -124,6 +124,21 @@ go run ./cmd/ceo-eval \
 
 Retries only apply to timed-out runs. Each retry gets its own `attempt-XX` evidence folder, and the summary keeps prior timed-out attempts under `prior_attempts`.
 
+Use per-agent timeout overrides when one tool is known to need a longer ceiling:
+
+```sh
+go run ./cmd/ceo-eval \
+  --local-agent-benchmark \
+  --local-agent-benchmark-task docs-product-status-weak-spots \
+  --local-agent-benchmark-agent-timeouts opencode=600 \
+  --local-agents opencode \
+  --tasks evals/tasks \
+  --output-dir .omo/evidence/opencode-agent-timeout-r1 \
+  --timeout-seconds 240
+```
+
+The override is recorded in `summary.json` as `agent_timeouts`.
+
 Run the focused cross-language suite against CEO Harness:
 
 ```sh
@@ -162,6 +177,7 @@ Latest timeout-retry evidence:
 | Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | 5 timeout-heavy current-suite tasks with 1 retry | 5/5 pass | 5/5 pass | 0/5 pass, 5 exhausted timeouts | 5/5 pass | `.omo/evidence/external-agent-timeout-retry-r1/summary.json` |
+| OpenCode focused docs task with 600s timeout | n/a | n/a | 0/1 pass, timed out at 600s | n/a | `.omo/evidence/opencode-agent-timeout-r1/summary.json` |
 
 Latest saved benchmark result:
 
