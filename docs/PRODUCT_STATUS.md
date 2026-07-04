@@ -10,6 +10,7 @@ CEO Harness is now a productized local CLI, not just a prototype folder. The cor
 - Local build, install, smoke, dogfood, and release scripts.
 - CI workflow for tests, vet, smoke, dogfood, race, build, and the local production gate.
 - Local release workflow for versioned archives, checksums, a release manifest, verifier, and a draft Homebrew formula.
+- Tag-triggered GitHub Release workflow for publishing verified archives, checksums, and the release manifest.
 - MIT license, changelog, task runner, Makefile fallback, editor config, and project instructions.
 
 The core product loop already supports:
@@ -120,6 +121,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Added public release bootstrap evidence through `scripts/release-bootstrap.sh`; it prepares commands, env, checklist, and a remote Homebrew formula draft without publishing anything.
 - Added public release preflight through `scripts/release-preflight.sh`; it blocks public claims until remote URL, Homebrew URL, and signature/checksum posture are explicit.
 - Added public release readiness evidence through `scripts/release-readiness.sh`; it writes `index.md`, `summary.json`, preflight output, git remote state, and GitHub auth state without publishing anything.
+- Added tag-triggered GitHub Release publishing; pushing a `v*` tag builds from the tag version, verifies archives, creates the GitHub Release, and attaches tarballs, checksums, and the manifest.
 - Added production-readiness aggregate evidence through `scripts/production-readiness.sh`; it summarizes release, provider, eval, security, endurance, and all-agent comparison proof in one packet without publishing or calling paid providers, writes `launch-checklist.md` with the exact public-production actions left, and fingerprints that checklist in `summary.json`.
 - Added `ceo-packet production-status`, a read-only operator command that reports the latest local/public production-readiness state from saved evidence.
 - Added `scripts/production-local-gate.sh` and CI artifact upload so source CI fails on local production regressions while preserving public-production blockers as evidence.

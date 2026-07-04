@@ -19,6 +19,21 @@ Artifacts are written to `dist/`:
 
 The Homebrew formula is a local draft that points at the generated Darwin archive with the matching checksum. It is for review or local formula testing only; it is not a published tap.
 
+## GitHub Release Publish
+
+Pushing a `v*` tag runs `.github/workflows/release.yml`.
+
+The workflow:
+
+- Derives the CLI version from the tag, for example `v0.1.0` builds `0.1.0`.
+- Runs `scripts/release-local.sh`.
+- Runs `scripts/verify-release.sh dist`.
+- Creates a GitHub Release for the existing tag.
+- Uploads `dist/*.tar.gz`, `dist/checksums.txt`, and `dist/release-manifest.json`.
+- Writes release notes with the checksum verification command.
+
+This is the explicit public-publish path. Local release commands still do not tag, push, or create a remote release.
+
 ## Release Gate
 
 Before cutting a tag, run:
@@ -89,7 +104,7 @@ Planned signing gate:
 
 ## Publish Boundary
 
-Do not tag, push, publish a tap, or create a remote release from the local release command. That needs explicit user approval and a real public release URL.
+Do not tag, push, publish a tap, or create a remote release from the local release command. Public publishing happens only through an explicit `v*` tag push to the GitHub release workflow.
 
 A public release is not claimed until the tag, remote artifacts, checksum file, and install docs are visible and verified.
 

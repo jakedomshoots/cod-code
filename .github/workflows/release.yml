@@ -9,7 +9,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -19,10 +19,35 @@ jobs:
           cache: true
 
       - name: Build release archives
-        run: sh scripts/release-local.sh
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          VERSION="$version" sh scripts/release-local.sh
 
       - name: Verify release archives
         run: sh scripts/verify-release.sh dist
+
+      - name: Write release notes
+        run: |
+          {
+            printf '# CEO Harness %s\n\n' "$GITHUB_REF_NAME"
+            printf 'Archives, checksums, and release manifest are attached below.\n\n'
+            printf 'Verify downloaded archives with:\n\n'
+            printf '```sh\n'
+            printf 'shasum -a 256 -c checksums.txt\n'
+            printf '```\n'
+          } > dist/release-notes.md
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            dist/*.tar.gz \
+            dist/checksums.txt \
+            dist/release-manifest.json \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file dist/release-notes.md \
+            --verify-tag
 
       - uses: actions/upload-artifact@v4
         with:
