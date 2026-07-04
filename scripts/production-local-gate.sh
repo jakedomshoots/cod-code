@@ -160,12 +160,19 @@ if mismatches > 0:
     raise SystemExit(1)
 
 finalizer = production_status.get("finalizer_next_actions") or {}
+launch = production_status.get("launch_checklist") or {}
+if launch.get("matches_declared") is False:
+    print("production-local-gate: fail launch checklist fingerprint mismatch")
+    raise SystemExit(1)
 if not bool(readiness.get("public_production_ready")):
     if int(finalizer.get("evidence_declared_mismatch_count", 0) or 0) > 0:
         print("production-local-gate: fail finalizer evidence mismatch")
         raise SystemExit(1)
     if int(finalizer.get("setup_required_action_count", 0) or 0) <= 0 or not finalizer.get("setup_sha256"):
         print("production-local-gate: fail finalizer setup metadata missing")
+        raise SystemExit(1)
+    if finalizer.get("setup_matches_declared") is False:
+        print("production-local-gate: fail finalizer setup fingerprint mismatch")
         raise SystemExit(1)
 
 commands_text = open(commands_path, "r", encoding="utf-8").read()

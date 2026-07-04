@@ -85,7 +85,9 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 	status := readTextFile(t, filepath.Join(outputDir, "production-status.json"))
 	for _, want := range []string{
 		`"finalizer_next_actions":`,
+		`"matches_declared": true`,
 		`"setup_sha256":`,
+		`"setup_matches_declared": true`,
 		`"setup_required_action_count":`,
 		`"evidence_declared_mismatch_count": 0`,
 	} {

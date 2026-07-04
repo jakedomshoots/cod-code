@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -27,8 +28,12 @@ type productionChecklistStatus struct {
 	JSONPath                      string         `json:"json_path,omitempty"`
 	SetupPath                     string         `json:"setup_path,omitempty"`
 	SetupSHA256                   string         `json:"setup_sha256,omitempty"`
+	SetupCurrentSHA256            string         `json:"setup_current_sha256,omitempty"`
+	SetupMatchesDeclared          *bool          `json:"setup_matches_declared,omitempty"`
 	SetupRequiredActionCount      int            `json:"setup_required_action_count,omitempty"`
 	SHA256                        string         `json:"sha256,omitempty"`
+	CurrentSHA256                 string         `json:"current_sha256,omitempty"`
+	MatchesDeclared               *bool          `json:"matches_declared,omitempty"`
 	RequiredActionCount           int            `json:"required_action_count"`
 	RunnableCommandCount          int            `json:"runnable_command_count"`
 	BlockedCommandCount           int            `json:"blocked_command_count"`
@@ -97,12 +102,14 @@ func buildProductionStatusReport(workspaceDir string) (productionStatusReport, e
 		report.NextAction = "open " + filepath.Join(filepath.Dir(summaryPath), raw.LaunchChecklist.Path)
 	}
 	if raw.LaunchChecklist != nil {
+		checklistPath := filepath.Join(filepath.Dir(summaryPath), raw.LaunchChecklist.Path)
 		report.LaunchChecklist = &productionChecklistStatus{
 			Path:                raw.LaunchChecklist.Path,
 			SHA256:              raw.LaunchChecklist.SHA256,
 			RequiredActionCount: raw.LaunchChecklist.RequiredActionCount,
 			Status:              raw.LaunchChecklist.Status,
 		}
+		report.LaunchChecklist.CurrentSHA256, report.LaunchChecklist.MatchesDeclared = checklistFingerprint(checklistPath, raw.LaunchChecklist.SHA256)
 	}
 	if !raw.PublicProductionReady {
 		finalizer, err := latestProductionFinalizerNextActions(evidenceRoot)
@@ -201,9 +208,24 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 	if raw.SetupActions != nil && raw.SetupActions.Path != "" {
 		status.SetupPath = filepath.Join(finalizerDir, raw.SetupActions.Path)
 		status.SetupSHA256 = raw.SetupActions.SHA256
+		status.SetupCurrentSHA256, status.SetupMatchesDeclared = checklistFingerprint(status.SetupPath, raw.SetupActions.SHA256)
 		status.SetupRequiredActionCount = raw.SetupActions.RequiredActionCount
 	}
 	return status, nil
+}
+
+func checklistFingerprint(path string, declared string) (string, *bool) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return "", nil
+	}
+	sum := sha256.Sum256(content)
+	current := fmt.Sprintf("%x", sum[:])
+	if declared == "" {
+		return current, nil
+	}
+	matches := current == declared
+	return current, &matches
 }
 
 type productionActionSummary struct {
@@ -299,7 +321,11 @@ func renderProductionStatusText(report productionStatusReport) string {
 		fmt.Fprintf(&builder, "- %s\n", check)
 	}
 	if report.LaunchChecklist != nil {
-		fmt.Fprintf(&builder, "Launch checklist: %s (%d actions)\n", report.LaunchChecklist.Path, report.LaunchChecklist.RequiredActionCount)
+		fmt.Fprintf(&builder, "Launch checklist: %s (%d actions)", report.LaunchChecklist.Path, report.LaunchChecklist.RequiredActionCount)
+		if report.LaunchChecklist.MatchesDeclared != nil {
+			fmt.Fprintf(&builder, " declared_match=%t", *report.LaunchChecklist.MatchesDeclared)
+		}
+		builder.WriteString("\n")
 	}
 	if report.FinalizerNextActions != nil {
 		fmt.Fprintf(&builder, "Finalizer next actions: %s (%d actions)\n", report.FinalizerNextActions.Path, report.FinalizerNextActions.RequiredActionCount)
@@ -318,6 +344,9 @@ func renderProductionStatusText(report productionStatusReport) string {
 			}
 			if report.FinalizerNextActions.SetupSHA256 != "" {
 				fmt.Fprintf(&builder, " sha256=%s", report.FinalizerNextActions.SetupSHA256)
+			}
+			if report.FinalizerNextActions.SetupMatchesDeclared != nil {
+				fmt.Fprintf(&builder, " declared_match=%t", *report.FinalizerNextActions.SetupMatchesDeclared)
 			}
 			builder.WriteString("\n")
 		}

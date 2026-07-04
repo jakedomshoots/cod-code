@@ -3,7 +3,9 @@ package cli
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -11,6 +13,9 @@ import (
 
 func Test_Run_production_status_reads_latest_readiness_summary(t *testing.T) {
 	root := t.TempDir()
+	launchBody := "# Launch Checklist\n\n- one\n- two\n"
+	launchSHA := sha256Text(launchBody)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-r1", "launch-checklist.md"), strings.TrimSuffix(launchBody, "\n"))
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-r1", "summary.json"), `{
   "status": "blocked",
   "local_production_ready": true,
@@ -19,7 +24,7 @@ func Test_Run_production_status_reads_latest_readiness_summary(t *testing.T) {
   "blocked_checks": ["release.public_release_ready", "provider.openai_http_provider"],
   "launch_checklist": {
     "path": "launch-checklist.md",
-    "sha256": "abc123",
+    "sha256": "`+launchSHA+`",
     "required_action_count": 2,
     "status": "pass"
   }
@@ -39,7 +44,7 @@ func Test_Run_production_status_reads_latest_readiness_summary(t *testing.T) {
 	if body.BlockedCount != 2 || len(body.BlockedChecks) != 2 {
 		t.Fatalf("blocked = %d/%v, want two blocked checks", body.BlockedCount, body.BlockedChecks)
 	}
-	if body.LaunchChecklist == nil || body.LaunchChecklist.RequiredActionCount != 2 || body.LaunchChecklist.SHA256 != "abc123" {
+	if body.LaunchChecklist == nil || body.LaunchChecklist.RequiredActionCount != 2 || body.LaunchChecklist.SHA256 != launchSHA || body.LaunchChecklist.CurrentSHA256 != launchSHA || body.LaunchChecklist.MatchesDeclared == nil || *body.LaunchChecklist.MatchesDeclared != true {
 		t.Fatalf("launch checklist = %+v, want fingerprinted checklist", body.LaunchChecklist)
 	}
 	if !strings.Contains(body.NextAction, "launch-checklist.md") {
@@ -68,6 +73,12 @@ func Test_Run_production_status_text_reports_missing_evidence(t *testing.T) {
 
 func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 	root := t.TempDir()
+	launchBody := "# Launch Checklist\n\n- action\n"
+	launchSHA := sha256Text(launchBody)
+	setupBody := "# Production Setup Actions\n\n- release\n- provider\n- rerun\n- verify\n"
+	setupSHA := sha256Text(setupBody)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-r1", "launch-checklist.md"), strings.TrimSuffix(launchBody, "\n"))
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "setup-actions.md"), strings.TrimSuffix(setupBody, "\n"))
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-r1", "summary.json"), `{
   "status": "blocked",
   "local_production_ready": true,
@@ -76,6 +87,7 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
   "blocked_checks": ["comparison.all_agent_29_task_comparison"],
   "launch_checklist": {
     "path": "launch-checklist.md",
+    "sha256": "`+launchSHA+`",
     "required_action_count": 5,
     "status": "pass"
   }
@@ -90,7 +102,7 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
   "setup_actions": {
     "path": "setup-actions.md",
     "required_action_count": 4,
-    "sha256": "def456"
+    "sha256": "`+setupSHA+`"
   }
 }`)
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "next-actions.json"), `{
@@ -127,7 +139,7 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 	}
 	text := out.String()
 	for _, want := range []string{
-		"Launch checklist: launch-checklist.md (5 actions)",
+		"Launch checklist: launch-checklist.md (5 actions) declared_match=true",
 		"Finalizer next actions:",
 		"production-finalize-r1/next-actions.md (2 actions)",
 		"Finalizer actions JSON:",
@@ -138,7 +150,8 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 		"Finalizer setup actions:",
 		"production-finalize-r1/setup-actions.md",
 		"(4 actions)",
-		"sha256=def456",
+		"sha256=" + setupSHA,
+		"declared_match=true",
 		"Next action: open ",
 		"production-finalize-r1/next-actions.md",
 	} {
@@ -146,6 +159,11 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 			t.Fatalf("production status text missing %q:\n%s", want, text)
 		}
 	}
+}
+
+func sha256Text(body string) string {
+	sum := sha256.Sum256([]byte(body))
+	return fmt.Sprintf("%x", sum[:])
 }
 
 func Test_Run_production_status_ignores_skipped_finalizer_next_actions(t *testing.T) {
