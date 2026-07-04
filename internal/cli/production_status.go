@@ -18,6 +18,7 @@ type productionStatusReport struct {
 	BlockedChecks         []string                   `json:"blocked_checks"`
 	SummaryPath           string                     `json:"summary_path,omitempty"`
 	LaunchChecklist       *productionChecklistStatus `json:"launch_checklist,omitempty"`
+	FinalizerNextActions  *productionChecklistStatus `json:"finalizer_next_actions,omitempty"`
 	NextAction            string                     `json:"next_action"`
 }
 
@@ -94,6 +95,16 @@ func buildProductionStatusReport(workspaceDir string) (productionStatusReport, e
 			Status:              raw.LaunchChecklist.Status,
 		}
 	}
+	if !raw.PublicProductionReady {
+		finalizer, err := latestProductionFinalizerNextActions(evidenceRoot)
+		if err != nil {
+			return productionStatusReport{}, err
+		}
+		if finalizer != nil {
+			report.FinalizerNextActions = finalizer
+			report.NextAction = "open " + finalizer.Path
+		}
+	}
 	return report, nil
 }
 
@@ -115,6 +126,49 @@ func latestProductionReadinessSummary(evidenceRoot string) (string, error) {
 		}
 	}
 	return latest, nil
+}
+
+func latestProductionFinalizerNextActions(evidenceRoot string) (*productionChecklistStatus, error) {
+	matches, err := filepath.Glob(filepath.Join(evidenceRoot, "production-finalize*", "summary.json"))
+	if err != nil {
+		return nil, err
+	}
+	var latest string
+	var latestMod time.Time
+	for _, candidate := range matches {
+		info, err := os.Stat(candidate)
+		if err != nil {
+			continue
+		}
+		if latest == "" || info.ModTime().After(latestMod) {
+			latest = candidate
+			latestMod = info.ModTime()
+		}
+	}
+	if latest == "" {
+		return nil, nil
+	}
+	content, err := os.ReadFile(latest)
+	if err != nil {
+		return nil, fmt.Errorf("read production finalizer summary: %w", err)
+	}
+	var raw struct {
+		NextActions *struct {
+			Path                string `json:"path"`
+			RequiredActionCount int    `json:"required_action_count"`
+		} `json:"next_actions"`
+	}
+	if err := json.Unmarshal(content, &raw); err != nil {
+		return nil, fmt.Errorf("decode production finalizer summary: %w", err)
+	}
+	if raw.NextActions == nil || raw.NextActions.Path == "" {
+		return nil, nil
+	}
+	return &productionChecklistStatus{
+		Path:                filepath.Join(filepath.Dir(latest), raw.NextActions.Path),
+		RequiredActionCount: raw.NextActions.RequiredActionCount,
+		Status:              "pass",
+	}, nil
 }
 
 func writeProductionStatusReport(out io.Writer, report productionStatusReport, format reportFormat) error {
@@ -148,6 +202,9 @@ func renderProductionStatusText(report productionStatusReport) string {
 	}
 	if report.LaunchChecklist != nil {
 		fmt.Fprintf(&builder, "Launch checklist: %s (%d actions)\n", report.LaunchChecklist.Path, report.LaunchChecklist.RequiredActionCount)
+	}
+	if report.FinalizerNextActions != nil {
+		fmt.Fprintf(&builder, "Finalizer next actions: %s (%d actions)\n", report.FinalizerNextActions.Path, report.FinalizerNextActions.RequiredActionCount)
 	}
 	fmt.Fprintf(&builder, "Next action: %s\n", report.NextAction)
 	return builder.String()
