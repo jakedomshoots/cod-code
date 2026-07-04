@@ -378,7 +378,7 @@ fi
   fi
 } >"$output_dir/next-actions.md"
 
-python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output_dir/next-actions.md" "$output_dir/next-actions.json" <<'PY'
+python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output_dir/next-actions.md" "$output_dir/next-actions.json" "$provider_timeout_seconds" <<'PY'
 import json
 import sys
 import pathlib
@@ -399,11 +399,56 @@ action_lines = [
     if line.startswith("- ") and line != "- No next actions remain."
 ]
 actions = []
-for index, line in enumerate(action_lines, start=1):
-    actions.append({
-        "id": f"action-{index:02d}",
-        "text": line,
-    })
+action_text_by_step = {}
+for step, line in zip([step for step in steps if step["status"] not in {"pass", "skipped"}], action_lines):
+    action_text_by_step[step["name"]] = line
+
+provider_timeout = sys.argv[6]
+
+def action_for_step(step):
+    name = step["name"]
+    action = {
+        "id": name,
+        "status": step["status"],
+        "text": action_text_by_step.get(name, step["detail"]),
+        "evidence": step["evidence"],
+    }
+    if name == "release-readiness":
+        action["kind"] = "release_proof"
+        action["command"] = ["sh", "scripts/release-readiness.sh", "--dist", "dist", "--output-dir", ".omo/evidence/release-readiness-final"]
+    elif name == "provider-openai":
+        action["kind"] = "provider_proof"
+        action["provider"] = "openai"
+        action["required_env"] = "OPENAI_API_KEY"
+        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "openai", "--output-dir", ".omo/evidence/provider-proof-openai", "--timeout-seconds", provider_timeout]
+    elif name == "provider-openrouter":
+        action["kind"] = "provider_proof"
+        action["provider"] = "openrouter"
+        action["required_env"] = "OPENROUTER_API_KEY"
+        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "openrouter", "--output-dir", ".omo/evidence/provider-proof-openrouter", "--timeout-seconds", provider_timeout]
+    elif name == "provider-moonshot":
+        action["kind"] = "provider_proof"
+        action["provider"] = "moonshot"
+        action["required_env"] = "MOONSHOT_API_KEY"
+        action["command"] = ["sh", "scripts/provider-proof.sh", "--provider", "moonshot", "--output-dir", ".omo/evidence/provider-proof-moonshot", "--timeout-seconds", provider_timeout]
+    elif name in {"competitor-smoke", "competitor-smoke-command"}:
+        action["kind"] = "competitor_setup"
+        action["inspect"] = "competitor-smoke/summary.json"
+        action["command"] = ["ceo-packet", "production-finalize", "--workspace", ".", "--dry-run"]
+    elif name == "all-agent-29-comparison":
+        action["kind"] = "comparison"
+        action["command"] = ["ceo-packet", "production-finalize", "--workspace", ".", "--run-comparison"]
+    elif name == "production-readiness":
+        action["kind"] = "final_readiness"
+        action["command"] = ["sh", "scripts/production-readiness.sh", "--dist", "dist", "--output-dir", ".omo/evidence/production-readiness-final"]
+    else:
+        action["kind"] = "manual"
+    return action
+
+for step in steps:
+    if step["status"] in {"pass", "skipped"}:
+        continue
+    actions.append(action_for_step(step))
 
 with open(sys.argv[5], "w", encoding="utf-8") as handle:
     json.dump({
