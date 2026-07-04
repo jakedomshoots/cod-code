@@ -14,6 +14,7 @@ func registerLocalAgentFlags(flags *flag.FlagSet, opts *cliOptions) {
 	flags.IntVar(&opts.localAgentBenchmarkRepeat, "local-agent-benchmark-repeat", 1, "repeat count for each local-agent benchmark task")
 	flags.IntVar(&opts.localAgentBenchmarkConcurrency, "local-agent-benchmark-concurrency", 1, "max parallel local-agent benchmark runs")
 	flags.IntVar(&opts.localAgentBenchmarkTimeoutRetries, "local-agent-benchmark-timeout-retries", 0, "retry timed-out local-agent benchmark runs this many times")
+	flags.IntVar(&opts.localAgentBenchmarkResultRetries, "local-agent-benchmark-result-retries", 0, "retry partial or failed local-agent benchmark runs this many times")
 	flags.StringVar(&opts.localAgentBenchmarkAgentTimeouts, "local-agent-benchmark-agent-timeouts", "", "comma-separated per-agent timeout overrides, for example opencode=600,pi=360")
 	flags.StringVar(&opts.localAgentBenchmarkAgentModels, "local-agent-benchmark-agent-models", "", "comma-separated per-agent model overrides, for example opencode=openai/gpt-5.4-mini")
 	flags.StringVar(&opts.ceoHarnessBinary, "ceo-binary", filepath.Join(".", "bin", "ceo-packet"), "CEO Harness binary for local-agent suite")

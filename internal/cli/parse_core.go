@@ -121,6 +121,18 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 			return true, index, err
 		}
 		opts.productionFinalizeComparisonTimeoutSeconds = value
+	case "--comparison-timeout-retries":
+		value, err := parseNonNegativeIntFlag(args, index, "--comparison-timeout-retries")
+		if err != nil {
+			return true, index, err
+		}
+		opts.productionFinalizeComparisonTimeoutRetries = value
+	case "--comparison-result-retries":
+		value, err := parseNonNegativeIntFlag(args, index, "--comparison-result-retries")
+		if err != nil {
+			return true, index, err
+		}
+		opts.productionFinalizeComparisonResultRetries = value
 	case "--plan-only":
 		opts.planOnly = true
 		return true, index, nil

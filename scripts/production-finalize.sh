@@ -8,6 +8,8 @@ evidence_root="$root/.omo/evidence"
 dist="$root/dist"
 provider_timeout_seconds=600
 comparison_timeout_seconds=240
+comparison_timeout_retries=1
+comparison_result_retries=1
 dry_run=0
 run_comparison=0
 skip_release_readiness=0
@@ -30,6 +32,8 @@ Options:
   --dist dir                        Release dist directory. Default: dist
   --provider-timeout-seconds n      Provider proof timeout. Default: 600
   --comparison-timeout-seconds n    All-agent comparison timeout. Default: 240
+  --comparison-timeout-retries n    Retry timed-out all-agent comparison runs. Default: 1
+  --comparison-result-retries n     Retry partial/failed all-agent comparison runs. Default: 1
   --skip-release-readiness          Skip release-readiness step.
   --skip-provider-proofs            Skip HTTP provider proof steps.
   --skip-competitor-smoke           Skip competitor smoke preflight.
@@ -88,6 +92,22 @@ while [ "$#" -gt 0 ]; do
       comparison_timeout_seconds="$2"
       shift 2
       ;;
+    --comparison-timeout-retries)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "production-finalize: --comparison-timeout-retries requires a value" >&2
+        exit 2
+      }
+      comparison_timeout_retries="$2"
+      shift 2
+      ;;
+    --comparison-result-retries)
+      [ "$#" -ge 2 ] || {
+        printf '%s\n' "production-finalize: --comparison-result-retries requires a value" >&2
+        exit 2
+      }
+      comparison_result_retries="$2"
+      shift 2
+      ;;
     --skip-release-readiness)
       skip_release_readiness=1
       shift
@@ -126,6 +146,20 @@ esac
 case "$comparison_timeout_seconds" in
   ''|*[!0-9]*|0)
     printf '%s\n' "production-finalize: --comparison-timeout-seconds must be a positive integer" >&2
+    exit 2
+    ;;
+esac
+
+case "$comparison_timeout_retries" in
+  ''|*[!0-9]*)
+    printf '%s\n' "production-finalize: --comparison-timeout-retries must be a non-negative integer" >&2
+    exit 2
+    ;;
+esac
+
+case "$comparison_result_retries" in
+  ''|*[!0-9]*)
+    printf '%s\n' "production-finalize: --comparison-result-retries must be a non-negative integer" >&2
     exit 2
     ;;
 esac
@@ -241,6 +275,33 @@ raise SystemExit(1)
 PY
 }
 
+comparison_summary_clean() {
+  summary="$1"
+  [ -f "$summary" ] || return 1
+  python3 - "$summary" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    data = json.load(handle)
+
+run_count = int(data.get("run_count", 0) or 0)
+ok = (
+    run_count > 0
+    and int(data.get("task_count", 0) or 0) >= 29
+    and int(data.get("agent_count", 0) or 0) >= 4
+    and int(data.get("passed", 0) or 0) >= run_count
+    and int(data.get("partial", 0) or 0) == 0
+    and int(data.get("failed", 0) or 0) == 0
+    and int(data.get("timed_out", 0) or 0) == 0
+    and int(data.get("setup_blocked", 0) or 0) == 0
+    and int(data.get("skipped", 0) or 0) == 0
+    and int(data.get("incomplete_evidence", 0) or 0) == 0
+)
+raise SystemExit(0 if ok else 1)
+PY
+}
+
 {
   printf '%s\n' "#!/bin/sh"
   printf '%s\n' "set -eu"
@@ -287,7 +348,7 @@ else
   fi
 fi
 
-comparison_output="$evidence_root/external-agent-production-core-29-final"
+comparison_output="$evidence_root/external-agent-production-core-29-final-result-retry-r1"
 if [ "$run_comparison" -eq 1 ]; then
   if ! run_step "all-agent-29-comparison" "$comparison_output/summary.json" go run "$root/cmd/ceo-eval" \
     --local-agent-benchmark \
@@ -295,6 +356,8 @@ if [ "$run_comparison" -eq 1 ]; then
     --local-agent-benchmark-task production-core \
     --local-agent-benchmark-repeat 1 \
     --local-agent-benchmark-concurrency 4 \
+    --local-agent-benchmark-timeout-retries "$comparison_timeout_retries" \
+    --local-agent-benchmark-result-retries "$comparison_result_retries" \
     --ceo-binary "$root/bin/ceo-packet" \
     --tasks "$root/evals/tasks" \
     --output-dir "$comparison_output" \
@@ -310,14 +373,20 @@ else
     --local-agent-benchmark-task production-core \
     --local-agent-benchmark-repeat 1 \
     --local-agent-benchmark-concurrency 4 \
+    --local-agent-benchmark-timeout-retries "$comparison_timeout_retries" \
+    --local-agent-benchmark-result-retries "$comparison_result_retries" \
     --ceo-binary ./bin/ceo-packet \
     --tasks evals/tasks \
-    --output-dir .omo/evidence/external-agent-production-core-29-final \
+    --output-dir .omo/evidence/external-agent-production-core-29-final-result-retry-r1 \
     --timeout-seconds "$comparison_timeout_seconds" \
     --ceo-benchmark-mode model-command \
     --ceo-benchmark-model-command-json "[\"sh\",\"$root/scripts/benchmark-model-command.sh\"]"
-  add_step "all-agent-29-comparison" "planned" "commands.sh" "Use --run-comparison to execute the expensive all-agent suite"
-  if [ "$dry_run" -eq 0 ]; then
+  if comparison_summary_clean "$comparison_output/summary.json"; then
+    add_step "all-agent-29-comparison" "pass" "$comparison_output/summary.json" "Existing clean all-agent comparison evidence found"
+  else
+    add_step "all-agent-29-comparison" "planned" "commands.sh" "Use --run-comparison to execute the expensive all-agent suite"
+  fi
+  if [ "$dry_run" -eq 0 ] && ! comparison_summary_clean "$comparison_output/summary.json"; then
     overall="blocked"
   fi
 fi

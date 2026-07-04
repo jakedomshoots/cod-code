@@ -32,6 +32,7 @@ type cliOptions struct {
 	localAgentBenchmarkRepeat         int
 	localAgentBenchmarkConcurrency    int
 	localAgentBenchmarkTimeoutRetries int
+	localAgentBenchmarkResultRetries  int
 	localAgentBenchmarkAgentTimeouts  string
 	localAgentBenchmarkAgentModels    string
 	ceoHarnessBinary                  string
@@ -213,6 +214,7 @@ func runLocalAgentBenchmarkCLI(ctx context.Context, out io.Writer, opts cliOptio
 		RepeatCount:                       opts.localAgentBenchmarkRepeat,
 		Concurrency:                       opts.localAgentBenchmarkConcurrency,
 		TimeoutRetries:                    opts.localAgentBenchmarkTimeoutRetries,
+		ResultRetries:                     opts.localAgentBenchmarkResultRetries,
 		AgentTimeoutSeconds:               agentTimeouts,
 		AgentModels:                       agentModels,
 	})

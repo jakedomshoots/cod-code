@@ -121,6 +121,7 @@ func writeLocalAgentBenchmarkMarkdown(path string, summary LocalAgentBenchmarkSu
 	fmt.Fprintf(&builder, "Repeats: %d\n", summary.RepeatCount)
 	fmt.Fprintf(&builder, "Concurrency: %d\n", summary.Concurrency)
 	fmt.Fprintf(&builder, "Timeout retries: %d\n", summary.TimeoutRetries)
+	fmt.Fprintf(&builder, "Result retries: %d\n", summary.ResultRetries)
 	if len(summary.AgentTimeouts) > 0 {
 		fmt.Fprintf(&builder, "Agent timeouts: %s\n", formatAgentTimeouts(summary.AgentTimeouts))
 	}

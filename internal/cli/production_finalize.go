@@ -46,6 +46,12 @@ func runProductionFinalize(ctx context.Context, out io.Writer, opts options) err
 	if opts.productionFinalizeComparisonTimeoutSeconds > 0 {
 		args = append(args, "--comparison-timeout-seconds", strconv.Itoa(opts.productionFinalizeComparisonTimeoutSeconds))
 	}
+	if opts.productionFinalizeComparisonTimeoutRetries > 0 {
+		args = append(args, "--comparison-timeout-retries", strconv.Itoa(opts.productionFinalizeComparisonTimeoutRetries))
+	}
+	if opts.productionFinalizeComparisonResultRetries > 0 {
+		args = append(args, "--comparison-result-retries", strconv.Itoa(opts.productionFinalizeComparisonResultRetries))
+	}
 
 	cmd := exec.CommandContext(ctx, "sh", args...)
 	cmd.Dir = workspaceDir

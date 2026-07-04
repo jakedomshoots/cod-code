@@ -58,6 +58,8 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		"scripts/provider-proof.sh --provider moonshot",
 		"--comparison-smoke",
 		"--local-agent-benchmark-task production-core",
+		"--local-agent-benchmark-timeout-retries 1",
+		"--local-agent-benchmark-result-retries 1",
 		"scripts/production-readiness.sh",
 		"evidence root/provider-proof-openai",
 	} {
@@ -91,6 +93,55 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 	} {
 		if !strings.Contains(setupActions, want) {
 			t.Fatalf("setup-actions.md missing %q:\n%s", want, setupActions)
+		}
+	}
+}
+
+func Test_ProductionFinalizeScript_usesExistingCleanComparisonEvidence(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "production-finalize")
+	evidenceRoot := filepath.Join(t.TempDir(), "evidence")
+	writeProductionReadinessJSON(t, filepath.Join(evidenceRoot, "external-agent-production-core-29-final-result-retry-r1", "summary.json"), `{
+  "task_count": 29,
+  "agent_count": 4,
+  "run_count": 116,
+  "passed": 116,
+  "partial": 0,
+  "failed": 0,
+  "timed_out": 0,
+  "setup_blocked": 0,
+  "skipped": 0,
+  "incomplete_evidence": 0
+}`)
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "production-finalize.sh"),
+		"--output-dir", outputDir,
+		"--evidence-root", evidenceRoot,
+		"--dist", filepath.Join(root, "dist"),
+		"--skip-release-readiness",
+		"--skip-provider-proofs",
+		"--skip-competitor-smoke",
+		"--skip-production-readiness",
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("production-finalize failed with clean comparison evidence: %v\n%s", err, string(output))
+	}
+
+	index := readTextFile(t, filepath.Join(outputDir, "index.md"))
+	for _, want := range []string{
+		"Status: pass",
+		"| all-agent-29-comparison | pass |",
+		"Existing clean all-agent comparison evidence found",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("index.md missing %q:\n%s", want, index)
 		}
 	}
 }
@@ -171,7 +222,6 @@ exit 1
 	for _, want := range []string{
 		"# Production Finalize Next Actions",
 		"Fix competitor setup before final comparison",
-		"ceo-packet production-finalize --workspace . --run-comparison",
 		"production-finalize/competitor-smoke/summary.json",
 	} {
 		if !strings.Contains(nextActions, want) {
@@ -181,14 +231,11 @@ exit 1
 
 	nextActionsJSON := readTextFile(t, filepath.Join(outputDir, "next-actions.json"))
 	for _, want := range []string{
-		`"required_action_count": 2`,
+		`"required_action_count": 1`,
 		`"id": "competitor-smoke"`,
 		`"kind": "competitor_setup"`,
 		`"inspect": "competitor-smoke/summary.json"`,
 		"Fix competitor setup before final comparison",
-		`"id": "all-agent-29-comparison"`,
-		`"kind": "comparison"`,
-		`"command": [`,
 	} {
 		if !strings.Contains(nextActionsJSON, want) {
 			t.Fatalf("next-actions.json missing %q:\n%s", want, nextActionsJSON)
@@ -201,7 +248,7 @@ exit 1
 		`"competitor-smoke"`,
 		`"next_actions": {`,
 		`"json_path": "next-actions.json"`,
-		`"required_action_count": 2`,
+		`"required_action_count": 1`,
 		`"setup_actions": {`,
 	} {
 		if !strings.Contains(summary, want) {

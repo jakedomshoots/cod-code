@@ -35,6 +35,7 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 	repeatCount := normalizeLocalAgentBenchmarkRepeat(req.RepeatCount)
 	concurrency := normalizeLocalAgentBenchmarkConcurrency(req.Concurrency)
 	timeoutRetries := normalizeLocalAgentBenchmarkTimeoutRetries(req.TimeoutRetries)
+	resultRetries := normalizeLocalAgentBenchmarkResultRetries(req.ResultRetries)
 	agentTimeouts := normalizeLocalAgentBenchmarkAgentTimeouts(req.AgentTimeoutSeconds)
 	agentModels := normalizeLocalAgentBenchmarkAgentModels(req.AgentModels)
 	multiRun := len(tasks) > 1 || repeatCount > 1
@@ -48,6 +49,7 @@ func RunLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest)
 		RepeatCount:    repeatCount,
 		Concurrency:    concurrency,
 		TimeoutRetries: timeoutRetries,
+		ResultRetries:  resultRetries,
 		AgentTimeouts:  agentTimeouts,
 		AgentModels:    agentModels,
 		RunCount:       len(tasks) * repeatCount * len(agentIDs),
@@ -213,6 +215,13 @@ func normalizeLocalAgentBenchmarkTimeoutRetries(retries int) int {
 	return retries
 }
 
+func normalizeLocalAgentBenchmarkResultRetries(retries int) int {
+	if retries < 0 {
+		return 0
+	}
+	return retries
+}
+
 func normalizeLocalAgentBenchmarkAgentTimeouts(raw map[string]int) map[string]int {
 	clean := make(map[string]int)
 	for agent, seconds := range raw {
@@ -227,20 +236,41 @@ func normalizeLocalAgentBenchmarkAgentTimeouts(raw map[string]int) map[string]in
 }
 
 func runLocalAgentBenchmark(ctx context.Context, req LocalAgentBenchmarkRequest, task Task, spec localAgentSpec, attempt int, multiRun bool) LocalAgentBenchmarkResult {
-	maxRunAttempts := normalizeLocalAgentBenchmarkTimeoutRetries(req.TimeoutRetries) + 1
+	maxRunAttempts := maxLocalAgentBenchmarkAttempts(req)
 	prior := make([]RetryAttempt, 0, maxRunAttempts-1)
 	for runAttempt := 1; runAttempt <= maxRunAttempts; runAttempt++ {
 		result := runLocalAgentBenchmarkAttempt(ctx, req, task, spec, attempt, multiRun, runAttempt, maxRunAttempts)
 		result.PriorAttempts = append([]RetryAttempt(nil), prior...)
-		if result.Status != localAgentStatusTimeout || runAttempt == maxRunAttempts {
+		if !shouldRetryLocalAgentBenchmarkResult(req, result, runAttempt) {
 			if runAttempt > 1 && result.Status == localAgentStatusPass {
-				result.Note = fmt.Sprintf("%s after %d timed-out attempt(s)", result.Note, len(prior))
+				result.Note = fmt.Sprintf("%s after %d prior non-pass attempt(s)", result.Note, len(prior))
 			}
 			return result
 		}
 		prior = append(prior, retryAttemptFromResult(result))
 	}
 	return LocalAgentBenchmarkResult{}
+}
+
+func maxLocalAgentBenchmarkAttempts(req LocalAgentBenchmarkRequest) int {
+	timeoutAttempts := normalizeLocalAgentBenchmarkTimeoutRetries(req.TimeoutRetries) + 1
+	resultAttempts := normalizeLocalAgentBenchmarkResultRetries(req.ResultRetries) + 1
+	if resultAttempts > timeoutAttempts {
+		return resultAttempts
+	}
+	return timeoutAttempts
+}
+
+func shouldRetryLocalAgentBenchmarkResult(req LocalAgentBenchmarkRequest, result LocalAgentBenchmarkResult, runAttempt int) bool {
+	switch result.Status {
+	case localAgentStatusTimeout:
+		return runAttempt <= normalizeLocalAgentBenchmarkTimeoutRetries(req.TimeoutRetries) ||
+			runAttempt <= normalizeLocalAgentBenchmarkResultRetries(req.ResultRetries)
+	case localAgentStatusPartial, localAgentStatusFail:
+		return runAttempt <= normalizeLocalAgentBenchmarkResultRetries(req.ResultRetries)
+	default:
+		return false
+	}
 }
 
 func runLocalAgentBenchmarkAttempt(ctx context.Context, req LocalAgentBenchmarkRequest, task Task, spec localAgentSpec, attempt int, multiRun bool, runAttempt int, maxRunAttempts int) LocalAgentBenchmarkResult {

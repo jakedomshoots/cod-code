@@ -73,6 +73,8 @@ type options struct {
 	productionFinalizeEvidenceRoot             string
 	productionFinalizeProviderTimeoutSeconds   int
 	productionFinalizeComparisonTimeoutSeconds int
+	productionFinalizeComparisonTimeoutRetries int
+	productionFinalizeComparisonResultRetries  int
 	showConfigCheck                            bool
 	showConfigDoctor                           bool
 	showConfigExplain                          bool
