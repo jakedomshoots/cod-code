@@ -186,7 +186,7 @@ func Test_BuildLocalAgentBenchmarkSpec_httpProviderModeWritesWorkspaceConfig(t *
 		Title:                "Reject path escape writes",
 		Objective:            "Ensure patch/create requests cannot write outside the workspace root.",
 		RequiredChangedFiles: []string{"internal/workspace/workspace.go"},
-		RequiredDiffTerms:    []string{"path escapes workspace"},
+		RequiredDiffTerms:    []string{"ErrPathEscapesWorkspace"},
 		RequiredCommands:     []string{"go test ./internal/workspace -run Test_.*[Pp]ath -count=1"},
 	}
 

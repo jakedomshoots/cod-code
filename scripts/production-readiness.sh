@@ -137,6 +137,16 @@ endurance_index_has_pass() {
   grep -q -- "- Overall: pass" "$file" && grep -q -- "- Completed iterations: 30" "$file"
 }
 
+latest_evidence_summary() {
+  prefix="$1"
+  latest=""
+  for candidate in "$evidence_root"/"$prefix"*/summary.json; do
+    [ -f "$candidate" ] || continue
+    latest="$candidate"
+  done
+  printf '%s\n' "$latest"
+}
+
 if [ "$skip_secret_scan" -eq 1 ]; then
   add_check "security" "secret_scan" "skipped" "not-run" "Skipped by flag"
 else
@@ -178,10 +188,11 @@ else
   add_check "eval" "full_fixture_catalog" "blocked" "$evidence_root/benchmark-fixtures-31-r1/summary.json" "Full fixture catalog proof is missing or not clean"
 fi
 
-if json_check "$evidence_root/external-agent-production-core-29-r1/summary.json" "int(data.get('task_count', 0)) >= 29 and int(data.get('agent_count', 0)) >= 4 and int(data.get('failed', 0)) == 0 and int(data.get('partial', 0)) == 0 and int(data.get('timed_out', 0)) == 0 and int(data.get('incomplete_evidence', 0)) == 0"; then
-  add_check "comparison" "all_agent_29_task_comparison" "pass" "$evidence_root/external-agent-production-core-29-r1/summary.json" "All configured agents have clean current-suite evidence"
+comparison_summary=$(latest_evidence_summary "external-agent-production-core-29-")
+if json_check "$comparison_summary" "int(data.get('task_count', 0)) >= 29 and int(data.get('agent_count', 0)) >= 4 and int(data.get('failed', 0)) == 0 and int(data.get('partial', 0)) == 0 and int(data.get('timed_out', 0)) == 0 and int(data.get('incomplete_evidence', 0)) == 0"; then
+  add_check "comparison" "all_agent_29_task_comparison" "pass" "$comparison_summary" "All configured agents have clean current-suite evidence"
 else
-  add_check "comparison" "all_agent_29_task_comparison" "blocked" "$evidence_root/external-agent-production-core-29-r1/summary.json" "All-agent comparison is not yet rerun on the current 29-task suite"
+  add_check "comparison" "all_agent_29_task_comparison" "blocked" "$comparison_summary" "Latest all-agent current-suite evidence is missing, partial, timed out, or incomplete"
 fi
 
 if provider_index_has_pass "$evidence_root/provider-proof-kimi-r2/index.md"; then

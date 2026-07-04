@@ -241,7 +241,7 @@
     "forbidden_changed_files": ["../outside.txt"],
     "required_commands": ["go test ./internal/workspace -run Test_.*[Pp]ath -count=1"],
     "required_artifacts": [".omo/evidence/safety-policy-path-escape.md"],
-    "required_diff_terms": ["path escapes workspace"],
+    "required_diff_terms": ["ErrPathEscapesWorkspace"],
     "required_report_fields": ["patch_results"]
   },
   {

@@ -188,7 +188,7 @@ func Test_PrepareLocalAgentBenchmarkWorkspace_writes_real_path_escape_fixture(t 
 		RequiredChangedFiles: []string{"internal/workspace/workspace.go"},
 		RequiredCommands:     []string{"go test ./internal/workspace -run Test_.*[Pp]ath -count=1"},
 		RequiredArtifacts:    []string{".omo/evidence/safety-policy-path-escape.md"},
-		RequiredDiffTerms:    []string{"path escapes workspace"},
+		RequiredDiffTerms:    []string{"ErrPathEscapesWorkspace"},
 	}
 
 	// When
@@ -221,7 +221,7 @@ func Test_PrepareLocalAgentBenchmarkWorkspace_can_rerun_same_workspace(t *testin
 		RequiredChangedFiles: []string{"internal/workspace/workspace.go"},
 		RequiredCommands:     []string{"go test ./internal/workspace -run Test_.*[Pp]ath -count=1"},
 		RequiredArtifacts:    []string{".omo/evidence/safety-policy-path-escape.md"},
-		RequiredDiffTerms:    []string{"path escapes workspace"},
+		RequiredDiffTerms:    []string{"ErrPathEscapesWorkspace"},
 	}
 
 	// When
