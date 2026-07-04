@@ -165,10 +165,22 @@ cat >"$output_dir/commands.sh" <<'EOF'
 set -eu
 
 sh scripts/provider-setup-preflight.sh --output-dir .omo/evidence/provider-setup-preflight
-sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai --timeout-seconds 600
-sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter --timeout-seconds 600
-sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot --timeout-seconds 600
 EOF
+
+while IFS= read -r provider; do
+  [ -n "$provider" ] || continue
+  env_name=$(provider_env "$provider")
+  eval "env_value=\${$env_name:-}"
+  if [ -z "$env_value" ]; then
+    {
+      printf '%s\n' "# blocked command: sh scripts/provider-proof.sh --provider $provider"
+      printf '%s\n' "# reason: $env_name is missing or empty; export it before running provider proof."
+      printf '%s\n' "# sh scripts/provider-proof.sh --provider $provider --output-dir .omo/evidence/provider-proof-$provider --timeout-seconds 600"
+    } >>"$output_dir/commands.sh"
+  else
+    printf '%s\n' "sh scripts/provider-proof.sh --provider $provider --output-dir .omo/evidence/provider-proof-$provider --timeout-seconds 600" >>"$output_dir/commands.sh"
+  fi
+done <"$provider_list_file"
 chmod +x "$output_dir/commands.sh"
 
 commands_sha256=$(python3 - "$output_dir/commands.sh" <<'PY'

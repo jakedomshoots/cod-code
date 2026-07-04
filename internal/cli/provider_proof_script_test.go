@@ -309,6 +309,29 @@ func Test_ProviderSetupPreflightScript_writesBlockedEvidenceWithoutSecretValues(
 	if strings.Contains(summary, "secret-openai") || strings.Contains(index, "secret-openai") {
 		t.Fatalf("provider setup preflight leaked secret-like value")
 	}
+
+	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
+	for _, want := range []string{
+		"# blocked command: sh scripts/provider-proof.sh --provider openai",
+		"# reason: OPENAI_API_KEY is missing or empty; export it before running provider proof.",
+		"# blocked command: sh scripts/provider-proof.sh --provider openrouter",
+		"# reason: OPENROUTER_API_KEY is missing or empty; export it before running provider proof.",
+		"# blocked command: sh scripts/provider-proof.sh --provider moonshot",
+		"# reason: MOONSHOT_API_KEY is missing or empty; export it before running provider proof.",
+	} {
+		if !strings.Contains(commands, want) {
+			t.Fatalf("commands.sh missing %q:\n%s", want, commands)
+		}
+	}
+	for _, blockedRunnable := range []string{
+		"\nsh scripts/provider-proof.sh --provider openai",
+		"\nsh scripts/provider-proof.sh --provider openrouter",
+		"\nsh scripts/provider-proof.sh --provider moonshot",
+	} {
+		if strings.Contains(commands, blockedRunnable) {
+			t.Fatalf("commands.sh should not contain runnable blocked provider command %q:\n%s", blockedRunnable, commands)
+		}
+	}
 }
 
 func Test_ProviderSetupPreflightScript_passesWhenHTTPKeysArePresent(t *testing.T) {
@@ -350,6 +373,20 @@ func Test_ProviderSetupPreflightScript_passesWhenHTTPKeysArePresent(t *testing.T
 	}
 	if strings.Contains(summary, "secret-openai") || strings.Contains(summary, "secret-openrouter") || strings.Contains(summary, "secret-moonshot") {
 		t.Fatalf("provider setup preflight leaked secret values:\n%s", summary)
+	}
+
+	commands := readTextFile(t, filepath.Join(outputDir, "commands.sh"))
+	for _, want := range []string{
+		"sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai --timeout-seconds 600",
+		"sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter --timeout-seconds 600",
+		"sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot --timeout-seconds 600",
+	} {
+		if !strings.Contains(commands, want) {
+			t.Fatalf("commands.sh missing runnable command %q:\n%s", want, commands)
+		}
+	}
+	if strings.Contains(commands, "# blocked command:") {
+		t.Fatalf("commands.sh should not include blocked commands when all providers are ready:\n%s", commands)
 	}
 }
 
