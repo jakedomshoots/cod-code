@@ -48,22 +48,16 @@ ALLOW_CHECKSUM_ONLY_RELEASE=1 CHECKSUM_ONLY_RELEASE_NOTES_URL="$RELEASE_PUBLIC_U
 
 ## First Run
 
-Start with a real repo and keep the first run read-only:
+Use the boring path first. It proves login/provider setup, runs one checked task, then shows production readiness without hiding external blockers:
 
 ```sh
-ceo-packet start /path/to/repo
-ceo-packet config explain --workspace /path/to/repo --format text
-ceo-packet run --workspace /path/to/repo --plan-only --format text -- "Fix one failing test"
+ceo-packet oauth doctor --format text
+ceo-packet oauth init kimi --workspace . --format text
+ceo-packet run --workspace . --check go test ./... -- "Fix one real task"
+ceo-packet production-status --workspace . --format text
 ```
 
-For a guarded repair run, require checks and use the standard repair preset:
-
-```sh
-ceo-packet run --workspace /path/to/repo \
-  --repair-preset standard \
-  --check go test ./... -- \
-  "Fix one failing test"
-```
+Use `/path/to/repo` instead of `.` when you are setting up another checkout. `oauth init kimi` stores command routing only; the Kimi CLI owns its local login state.
 
 ## Real Provider Setup
 

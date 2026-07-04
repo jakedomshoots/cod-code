@@ -53,20 +53,26 @@ func renderQuickstartText(report quickstartReport) string {
 
 func quickstartNextSteps(workspaceDir string, providerSteps []string) []string {
 	workspace := workspaceArg(workspaceDir)
-	doctorStep := "ceo-packet --workspace " + workspace + " --doctor --format text"
-	smokeStep := "ceo-packet --workspace " + workspace + " --plan-only " + strconv.Quote("Smoke provider routing")
-	steps := []string{"ceo-packet --workspace " + workspace + " --config-check --format text"}
-	seen := map[string]struct{}{steps[0]: {}}
+	steps := make([]string, 0, len(providerSteps)+4)
+	seen := make(map[string]struct{}, len(providerSteps)+4)
 	for _, step := range providerSteps {
-		if step == smokeStep {
-			continue
-		}
 		if _, ok := seen[step]; ok {
 			continue
 		}
 		seen[step] = struct{}{}
 		steps = append(steps, step)
 	}
-	steps = append(steps, doctorStep, smokeStep)
+	for _, step := range []string{
+		"ceo-packet oauth doctor --format text",
+		"ceo-packet oauth init kimi --workspace " + workspace + " --format text",
+		"ceo-packet run --workspace " + workspace + " --check go test ./... -- " + strconv.Quote("Fix one real task"),
+		"ceo-packet production-status --workspace " + workspace + " --format text",
+	} {
+		if _, ok := seen[step]; ok {
+			continue
+		}
+		seen[step] = struct{}{}
+		steps = append(steps, step)
+	}
 	return steps
 }

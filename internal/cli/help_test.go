@@ -46,14 +46,23 @@ func Test_Run_prints_help_when_help_flag_is_supplied(t *testing.T) {
 		"--version",
 		"--format <json|text>",
 		"--help-advanced",
-		"Provider quick start:",
-		"Codex CLI: ceo-packet config init --adapter codex",
-		"Kimi CLI: ceo-packet config init --adapter kimi",
-		"OAuth providers: ceo-packet oauth list",
-		"OpenRouter: use --provider-wizard openrouter; missing OPENROUTER_API_KEY is blocked setup, not a failed benchmark",
+		"ceo-packet oauth doctor --format text",
+		"ceo-packet oauth init kimi --workspace . --format text",
+		"ceo-packet run --workspace . --check go test ./... -- \"Fix one real task\"",
+		"ceo-packet production-status --workspace . --format text",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("help output missing %q:\n%s", want, body)
+		}
+	}
+	for _, legacy := range []string{
+		"Provider quick start:",
+		"Codex CLI: ceo-packet config init --adapter codex",
+		"Kimi CLI: ceo-packet config init --adapter kimi",
+		"OpenRouter: use --provider-wizard openrouter; missing OPENROUTER_API_KEY is blocked setup, not a failed benchmark",
+	} {
+		if strings.Contains(body, legacy) {
+			t.Fatalf("compact help must omit legacy provider quick-start %q:\n%s", legacy, body)
 		}
 	}
 	for _, advanced := range []string{

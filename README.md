@@ -15,11 +15,13 @@ PREFIX=/tmp/ceo-harness sh scripts/install-local.sh
 /tmp/ceo-harness/bin/ceo-packet --version
 ```
 
-Quick first task:
+First boring run:
 
 ```sh
-ceo-packet --quickstart /path/to/repo --format text
-ceo-packet --workspace /path/to/repo --plan-only --format text -- "Fix one failing test"
+ceo-packet oauth doctor --format text
+ceo-packet oauth init kimi --workspace . --format text
+ceo-packet run --workspace . --check go test ./... -- "Fix one real task"
+ceo-packet production-status --workspace . --format text
 ```
 
 ## Product Docs
@@ -66,10 +68,10 @@ If `ceo-packet` is not found after install, add `$(go env GOPATH)/bin` to your `
 Copy-paste first setup for a repo:
 
 ```sh
-ceo-packet config explain --workspace . --format text
-ceo-packet --workspace . --provider-wizard openai --http-model gpt-5 --format text
-ceo-packet config doctor --workspace . --format text
-ceo-packet run --workspace . --check go test ./... -- "Fix one failing test"
+ceo-packet oauth doctor --format text
+ceo-packet oauth init kimi --workspace . --format text
+ceo-packet run --workspace . --check go test ./... -- "Fix one real task"
+ceo-packet production-status --workspace . --format text
 ```
 
 Generate shell completions:
@@ -126,20 +128,16 @@ ceo-packet production-status --workspace . --format text
 
 The release script writes tarballs, checksums, and a local Homebrew formula draft under `dist/homebrew/ceo-packet.rb`. The readiness scripts write pass/blocked evidence without publishing, tagging, pushing, or creating a remote release. `production-local-gate` fails only if local production readiness regresses; public release/provider blockers stay visible but do not fail source CI. `production-status` reads that evidence and prints local/public readiness, `External setup required: true` when only outside release/provider setup remains, plus the next action.
 
-Create a working example workspace config:
+Recommended first run:
 
 ```sh
-ceo-packet --quickstart /path/to/repo
-ceo-packet --workspace /path/to/repo --doctor
+ceo-packet oauth doctor --format text
+ceo-packet oauth init kimi --workspace . --format text
+ceo-packet run --workspace . --check go test ./... -- "Fix one real task"
+ceo-packet production-status --workspace . --format text
 ```
 
-Use the shorter operator start flow when you want setup, config check, doctor, and next commands in one text report:
-
-```sh
-ceo-packet --start /path/to/repo --format text
-```
-
-Use `--quickstart /path/to/repo --format text` for a short first-run checklist.
+`oauth init kimi` creates provider `main` from the local Kimi CLI login and stores no OAuth token in the harness. Use `ceo-packet oauth list --format text` to see the other CLI-backed providers.
 
 Market gauntlet and recovery commands:
 
