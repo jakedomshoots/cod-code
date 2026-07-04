@@ -15,6 +15,7 @@ Status date: 2026-07-03
   - `gofumpt -l cmd internal`
   - `golangci-lint run ./...`
   - `nilaway ./...`
+  - `sh scripts/secret-scan.sh`
   - `sh -n` over shell scripts when ShellCheck is unavailable.
   - `sh scripts/strict-checks.sh`
 - Latest live external-agent comparison:

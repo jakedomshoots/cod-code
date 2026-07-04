@@ -71,6 +71,7 @@ fi
 "$nilaway" ./...
 
 run_shell_syntax_check
+sh scripts/secret-scan.sh
 
 if shellcheck_path=$(tool_path shellcheck); then
   "$shellcheck_path" scripts/*.sh examples/*.sh examples/adapters/*.sh tests/*.sh

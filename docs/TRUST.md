@@ -10,6 +10,7 @@ CEO Harness should be installable, reviewable, and honest about what has actuall
 - Machine-readable release manifest in `dist/release-manifest.json`.
 - Public release preflight through `scripts/release-preflight.sh`.
 - Durable release-readiness evidence through `scripts/release-readiness.sh`.
+- Secret leak scan through `scripts/secret-scan.sh`.
 - Checksum verification from inside `dist/`.
 - Smoke and dogfood scripts that drive the CLI surface.
 
@@ -54,6 +55,16 @@ ALLOW_CHECKSUM_ONLY_RELEASE=1 CHECKSUM_ONLY_RELEASE_NOTES_URL=https://<release-n
 ```
 
 Current releases are checksum-only. Signing is planned after a real release identity is chosen.
+
+## Secret Scan
+
+Before release or proof publication, scan source, docs, scripts, and workflow files for committed secret values:
+
+```sh
+sh scripts/secret-scan.sh
+```
+
+The scan allows placeholders like `OPENAI_API_KEY=...` and skips test fixtures, but blocks real-looking provider keys and GitHub tokens.
 
 ## Local Docs Link Check
 

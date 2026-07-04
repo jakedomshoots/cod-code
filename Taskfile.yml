@@ -39,6 +39,11 @@ tasks:
     cmds:
       - sh scripts/strict-checks.sh
 
+  secret:scan:
+    desc: Scan source, docs, scripts, and workflows for committed secret values
+    cmds:
+      - sh scripts/secret-scan.sh
+
   smoke:
     desc: Run the local CLI smoke check
     cmds:
