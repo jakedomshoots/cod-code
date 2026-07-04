@@ -247,6 +247,13 @@ for action in action_rows:
         if provider_name and f"scripts/provider-proof.sh --provider {provider_name}" not in provider_commands:
             print(f"production-local-gate: fail provider command file missing rerun command for {action_id}")
             raise SystemExit(1)
+        if "provider setup:" in provider_commands:
+            if api_key_env and f"${{{api_key_env}+x}}" not in provider_commands:
+                print(f"production-local-gate: fail provider command file missing env-present guard for {action_id}")
+                raise SystemExit(1)
+            if api_key_env and f"${{{api_key_env}}}" not in provider_commands:
+                print(f"production-local-gate: fail provider command file missing env-empty guard for {action_id}")
+                raise SystemExit(1)
 if missing_reasons:
     print("production-local-gate: fail action_reason missing for " + ", ".join(missing_reasons))
     raise SystemExit(1)

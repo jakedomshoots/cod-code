@@ -187,6 +187,16 @@ func Test_ProviderProofScript_liveBlocksWhenHTTPKeyMissing(t *testing.T) {
 	if !strings.Contains(commands, "scripts/provider-proof.sh --provider openrouter") {
 		t.Fatalf("commands.sh missing rerun command:\n%s", commands)
 	}
+	for _, want := range []string{
+		"${OPENROUTER_API_KEY+x}",
+		"${OPENROUTER_API_KEY}",
+		"provider setup: OPENROUTER_API_KEY is not set",
+		"provider setup: OPENROUTER_API_KEY is empty",
+	} {
+		if !strings.Contains(commands, want) {
+			t.Fatalf("commands.sh missing env guard %q:\n%s", want, commands)
+		}
+	}
 	if strings.Contains(commands, "OPENROUTER_API_KEY=") || strings.Contains(commands, "<redacted>") {
 		t.Fatalf("commands.sh should not include key assignment, even redacted:\n%s", commands)
 	}
