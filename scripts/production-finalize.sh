@@ -162,6 +162,19 @@ quote_command_arg() {
   esac
 }
 
+display_path() {
+  case "$1" in
+    "$root"/*) printf '%s\n' "${1#"$root"/}" ;;
+    "$root") printf '%s\n' "." ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+
+quote_display_path() {
+  path=$(display_path "$1")
+  quote_command_arg "$path"
+}
+
 write_command() {
   first=1
   for arg in "$@"; do
@@ -335,25 +348,25 @@ fi
     action_count=$((action_count + 1))
     case "$name" in
       release-readiness)
-        printf '%s\n' "- Publish and verify release evidence: set public release metadata, then rerun \`sh scripts/release-readiness.sh --dist $(quote_command_arg "$dist") --output-dir $(quote_command_arg "$evidence_root/release-readiness-final")\`. Evidence: \`$evidence\`."
+        printf '%s\n' "- Publish and verify release evidence: set public release metadata, then rerun \`sh scripts/release-readiness.sh --dist $(quote_display_path "$dist") --output-dir $(quote_display_path "$evidence_root/release-readiness-final")\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       provider-openai)
-        printf '%s\n' "- Prove OpenAI HTTP provider: export \`OPENAI_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider openai --output-dir $(quote_command_arg "$evidence_root/provider-proof-openai") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$evidence\`."
+        printf '%s\n' "- Prove OpenAI HTTP provider: export \`OPENAI_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider openai --output-dir $(quote_display_path "$evidence_root/provider-proof-openai") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       provider-openrouter)
-        printf '%s\n' "- Prove OpenRouter HTTP provider: export \`OPENROUTER_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider openrouter --output-dir $(quote_command_arg "$evidence_root/provider-proof-openrouter") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$evidence\`."
+        printf '%s\n' "- Prove OpenRouter HTTP provider: export \`OPENROUTER_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider openrouter --output-dir $(quote_display_path "$evidence_root/provider-proof-openrouter") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       provider-moonshot)
-        printf '%s\n' "- Prove Moonshot HTTP provider: export \`MOONSHOT_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider moonshot --output-dir $(quote_command_arg "$evidence_root/provider-proof-moonshot") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$evidence\`."
+        printf '%s\n' "- Prove Moonshot HTTP provider: export \`MOONSHOT_API_KEY\`, then rerun \`sh scripts/provider-proof.sh --provider moonshot --output-dir $(quote_display_path "$evidence_root/provider-proof-moonshot") --timeout-seconds $provider_timeout_seconds\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       competitor-smoke|competitor-smoke-command)
-        printf '%s\n' "- Fix competitor setup before final comparison: inspect \`$output_dir/competitor-smoke/summary.json\`, install missing binaries or fix provider auth/quota, then rerun \`ceo-packet production-finalize --workspace . --dry-run\` or the full finalizer."
+        printf '%s\n' "- Fix competitor setup before final comparison: inspect \`$(display_path "$output_dir/competitor-smoke/summary.json")\`, install missing binaries or fix provider auth/quota, then rerun \`ceo-packet production-finalize --workspace . --dry-run\` or the full finalizer."
         ;;
       all-agent-29-comparison)
         printf '%s\n' "- Run the final all-agent 29-task comparison after setup is clean: \`ceo-packet production-finalize --workspace . --run-comparison\`."
         ;;
       production-readiness)
-        printf '%s\n' "- Re-run the final readiness aggregate after release, provider, smoke, and comparison proof are clean: \`sh scripts/production-readiness.sh --dist $(quote_command_arg "$dist") --output-dir $(quote_command_arg "$evidence_root/production-readiness-final")\`. Evidence: \`$evidence\`."
+        printf '%s\n' "- Re-run the final readiness aggregate after release, provider, smoke, and comparison proof are clean: \`sh scripts/production-readiness.sh --dist $(quote_display_path "$dist") --output-dir $(quote_display_path "$evidence_root/production-readiness-final")\`. Evidence: \`$(display_path "$evidence")\`."
         ;;
       *)
         printf '%s\n' "- Resolve \`$name\`: $detail. Evidence: \`$evidence\`."

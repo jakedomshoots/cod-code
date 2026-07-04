@@ -144,6 +144,7 @@ func Test_ProductionFinalizeScript_marksSetupBlockedCompetitorSmokeBlocked(t *te
 		"# Production Finalize Next Actions",
 		"Fix competitor setup before final comparison",
 		"ceo-packet production-finalize --workspace . --run-comparison",
+		"production-finalize/competitor-smoke/summary.json",
 	} {
 		if !strings.Contains(nextActions, want) {
 			t.Fatalf("next-actions.md missing %q:\n%s", want, nextActions)
