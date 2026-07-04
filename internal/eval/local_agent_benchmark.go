@@ -14,6 +14,7 @@ const (
 	localAgentBenchmarkMode      = "local_agent_benchmark"
 	defaultLocalAgentBenchmarkID = "docs-roadmap-cli-first"
 	localAgentStatusPartial      = "partial"
+	localAgentStatusSetupBlocked = "setup_blocked"
 	localAgentEvidenceComplete   = "complete"
 	localAgentEvidenceIncomplete = "incomplete"
 	localAgentEvidenceNotRun     = "not_run"

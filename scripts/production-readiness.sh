@@ -189,7 +189,7 @@ else
 fi
 
 comparison_summary=$(latest_evidence_summary "external-agent-production-core-29-")
-if json_check "$comparison_summary" "int(data.get('task_count', 0)) >= 29 and int(data.get('agent_count', 0)) >= 4 and int(data.get('failed', 0)) == 0 and int(data.get('partial', 0)) == 0 and int(data.get('timed_out', 0)) == 0 and int(data.get('incomplete_evidence', 0)) == 0"; then
+if json_check "$comparison_summary" "int(data.get('task_count', 0)) >= 29 and int(data.get('agent_count', 0)) >= 4 and int(data.get('failed', 0)) == 0 and int(data.get('partial', 0)) == 0 and int(data.get('timed_out', 0)) == 0 and int(data.get('setup_blocked', 0)) == 0 and int(data.get('incomplete_evidence', 0)) == 0"; then
   add_check "comparison" "all_agent_29_task_comparison" "pass" "$comparison_summary" "All configured agents have clean current-suite evidence"
 else
   add_check "comparison" "all_agent_29_task_comparison" "blocked" "$comparison_summary" "Latest all-agent current-suite evidence is missing, partial, timed out, or incomplete"

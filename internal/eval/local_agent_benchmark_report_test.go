@@ -118,13 +118,12 @@ func Test_WriteLocalAgentComparisonReport_separatesCleanCEOFromExternalBlockers(
 	// Given
 	path := filepath.Join(t.TempDir(), "comparison-report.md")
 	summary := LocalAgentBenchmarkSummary{
-		Mode:               "local_agent_benchmark",
-		TaskCount:          1,
-		Concurrency:        2,
-		RunCount:           2,
-		Passed:             1,
-		TimedOut:           1,
-		IncompleteEvidence: 1,
+		Mode:         "local_agent_benchmark",
+		TaskCount:    1,
+		Concurrency:  2,
+		RunCount:     2,
+		Passed:       1,
+		SetupBlocked: 1,
 		Results: []LocalAgentBenchmarkResult{
 			{
 				ID:             "ceo_harness",
@@ -141,8 +140,8 @@ func Test_WriteLocalAgentComparisonReport_separatesCleanCEOFromExternalBlockers(
 				Name:           "OpenCode",
 				TaskID:         "docs-roadmap-cli-first",
 				Attempt:        1,
-				Status:         localAgentStatusTimeout,
-				EvidenceStatus: localAgentEvidenceIncomplete,
+				Status:         localAgentStatusSetupBlocked,
+				EvidenceStatus: localAgentEvidenceComplete,
 				PassedChecks:   0,
 				TotalChecks:    5,
 			},
@@ -163,7 +162,7 @@ func Test_WriteLocalAgentComparisonReport_separatesCleanCEOFromExternalBlockers(
 	for _, want := range []string{
 		"Overall comparison: blocked",
 		"CEO Harness result: clean",
-		"External blockers: OpenCode partial=0 fail=0 timeout=1 incomplete=1",
+		"External blockers: OpenCode partial=0 fail=0 timeout=0 setup_blocked=1 incomplete=0",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("comparison report missing %q:\n%s", want, text)

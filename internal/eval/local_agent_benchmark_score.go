@@ -146,6 +146,9 @@ func benchmarkExtraChangedFiles(task Task, changedFiles []string) []string {
 }
 
 func localAgentBenchmarkStatus(run localAgentRunResult, verdict string) string {
+	if localAgentSetupBlocked(run) {
+		return localAgentStatusSetupBlocked
+	}
 	if run.timedOut {
 		return localAgentStatusTimeout
 	}
@@ -170,7 +173,27 @@ func localAgentBenchmarkNote(status string) string {
 		return "agent command exited 0 but only partially satisfied benchmark scoring"
 	case localAgentStatusTimeout:
 		return "agent command timed out; process tree was canceled"
+	case localAgentStatusSetupBlocked:
+		return "agent provider setup is blocked; stdout/stderr captured the auth, quota, or credential issue"
 	default:
 		return "agent command or benchmark score failed"
 	}
+}
+
+func localAgentSetupBlocked(run localAgentRunResult) bool {
+	body := strings.ToLower(run.stdout + "\n" + run.stderr + "\n" + run.errText)
+	for _, marker := range []string{
+		"token plan usage limit reached",
+		"token refresh failed",
+		"api key appears to be invalid",
+		"api key appears to be invalid or may have expired",
+		"authentication_error",
+		"quota",
+		"usage limit",
+	} {
+		if strings.Contains(body, marker) {
+			return true
+		}
+	}
+	return false
 }

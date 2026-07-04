@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -410,6 +411,55 @@ printf 'done\n'
 		t.Fatalf("required artifact should be missing: %v", statErr)
 	}
 	requireFile(t, filepath.Join(root, "benchmark", "comparison-report.md"))
+}
+
+func Test_RunLocalAgentBenchmark_marks_provider_quota_as_setup_blocked(t *testing.T) {
+	// Given
+	binDir := t.TempDir()
+	writeExecutableContent(t, filepath.Join(binDir, "opencode"), `#!/bin/sh
+printf 'AI_APICallError: Token Plan usage limit reached\n' >&2
+sleep 5
+`)
+	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	root := t.TempDir()
+	tasksDir := filepath.Join(root, "tasks")
+	writeTaskSpec(t, tasksDir, `{
+		"id":"docs-one",
+		"category":"docs",
+		"title":"Update one",
+		"objective":"Refresh docs one.",
+		"required_changed_files":["docs/ONE.md"],
+		"required_artifacts":[".omo/evidence/docs-one.md"],
+		"required_diff_terms":["one-term"],
+		"required_report_fields":["changed_files"]
+	}`)
+
+	// When
+	summary, err := RunLocalAgentBenchmark(context.Background(), LocalAgentBenchmarkRequest{
+		TasksDir:        tasksDir,
+		OutputDir:       filepath.Join(root, "benchmark"),
+		TimeoutSeconds:  1,
+		Agents:          []string{"opencode"},
+		BenchmarkTaskID: "docs-one",
+	})
+	// Then
+	if err != nil {
+		t.Fatalf("RunLocalAgentBenchmark returned error: %v", err)
+	}
+	if summary.SetupBlocked != 1 || summary.TimedOut != 0 || summary.IncompleteEvidence != 0 {
+		t.Fatalf("summary = %+v, want setup-blocked with complete evidence", summary)
+	}
+	result := summary.Results[0]
+	if result.Status != localAgentStatusSetupBlocked || result.EvidenceStatus != localAgentEvidenceComplete {
+		t.Fatalf("result status=%q evidence=%q, want setup blocked complete", result.Status, result.EvidenceStatus)
+	}
+	stderr, err := os.ReadFile(filepath.Join(root, "benchmark", "opencode", "stderr.log"))
+	if err != nil {
+		t.Fatalf("read stderr evidence: %v", err)
+	}
+	if !strings.Contains(string(stderr), "Token Plan usage limit reached") {
+		t.Fatalf("stderr evidence missing provider quota error:\n%s", stderr)
+	}
 }
 
 func Test_RunCLI_runs_local_agent_benchmark_with_repeat_flag(t *testing.T) {

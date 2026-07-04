@@ -39,6 +39,7 @@ type LocalAgentBenchmarkSummary struct {
 	Partial            int                         `json:"partial"`
 	Failed             int                         `json:"failed"`
 	TimedOut           int                         `json:"timed_out"`
+	SetupBlocked       int                         `json:"setup_blocked,omitempty"`
 	Skipped            int                         `json:"skipped"`
 	IncompleteEvidence int                         `json:"incomplete_evidence"`
 	Results            []LocalAgentBenchmarkResult `json:"results"`

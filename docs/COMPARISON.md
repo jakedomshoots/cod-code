@@ -152,7 +152,7 @@ go run ./cmd/ceo-eval \
   --timeout-seconds 240
 ```
 
-The selected model is recorded in `summary.json` as `agent_models`. OpenCode benchmark runs also include `--print-logs --log-level INFO` so provider quota/auth failures are visible in `stderr.log`.
+The selected model is recorded in `summary.json` as `agent_models`. OpenCode benchmark runs also include `--print-logs --log-level INFO` so provider quota/auth failures are visible in `stderr.log`. When those logs show quota, token refresh, or invalid-key errors, the benchmark records `setup_blocked` instead of treating the run as a silent timeout.
 
 Run the focused cross-language suite against CEO Harness:
 

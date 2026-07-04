@@ -19,12 +19,13 @@ func writeLocalAgentComparisonReport(path string, summary LocalAgentBenchmarkSum
 	fmt.Fprintf(&builder, "Partial: %d\n", summary.Partial)
 	fmt.Fprintf(&builder, "Failed: %d\n", summary.Failed)
 	fmt.Fprintf(&builder, "Timed out: %d\n", summary.TimedOut)
+	fmt.Fprintf(&builder, "Setup blocked: %d\n", summary.SetupBlocked)
 	fmt.Fprintf(&builder, "Skipped: %d\n", summary.Skipped)
 	fmt.Fprintf(&builder, "Incomplete evidence: %d\n\n", summary.IncompleteEvidence)
 	writeLocalAgentComparisonDecision(&builder, summary, agentOrder, agentStats)
 	fmt.Fprintf(&builder, "## Per-Agent Status\n\n")
-	fmt.Fprintf(&builder, "| Agent | Runs | Pass | Partial | Fail | Timeout | Skipped | Evidence complete | Evidence incomplete | Duration ms |\n")
-	fmt.Fprintf(&builder, "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n")
+	fmt.Fprintf(&builder, "| Agent | Runs | Pass | Partial | Fail | Timeout | Setup blocked | Skipped | Evidence complete | Evidence incomplete | Duration ms |\n")
+	fmt.Fprintf(&builder, "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |\n")
 	for _, id := range agentOrder {
 		stats := agentStats[id]
 		if stats == nil {
@@ -32,13 +33,14 @@ func writeLocalAgentComparisonReport(path string, summary LocalAgentBenchmarkSum
 		}
 		fmt.Fprintf(
 			&builder,
-			"| %s | %d | %d | %d | %d | %d | %d | %d | %d | %d |\n",
+			"| %s | %d | %d | %d | %d | %d | %d | %d | %d | %d | %d |\n",
 			stats.Name,
 			stats.Runs,
 			stats.Passed,
 			stats.Partial,
 			stats.Failed,
 			stats.TimedOut,
+			stats.SetupBlocked,
 			stats.Skipped,
 			stats.EvidenceComplete,
 			stats.EvidenceIncomplete,
@@ -92,6 +94,7 @@ func writeLocalAgentComparisonDecision(builder *strings.Builder, summary LocalAg
 		summary.Partial == 0 &&
 		summary.Failed == 0 &&
 		summary.TimedOut == 0 &&
+		summary.SetupBlocked == 0 &&
 		summary.IncompleteEvidence == 0
 	ceoStats := agentStats["ceo_harness"]
 	ceoClean := ceoStats != nil &&
@@ -100,6 +103,7 @@ func writeLocalAgentComparisonDecision(builder *strings.Builder, summary LocalAg
 		ceoStats.Partial == 0 &&
 		ceoStats.Failed == 0 &&
 		ceoStats.TimedOut == 0 &&
+		ceoStats.SetupBlocked == 0 &&
 		ceoStats.EvidenceIncomplete == 0
 
 	fmt.Fprintf(builder, "## Readiness Decision\n\n")
@@ -122,8 +126,8 @@ func writeLocalAgentComparisonDecision(builder *strings.Builder, summary LocalAg
 		if stats == nil {
 			continue
 		}
-		if stats.Partial > 0 || stats.Failed > 0 || stats.TimedOut > 0 || stats.EvidenceIncomplete > 0 {
-			blockers = append(blockers, fmt.Sprintf("%s partial=%d fail=%d timeout=%d incomplete=%d", stats.Name, stats.Partial, stats.Failed, stats.TimedOut, stats.EvidenceIncomplete))
+		if stats.Partial > 0 || stats.Failed > 0 || stats.TimedOut > 0 || stats.SetupBlocked > 0 || stats.EvidenceIncomplete > 0 {
+			blockers = append(blockers, fmt.Sprintf("%s partial=%d fail=%d timeout=%d setup_blocked=%d incomplete=%d", stats.Name, stats.Partial, stats.Failed, stats.TimedOut, stats.SetupBlocked, stats.EvidenceIncomplete))
 		}
 	}
 	if len(blockers) == 0 {
@@ -140,6 +144,7 @@ type localAgentComparisonAgentStats struct {
 	Partial            int
 	Failed             int
 	TimedOut           int
+	SetupBlocked       int
 	Skipped            int
 	EvidenceComplete   int
 	EvidenceIncomplete int
@@ -156,6 +161,8 @@ func (stats *localAgentComparisonAgentStats) add(result LocalAgentBenchmarkResul
 		stats.Partial++
 	case localAgentStatusTimeout:
 		stats.TimedOut++
+	case localAgentStatusSetupBlocked:
+		stats.SetupBlocked++
 	case localAgentStatusSkipped:
 		stats.Skipped++
 	default:

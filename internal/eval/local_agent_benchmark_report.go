@@ -14,6 +14,8 @@ func accumulateLocalAgentBenchmarkStatus(summary *LocalAgentBenchmarkSummary, st
 		summary.Partial++
 	case localAgentStatusTimeout:
 		summary.TimedOut++
+	case localAgentStatusSetupBlocked:
+		summary.SetupBlocked++
 	case localAgentStatusSkipped:
 		summary.Skipped++
 	default:
@@ -30,6 +32,9 @@ func accumulateLocalAgentBenchmarkEvidence(summary *LocalAgentBenchmarkSummary, 
 func localAgentBenchmarkEvidenceStatus(status string, failedChecks []CheckResult) string {
 	if status == localAgentStatusSkipped {
 		return localAgentEvidenceNotRun
+	}
+	if status == localAgentStatusSetupBlocked {
+		return localAgentEvidenceComplete
 	}
 	for _, check := range failedChecks {
 		if isEvidenceCheck(check.Name) {
@@ -82,6 +87,8 @@ func localAgentBenchmarkFinding(result LocalAgentBenchmarkResult) string {
 	switch result.Status {
 	case localAgentStatusTimeout:
 		return result.Name + " timed out on the benchmark task"
+	case localAgentStatusSetupBlocked:
+		return result.Name + " setup is blocked by provider auth, quota, or credential state"
 	case localAgentStatusSkipped:
 		return result.Name + " binary was not found"
 	case localAgentStatusPartial:
@@ -95,6 +102,8 @@ func localAgentBenchmarkNextStep(result LocalAgentBenchmarkResult) string {
 	switch result.Status {
 	case localAgentStatusTimeout:
 		return "shorten the task prompt or add a tool-specific timeout/auth preflight"
+	case localAgentStatusSetupBlocked:
+		return "repair the provider login, quota, or selected model, then rerun with saved stderr/stdout evidence"
 	case localAgentStatusSkipped:
 		return result.SetupHint
 	case localAgentStatusPartial:
@@ -114,6 +123,9 @@ func writeLocalAgentBenchmarkMarkdown(path string, summary LocalAgentBenchmarkSu
 	fmt.Fprintf(&builder, "Timeout retries: %d\n", summary.TimeoutRetries)
 	if len(summary.AgentTimeouts) > 0 {
 		fmt.Fprintf(&builder, "Agent timeouts: %s\n", formatAgentTimeouts(summary.AgentTimeouts))
+	}
+	if len(summary.AgentModels) > 0 {
+		fmt.Fprintf(&builder, "Agent models: %s\n", formatAgentModels(summary.AgentModels))
 	}
 	fmt.Fprintf(&builder, "Runs: %d\n\n", summary.RunCount)
 	fmt.Fprintf(&builder, "| Task | Run | Retry | Agent | Status | Score | Exit | Duration ms | Extra files | Changed files | Evidence |\n")
@@ -140,6 +152,7 @@ func writeLocalAgentBenchmarkMarkdown(path string, summary LocalAgentBenchmarkSu
 	fmt.Fprintf(&builder, "Partial: %d\n", summary.Partial)
 	fmt.Fprintf(&builder, "Failed: %d\n", summary.Failed)
 	fmt.Fprintf(&builder, "Timed out: %d\n", summary.TimedOut)
+	fmt.Fprintf(&builder, "Setup blocked: %d\n", summary.SetupBlocked)
 	fmt.Fprintf(&builder, "Skipped: %d\n", summary.Skipped)
 	fmt.Fprintf(&builder, "Incomplete evidence: %d\n", summary.IncompleteEvidence)
 	return writeTextFile(path, builder.String())
@@ -152,6 +165,18 @@ func formatAgentTimeouts(timeouts map[string]int) string {
 	parts := make([]string, 0, len(timeouts))
 	for agent, seconds := range timeouts {
 		parts = append(parts, fmt.Sprintf("%s=%ds", agent, seconds))
+	}
+	sort.Strings(parts)
+	return strings.Join(parts, ", ")
+}
+
+func formatAgentModels(models map[string]string) string {
+	if len(models) == 0 {
+		return ""
+	}
+	parts := make([]string, 0, len(models))
+	for agent, model := range models {
+		parts = append(parts, fmt.Sprintf("%s=%s", agent, model))
 	}
 	sort.Strings(parts)
 	return strings.Join(parts, ", ")
