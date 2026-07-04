@@ -311,6 +311,17 @@
     "required_report_fields": ["run_manifest.changed_file_count", "provider_route_decisions", "evidence_paths"]
   },
   {
+    "id": "multi-file-finalizer-check-fix",
+    "category": "multi_file",
+    "title": "Finalizer check-fix spans status, finalizer, and docs",
+    "objective": "Update production finalizer check-fix behavior across CLI status, finalizer policy, and operator docs so blocked public actions produce explicit repair commands and evidence mismatch reasons.",
+    "required_changed_files": ["internal/cli/finalizer_check_fix.go", "internal/ceo/finalizer_check_fix.go", "docs/FINALIZER_CHECK_FIX.md"],
+    "required_commands": ["go test ./internal/cli ./internal/ceo -run Test_BenchmarkFixture -count=1"],
+    "required_artifacts": [".omo/evidence/multi-file-finalizer-check-fix.md"],
+    "required_diff_terms": ["finalizer check-fix", "blocked public action", "repair command", "evidence mismatch"],
+    "required_report_fields": ["run_manifest.changed_file_count", "check_results", "evidence_paths", "verification_contract.status"]
+  },
+  {
     "id": "report-quality-evidence-summary",
     "category": "report_quality",
     "title": "Report quality evidence is complete",

@@ -333,6 +333,10 @@ preview_digest_from_stdout() {
   sed -n 's/.*"preview_digest": "\([^"]*\)".*/\1/p' "$1" | head -n 1
 }
 
+job_id_from_stdout() {
+  sed -n 's/.*"job_id": "\([^"]*\)".*/\1/p' "$1" | tail -n 1
+}
+
 prepare_repo_workspace() {
   source_path="$1"
   evidence_repo_dir="$2"
@@ -417,7 +421,7 @@ write_index_header() {
     printf '%s\n' "| scenario-03-observe-run | Run CEO Harness with a local deterministic model in observe mode | listed only | JSON report, pass/fail note |"
     printf '%s\n' "| scenario-04-patch-preview | Capture a patch approval digest on a controlled fixture | listed only | preview report and digest |"
     printf '%s\n' "| scenario-05-timeout-guard | Prove hung model commands do not look successful | listed only | expected-failure transcript |"
-    printf '%s\n' "| scenario-06-write-probe | Prove preview plus approved write mutates only the copied workspace | listed only | preview digest, apply report, after-state git status |"
+    printf '%s\n' "| scenario-06-write-probe | Prove preview plus approved write mutates only the copied workspace and can roll back | listed only | preview digest, apply report, rollback report, after-rollback git status |"
     printf '%s\n' "| scenario-07-feature-edit-probe | Prove a repo-specific feature note can be previewed and approved in a copied workspace | listed only | feature file, preview digest, after-state git status |"
     printf '%s\n' "| scenario-08-app-code-probe | Prove a source-code module can be previewed and approved in a copied workspace | listed only | app-code file, preview digest, after-state git status |"
     printf '%s\n' "| scenario-09-integrated-app-code-probe | Prove an existing source file can be previewed and approved in a copied workspace | listed only | target path, modified source file, preview digest, after-state git status |"
@@ -577,8 +581,28 @@ run_write_probe() {
     return 1
   fi
 
-  capture_git_status_only "$probe_repo_path" "$probe_dir/git-status-after.txt"
-  printf '%s\n' "approved write changed copied workspace only" >"$probe_dir/pass-fail-note.txt"
+  capture_git_status_only "$probe_repo_path" "$probe_dir/git-status-after-apply.txt"
+  job_id=$(job_id_from_stdout "$probe_dir/apply/stdout.txt")
+  if [ -z "$job_id" ]; then
+    printf '%s\n' "write probe apply output did not include a job_id for rollback" >"$probe_dir/pass-fail-note.txt"
+    return 1
+  fi
+  report_path="$probe_repo_path/ceo-artifacts/jobs/$job_id.json"
+  if [ ! -f "$report_path" ]; then
+    printf '%s\n' "write probe rollback report missing: $report_path" >"$probe_dir/pass-fail-note.txt"
+    return 1
+  fi
+  printf '%s\n' "$report_path" >"$probe_dir/rollback-report-path.txt"
+  if ! run_capture "$probe_dir/rollback" "$probe_bin" rollback "$report_path" --workspace "$probe_repo_path" --format json; then
+    printf '%s\n' "write probe rollback failed" >"$probe_dir/pass-fail-note.txt"
+    return 1
+  fi
+  if [ "$(cat "$probe_file")" != "old" ]; then
+    printf '%s\n' "write probe file content did not roll back to expected value" >"$probe_dir/pass-fail-note.txt"
+    return 1
+  fi
+  capture_git_status_only "$probe_repo_path" "$probe_dir/git-status-after-rollback.txt"
+  printf '%s\n' "approved write changed copied workspace only and rollback restored the probe file" >"$probe_dir/pass-fail-note.txt"
   return 0
 }
 
@@ -773,16 +797,22 @@ select_multi_file_source_files() {
       "$multi_repo_path/src/App.js" \
       "$multi_repo_path/src/main.js" \
       "$multi_repo_path/src/App.ts" \
-      "$multi_repo_path/src/main.ts"; do
+      "$multi_repo_path/src/main.ts" \
+      "$multi_repo_path/app/page.tsx" \
+      "$multi_repo_path/app/layout.tsx" \
+      "$multi_repo_path/cmd/ceo-packet/main.go" \
+      "$multi_repo_path/internal/cli/run.go"; do
       if [ -f "$candidate" ]; then
         printf '%s\n' "$candidate"
       fi
     done
-    if [ -d "$multi_repo_path/src" ]; then
-      find "$multi_repo_path/src" -type f \( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' \) \
-        | grep -Ev '/(__tests__|test)/|[._](test|spec)\.' \
-        | sort
-    fi
+    for source_dir in src app components lib internal cmd pkg convex; do
+      if [ -d "$multi_repo_path/$source_dir" ]; then
+        find "$multi_repo_path/$source_dir" -type f \( -name '*.go' -o -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.mjs' -o -name '*.cjs' \) \
+          | grep -Ev '/(__tests__|test|tests|e2e|dist|out|node_modules)/|[._](test|spec)\.' \
+          | sort
+      fi
+    done
   } | awk '!seen[$0]++' | sed -n '1,2p'
 }
 
@@ -803,12 +833,24 @@ run_multi_file_single_app_code_edit() {
   old_content=$(cat "$target_file")
   repo_js=$(js_string_escape "$multi_repo_name")
   task_js=$(js_string_escape "$multi_task_text")
-  marker=$(printf '%s\n' \
-    "export const $variable_name = {" \
-    "  repo: \"$repo_js\"," \
-    "  task: \"$task_js\"," \
-    "  result: \"approved multi-file copied-workspace app-code edit\"" \
-    "};")
+  case "$target_file" in
+    *.go)
+      marker=$(printf '%s\n' \
+        "var $variable_name = \"approved multi-file copied-workspace app-code edit for $repo_js: $task_js\"")
+      ;;
+    *.js|*.jsx|*.ts|*.tsx|*.mjs|*.cjs)
+      marker=$(printf '%s\n' \
+        "export const $variable_name = {" \
+        "  repo: \"$repo_js\"," \
+        "  task: \"$task_js\"," \
+        "  result: \"approved multi-file copied-workspace app-code edit\"" \
+        "};")
+      ;;
+    *)
+      marker=$(printf '%s\n' \
+        "/* $variable_name: approved multi-file copied-workspace app-code edit for $repo_js: $task_js */")
+      ;;
+  esac
   new_content=$(printf '%s\n\n%s' "$old_content" "$marker")
 
   if ! run_capture "$multi_dir/preview-$label" "$multi_bin" --workspace "$multi_repo_path" --dry-run --replace "$target_rel" "$old_content" "$new_content" --format json "Preview copied workspace multi-file app-code probe"; then

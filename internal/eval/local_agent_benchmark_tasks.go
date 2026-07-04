@@ -49,6 +49,7 @@ var localAgentBenchmarkTaskSuites = map[string][]string{
 		"multi-file-release-readiness-publish-boundary",
 		"multi-file-lean-context-autonomy",
 		"multi-file-secret-safe-provider-proof",
+		"multi-file-finalizer-check-fix",
 		"report-quality-evidence-summary",
 	},
 	"cross-language-core": {
