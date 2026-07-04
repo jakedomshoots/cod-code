@@ -11,16 +11,18 @@ import (
 )
 
 type productionActionsReport struct {
-	Path                string            `json:"path"`
-	Status              string            `json:"status"`
-	RequiredActionCount int               `json:"required_action_count"`
-	EnvReadyActionCount int               `json:"env_ready_action_count"`
-	ReadyActionCount    int               `json:"ready_action_count"`
-	ActionStateCounts   map[string]int    `json:"action_state_counts,omitempty"`
-	NextOnly            bool              `json:"next_only,omitempty"`
-	CommandsOnly        bool              `json:"commands_only,omitempty"`
-	Filter              map[string]string `json:"filter,omitempty"`
-	Actions             []map[string]any  `json:"actions"`
+	Path                 string            `json:"path"`
+	Status               string            `json:"status"`
+	RequiredActionCount  int               `json:"required_action_count"`
+	EnvReadyActionCount  int               `json:"env_ready_action_count"`
+	ReadyActionCount     int               `json:"ready_action_count"`
+	RunnableCommandCount int               `json:"runnable_command_count"`
+	BlockedCommandCount  int               `json:"blocked_command_count"`
+	ActionStateCounts    map[string]int    `json:"action_state_counts,omitempty"`
+	NextOnly             bool              `json:"next_only,omitempty"`
+	CommandsOnly         bool              `json:"commands_only,omitempty"`
+	Filter               map[string]string `json:"filter,omitempty"`
+	Actions              []map[string]any  `json:"actions"`
 }
 
 func runProductionActions(out io.Writer, opts options) error {
@@ -57,16 +59,18 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 	annotated := annotateProductionActions(raw.Actions, filepath.Dir(status.FinalizerNextActions.JSONPath))
 	actions := filterProductionActions(annotated, opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionState, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly, opts.productionActionsNextOnly)
 	return productionActionsReport{
-		Path:                status.FinalizerNextActions.JSONPath,
-		Status:              raw.Status,
-		RequiredActionCount: len(actions),
-		EnvReadyActionCount: countEnvReadyProductionActions(actions),
-		ReadyActionCount:    countReadyProductionActions(actions),
-		ActionStateCounts:   countProductionActionStates(actions),
-		NextOnly:            opts.productionActionsNextOnly,
-		CommandsOnly:        opts.productionActionsCommandsOnly,
-		Filter:              productionActionFilter(opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionState, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly, opts.productionActionsNextOnly),
-		Actions:             actions,
+		Path:                 status.FinalizerNextActions.JSONPath,
+		Status:               raw.Status,
+		RequiredActionCount:  len(actions),
+		EnvReadyActionCount:  countEnvReadyProductionActions(actions),
+		ReadyActionCount:     countReadyProductionActions(actions),
+		RunnableCommandCount: countRunnableProductionActionCommands(actions),
+		BlockedCommandCount:  countBlockedProductionActionCommands(actions),
+		ActionStateCounts:    countProductionActionStates(actions),
+		NextOnly:             opts.productionActionsNextOnly,
+		CommandsOnly:         opts.productionActionsCommandsOnly,
+		Filter:               productionActionFilter(opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionState, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly, opts.productionActionsNextOnly),
+		Actions:              actions,
 	}, nil
 }
 
@@ -533,6 +537,26 @@ func countReadyProductionActions(actions []map[string]any) int {
 	return count
 }
 
+func countRunnableProductionActionCommands(actions []map[string]any) int {
+	count := 0
+	for _, action := range actions {
+		if len(stringSlice(action["command"])) > 0 && actionReady(action) {
+			count++
+		}
+	}
+	return count
+}
+
+func countBlockedProductionActionCommands(actions []map[string]any) int {
+	count := 0
+	for _, action := range actions {
+		if len(stringSlice(action["command"])) > 0 && !actionReady(action) {
+			count++
+		}
+	}
+	return count
+}
+
 func countProductionActionStates(actions []map[string]any) map[string]int {
 	counts := map[string]int{}
 	for _, action := range actions {
@@ -664,6 +688,8 @@ func renderProductionActionsText(report productionActionsReport) string {
 	fmt.Fprintf(&builder, "Required actions: %d\n", report.RequiredActionCount)
 	fmt.Fprintf(&builder, "Env ready: %d\n", report.EnvReadyActionCount)
 	fmt.Fprintf(&builder, "Ready now: %d\n", report.ReadyActionCount)
+	fmt.Fprintf(&builder, "Runnable commands: %d\n", report.RunnableCommandCount)
+	fmt.Fprintf(&builder, "Blocked commands: %d\n", report.BlockedCommandCount)
 	if len(report.ActionStateCounts) > 0 {
 		fmt.Fprintf(&builder, "States: %s\n", renderActionStateCounts(report.ActionStateCounts))
 	}
