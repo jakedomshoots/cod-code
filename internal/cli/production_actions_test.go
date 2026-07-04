@@ -126,7 +126,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Production actions: blocked",
 		"Required actions: 5",
 		"Env ready: 4",
-		"Ready now: 2",
+		"Ready now: 0",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 		"(missing env: OPENAI_API_KEY)",
 		"Provider blocker: missing_api_key_env",
@@ -166,11 +166,11 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &body); err != nil {
 		t.Fatalf("decode production actions: %v\n%s", err, out.String())
 	}
-	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || body.ReadyActionCount != 2 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
+	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || body.ReadyActionCount != 0 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
 		t.Fatalf("body = %+v, want five actions starting with provider-openai", body)
 	}
-	if body.Actions[0]["action_state"] != "missing_env" || body.Actions[1]["action_state"] != "ready" || body.Actions[3]["action_state"] != "waiting" {
-		t.Fatalf("action states = %#v/%#v/%#v, want missing_env/ready/waiting", body.Actions[0]["action_state"], body.Actions[1]["action_state"], body.Actions[3]["action_state"])
+	if body.Actions[0]["action_state"] != "missing_env" || body.Actions[1]["action_state"] != "setup_blocked" || body.Actions[2]["action_state"] != "setup_blocked" || body.Actions[3]["action_state"] != "waiting" {
+		t.Fatalf("action states = %#v/%#v/%#v/%#v, want missing_env/setup_blocked/setup_blocked/waiting", body.Actions[0]["action_state"], body.Actions[1]["action_state"], body.Actions[2]["action_state"], body.Actions[3]["action_state"])
 	}
 	if blockedBy := stringSlice(body.Actions[3]["blocked_by"]); len(blockedBy) != 1 || blockedBy[0] != "competitor-smoke" {
 		t.Fatalf("comparison blocked_by = %#v, want competitor-smoke", body.Actions[3]["blocked_by"])
@@ -246,6 +246,25 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 
 	out.Reset()
+	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--format", "text", "--action-state", "setup_blocked"}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	text = out.String()
+	for _, want := range []string{
+		"Required actions: 2",
+		"Filter: state=setup_blocked",
+		"release-readiness [release_proof]: Prove public release readiness",
+		"competitor-smoke [competitor_setup]: Fix competitor setup",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("setup-blocked production actions text missing %q:\n%s", want, text)
+		}
+	}
+	if strings.Contains(text, "provider-openai [provider_proof]") {
+		t.Fatalf("setup-blocked production actions included provider missing-env action:\n%s", text)
+	}
+
+	out.Reset()
 	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--format", "text", "--action-state", "waiting"}); err != nil {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
 	}
@@ -269,7 +288,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	for _, want := range []string{
 		"Required actions: 4",
 		"Env ready: 4",
-		"Ready now: 2",
+		"Ready now: 0",
 		"Filter: env_ready=true",
 		"release-readiness [release_proof]: Prove public release readiness",
 	} {
@@ -287,11 +306,9 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	text = out.String()
 	for _, want := range []string{
-		"Required actions: 2",
-		"Ready now: 2",
+		"Required actions: 0",
+		"Ready now: 0",
 		"Filter: ready=true",
-		"release-readiness [release_proof]: Prove public release readiness",
-		"competitor-smoke [competitor_setup]: Fix competitor setup",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("ready-only production actions text missing %q:\n%s", want, text)
@@ -299,6 +316,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	for _, notWant := range []string{
 		"provider-openai [provider_proof]",
+		"release-readiness [release_proof]",
+		"competitor-smoke [competitor_setup]",
 		"all-agent-29-comparison [comparison]",
 		"production-readiness [final_readiness]",
 	} {
@@ -313,17 +332,16 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	text = out.String()
 	for _, want := range []string{
-		"Required actions: 1",
-		"Ready now: 1",
+		"Required actions: 0",
+		"Ready now: 0",
 		"Filter: next=true",
-		"release-readiness [release_proof]: Prove public release readiness",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("next production actions text missing %q:\n%s", want, text)
 		}
 	}
-	if strings.Contains(text, "competitor-smoke [competitor_setup]") {
-		t.Fatalf("next production actions included second ready action:\n%s", text)
+	if strings.Contains(text, "release-readiness [release_proof]") || strings.Contains(text, "competitor-smoke [competitor_setup]") {
+		t.Fatalf("next production actions included setup-blocked action:\n%s", text)
 	}
 
 	out.Reset()

@@ -112,10 +112,24 @@ func productionActionState(action map[string]any) string {
 	if missingEnv := actionString(action, "missing_required_env"); missingEnv != "" {
 		return "missing_env"
 	}
+	if hasSetupBlocker(action) {
+		return "setup_blocked"
+	}
 	if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
 		return "waiting"
 	}
 	return "ready"
+}
+
+func hasSetupBlocker(action map[string]any) bool {
+	if summary, _ := action["release_summary"].(map[string]any); summary != nil {
+		return numberValue(summary["blocked_count"]) > 0 || !boolValue(summary["public_release_ready"])
+	}
+	if summary, _ := action["competitor_summary"].(map[string]any); summary != nil {
+		blockers, _ := summary["blockers"].([]map[string]string)
+		return len(blockers) > 0 || numberValue(summary["setup_blocked"]) > 0 || numberValue(summary["skipped"]) > 0 || numberValue(summary["smoke_failed"]) > 0
+	}
+	return false
 }
 
 func annotateProductionActionDependencies(actions []map[string]any) {
@@ -156,16 +170,8 @@ func actionHasOpenBlocker(action map[string]any) bool {
 	if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
 		return true
 	}
-	if summary, _ := action["release_summary"].(map[string]any); summary != nil {
-		if numberValue(summary["blocked_count"]) > 0 || !boolValue(summary["public_release_ready"]) {
-			return true
-		}
-	}
-	if summary, _ := action["competitor_summary"].(map[string]any); summary != nil {
-		blockers, _ := summary["blockers"].([]map[string]string)
-		if len(blockers) > 0 || numberValue(summary["setup_blocked"]) > 0 || numberValue(summary["skipped"]) > 0 || numberValue(summary["smoke_failed"]) > 0 {
-			return true
-		}
+	if hasSetupBlocker(action) {
+		return true
 	}
 	status := actionString(action, "status")
 	return status != "" && status != "pass"
@@ -383,7 +389,7 @@ func countReadyProductionActions(actions []map[string]any) int {
 
 func actionReady(action map[string]any) bool {
 	envReady, _ := action["env_ready"].(bool)
-	return envReady && len(stringSlice(action["blocked_by"])) == 0
+	return envReady && !hasSetupBlocker(action) && len(stringSlice(action["blocked_by"])) == 0
 }
 
 func filterProductionActions(actions []map[string]any, id string, kind string, provider string, state string, envReadyOnly bool, readyOnly bool, nextOnly bool) []map[string]any {

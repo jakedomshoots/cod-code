@@ -119,6 +119,7 @@ ceo-packet production-actions --workspace . --format text --action-kind provider
 ceo-packet production-actions --workspace . --format text --action-provider openai
 ceo-packet production-actions --workspace . --format text --action-state missing_env
 ceo-packet production-actions --workspace . --format text --action-state empty_env
+ceo-packet production-actions --workspace . --format text --action-state setup_blocked
 ceo-packet production-actions --workspace . --format text --env-ready-only
 ceo-packet production-actions --workspace . --format text --ready-only
 ceo-packet production-actions --workspace . --format text --next
