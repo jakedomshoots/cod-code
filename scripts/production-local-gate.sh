@@ -154,6 +154,19 @@ if required > 0 and runnable + blocked <= 0:
     print("production-local-gate: fail production action command counts missing")
     raise SystemExit(1)
 
+action_rows = actions.get("actions") or []
+missing_reasons = []
+for action in action_rows:
+    action_id = action.get("id") or "<unknown>"
+    if not action.get("action_state"):
+        print(f"production-local-gate: fail action_state missing for {action_id}")
+        raise SystemExit(1)
+    if not action.get("action_reason"):
+        missing_reasons.append(action_id)
+if missing_reasons:
+    print("production-local-gate: fail action_reason missing for " + ", ".join(missing_reasons))
+    raise SystemExit(1)
+
 mismatches = int(actions.get("evidence_declared_mismatch_count", 0) or 0)
 if mismatches > 0:
     print(f"production-local-gate: fail production action evidence mismatches={mismatches}")
@@ -183,9 +196,14 @@ blocked_lines = sum(1 for line in commands_text.splitlines() if line.startswith(
 if blocked_lines != blocked:
     print(f"production-local-gate: fail blocked command lines={blocked_lines} expected={blocked}")
     raise SystemExit(1)
+reason_lines = sum(1 for line in commands_text.splitlines() if line.startswith("# ") and " reason: " in line)
+if required > 0 and reason_lines <= 0:
+    print("production-local-gate: fail production action commands missing blocker reasons")
+    raise SystemExit(1)
 
 print(f"production-local-gate: production_actions={status}")
 print(f"production-local-gate: runnable_commands={runnable}")
 print(f"production-local-gate: blocked_commands={blocked}")
+print(f"production-local-gate: action_reasons={len(action_rows)}")
 print(f"production-local-gate: finalizer_setup_actions={finalizer.get('setup_required_action_count', 0)}")
 PY

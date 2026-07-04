@@ -44,6 +44,7 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		"production-local-gate: production_actions=",
 		"production-local-gate: runnable_commands=",
 		"production-local-gate: blocked_commands=",
+		"production-local-gate: action_reasons=",
 		"production-local-gate: finalizer_setup_actions=",
 	} {
 		if !strings.Contains(body, want) {
@@ -70,9 +71,14 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 	if !strings.Contains(commands, "# blocked command:") {
 		t.Fatalf("production action command artifact should comment blocked commands:\n%s", commands)
 	}
+	if !strings.Contains(commands, " reason: ") {
+		t.Fatalf("production action command artifact should include blocker reasons:\n%s", commands)
+	}
 	actions := readTextFile(t, filepath.Join(outputDir, "production-actions.json"))
 	for _, want := range []string{
 		`"path":`,
+		`"action_reason":`,
+		`"action_state":`,
 		`"runnable_command_count":`,
 		`"blocked_command_count":`,
 		`"evidence_declared_match_count":`,
