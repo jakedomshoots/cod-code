@@ -151,11 +151,24 @@ func Test_ProductionFinalizeScript_marksSetupBlockedCompetitorSmokeBlocked(t *te
 		}
 	}
 
+	nextActionsJSON := readTextFile(t, filepath.Join(outputDir, "next-actions.json"))
+	for _, want := range []string{
+		`"required_action_count": 2`,
+		`"id": "action-01"`,
+		"Fix competitor setup before final comparison",
+		`"id": "action-02"`,
+	} {
+		if !strings.Contains(nextActionsJSON, want) {
+			t.Fatalf("next-actions.json missing %q:\n%s", want, nextActionsJSON)
+		}
+	}
+
 	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
 	for _, want := range []string{
 		`"status": "blocked"`,
 		`"competitor-smoke"`,
 		`"next_actions": {`,
+		`"json_path": "next-actions.json"`,
 		`"required_action_count": 2`,
 	} {
 		if !strings.Contains(summary, want) {

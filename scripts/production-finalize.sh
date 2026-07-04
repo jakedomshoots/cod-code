@@ -378,7 +378,7 @@ fi
   fi
 } >"$output_dir/next-actions.md"
 
-python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output_dir/next-actions.md" <<'PY'
+python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output_dir/next-actions.md" "$output_dir/next-actions.json" <<'PY'
 import json
 import sys
 import pathlib
@@ -394,6 +394,26 @@ with open(sys.argv[1], "r", encoding="utf-8") as handle:
             "detail": detail,
         })
 
+action_lines = [
+    line[2:] for line in pathlib.Path(sys.argv[4]).read_text(encoding="utf-8").splitlines()
+    if line.startswith("- ") and line != "- No next actions remain."
+]
+actions = []
+for index, line in enumerate(action_lines, start=1):
+    actions.append({
+        "id": f"action-{index:02d}",
+        "text": line,
+    })
+
+with open(sys.argv[5], "w", encoding="utf-8") as handle:
+    json.dump({
+        "schema_version": 1,
+        "status": sys.argv[3],
+        "required_action_count": len(actions),
+        "actions": actions,
+    }, handle, indent=2)
+    handle.write("\n")
+
 summary = {
     "schema_version": 1,
     "status": sys.argv[3],
@@ -405,10 +425,8 @@ summary = {
     "publish_actions_performed": False,
     "next_actions": {
         "path": "next-actions.md",
-        "required_action_count": sum(
-            1 for line in pathlib.Path(sys.argv[4]).read_text(encoding="utf-8").splitlines()
-            if line.startswith("- ") and line != "- No next actions remain."
-        ),
+        "json_path": "next-actions.json",
+        "required_action_count": len(actions),
     },
     "steps": steps,
 }
