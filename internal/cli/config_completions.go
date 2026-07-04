@@ -52,6 +52,10 @@ func completionWords() string {
 	return "start run gauntlet doctor inbox status production-status production-actions production-finalize resume retry rollback explain-failure review context config eval"
 }
 
+func productionActionStateWords() string {
+	return "ready missing_env empty_env setup_blocked waiting"
+}
+
 func zshCompletion() string {
 	return `#compdef ceo-packet
 local -a commands
@@ -64,6 +68,13 @@ case $words[2] in
     _arguments '2:config command:((check doctor explain completions init))' \
       '--shell[completion shell]:shell:(zsh bash fish)' \
       '--output-dir[write completion file to directory]:directory:_files -/'
+    ;;
+  production-actions)
+    _arguments \
+      '--action-state[action state]:state:(` + productionActionStateWords() + `)' \
+      '--action-kind[action kind]:kind:(release_proof provider_proof competitor_setup comparison final_readiness)' \
+      '--action-provider[provider]:provider:(openai openrouter moonshot kimi codex)' \
+      '--format[output format]:format:(json text events)'
     ;;
 esac
 `
@@ -87,6 +98,18 @@ func bashCompletion() string {
     COMPREPLY=( $(compgen -W "ceo_harness codex_cli opencode pi" -- "$cur") )
     return 0
   fi
+  if [[ "${COMP_WORDS[1]}" == production-actions && "$prev" == --action-state ]]; then
+    COMPREPLY=( $(compgen -W "` + productionActionStateWords() + `" -- "$cur") )
+    return 0
+  fi
+  if [[ "${COMP_WORDS[1]}" == production-actions && "$prev" == --action-kind ]]; then
+    COMPREPLY=( $(compgen -W "release_proof provider_proof competitor_setup comparison final_readiness" -- "$cur") )
+    return 0
+  fi
+  if [[ "${COMP_WORDS[1]}" == production-actions && "$prev" == --action-provider ]]; then
+    COMPREPLY=( $(compgen -W "openai openrouter moonshot kimi codex" -- "$cur") )
+    return 0
+  fi
   if [[ "$prev" == --shell ]]; then
     COMPREPLY=( $(compgen -W "zsh bash fish" -- "$cur") )
     return 0
@@ -101,6 +124,9 @@ func fishCompletion() string {
 complete -c ceo-packet -f -n "__fish_seen_subcommand_from config" -a "check doctor explain completions init"
 complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l agents -a "ceo_harness codex_cli opencode pi"
 complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l output-dir -r
+complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-state -a "` + productionActionStateWords() + `"
+complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-kind -a "release_proof provider_proof competitor_setup comparison final_readiness"
+complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-provider -a "openai openrouter moonshot kimi codex"
 complete -c ceo-packet -n "__fish_seen_subcommand_from completions" -l shell -a "zsh bash fish"
 complete -c ceo-packet -n "__fish_seen_subcommand_from completions" -l output-dir -r
 `
