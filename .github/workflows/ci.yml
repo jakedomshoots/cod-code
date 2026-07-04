@@ -39,3 +39,14 @@ jobs:
 
       - name: Build
         run: go build -trimpath -o bin/ceo-packet ./cmd/ceo-packet
+
+      - name: Local production gate
+        run: |
+          sh scripts/release-local.sh
+          sh scripts/production-local-gate.sh --dist dist --output-dir .omo/evidence/production-local-gate
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-local-gate-evidence
+          path: .omo/evidence/production-local-gate/**

@@ -8,7 +8,7 @@ CEO Harness is now a productized local CLI, not just a prototype folder. The cor
 
 - Git repository initialized on `main`.
 - Local build, install, smoke, dogfood, and release scripts.
-- CI workflow for tests, vet, smoke, dogfood, race, and build.
+- CI workflow for tests, vet, smoke, dogfood, race, build, and the local production gate.
 - Local release workflow for versioned archives, checksums, a release manifest, verifier, and a draft Homebrew formula.
 - MIT license, changelog, task runner, Makefile fallback, editor config, and project instructions.
 
@@ -122,6 +122,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Added public release readiness evidence through `scripts/release-readiness.sh`; it writes `index.md`, `summary.json`, preflight output, git remote state, and GitHub auth state without publishing anything.
 - Added production-readiness aggregate evidence through `scripts/production-readiness.sh`; it summarizes release, provider, eval, security, endurance, and all-agent comparison proof in one packet without publishing or calling paid providers, writes `launch-checklist.md` with the exact public-production actions left, and fingerprints that checklist in `summary.json`.
 - Added `ceo-packet production-status`, a read-only operator command that reports the latest local/public production-readiness state from saved evidence.
+- Added `scripts/production-local-gate.sh` and CI artifact upload so source CI fails on local production regressions while preserving public-production blockers as evidence.
 - Strict checks now run `sh -n` across shell scripts even when ShellCheck is not installed; ShellCheck remains an optional deeper lint layer.
 - Rollback now covers created-file model patches as well as normal replacement patches; created-file rollback refuses to delete if the file content changed after creation.
 - Default `--help` is now compact and points advanced users to `--help-advanced`; the full reference remains available without loading the first screen with every flag.

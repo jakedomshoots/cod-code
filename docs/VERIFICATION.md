@@ -25,6 +25,9 @@ Status date: 2026-07-03
 - Latest production status command:
   - `ceo-packet production-status --workspace . --format text`
   - Result: reports `Local ready: true`, `Public ready: false`, blocked checks, and the launch checklist next action from saved evidence.
+- Latest local production gate:
+  - `sh scripts/production-local-gate.sh --dist dist --output-dir .omo/evidence/production-local-gate-r1`
+  - Result: pass. Local production readiness is true; public blockers remain recorded as evidence.
 - Latest live external-agent comparison:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-25-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 100 runs / 99 pass / 0 partial / 0 fail / 1 timed out / 0 skipped / 1 incomplete evidence.
