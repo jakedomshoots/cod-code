@@ -75,6 +75,8 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		`"path":`,
 		`"runnable_command_count":`,
 		`"blocked_command_count":`,
+		`"evidence_declared_match_count":`,
+		`"evidence_declared_mismatch_count": 0`,
 	} {
 		if !strings.Contains(actions, want) {
 			t.Fatalf("production action artifact missing %q:\n%s", want, actions)

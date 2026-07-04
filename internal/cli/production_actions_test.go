@@ -161,6 +161,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Ready now: 0",
 		"Runnable commands: 0",
 		"Blocked commands: 4",
+		"Evidence matches: declared=1 mismatched=0",
 		"States: missing_env=1 setup_blocked=2 waiting=2",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 		"(missing env: OPENAI_API_KEY)",
@@ -214,7 +215,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &body); err != nil {
 		t.Fatalf("decode production actions: %v\n%s", err, out.String())
 	}
-	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || body.ReadyActionCount != 0 || body.RunnableCommandCount != 0 || body.BlockedCommandCount != 4 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
+	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || body.ReadyActionCount != 0 || body.RunnableCommandCount != 0 || body.BlockedCommandCount != 4 || body.EvidenceDeclaredMatchCount != 1 || body.EvidenceDeclaredMismatchCount != 0 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
 		t.Fatalf("body = %+v, want five actions starting with provider-openai", body)
 	}
 	if body.ActionStateCounts["missing_env"] != 1 || body.ActionStateCounts["setup_blocked"] != 2 || body.ActionStateCounts["waiting"] != 2 {
@@ -265,6 +266,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Ready now: 0",
 		"Runnable commands: 0",
 		"Blocked commands: 1",
+		"Evidence matches: declared=1 mismatched=0",
 		"States: missing_env=1",
 		"Filter: kind=provider_proof",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",

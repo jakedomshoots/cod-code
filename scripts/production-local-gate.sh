@@ -154,11 +154,7 @@ if required > 0 and runnable + blocked <= 0:
     print("production-local-gate: fail production action command counts missing")
     raise SystemExit(1)
 
-mismatches = 0
-for action in actions.get("actions", []):
-    for evidence_file in action.get("evidence_files", []):
-        if evidence_file.get("matches_declared") is False:
-            mismatches += 1
+mismatches = int(actions.get("evidence_declared_mismatch_count", 0) or 0)
 if mismatches > 0:
     print(f"production-local-gate: fail production action evidence mismatches={mismatches}")
     raise SystemExit(1)
