@@ -167,15 +167,16 @@ func Test_DogfoodRealScript_copyWorkspaceWriteProbeMutatesOnlyCopy(t *testing.T)
 	}
 	workspacePath := strings.TrimSpace(readTextFile(t, filepath.Join(outputDir, "repos", "sample", "workspace-path.txt")))
 	probePath := filepath.Join(workspacePath, "ceo-dogfood-write-probe.txt")
-	if got := readTextFile(t, probePath); got != "new\n" {
-		t.Fatalf("write probe copy content = %q, want new", got)
+	if got := readTextFile(t, probePath); got != "old\n" {
+		t.Fatalf("write probe copy content after rollback = %q, want old", got)
 	}
 	summary := readTextFile(t, filepath.Join(outputDir, "repos", "sample", "summary.md"))
 	if !strings.Contains(summary, "| scenario-06-write-probe | pass |") {
 		t.Fatalf("summary missing passing write probe:\n%s", summary)
 	}
 	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "scenario-06-write-probe", "preview-digest.txt"))
-	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "scenario-06-write-probe", "git-status-after.txt"))
+	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "scenario-06-write-probe", "git-status-after-apply.txt"))
+	requireTextFile(t, filepath.Join(outputDir, "repos", "sample", "scenario-06-write-probe", "git-status-after-rollback.txt"))
 }
 
 func Test_DogfoodRealScript_writeProbeRequiresCopyWorkspace(t *testing.T) {

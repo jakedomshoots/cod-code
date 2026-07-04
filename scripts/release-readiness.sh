@@ -143,7 +143,7 @@ write_setup_action() {
       printf '%s\n' "- git_remote: configure an origin remote for the public repo, for example \`git remote add origin git@github.com:<owner>/<repo>.git\`, or set \`GH_REPO=owner/name\` for release-only verification."
       ;;
     remote_release_url)
-      printf '%s\n' "- remote_release_url: set \`RELEASE_PUBLIC_URL\` (or \`RELEASE_URL\`) to the public HTTPS release page."
+      printf '%s\n' "- remote_release_url: set \`RELEASE_URL\` (or \`RELEASE_PUBLIC_URL\`) to the public HTTPS release page."
       ;;
     github_release_assets)
       printf '%s\n' "- github_release_assets: push a \`v*\` tag, let the release workflow upload archives, \`checksums.txt\`, and \`release-manifest.json\`, then set \`RELEASE_VERSION\` plus \`GITHUB_REPOSITORY\` (or \`GH_RELEASE_TAG\` plus \`GH_REPO\`) if no GitHub origin is configured."

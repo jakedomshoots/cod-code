@@ -202,7 +202,7 @@ if [ -n "$remote_url" ]; then
     github_repo=$(github_repo_from_remote "$remote_url" || true)
   fi
 elif is_github_repo_name "$github_repo"; then
-  row "git_remote" "pass" "GITHUB_REPOSITORY=$github_repo"
+  row "git_remote" "pass" "GH_REPO=$github_repo"
 else
   row "git_remote" "blocked" "no origin remote configured; set GITHUB_REPOSITORY=owner/name for release-only verification"
 fi

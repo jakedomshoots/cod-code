@@ -21,7 +21,7 @@ func Test_ReleaseWorkflow_publishesGitHubReleaseAssets(t *testing.T) {
 		"contents: write",
 		`version="${GITHUB_REF_NAME#v}"`,
 		`VERSION="$version" sh scripts/release-local.sh`,
-		"sh scripts/verify-release.sh dist",
+		"sh scripts/verify-release.sh --dist dist",
 		"gh release create \"$GITHUB_REF_NAME\"",
 		"dist/*.tar.gz",
 		"dist/checksums.txt",
