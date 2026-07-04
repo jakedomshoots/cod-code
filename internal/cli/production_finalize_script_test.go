@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"bytes"
+	"context"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -70,5 +72,32 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("summary.json missing %q:\n%s", want, summary)
 		}
+	}
+}
+
+func Test_Run_productionFinalizeVerbRunsDryRun(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	outputDir := filepath.Join(t.TempDir(), "production-finalize")
+	var out bytes.Buffer
+
+	err = Run(context.Background(), &out, []string{
+		"production-finalize",
+		"--workspace", root,
+		"--dry-run",
+		"--output-dir", outputDir,
+		"--dist", filepath.Join(root, "dist"),
+	})
+	if err != nil {
+		t.Fatalf("Run production-finalize returned error: %v\n%s", err, out.String())
+	}
+	if !strings.Contains(out.String(), "production-finalize: planned") {
+		t.Fatalf("output = %q, want planned finalizer", out.String())
+	}
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	if !strings.Contains(summary, `"status": "planned"`) {
+		t.Fatalf("summary missing planned status:\n%s", summary)
 	}
 }

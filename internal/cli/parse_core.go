@@ -52,6 +52,36 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 	case "--production-status":
 		opts.showProductionStatus = true
 		return true, index, nil
+	case "--production-finalize":
+		opts.showProductionFinalize = true
+		return true, index, nil
+	case "--run-comparison":
+		opts.productionFinalizeRunComparison = true
+		return true, index, nil
+	case "--dist":
+		value, err := parseNextValue(args, index, "--dist requires a directory")
+		if err != nil {
+			return true, index, err
+		}
+		opts.productionFinalizeDist = value
+	case "--evidence-root":
+		value, err := parseNextValue(args, index, "--evidence-root requires a directory")
+		if err != nil {
+			return true, index, err
+		}
+		opts.productionFinalizeEvidenceRoot = value
+	case "--provider-timeout-seconds":
+		value, err := parseNonNegativeIntFlag(args, index, "--provider-timeout-seconds")
+		if err != nil {
+			return true, index, err
+		}
+		opts.productionFinalizeProviderTimeoutSeconds = value
+	case "--comparison-timeout-seconds":
+		value, err := parseNonNegativeIntFlag(args, index, "--comparison-timeout-seconds")
+		if err != nil {
+			return true, index, err
+		}
+		opts.productionFinalizeComparisonTimeoutSeconds = value
 	case "--plan-only":
 		opts.planOnly = true
 		return true, index, nil

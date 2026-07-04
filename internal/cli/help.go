@@ -15,6 +15,7 @@ Primary flow:
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
   production-status [flags]       Print local/public production readiness
+  production-finalize [flags]     Run guarded final production evidence
   resume <job> --answer <text>    Resume a needs_input job
   retry <job>                     Rerun a saved job with current config
   rollback <report>               Roll back supported patches from a saved JSON report
@@ -30,6 +31,7 @@ Usage:
   ceo-packet inbox [flags]
   ceo-packet status [flags]
   ceo-packet production-status [flags]
+  ceo-packet production-finalize --dry-run [flags]
   ceo-packet resume <job> --answer <text>
   ceo-packet retry <job>
   ceo-packet rollback <report>
@@ -66,6 +68,7 @@ Examples:
   ceo-packet gauntlet --suite production-core --agents ceo_harness --output-dir .omo/evidence/production-gauntlet
   ceo-packet inbox --workspace .
   ceo-packet production-status --workspace .
+  ceo-packet production-finalize --workspace . --dry-run
   ceo-packet retry latest --workspace .
   ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
   ceo-packet config check --workspace .
@@ -84,6 +87,7 @@ Primary flow:
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
   production-status [flags]       Print local/public production readiness
+  production-finalize [flags]     Run guarded final production evidence
   resume <job> --answer <text>    Resume a needs_input job
   retry <job>                     Rerun a saved job with current config
   rollback <report>               Roll back supported patches from a saved JSON report
@@ -99,6 +103,7 @@ Usage:
   ceo-packet inbox [flags]
   ceo-packet status [flags]
   ceo-packet production-status [flags]
+  ceo-packet production-finalize --dry-run [flags]
   ceo-packet resume <job> --answer <text>
   ceo-packet retry <job>
   ceo-packet rollback <report>
@@ -172,6 +177,8 @@ Advanced flags:
   --output-dir <path>             Completion output directory
   --history                       Print recent job history
   --production-status             Print latest production-readiness status from evidence
+  --production-finalize           Run guarded final production evidence sequence
+  --run-comparison                Include the expensive 29-task all-agent comparison
   --review-queue                  Print jobs needing human attention
   --review-details                Include compact context in review queue
   --inbox                         Review queue alias with text details

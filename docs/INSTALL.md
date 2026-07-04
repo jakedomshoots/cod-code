@@ -104,7 +104,7 @@ ceo-packet rollback .ceo-harness/history/job-000001.json --workspace /path/to/re
 For the final public-production evidence sequence, run:
 
 ```sh
-sh scripts/production-finalize.sh --dry-run
+ceo-packet production-finalize --workspace . --dry-run
 ```
 
 Remove `--dry-run` after release metadata and provider key environment variables are ready. The script writes evidence and command files, but it does not publish, tag, upload, or save secret values.

@@ -104,6 +104,16 @@ func Test_ParseArgs_sets_command_surfaces_when_verbs_are_supplied(t *testing.T) 
 			},
 		},
 		{
+			name: "production finalize",
+			args: []string{"production-finalize", "--workspace", "/tmp/workspace", "--dry-run", "--run-comparison", "--output-dir", "/tmp/finalize"},
+			want: func(t *testing.T, opts options) {
+				t.Helper()
+				if !opts.showProductionFinalize || !opts.dryRun || !opts.productionFinalizeRunComparison || opts.workspaceDir != "/tmp/workspace" || opts.completionOutputDir != "/tmp/finalize" {
+					t.Fatalf("opts = %+v, want production finalize dry-run", opts)
+				}
+			},
+		},
+		{
 			name: "resume",
 			args: []string{"resume", "job-000001", "--answer", "Use internal/cli", "--workspace", "/tmp/workspace"},
 			want: func(t *testing.T, opts options) {

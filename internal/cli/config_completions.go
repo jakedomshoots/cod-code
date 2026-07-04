@@ -49,7 +49,7 @@ func completionForShell(shell string) (completionFile, error) {
 }
 
 func completionWords() string {
-	return "start run gauntlet doctor inbox status production-status resume retry rollback explain-failure review context config eval"
+	return "start run gauntlet doctor inbox status production-status production-finalize resume retry rollback explain-failure review context config eval"
 }
 
 func zshCompletion() string {
@@ -57,7 +57,7 @@ func zshCompletion() string {
 local -a commands
 commands=(` + completionWords() + `)
 _arguments \
-  '1:command:((start run gauntlet doctor inbox status production-status resume retry rollback explain-failure review context config eval))' \
+  '1:command:((start run gauntlet doctor inbox status production-status production-finalize resume retry rollback explain-failure review context config eval))' \
   '*::arg:->args'
 case $words[2] in
   config)
