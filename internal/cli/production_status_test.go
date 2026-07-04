@@ -144,6 +144,14 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 }`)
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "release-bootstrap-r1", "release-handoff.md"), `# Public Release Handoff
 `)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "provider-setup-preflight", "summary.json"), `{
+  "status": "blocked",
+  "provider_count": 3,
+  "ready_count": 1,
+  "blocked_count": 2,
+  "blocked_providers": ["openrouter", "moonshot"],
+  "secret_value_saved": false
+}`)
 
 	var out bytes.Buffer
 	if err := Run(context.Background(), &out, []string{"production-status", "--workspace", root, "--format", "text"}); err != nil {
@@ -167,6 +175,8 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 		"Release bootstrap: blocked blocked=3 version=0.2.0-test",
 		"Release handoff:",
 		"release-bootstrap-r1/release-handoff.md",
+		"Provider setup preflight: blocked ready=1 blocked=2 providers=3 blocked_providers=openrouter,moonshot",
+		"provider-setup-preflight/summary.json",
 		"Next action: open ",
 		"production-finalize-r1/next-actions.md",
 	} {
@@ -185,6 +195,9 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 	}
 	if body.ReleaseBootstrap == nil || body.ReleaseBootstrap.Status != "blocked" || body.ReleaseBootstrap.BlockedCount != 3 || !strings.Contains(body.ReleaseBootstrap.HandoffPath, "release-handoff.md") {
 		t.Fatalf("release bootstrap = %+v, want surfaced handoff", body.ReleaseBootstrap)
+	}
+	if body.ProviderSetupPreflight == nil || body.ProviderSetupPreflight.Status != "blocked" || body.ProviderSetupPreflight.ReadyCount != 1 || body.ProviderSetupPreflight.BlockedCount != 2 || len(body.ProviderSetupPreflight.BlockedProviders) != 2 {
+		t.Fatalf("provider setup preflight = %+v, want surfaced provider setup status", body.ProviderSetupPreflight)
 	}
 }
 

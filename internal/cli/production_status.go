@@ -12,16 +12,26 @@ import (
 )
 
 type productionStatusReport struct {
-	Status                string                     `json:"status"`
-	LocalProductionReady  bool                       `json:"local_production_ready"`
-	PublicProductionReady bool                       `json:"public_production_ready"`
-	BlockedCount          int                        `json:"blocked_count"`
-	BlockedChecks         []string                   `json:"blocked_checks"`
-	SummaryPath           string                     `json:"summary_path,omitempty"`
-	LaunchChecklist       *productionChecklistStatus `json:"launch_checklist,omitempty"`
-	FinalizerNextActions  *productionChecklistStatus `json:"finalizer_next_actions,omitempty"`
-	ReleaseBootstrap      *productionBootstrapStatus `json:"release_bootstrap,omitempty"`
-	NextAction            string                     `json:"next_action"`
+	Status                 string                        `json:"status"`
+	LocalProductionReady   bool                          `json:"local_production_ready"`
+	PublicProductionReady  bool                          `json:"public_production_ready"`
+	BlockedCount           int                           `json:"blocked_count"`
+	BlockedChecks          []string                      `json:"blocked_checks"`
+	SummaryPath            string                        `json:"summary_path,omitempty"`
+	LaunchChecklist        *productionChecklistStatus    `json:"launch_checklist,omitempty"`
+	FinalizerNextActions   *productionChecklistStatus    `json:"finalizer_next_actions,omitempty"`
+	ReleaseBootstrap       *productionBootstrapStatus    `json:"release_bootstrap,omitempty"`
+	ProviderSetupPreflight *providerSetupPreflightStatus `json:"provider_setup_preflight,omitempty"`
+	NextAction             string                        `json:"next_action"`
+}
+
+type providerSetupPreflightStatus struct {
+	Path             string   `json:"path"`
+	Status           string   `json:"status"`
+	ProviderCount    int      `json:"provider_count"`
+	ReadyCount       int      `json:"ready_count"`
+	BlockedCount     int      `json:"blocked_count"`
+	BlockedProviders []string `json:"blocked_providers,omitempty"`
 }
 
 type productionBootstrapStatus struct {
@@ -126,6 +136,11 @@ func buildProductionStatusReport(workspaceDir string) (productionStatusReport, e
 			return productionStatusReport{}, err
 		}
 		report.ReleaseBootstrap = bootstrap
+		providerSetup, err := latestProviderSetupPreflightStatus(evidenceRoot)
+		if err != nil {
+			return productionStatusReport{}, err
+		}
+		report.ProviderSetupPreflight = providerSetup
 		finalizer, err := latestProductionFinalizerNextActions(evidenceRoot)
 		if err != nil {
 			return productionStatusReport{}, err
@@ -136,6 +151,50 @@ func buildProductionStatusReport(workspaceDir string) (productionStatusReport, e
 		}
 	}
 	return report, nil
+}
+
+func latestProviderSetupPreflightStatus(evidenceRoot string) (*providerSetupPreflightStatus, error) {
+	matches, err := filepath.Glob(filepath.Join(evidenceRoot, "provider-setup-preflight*", "summary.json"))
+	if err != nil {
+		return nil, err
+	}
+	var latest string
+	var latestMod time.Time
+	for _, candidate := range matches {
+		info, err := os.Stat(candidate)
+		if err != nil {
+			continue
+		}
+		if latest == "" || info.ModTime().After(latestMod) {
+			latest = candidate
+			latestMod = info.ModTime()
+		}
+	}
+	if latest == "" {
+		return nil, nil
+	}
+	content, err := os.ReadFile(latest)
+	if err != nil {
+		return nil, fmt.Errorf("read provider setup preflight summary: %w", err)
+	}
+	var raw struct {
+		Status           string   `json:"status"`
+		ProviderCount    int      `json:"provider_count"`
+		ReadyCount       int      `json:"ready_count"`
+		BlockedCount     int      `json:"blocked_count"`
+		BlockedProviders []string `json:"blocked_providers"`
+	}
+	if err := json.Unmarshal(content, &raw); err != nil {
+		return nil, fmt.Errorf("decode provider setup preflight summary: %w", err)
+	}
+	return &providerSetupPreflightStatus{
+		Path:             latest,
+		Status:           raw.Status,
+		ProviderCount:    raw.ProviderCount,
+		ReadyCount:       raw.ReadyCount,
+		BlockedCount:     raw.BlockedCount,
+		BlockedProviders: raw.BlockedProviders,
+	}, nil
 }
 
 func latestReleaseBootstrapStatus(evidenceRoot string) (*productionBootstrapStatus, error) {
@@ -446,6 +505,20 @@ func renderProductionStatusText(report productionStatusReport) string {
 		if report.ReleaseBootstrap.HandoffPath != "" {
 			fmt.Fprintf(&builder, "Release handoff: %s\n", report.ReleaseBootstrap.HandoffPath)
 		}
+	}
+	if report.ProviderSetupPreflight != nil {
+		fmt.Fprintf(
+			&builder,
+			"Provider setup preflight: %s ready=%d blocked=%d providers=%d",
+			report.ProviderSetupPreflight.Status,
+			report.ProviderSetupPreflight.ReadyCount,
+			report.ProviderSetupPreflight.BlockedCount,
+			report.ProviderSetupPreflight.ProviderCount,
+		)
+		if len(report.ProviderSetupPreflight.BlockedProviders) > 0 {
+			fmt.Fprintf(&builder, " blocked_providers=%s", strings.Join(report.ProviderSetupPreflight.BlockedProviders, ","))
+		}
+		fmt.Fprintf(&builder, " path=%s\n", report.ProviderSetupPreflight.Path)
 	}
 	fmt.Fprintf(&builder, "Next action: %s\n", report.NextAction)
 	return builder.String()
