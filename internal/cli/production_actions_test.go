@@ -138,6 +138,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Required actions: 5",
 		"Env ready: 4",
 		"Ready now: 0",
+		"States: missing_env=1 setup_blocked=2 waiting=2",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 		"(missing env: OPENAI_API_KEY)",
 		"Provider blocker: missing_api_key_env",
@@ -186,6 +187,9 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || body.ReadyActionCount != 0 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
 		t.Fatalf("body = %+v, want five actions starting with provider-openai", body)
 	}
+	if body.ActionStateCounts["missing_env"] != 1 || body.ActionStateCounts["setup_blocked"] != 2 || body.ActionStateCounts["waiting"] != 2 {
+		t.Fatalf("ActionStateCounts = %#v, want missing/setup/waiting counts", body.ActionStateCounts)
+	}
 	if body.Actions[0]["action_state"] != "missing_env" || body.Actions[1]["action_state"] != "setup_blocked" || body.Actions[2]["action_state"] != "setup_blocked" || body.Actions[3]["action_state"] != "waiting" {
 		t.Fatalf("action states = %#v/%#v/%#v/%#v, want missing_env/setup_blocked/setup_blocked/waiting", body.Actions[0]["action_state"], body.Actions[1]["action_state"], body.Actions[2]["action_state"], body.Actions[3]["action_state"])
 	}
@@ -212,6 +216,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Required actions: 1",
 		"Env ready: 0",
 		"Ready now: 0",
+		"States: missing_env=1",
 		"Filter: kind=provider_proof",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 	} {
@@ -280,6 +285,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	for _, want := range []string{
 		"Required actions: 2",
 		"Filter: state=setup_blocked",
+		"States: setup_blocked=2",
 		"release-readiness [release_proof]: Prove public release readiness",
 		"competitor-smoke [competitor_setup]: Fix competitor setup",
 	} {
