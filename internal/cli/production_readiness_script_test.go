@@ -148,6 +148,52 @@ func Test_ProductionReadinessScript_passesWithCompleteEvidence(t *testing.T) {
 	}
 }
 
+func Test_ProductionReadinessScript_usesCanonicalBlockedProviderEvidence(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	evidenceRoot := filepath.Join(t.TempDir(), "evidence")
+	outputDir := filepath.Join(t.TempDir(), "production-readiness")
+
+	writeCompleteProductionReadinessEvidence(t, evidenceRoot)
+	writeProviderIndex(t, filepath.Join(evidenceRoot, "provider-proof-openrouter", "index.md"), "blocked")
+	writeProductionReadinessJSON(t, filepath.Join(evidenceRoot, "provider-proof-openrouter", "summary.json"), `{
+  "status": "blocked",
+  "blocked_reason": "empty_api_key_env",
+  "secret_value_saved": false
+}`)
+
+	cmd := exec.Command(
+		"sh",
+		filepath.Join(root, "scripts", "production-readiness.sh"),
+		"--evidence-root", evidenceRoot,
+		"--output-dir", outputDir,
+		"--skip-release-readiness",
+		"--skip-secret-scan",
+	)
+	cmd.Dir = root
+	output, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("production readiness unexpectedly passed with blocked provider:\n%s", string(output))
+	}
+
+	summary := readTextFile(t, filepath.Join(outputDir, "summary.json"))
+	for _, want := range []string{
+		`"public_production_ready": false`,
+		`"provider.openrouter_http_provider"`,
+		filepath.ToSlash(filepath.Join(evidenceRoot, "provider-proof-openrouter", "index.md")),
+		`"detail": "openrouter HTTP provider proof is blocked by setup"`,
+	} {
+		if !strings.Contains(summary, want) {
+			t.Fatalf("summary.json missing %q:\n%s", want, summary)
+		}
+	}
+	if strings.Contains(summary, "provider-proof-openrouter-blocked-r1") {
+		t.Fatalf("summary.json used stale blocked provider folder:\n%s", summary)
+	}
+}
+
 func Test_ProductionReadinessScript_usesNewestComparisonEvidence(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {
