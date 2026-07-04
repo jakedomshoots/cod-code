@@ -75,6 +75,8 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		`"publish_actions_performed": false`,
 		`"setup_actions": {`,
 		`"path": "setup-actions.md"`,
+		`"required_action_count":`,
+		`"sha256": "`,
 		`"provider-openai"`,
 		`"all-agent-29-comparison"`,
 	} {

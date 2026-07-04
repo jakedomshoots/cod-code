@@ -612,6 +612,11 @@ summary = {
     },
     "setup_actions": {
         "path": "setup-actions.md",
+        "required_action_count": sum(
+            1 for line in pathlib.Path(sys.argv[7]).read_text(encoding="utf-8").splitlines()
+            if line.startswith("- ")
+        ),
+        "sha256": hashlib.sha256(pathlib.Path(sys.argv[7]).read_bytes()).hexdigest(),
     },
     "steps": steps,
 }

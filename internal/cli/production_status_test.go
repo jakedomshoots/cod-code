@@ -88,7 +88,9 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
     "required_action_count": 2
   },
   "setup_actions": {
-    "path": "setup-actions.md"
+    "path": "setup-actions.md",
+    "required_action_count": 4,
+    "sha256": "def456"
   }
 }`)
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "next-actions.json"), `{
@@ -135,6 +137,8 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 		"Finalizer evidence matches: declared=0 mismatched=0",
 		"Finalizer setup actions:",
 		"production-finalize-r1/setup-actions.md",
+		"(4 actions)",
+		"sha256=def456",
 		"Next action: open ",
 		"production-finalize-r1/next-actions.md",
 	} {

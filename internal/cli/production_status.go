@@ -26,6 +26,8 @@ type productionChecklistStatus struct {
 	Path                          string         `json:"path"`
 	JSONPath                      string         `json:"json_path,omitempty"`
 	SetupPath                     string         `json:"setup_path,omitempty"`
+	SetupSHA256                   string         `json:"setup_sha256,omitempty"`
+	SetupRequiredActionCount      int            `json:"setup_required_action_count,omitempty"`
 	SHA256                        string         `json:"sha256,omitempty"`
 	RequiredActionCount           int            `json:"required_action_count"`
 	RunnableCommandCount          int            `json:"runnable_command_count"`
@@ -169,7 +171,9 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 			RequiredActionCount int    `json:"required_action_count"`
 		} `json:"next_actions"`
 		SetupActions *struct {
-			Path string `json:"path"`
+			Path                string `json:"path"`
+			SHA256              string `json:"sha256"`
+			RequiredActionCount int    `json:"required_action_count"`
 		} `json:"setup_actions"`
 	}
 	if err := json.Unmarshal(content, &raw); err != nil {
@@ -196,6 +200,8 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 	}
 	if raw.SetupActions != nil && raw.SetupActions.Path != "" {
 		status.SetupPath = filepath.Join(finalizerDir, raw.SetupActions.Path)
+		status.SetupSHA256 = raw.SetupActions.SHA256
+		status.SetupRequiredActionCount = raw.SetupActions.RequiredActionCount
 	}
 	return status, nil
 }
@@ -306,7 +312,14 @@ func renderProductionStatusText(report productionStatusReport) string {
 		fmt.Fprintf(&builder, "Finalizer commands: runnable=%d blocked=%d\n", report.FinalizerNextActions.RunnableCommandCount, report.FinalizerNextActions.BlockedCommandCount)
 		fmt.Fprintf(&builder, "Finalizer evidence matches: declared=%d mismatched=%d\n", report.FinalizerNextActions.EvidenceDeclaredMatchCount, report.FinalizerNextActions.EvidenceDeclaredMismatchCount)
 		if report.FinalizerNextActions.SetupPath != "" {
-			fmt.Fprintf(&builder, "Finalizer setup actions: %s\n", report.FinalizerNextActions.SetupPath)
+			fmt.Fprintf(&builder, "Finalizer setup actions: %s", report.FinalizerNextActions.SetupPath)
+			if report.FinalizerNextActions.SetupRequiredActionCount > 0 {
+				fmt.Fprintf(&builder, " (%d actions)", report.FinalizerNextActions.SetupRequiredActionCount)
+			}
+			if report.FinalizerNextActions.SetupSHA256 != "" {
+				fmt.Fprintf(&builder, " sha256=%s", report.FinalizerNextActions.SetupSHA256)
+			}
+			builder.WriteString("\n")
 		}
 	}
 	fmt.Fprintf(&builder, "Next action: %s\n", report.NextAction)
