@@ -57,6 +57,7 @@ type options struct {
 	showReviewQueue                           bool
 	reviewDetails                             bool
 	showProviderHealth                        bool
+	showProductionStatus                      bool
 	showConfigCheck                           bool
 	showConfigDoctor                          bool
 	showConfigExplain                         bool

@@ -49,6 +49,9 @@ func parseCoreFlag(args []string, index int, opts *options) (bool, int, error) {
 	case "--doctor":
 		opts.showDoctor = true
 		return true, index, nil
+	case "--production-status":
+		opts.showProductionStatus = true
+		return true, index, nil
 	case "--plan-only":
 		opts.planOnly = true
 		return true, index, nil

@@ -74,6 +74,9 @@ func RunWithIO(ctx context.Context, in io.Reader, out io.Writer, args []string) 
 			topProviders:   opts.topProviders,
 		})
 	}
+	if opts.showProductionStatus {
+		return runProductionStatus(out, opts)
+	}
 	if opts.showReviewQueue {
 		return runReviewQueue(ctx, out, reviewQueueRequestFromOptions(opts))
 	}

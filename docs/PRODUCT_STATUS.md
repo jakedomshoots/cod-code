@@ -23,6 +23,7 @@ The core product loop already supports:
 - Provider routing, fallback, provider health, and route-decision reporting.
 - JSON, compact text, and JSONL event output.
 - Primary operator commands: `start`, `run`, `gauntlet`, `doctor`, `inbox`, `status`, `resume`, `retry`, `rollback`, and `explain-failure`.
+- Public-readiness operator command: `production-status` reads the latest readiness packet and reports local/public readiness plus the next launch action.
 - Guided start, friendly inbox/status, provider wizard, golden demo repo generation, write policy presets, shell completions, external adapter presets, and lightweight interactive `tui`.
 
 ## Positioning
@@ -120,6 +121,7 @@ CEO Harness is not trying to beat mature tools at editor polish today. Its wedge
 - Added public release preflight through `scripts/release-preflight.sh`; it blocks public claims until remote URL, Homebrew URL, and signature/checksum posture are explicit.
 - Added public release readiness evidence through `scripts/release-readiness.sh`; it writes `index.md`, `summary.json`, preflight output, git remote state, and GitHub auth state without publishing anything.
 - Added production-readiness aggregate evidence through `scripts/production-readiness.sh`; it summarizes release, provider, eval, security, endurance, and all-agent comparison proof in one packet without publishing or calling paid providers, writes `launch-checklist.md` with the exact public-production actions left, and fingerprints that checklist in `summary.json`.
+- Added `ceo-packet production-status`, a read-only operator command that reports the latest local/public production-readiness state from saved evidence.
 - Strict checks now run `sh -n` across shell scripts even when ShellCheck is not installed; ShellCheck remains an optional deeper lint layer.
 - Rollback now covers created-file model patches as well as normal replacement patches; created-file rollback refuses to delete if the file content changed after creation.
 - Default `--help` is now compact and points advanced users to `--help-advanced`; the full reference remains available without loading the first screen with every flag.

@@ -14,6 +14,7 @@ Primary flow:
   doctor [flags]                  Run harness health checks
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
+  production-status [flags]       Print local/public production readiness
   resume <job> --answer <text>    Resume a needs_input job
   retry <job>                     Rerun a saved job with current config
   rollback <report>               Roll back supported patches from a saved JSON report
@@ -28,6 +29,7 @@ Usage:
   ceo-packet doctor [flags]
   ceo-packet inbox [flags]
   ceo-packet status [flags]
+  ceo-packet production-status [flags]
   ceo-packet resume <job> --answer <text>
   ceo-packet retry <job>
   ceo-packet rollback <report>
@@ -63,6 +65,7 @@ Examples:
   ceo-packet run --workspace . --check go test ./... -- "Fix retry bug"
   ceo-packet gauntlet --suite production-core --agents ceo_harness --output-dir .omo/evidence/production-gauntlet
   ceo-packet inbox --workspace .
+  ceo-packet production-status --workspace .
   ceo-packet retry latest --workspace .
   ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
   ceo-packet config check --workspace .
@@ -80,6 +83,7 @@ Primary flow:
   doctor [flags]                  Run harness health checks
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
+  production-status [flags]       Print local/public production readiness
   resume <job> --answer <text>    Resume a needs_input job
   retry <job>                     Rerun a saved job with current config
   rollback <report>               Roll back supported patches from a saved JSON report
@@ -94,6 +98,7 @@ Usage:
   ceo-packet doctor [flags]
   ceo-packet inbox [flags]
   ceo-packet status [flags]
+  ceo-packet production-status [flags]
   ceo-packet resume <job> --answer <text>
   ceo-packet retry <job>
   ceo-packet rollback <report>
@@ -166,6 +171,7 @@ Advanced flags:
   --shell <zsh|bash|fish>         Completion shell
   --output-dir <path>             Completion output directory
   --history                       Print recent job history
+  --production-status             Print latest production-readiness status from evidence
   --review-queue                  Print jobs needing human attention
   --review-details                Include compact context in review queue
   --inbox                         Review queue alias with text details

@@ -26,6 +26,8 @@ func normalizeVerbArgs(args []string) ([]string, error) {
 		return append([]string{"--inbox"}, rest...), nil
 	case "status":
 		return append([]string{"--history", "--summary-only"}, rest...), nil
+	case "production-status":
+		return append([]string{"--production-status"}, rest...), nil
 	case "review":
 		return append([]string{"--review-queue", "--review-details"}, rest...), nil
 	case "context":
@@ -128,7 +130,7 @@ func contextVerbJobIndex(args []string) int {
 
 func isKnownVerb(verb string) bool {
 	switch verb {
-	case "start", "run", "gauntlet", "doctor", "inbox", "status", "resume", "retry", "rollback", "explain-failure", "review", "context", "tui", "eval":
+	case "start", "run", "gauntlet", "doctor", "inbox", "status", "production-status", "resume", "retry", "rollback", "explain-failure", "review", "context", "tui", "eval":
 		return true
 	default:
 		return false

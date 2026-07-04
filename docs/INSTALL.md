@@ -93,10 +93,13 @@ The gauntlet can report partial/incomplete evidence when an agent, key, login, t
 
 ```sh
 ceo-packet status --workspace /path/to/repo
+ceo-packet production-status --workspace /path/to/repo --format text
 ceo-packet explain-failure latest --workspace /path/to/repo
 ceo-packet retry latest --workspace /path/to/repo
 ceo-packet rollback .ceo-harness/history/job-000001.json --workspace /path/to/repo
 ```
+
+`production-status` reads the latest `.omo/evidence/production-readiness*/summary.json` packet and reports local readiness, public readiness, blockers, and the launch checklist next action.
 
 `rollback` supports saved JSON reports for normal replacements and created files produced by CEO Harness. It refuses to remove a created file if the file content no longer matches the saved report.
 
@@ -120,5 +123,6 @@ If optional tools are missing, use the documented fallback commands in [Verifica
 - No remote install URL or Homebrew tap is published yet.
 - Local archives are checksum-only; they are not signed.
 - Public release readiness is tracked with `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness`.
+- Public production readiness can be checked with `ceo-packet production-status --workspace . --format text` after running `scripts/production-readiness.sh`.
 - External provider quality depends on the configured provider, model, login, and key.
 - Current market comparison evidence is useful but still narrow. Do not describe prototype areas as proven unless the saved command logs and artifacts show it.
