@@ -65,6 +65,11 @@ tasks:
     cmds:
       - sh scripts/release-local.sh
 
+  release:signatures:
+    desc: Sign local release archives with RELEASE_SIGNING_KEY
+    cmds:
+      - sh scripts/release-signatures.sh --dist dist --private-key "$RELEASE_SIGNING_KEY"
+
   release:preflight:
     desc: Check whether local artifacts are ready for a public release claim
     cmds:

@@ -3,7 +3,7 @@ PKG := ./cmd/ceo-packet
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || printf dev)
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || printf local)
 
-.PHONY: ci fmt test test-race vet smoke dogfood build secret-scan release-local release-preflight release-bootstrap release-readiness production-readiness production-finalize production-local-gate eval-nightly eval-endurance eval-provider-kimi eval-provider-codex eval-provider-openai eval-provider-openrouter eval-provider-moonshot
+.PHONY: ci fmt test test-race vet smoke dogfood build secret-scan release-local release-signatures release-preflight release-bootstrap release-readiness production-readiness production-finalize production-local-gate eval-nightly eval-endurance eval-provider-kimi eval-provider-codex eval-provider-openai eval-provider-openrouter eval-provider-moonshot
 
 ci: fmt test vet smoke dogfood build
 
@@ -34,6 +34,9 @@ secret-scan:
 
 release-local:
 	sh scripts/release-local.sh
+
+release-signatures:
+	sh scripts/release-signatures.sh --dist dist --private-key "$$RELEASE_SIGNING_KEY"
 
 release-preflight:
 	sh scripts/release-preflight.sh dist

@@ -3,6 +3,7 @@ set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 dist=${1:-"$root/dist"}
+signing_public_key=${RELEASE_SIGNING_PUBLIC_KEY:-${SIGNING_PUBLIC_KEY:-}}
 
 case "$dist" in
   /*) ;;
@@ -66,5 +67,9 @@ for artifact in artifacts:
 
 print("release manifest ok")
 PY
+
+if [ -n "$signing_public_key" ]; then
+  sh "$root/scripts/release-signatures.sh" --dist "$dist" --verify --public-key "$signing_public_key"
+fi
 
 printf '%s\n' "release verify ok"

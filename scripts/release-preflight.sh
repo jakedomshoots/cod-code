@@ -8,6 +8,7 @@ github_release_tag=${GH_RELEASE_TAG:-${RELEASE_TAG:-}}
 github_repo=${GH_REPO:-}
 checksum_only_notes_url=${CHECKSUM_ONLY_RELEASE_NOTES_URL:-}
 allow_checksum_only=${ALLOW_CHECKSUM_ONLY_RELEASE:-}
+signing_public_key=${RELEASE_SIGNING_PUBLIC_KEY:-${SIGNING_PUBLIC_KEY:-}}
 blockers=0
 
 case "$dist" in
@@ -30,6 +31,9 @@ Environment:
                                       with CHECKSUM_ONLY_RELEASE_NOTES_URL.
   CHECKSUM_ONLY_RELEASE_NOTES_URL     Public HTTPS notes explaining checksum-only
                                       verification.
+  RELEASE_SIGNING_PUBLIC_KEY          Optional public key used to verify .sig
+                                      files before accepting signatures.
+  SIGNING_PUBLIC_KEY                  Alternate public key env name.
 USAGE
 }
 
@@ -191,7 +195,16 @@ else
 fi
 
 if signatures_exist; then
-  row "artifact_signatures" "pass" "every archive has .sig, .minisig, or .asc"
+  if [ -n "$signing_public_key" ]; then
+    if sh "$root/scripts/release-signatures.sh" --dist "$dist" --verify --public-key "$signing_public_key" >/tmp/ceo-release-preflight-signatures.$$ 2>&1; then
+      row "artifact_signatures" "pass" "every archive signature verified with public key"
+    else
+      row "artifact_signatures" "blocked" "signature files exist but verification failed with RELEASE_SIGNING_PUBLIC_KEY"
+    fi
+    rm -f /tmp/ceo-release-preflight-signatures.$$
+  else
+    row "artifact_signatures" "pass" "every archive has .sig, .minisig, or .asc"
+  fi
 elif [ "$allow_checksum_only" = "1" ] && is_public_https_url "$checksum_only_notes_url"; then
   row "artifact_signatures" "pass" "checksum-only release explicitly documented at $checksum_only_notes_url"
 else

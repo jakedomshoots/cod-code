@@ -67,9 +67,11 @@ sed -n '1,80p' dist/homebrew/ceo-packet.rb
 
 `scripts/verify-release.sh` checks `checksums.txt`, verifies every archive hash and size against `release-manifest.json`, and fails if any artifact is missing or mismatched.
 
+When `RELEASE_SIGNING_PUBLIC_KEY` or `SIGNING_PUBLIC_KEY` is set, `scripts/verify-release.sh` also verifies every `.tar.gz.sig` sidecar with `scripts/release-signatures.sh`.
+
 `scripts/release-bootstrap.sh` prepares the public release packet without publishing anything. It writes `index.md`, `summary.json`, `commands.sh`, `env.template`, `release-checklist.md`, `remote-homebrew-formula.rb`, and `verify-release.txt`. It exits non-zero until public repo, release, Homebrew archive, and signing/checksum policy inputs are explicit. `summary.json` records the checklist item count and SHA-256 fingerprints for the bootstrap files.
 
-`scripts/release-preflight.sh` checks whether a release can honestly be called public. It verifies local artifacts, then blocks until a git remote, public release URL, remote Homebrew archive URL, and archive signatures or explicit checksum-only release notes are handled. It does not tag, push, upload, or publish anything.
+`scripts/release-preflight.sh` checks whether a release can honestly be called public. It verifies local artifacts, then blocks until a git remote, public release URL, remote Homebrew archive URL, and archive signatures or explicit checksum-only release notes are handled. If `RELEASE_SIGNING_PUBLIC_KEY` is set, signature sidecars must verify with that key. It does not tag, push, upload, or publish anything.
 
 After the GitHub Release exists, preflight can verify the real release assets:
 
@@ -101,14 +103,24 @@ sh scripts/release-bootstrap.sh \
 
 ## Signing
 
-Current local releases are checksum-only. Do not claim signed artifacts until a release signing identity is configured and the signature verification command is documented here.
+Generate detached `.sig` files for every archive:
 
-Planned signing gate:
+```sh
+openssl genrsa -out release-private.pem 4096
+openssl rsa -in release-private.pem -pubout -out release-public.pem
+sh scripts/release-signatures.sh --dist dist --private-key release-private.pem
+RELEASE_SIGNING_PUBLIC_KEY=release-public.pem sh scripts/verify-release.sh dist
+RELEASE_SIGNING_PUBLIC_KEY=release-public.pem sh scripts/release-preflight.sh dist
+```
 
-1. Choose the signing tool and release identity.
-2. Sign every archive in `dist/`.
-3. Publish the public verification key.
-4. Add a copy-paste verification command next to the checksum command.
+The Make/Task wrappers use `RELEASE_SIGNING_KEY`:
+
+```sh
+RELEASE_SIGNING_KEY=/path/to/release-private.pem make release-signatures
+RELEASE_SIGNING_KEY=/path/to/release-private.pem task release:signatures
+```
+
+Keep the private key out of git, logs, release artifacts, and evidence folders. Publish the public key and the copy-paste verification command with the release notes before calling the release signed.
 
 ## Publish Boundary
 

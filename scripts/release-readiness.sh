@@ -152,7 +152,7 @@ write_setup_action() {
       printf '%s\n' "- homebrew_formula_url: publish the release archives to a stable HTTPS URL and update \`dist/homebrew/ceo-packet.rb\` or the tap formula so it uses that remote archive URL."
       ;;
     artifact_signatures)
-      printf '%s\n' "- artifact_signatures: add \`.sig\`, \`.minisig\`, or \`.asc\` signatures for every archive, or set \`ALLOW_CHECKSUM_ONLY_RELEASE=1\` with a public \`CHECKSUM_ONLY_RELEASE_NOTES_URL\`."
+      printf '%s\n' "- artifact_signatures: run \`sh scripts/release-signatures.sh --dist dist --private-key <key.pem>\` and rerun preflight with \`RELEASE_SIGNING_PUBLIC_KEY=<public.pem>\`, or set \`ALLOW_CHECKSUM_ONLY_RELEASE=1\` with a public \`CHECKSUM_ONLY_RELEASE_NOTES_URL\`."
       ;;
     *)
       printf '%s\n' "- $check: inspect \`preflight.md\` and resolve this blocked release preflight check."
@@ -202,7 +202,7 @@ if [ "$blocked_count" -gt 0 ]; then
           printf '%s\n' '# blocked homebrew_formula_url: update the tap formula to use the public HTTPS archive URL.'
           ;;
         artifact_signatures)
-          printf '%s\n' '# blocked artifact_signatures: add .sig/.minisig/.asc files or document checksum-only release notes.'
+          printf '%s\n' '# blocked artifact_signatures: sign archives with scripts/release-signatures.sh and set RELEASE_SIGNING_PUBLIC_KEY, or document checksum-only release notes.'
           ;;
         *)
           printf '# blocked %s: inspect preflight.md and resolve this check.\n' "$check"

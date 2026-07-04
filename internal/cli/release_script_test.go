@@ -125,6 +125,71 @@ func Test_ReleasePreflight_acceptsExplicitChecksumOnlyReleaseNotes(t *testing.T)
 	}
 }
 
+func Test_ReleaseSignaturesScript_signsAndPreflightVerifiesArchives(t *testing.T) {
+	if _, err := exec.LookPath("openssl"); err != nil {
+		t.Skipf("openssl not available: %v", err)
+	}
+
+	root, err := filepath.Abs(filepath.Join("..", ".."))
+	if err != nil {
+		t.Fatalf("resolve repo root: %v", err)
+	}
+	tmp := t.TempDir()
+	dist := filepath.Join(tmp, "dist")
+	privateKey := filepath.Join(tmp, "release-private.pem")
+	publicKey := filepath.Join(tmp, "release-public.pem")
+
+	release := exec.Command("sh", filepath.Join(root, "scripts", "release-local.sh"))
+	release.Dir = root
+	release.Env = append(release.Environ(), "DIST="+dist, "VERSION=0.2.0-test", "COMMIT=abc123")
+	output, err := release.CombinedOutput()
+	if err != nil {
+		t.Fatalf("release-local failed: %v\n%s", err, string(output))
+	}
+
+	keygen := exec.Command("openssl", "genrsa", "-out", privateKey, "2048")
+	if output, err := keygen.CombinedOutput(); err != nil {
+		t.Fatalf("openssl genrsa failed: %v\n%s", err, string(output))
+	}
+	pubout := exec.Command("openssl", "rsa", "-in", privateKey, "-pubout", "-out", publicKey)
+	if output, err := pubout.CombinedOutput(); err != nil {
+		t.Fatalf("openssl rsa pubout failed: %v\n%s", err, string(output))
+	}
+
+	sign := exec.Command("sh", filepath.Join(root, "scripts", "release-signatures.sh"), "--dist", dist, "--private-key", privateKey)
+	sign.Dir = root
+	signOutput, err := sign.CombinedOutput()
+	if err != nil {
+		t.Fatalf("release-signatures sign failed: %v\n%s", err, string(signOutput))
+	}
+	if !strings.Contains(string(signOutput), "signed ceo-packet_0.2.0-test_darwin_arm64.tar.gz.sig") {
+		t.Fatalf("release-signatures sign output missing archive signature:\n%s", string(signOutput))
+	}
+
+	verify := exec.Command("sh", filepath.Join(root, "scripts", "verify-release.sh"), dist)
+	verify.Dir = root
+	verify.Env = append(verify.Environ(), "RELEASE_SIGNING_PUBLIC_KEY="+publicKey)
+	verifyOutput, err := verify.CombinedOutput()
+	if err != nil {
+		t.Fatalf("verify-release with signatures failed: %v\n%s", err, string(verifyOutput))
+	}
+	if !strings.Contains(string(verifyOutput), "verified ceo-packet_0.2.0-test_darwin_arm64.tar.gz.sig") {
+		t.Fatalf("verify-release output did not include signature verification:\n%s", string(verifyOutput))
+	}
+
+	preflight := exec.Command("sh", filepath.Join(root, "scripts", "release-preflight.sh"), dist)
+	preflight.Dir = root
+	preflight.Env = append(preflight.Environ(), "RELEASE_SIGNING_PUBLIC_KEY="+publicKey)
+	preflightOutput, err := preflight.CombinedOutput()
+	if err == nil {
+		t.Fatalf("release-preflight unexpectedly passed while public metadata is still missing:\n%s", string(preflightOutput))
+	}
+	body := string(preflightOutput)
+	if !strings.Contains(body, "| artifact_signatures | pass | every archive signature verified with public key |") {
+		t.Fatalf("preflight did not verify release signatures:\n%s", body)
+	}
+}
+
 func Test_ReleasePreflight_verifiesGitHubReleaseAssets(t *testing.T) {
 	root, err := filepath.Abs(filepath.Join("..", ".."))
 	if err != nil {
@@ -280,7 +345,7 @@ func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 		"# Release Setup Actions",
 		"remote_release_url: set `RELEASE_URL`",
 		"github_release_assets: push a `v*` tag",
-		"artifact_signatures: add `.sig`, `.minisig`, or `.asc`",
+		"artifact_signatures: run `sh scripts/release-signatures.sh --dist dist --private-key <key.pem>`",
 		"sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final",
 	} {
 		if !strings.Contains(string(setupActions), want) {
@@ -293,7 +358,7 @@ func Test_ReleaseReadinessScript_writesBlockedEvidencePacket(t *testing.T) {
 		"sh scripts/verify-release.sh dist",
 		"# blocked remote_release_url:",
 		"# blocked github_release_assets:",
-		"# blocked artifact_signatures:",
+		"# blocked artifact_signatures: sign archives with scripts/release-signatures.sh",
 		"sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final",
 	} {
 		if !strings.Contains(setupCommands, want) {
