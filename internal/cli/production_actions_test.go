@@ -141,6 +141,9 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if body.RequiredActionCount != 5 || body.EnvReadyActionCount != 4 || body.ReadyActionCount != 2 || len(body.Actions) != 5 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
 		t.Fatalf("body = %+v, want five actions starting with provider-openai", body)
 	}
+	if body.Actions[0]["action_state"] != "missing_env" || body.Actions[1]["action_state"] != "ready" || body.Actions[3]["action_state"] != "waiting" {
+		t.Fatalf("action states = %#v/%#v/%#v, want missing_env/ready/waiting", body.Actions[0]["action_state"], body.Actions[1]["action_state"], body.Actions[3]["action_state"])
+	}
 	if blockedBy := stringSlice(body.Actions[3]["blocked_by"]); len(blockedBy) != 1 || blockedBy[0] != "competitor-smoke" {
 		t.Fatalf("comparison blocked_by = %#v, want competitor-smoke", body.Actions[3]["blocked_by"])
 	}
@@ -276,7 +279,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	text = out.String()
 	for _, want := range []string{
-		"# provider-openai [provider_proof] missing env: OPENAI_API_KEY",
+		"# provider-openai [provider_proof] missing env: OPENAI_API_KEY state: missing_env",
 		"sh scripts/provider-proof.sh --provider openai",
 	} {
 		if !strings.Contains(text, want) {

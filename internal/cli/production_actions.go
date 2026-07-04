@@ -89,7 +89,24 @@ func annotateProductionActions(actions []map[string]any, sourceDir string) []map
 		annotated = append(annotated, next)
 	}
 	annotateProductionActionDependencies(annotated)
+	annotateProductionActionStates(annotated)
 	return annotated
+}
+
+func annotateProductionActionStates(actions []map[string]any) {
+	for _, action := range actions {
+		action["action_state"] = productionActionState(action)
+	}
+}
+
+func productionActionState(action map[string]any) string {
+	if missingEnv := actionString(action, "missing_required_env"); missingEnv != "" {
+		return "missing_env"
+	}
+	if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
+		return "waiting"
+	}
+	return "ready"
 }
 
 func annotateProductionActionDependencies(actions []map[string]any) {
@@ -463,6 +480,9 @@ func renderProductionActionCommandsOnly(report productionActionsReport) string {
 				} else {
 					fmt.Fprintf(&builder, " requires env: %s", requiredEnv)
 				}
+			}
+			if state := actionString(action, "action_state"); state != "" {
+				fmt.Fprintf(&builder, " state: %s", state)
 			}
 			if blockedBy := stringSlice(action["blocked_by"]); len(blockedBy) > 0 {
 				fmt.Fprintf(&builder, " waiting on: %s", strings.Join(blockedBy, ", "))
