@@ -279,6 +279,8 @@ Examples:
   ceo-packet config doctor --workspace . --format text
   ceo-packet config explain --workspace . --format text
   ceo-packet config completions --shell zsh --output-dir /tmp/ceo-completions
+  ceo-packet production-actions --workspace . --format text
+  ceo-packet production-actions --workspace . --action-state empty_env --commands-only
   ceo-packet --workspace . --provider-wizard openai --http-model gpt-5
   ceo-packet --init-demo-repo /tmp/ceo-demo
   ceo-packet run --workspace . --check go test ./... -- "Fix retry bug"

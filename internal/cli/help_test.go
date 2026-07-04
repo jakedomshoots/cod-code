@@ -83,6 +83,8 @@ func Test_Run_prints_advanced_help_when_requested(t *testing.T) {
 		"--http-input-cost-per-million",
 		"--provider-health-watch-cost-per-attempt-microusd",
 		"CEO_RESEARCH_COMMAND_JSON",
+		"ceo-packet production-actions --workspace . --format text",
+		"ceo-packet production-actions --workspace . --action-state empty_env --commands-only",
 		`create patch JSON: {"patches":[{"path":"docs/notes.md","content":"# Notes\n"}]}`,
 	} {
 		if !strings.Contains(body, want) {
