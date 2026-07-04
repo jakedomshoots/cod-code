@@ -313,7 +313,11 @@ func annotateProviderProof(action map[string]any) {
 		"secret_value_saved": summary.SecretValueSaved,
 	}
 	if summary.Artifacts.Checklist != "" {
-		providerSummary["checklist_path"] = filepath.Join(filepath.Dir(summaryPath), summary.Artifacts.Checklist)
+		checklistPath := filepath.Join(filepath.Dir(summaryPath), summary.Artifacts.Checklist)
+		providerSummary["checklist_path"] = checklistPath
+		if checklistItems, err := readNumberedChecklistItems(checklistPath); err == nil && len(checklistItems) > 0 {
+			providerSummary["checklist_items"] = checklistItems
+		}
 	}
 	if summary.Artifacts.Commands != "" {
 		providerSummary["commands_path"] = filepath.Join(filepath.Dir(summaryPath), summary.Artifacts.Commands)
@@ -322,6 +326,40 @@ func annotateProviderProof(action map[string]any) {
 		providerSummary["env_template_path"] = filepath.Join(filepath.Dir(summaryPath), summary.Artifacts.EnvTemplate)
 	}
 	action["provider_summary"] = providerSummary
+}
+
+func readNumberedChecklistItems(path string) ([]map[string]string, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	items := []map[string]string{}
+	for _, line := range strings.Split(string(content), "\n") {
+		line = strings.TrimSpace(line)
+		dot := strings.Index(line, ".")
+		if dot <= 0 {
+			continue
+		}
+		rawNumber := line[:dot]
+		for _, r := range rawNumber {
+			if r < '0' || r > '9' {
+				rawNumber = ""
+				break
+			}
+		}
+		if rawNumber == "" {
+			continue
+		}
+		text := strings.TrimSpace(line[dot+1:])
+		if text == "" {
+			continue
+		}
+		items = append(items, map[string]string{
+			"step": rawNumber,
+			"text": text,
+		})
+	}
+	return items, nil
 }
 
 func annotateCompetitorSetup(action map[string]any, sourceDir string) {
@@ -666,6 +704,12 @@ func writeProviderProofText(builder *strings.Builder, action map[string]any) {
 	}
 	if checklist := stringValue(summary["checklist_path"]); checklist != "" {
 		fmt.Fprintf(builder, "  Setup checklist: %s\n", checklist)
+	}
+	if items, _ := summary["checklist_items"].([]map[string]string); len(items) > 0 {
+		fmt.Fprintf(builder, "  Setup checklist items:\n")
+		for _, item := range items {
+			fmt.Fprintf(builder, "  %s. %s\n", item["step"], item["text"])
+		}
 	}
 	if commands := stringValue(summary["commands_path"]); commands != "" {
 		fmt.Fprintf(builder, "  Setup command file: %s\n", commands)

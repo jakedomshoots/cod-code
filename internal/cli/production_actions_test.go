@@ -121,6 +121,12 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
     "env_template": "env.template"
   }
 }`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "setup-checklist.md"), `# Provider Setup Checklist
+
+1. Export `+"`OPENAI_API_KEY`"+` in the shell or local secret manager.
+2. Keep the key out of git, logs, reports, and evidence folders.
+3. Run `+"`commands.sh`"+` from the repo root.
+`)
 
 	var out bytes.Buffer
 	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--format", "text"}); err != nil {
@@ -138,6 +144,9 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"Provider model: gpt-5",
 		"Setup checklist:",
 		"provider-proof-openai",
+		"Setup checklist items:",
+		"1. Export `OPENAI_API_KEY` in the shell or local secret manager.",
+		"2. Keep the key out of git, logs, reports, and evidence folders.",
 		"Setup command file:",
 		"Requires env: OPENAI_API_KEY",
 		"Command: sh scripts/provider-proof.sh --provider openai",
@@ -179,6 +188,11 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	if body.Actions[0]["action_state"] != "missing_env" || body.Actions[1]["action_state"] != "setup_blocked" || body.Actions[2]["action_state"] != "setup_blocked" || body.Actions[3]["action_state"] != "waiting" {
 		t.Fatalf("action states = %#v/%#v/%#v/%#v, want missing_env/setup_blocked/setup_blocked/waiting", body.Actions[0]["action_state"], body.Actions[1]["action_state"], body.Actions[2]["action_state"], body.Actions[3]["action_state"])
+	}
+	providerSummary, _ := body.Actions[0]["provider_summary"].(map[string]any)
+	checklistItems, _ := providerSummary["checklist_items"].([]any)
+	if len(checklistItems) != 3 {
+		t.Fatalf("checklist_items = %#v, want three structured provider checklist items", providerSummary["checklist_items"])
 	}
 	releaseSummary, _ := body.Actions[1]["release_summary"].(map[string]any)
 	setupItems, _ := releaseSummary["setup_action_items"].([]any)
