@@ -1,6 +1,6 @@
 # Verification Record
 
-Status date: 2026-07-03
+Status date: 2026-07-04
 
 ## Passed
 
@@ -45,7 +45,7 @@ Status date: 2026-07-03
   - Result: writes `next-actions.md` with the exact competitor setup and all-agent comparison follow-up commands, and records `next_actions.required_action_count`.
 - Latest production status next-action proof:
   - `go run ./cmd/ceo-packet production-status --workspace . --format text`
-  - Result: reports the launch checklist plus latest complete finalizer `next-actions.md`, prints `Finalizer actions JSON: .omo/evidence/production-finalize-full-setup-root-r1/next-actions.json`, prints `Finalizer setup actions: .omo/evidence/production-finalize-full-setup-root-r1/setup-actions.md`, ignores partial finalizer packets with skipped steps, and sets `Next action` to open `.omo/evidence/production-finalize-full-setup-root-r1/next-actions.md`.
+  - Result: reports the launch checklist plus latest complete finalizer `next-actions.md`, prints `Finalizer actions JSON: .omo/evidence/production-finalize-full-after-installs-r1/next-actions.json`, prints `Finalizer setup actions: .omo/evidence/production-finalize-full-after-installs-r1/setup-actions.md`, ignores partial finalizer packets with skipped steps, and sets `Next action` to open `.omo/evidence/production-finalize-full-after-installs-r1/next-actions.md`.
 - Latest production actions command proof:
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text`
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text --action-id provider-openai`
@@ -58,10 +58,10 @@ Status date: 2026-07-03
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text --action-kind competitor_setup`
   - `go run ./cmd/ceo-packet production-actions --workspace . --format text --action-kind final_readiness`
   - `go run ./cmd/ceo-packet production-actions --workspace . --action-id provider-openai --commands-only`
-  - Result: prints seven structured finalizer actions from `.omo/evidence/production-finalize-full-setup-root-r1/next-actions.json`, including release, provider, competitor setup, comparison, and final readiness actions; filtered mode narrows that list by exact action id, release, provider-proof, action state, env-ready, ready-now, first next action, competitor setup, or final-readiness queues without printing secret values. Output separates `Env ready` from `Ready now`, every action includes `action_state`, and dependency-blocked actions are not counted as immediately runnable. Release, provider, and competitor setup output now include direct setup checklist paths; provider output also shows blocked reason and model. Competitor setup summarizes six competitors, with Codex CLI and Pi passing smoke, Claude Code/Aider/Goose missing, and OpenCode setup-blocked. Downstream actions print `Waiting on` dependency lists, text output includes shell-quoted `Command:` lines, and `--commands-only` prints replayable command lines plus secret-safe comments.
+  - Result: prints six structured finalizer actions from `.omo/evidence/production-finalize-full-after-installs-r1/next-actions.json`, including release, provider, comparison, and final readiness actions; filtered mode narrows that list by exact action id, release, provider-proof, action state, env-ready, ready-now, first next action, competitor setup, or final-readiness queues without printing secret values. Output separates `Env ready` from `Ready now`, every action includes `action_state`, and dependency-blocked actions are not counted as immediately runnable. Release and provider setup output include direct setup checklist paths; provider output also shows blocked reason and model. Competitor setup is no longer a remaining action after six configured competitors passed smoke. Downstream actions print `Waiting on` dependency lists, text output includes shell-quoted `Command:` lines, and `--commands-only` prints replayable command lines plus secret-safe comments.
 - Latest complete finalizer next-actions proof:
-  - `sh scripts/production-finalize.sh --output-dir .omo/evidence/production-finalize-full-setup-root-r1 --dist dist`
-  - Result: exits blocked as expected, records no skipped steps, and writes seven repo-relative remaining actions covering release, providers, competitor setup, comparison, and final readiness in `next-actions.md`; `next-actions.json` includes structured action ids, kinds, commands, provider names, required env vars, and evidence paths. Release readiness writes `setup-actions.md`; competitor smoke covers six configured competitors, records Pi as `smoke_pass`, and writes `competitor-smoke/setup-actions.md`; root `setup-actions.md` consolidates release, provider, competitor, comparison, and final rerun work.
+  - `sh scripts/production-finalize.sh --output-dir .omo/evidence/production-finalize-full-after-installs-r1 --dist dist`
+  - Result: exits blocked as expected, records no skipped steps, and writes six repo-relative remaining actions covering release, providers, comparison, and final readiness in `next-actions.md`; `next-actions.json` includes structured action ids, kinds, commands, provider names, required env vars, and evidence paths. Release readiness writes `setup-actions.md`; competitor smoke covers all six configured competitors and passes for Codex CLI, Claude Code, Aider, OpenCode, Goose, and Pi; root `setup-actions.md` consolidates release, provider, comparison, and final rerun work.
 - Latest release workflow guard:
   - `go test ./internal/cli -run Test_ReleaseWorkflow_publishesGitHubReleaseAssets -count=1`
   - Result: verifies the tag-triggered GitHub release workflow has write permission, derives the version from `GITHUB_REF_NAME`, runs local release plus verification, creates the GitHub Release, and attaches archives, checksums, and the manifest.
@@ -94,8 +94,8 @@ Status date: 2026-07-03
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents opencode --local-agent-benchmark-task docs-product-status-weak-spots --tasks evals/tasks --output-dir .omo/evidence/opencode-setup-blocked-r1 --timeout-seconds 25`
   - Result: OpenCode records `setup_blocked: 1`, `timed_out: 0`, and `incomplete_evidence: 0`; `stderr.log` shows `Token Plan usage limit reached` for `minimax-coding-plan/MiniMax-M3`.
 - Latest competitor smoke setup preflight:
-  - `go run ./cmd/ceo-eval --comparison-smoke --competitors evals/competitors.json --output-dir .omo/evidence/competitor-smoke-setup-r1 --timeout-seconds 25`
-  - Result: Codex CLI smoke passed, OpenCode recorded `setup_blocked: 1` from provider quota evidence, and missing Claude Code, Aider, and Goose binaries were skipped instead of failed.
+  - `go run ./cmd/ceo-eval --comparison-smoke --competitors evals/competitors.json --output-dir .omo/evidence/competitor-smoke-after-installs-r1 --timeout-seconds 25`
+  - Result: six configured competitors passed smoke: Codex CLI 0.142.4, Claude Code 2.1.201, Aider 0.86.2, OpenCode 1.17.13, Goose 1.41.0, and Pi 0.80.3. This is still a version/dry-run smoke, not the full head-to-head task comparison.
 - Latest comparison report decision smoke:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task docs-roadmap-cli-first --output-dir .omo/evidence/comparison-report-decision-smoke-r1 ...`
   - Result: comparison report includes `Overall comparison: pass`, `CEO Harness result: clean`, and `External blockers: none`.
