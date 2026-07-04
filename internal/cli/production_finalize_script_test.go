@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"context"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -42,6 +43,7 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		"| provider-moonshot | planned |",
 		"| all-agent-29-comparison | planned |",
 		"`commands.sh`",
+		"`setup-actions.md`",
 	} {
 		if !strings.Contains(index, want) {
 			t.Fatalf("index.md missing %q:\n%s", want, index)
@@ -69,11 +71,26 @@ func Test_ProductionFinalizeScript_dryRunWritesGuardedPlan(t *testing.T) {
 		`"status": "planned"`,
 		`"secret_value_saved": false`,
 		`"publish_actions_performed": false`,
+		`"setup_actions": {`,
+		`"path": "setup-actions.md"`,
 		`"provider-openai"`,
 		`"all-agent-29-comparison"`,
 	} {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("summary.json missing %q:\n%s", want, summary)
+		}
+	}
+
+	setupActions := readTextFile(t, filepath.Join(outputDir, "setup-actions.md"))
+	for _, want := range []string{
+		"# Production Setup Actions",
+		"## Providers",
+		"openai:",
+		"## Final Rerun",
+		"ceo-packet production-finalize --workspace . --run-comparison",
+	} {
+		if !strings.Contains(setupActions, want) {
+			t.Fatalf("setup-actions.md missing %q:\n%s", want, setupActions)
 		}
 	}
 }
@@ -111,6 +128,15 @@ func Test_ProductionFinalizeScript_marksSetupBlockedCompetitorSmokeBlocked(t *te
 		t.Fatalf("resolve repo root: %v", err)
 	}
 	outputDir := filepath.Join(t.TempDir(), "production-finalize")
+	binDir := t.TempDir()
+	writeExecutableScript(t, filepath.Join(binDir, "opencode"), `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  printf 'opencode 1.0.0\n'
+  exit 0
+fi
+printf 'AI_APICallError: Token Plan usage limit reached\n' >&2
+exit 1
+`)
 
 	cmd := exec.Command(
 		"sh",
@@ -122,6 +148,7 @@ func Test_ProductionFinalizeScript_marksSetupBlockedCompetitorSmokeBlocked(t *te
 		"--skip-production-readiness",
 	)
 	cmd.Dir = root
+	cmd.Env = append(cmd.Environ(), "PATH="+binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	output, err := cmd.CombinedOutput()
 	if err == nil {
 		t.Fatalf("production-finalize unexpectedly passed with setup-blocked smoke:\n%s", string(output))
@@ -133,6 +160,7 @@ func Test_ProductionFinalizeScript_marksSetupBlockedCompetitorSmokeBlocked(t *te
 		"| competitor-smoke | blocked |",
 		"Smoke summary has failed or setup-blocked competitors",
 		"Open `next-actions.md`",
+		"Open `setup-actions.md`",
 	} {
 		if !strings.Contains(index, want) {
 			t.Fatalf("index.md missing %q:\n%s", want, index)
@@ -174,6 +202,7 @@ func Test_ProductionFinalizeScript_marksSetupBlockedCompetitorSmokeBlocked(t *te
 		`"next_actions": {`,
 		`"json_path": "next-actions.json"`,
 		`"required_action_count": 2`,
+		`"setup_actions": {`,
 	} {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("summary.json missing %q:\n%s", want, summary)

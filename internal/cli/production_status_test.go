@@ -86,6 +86,9 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
     "path": "next-actions.md",
     "json_path": "next-actions.json",
     "required_action_count": 2
+  },
+  "setup_actions": {
+    "path": "setup-actions.md"
   }
 }`)
 
@@ -100,6 +103,8 @@ func Test_Run_production_status_prefers_finalizer_next_actions(t *testing.T) {
 		"production-finalize-r1/next-actions.md (2 actions)",
 		"Finalizer actions JSON:",
 		"production-finalize-r1/next-actions.json",
+		"Finalizer setup actions:",
+		"production-finalize-r1/setup-actions.md",
 		"Next action: open ",
 		"production-finalize-r1/next-actions.md",
 	} {

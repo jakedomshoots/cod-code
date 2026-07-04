@@ -378,7 +378,45 @@ fi
   fi
 } >"$output_dir/next-actions.md"
 
-python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output_dir/next-actions.md" "$output_dir/next-actions.json" "$provider_timeout_seconds" <<'PY'
+{
+  printf '%s\n' "# Production Setup Actions"
+  printf '\n'
+  printf '%s\n' "Use this as the single checklist before claiming public production readiness."
+  printf '\n'
+  if [ -f "$evidence_root/release-readiness-final/setup-actions.md" ]; then
+    printf '%s\n' "## Release"
+    printf '\n'
+    printf '%s\n' "- Follow \`$(display_path "$evidence_root/release-readiness-final/setup-actions.md")\`."
+    printf '\n'
+  fi
+  printf '%s\n' "## Providers"
+  printf '\n'
+  for provider in openai openrouter moonshot; do
+    checklist="$evidence_root/provider-proof-$provider/setup-checklist.md"
+    commands_file="$evidence_root/provider-proof-$provider/commands.sh"
+    if [ -f "$checklist" ]; then
+      printf '%s\n' "- $provider: follow \`$(display_path "$checklist")\` and rerun \`$(display_path "$commands_file")\` after the required env var is set."
+    else
+      printf '%s\n' "- $provider: run \`sh scripts/provider-proof.sh --provider $provider --output-dir $(quote_display_path "$evidence_root/provider-proof-$provider") --timeout-seconds $provider_timeout_seconds\`."
+    fi
+  done
+  printf '\n'
+  if [ -f "$output_dir/competitor-smoke/setup-actions.md" ]; then
+    printf '%s\n' "## Competitors"
+    printf '\n'
+    printf '%s\n' "- Follow \`$(display_path "$output_dir/competitor-smoke/setup-actions.md")\`."
+    printf '\n'
+  fi
+  printf '%s\n' "## Final Rerun"
+  printf '\n'
+  printf '%s\n' '```sh'
+  printf '%s\n' 'ceo-packet production-finalize --workspace . --dry-run'
+  printf '%s\n' 'ceo-packet production-finalize --workspace . --run-comparison'
+  printf '%s\n' 'sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness-final'
+  printf '%s\n' '```'
+} >"$output_dir/setup-actions.md"
+
+python3 - "$output_dir/steps.tsv" "$output_dir/summary.json" "$overall" "$output_dir/next-actions.md" "$output_dir/next-actions.json" "$provider_timeout_seconds" "$output_dir/setup-actions.md" <<'PY'
 import json
 import sys
 import pathlib
@@ -473,6 +511,9 @@ summary = {
         "json_path": "next-actions.json",
         "required_action_count": len(actions),
     },
+    "setup_actions": {
+        "path": "setup-actions.md",
+    },
     "steps": steps,
 }
 with open(sys.argv[2], "w", encoding="utf-8") as handle:
@@ -496,6 +537,7 @@ PY
   printf '%s\n' "## Next Actions"
   printf '\n'
   printf '%s\n' "Open \`next-actions.md\` for the exact remaining commands and setup steps."
+  printf '%s\n' "Open \`setup-actions.md\` for one consolidated public-readiness checklist."
   printf '\n'
   printf '%s\n' "## Commands"
   printf '\n'

@@ -25,6 +25,7 @@ type productionStatusReport struct {
 type productionChecklistStatus struct {
 	Path                string `json:"path"`
 	JSONPath            string `json:"json_path,omitempty"`
+	SetupPath           string `json:"setup_path,omitempty"`
 	SHA256              string `json:"sha256,omitempty"`
 	RequiredActionCount int    `json:"required_action_count"`
 	Status              string `json:"status"`
@@ -162,6 +163,9 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 			JSONPath            string `json:"json_path"`
 			RequiredActionCount int    `json:"required_action_count"`
 		} `json:"next_actions"`
+		SetupActions *struct {
+			Path string `json:"path"`
+		} `json:"setup_actions"`
 	}
 	if err := json.Unmarshal(content, &raw); err != nil {
 		return nil, fmt.Errorf("decode production finalizer summary: %w", err)
@@ -177,6 +181,9 @@ func latestProductionFinalizerNextActions(evidenceRoot string) (*productionCheck
 	}
 	if raw.NextActions.JSONPath != "" {
 		status.JSONPath = filepath.Join(finalizerDir, raw.NextActions.JSONPath)
+	}
+	if raw.SetupActions != nil && raw.SetupActions.Path != "" {
+		status.SetupPath = filepath.Join(finalizerDir, raw.SetupActions.Path)
 	}
 	return status, nil
 }
@@ -231,6 +238,9 @@ func renderProductionStatusText(report productionStatusReport) string {
 		fmt.Fprintf(&builder, "Finalizer next actions: %s (%d actions)\n", report.FinalizerNextActions.Path, report.FinalizerNextActions.RequiredActionCount)
 		if report.FinalizerNextActions.JSONPath != "" {
 			fmt.Fprintf(&builder, "Finalizer actions JSON: %s\n", report.FinalizerNextActions.JSONPath)
+		}
+		if report.FinalizerNextActions.SetupPath != "" {
+			fmt.Fprintf(&builder, "Finalizer setup actions: %s\n", report.FinalizerNextActions.SetupPath)
 		}
 	}
 	fmt.Fprintf(&builder, "Next action: %s\n", report.NextAction)
