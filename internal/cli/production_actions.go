@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -91,6 +92,7 @@ func annotateProductionActions(actions []map[string]any, sourceDir string) []map
 			}
 		}
 		next["env_ready"] = envReady
+		annotateDeclaredEvidence(next, sourceDir)
 		annotateReleaseProof(next)
 		annotateProviderProof(next)
 		annotateCompetitorSetup(next, sourceDir)
@@ -99,6 +101,45 @@ func annotateProductionActions(actions []map[string]any, sourceDir string) []map
 	annotateProductionActionDependencies(annotated)
 	annotateProductionActionStates(annotated)
 	return annotated
+}
+
+func annotateDeclaredEvidence(action map[string]any, sourceDir string) {
+	refs := []struct {
+		field string
+		path  string
+	}{
+		{field: "evidence", path: actionString(action, "evidence")},
+		{field: "inspect", path: actionString(action, "inspect")},
+	}
+	files := []map[string]any{}
+	for _, ref := range refs {
+		if strings.TrimSpace(ref.path) == "" {
+			continue
+		}
+		path := ref.path
+		if !filepath.IsAbs(path) && sourceDir != "" {
+			path = filepath.Join(sourceDir, path)
+		}
+		entry := map[string]any{
+			"field": ref.field,
+			"path":  path,
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			entry["exists"] = false
+			entry["error"] = err.Error()
+			files = append(files, entry)
+			continue
+		}
+		sum := sha256.Sum256(content)
+		entry["exists"] = true
+		entry["size_bytes"] = len(content)
+		entry["sha256"] = fmt.Sprintf("%x", sum[:])
+		files = append(files, entry)
+	}
+	if len(files) > 0 {
+		action["evidence_files"] = files
+	}
 }
 
 func annotateProductionActionStates(actions []map[string]any) {
@@ -650,6 +691,7 @@ func renderProductionActionsText(report productionActionsReport) string {
 		writeReleaseProofText(&builder, action)
 		writeProviderProofText(&builder, action)
 		writeCompetitorSetupText(&builder, action)
+		writeEvidenceFilesText(&builder, action)
 		writeBlockedByText(&builder, action)
 		writeActionCommandText(&builder, action)
 	}
@@ -811,6 +853,30 @@ func writeCompetitorSetupText(builder *strings.Builder, action map[string]any) {
 	}
 }
 
+func writeEvidenceFilesText(builder *strings.Builder, action map[string]any) {
+	files := evidenceFileEntries(action["evidence_files"])
+	for _, file := range files {
+		field := stringValue(file["field"])
+		path := stringValue(file["path"])
+		if path == "" {
+			continue
+		}
+		label := "Evidence file"
+		if field == "inspect" {
+			label = "Inspect file"
+		}
+		if exists, _ := file["exists"].(bool); exists {
+			fmt.Fprintf(builder, "  %s: %s sha256=%s size=%d\n", label, path, stringValue(file["sha256"]), int(numberValue(file["size_bytes"])))
+			continue
+		}
+		if err := stringValue(file["error"]); err != "" {
+			fmt.Fprintf(builder, "  %s: %s missing (%s)\n", label, path, err)
+		} else {
+			fmt.Fprintf(builder, "  %s: %s missing\n", label, path)
+		}
+	}
+}
+
 func writeBlockedByText(builder *strings.Builder, action map[string]any) {
 	blockedBy := stringSlice(action["blocked_by"])
 	if len(blockedBy) == 0 {
@@ -869,6 +935,23 @@ func stringValue(value any) string {
 func boolValue(value any) bool {
 	typed, _ := value.(bool)
 	return typed
+}
+
+func evidenceFileEntries(value any) []map[string]any {
+	switch typed := value.(type) {
+	case []map[string]any:
+		return typed
+	case []any:
+		result := make([]map[string]any, 0, len(typed))
+		for _, item := range typed {
+			if entry, ok := item.(map[string]any); ok {
+				result = append(result, entry)
+			}
+		}
+		return result
+	default:
+		return nil
+	}
 }
 
 func stringSlice(value any) []string {

@@ -87,6 +87,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
   "origin_remote_configured": false,
   "github_auth_status": "pass"
 }`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "release-readiness-final", "index.md"), `# Release Readiness Evidence
+`)
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "release-readiness-final", "setup-actions.md"), `# Release Setup Actions
 
 - git_remote: configure an origin remote for the public repo.
@@ -121,6 +123,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
     "env_template": "env.template"
   }
 }`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "index.md"), `# Provider Proof Evidence
+`)
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "provider-proof-openai", "setup-checklist.md"), `# Provider Setup Checklist
 
 1. Export `+"`OPENAI_API_KEY`"+` in the shell or local secret manager.
@@ -149,6 +153,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 		"1. Export `OPENAI_API_KEY` in the shell or local secret manager.",
 		"2. Keep the key out of git, logs, reports, and evidence folders.",
 		"Setup command file:",
+		"Evidence file:",
+		"sha256=",
 		"Requires env: OPENAI_API_KEY",
 		"Command: sh scripts/provider-proof.sh --provider openai",
 		"release-readiness [release_proof]: Prove public release readiness",
@@ -205,6 +211,14 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	if blockedBy := stringSlice(body.Actions[3]["blocked_by"]); len(blockedBy) != 1 || blockedBy[0] != "competitor-smoke" {
 		t.Fatalf("comparison blocked_by = %#v, want competitor-smoke", body.Actions[3]["blocked_by"])
+	}
+	evidenceFiles, _ := body.Actions[0]["evidence_files"].([]any)
+	if len(evidenceFiles) != 1 {
+		t.Fatalf("provider evidence_files = %#v, want one declared evidence file", body.Actions[0]["evidence_files"])
+	}
+	firstEvidence, _ := evidenceFiles[0].(map[string]any)
+	if firstEvidence["exists"] != true || firstEvidence["sha256"] == "" || numberValue(firstEvidence["size_bytes"]) <= 0 {
+		t.Fatalf("provider evidence metadata = %#v, want existing fingerprinted evidence", firstEvidence)
 	}
 
 	out.Reset()
