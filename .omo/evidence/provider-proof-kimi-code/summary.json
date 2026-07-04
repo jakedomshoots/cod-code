@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "blocked",
+  "provider": "kimi-code",
+  "provider_mode": "http-provider",
+  "http_preset": "kimi-code",
+  "http_model": "kimi-for-coding",
+  "api_key_env": "KIMI_CODE_API_KEY",
+  "blocked_reason": "missing_api_key_env",
+  "setup_result_status": "blocked_missing_key",
+  "setup_checklist_item_count": 6,
+  "setup_artifacts_sha256": {"blocked.md": "5c4dcf88579d30c4d198344d5afb3650e4e9666bb19e6afe834ddfd458cbe183", "commands.sh": "5775f87b8c8803132680480e8bc19f46a5b014b57a3d0f8c81d87a85d87399f6", "env.template": "b720058c988726cb959316bc9818a5c2b407b53900ae81e4cdf97ad86b39d8a6", "setup-checklist.md": "636a9ee67bed9d6f0db6a5128d6d70fc84785fc6b94a1420ed5d2d8b8d23d84f"},
+  "command_script_secret_policy": "no_secret_assignment",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md",
+    "blocked": "blocked.md",
+    "env_template": "env.template",
+    "commands": "commands.sh",
+    "checklist": "setup-checklist.md"
+  }
+}

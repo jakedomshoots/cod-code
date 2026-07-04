@@ -1,0 +1,6 @@
+go
+build
+-trimpath
+-o
+bin/ceo-packet
+./cmd/ceo-packet

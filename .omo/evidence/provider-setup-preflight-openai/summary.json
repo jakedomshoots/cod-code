@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "status": "blocked",
+  "provider_count": 1,
+  "ready_count": 0,
+  "blocked_count": 1,
+  "blocked_providers": ["openai"],
+  "command_script_secret_policy": "no_secret_assignment",
+  "secret_value_saved": false,
+  "commands_sha256": "0e39450ef8635231896b4072af4f754bed529ade7474630d487eb82633c9c473",
+  "results": [
+  {
+    "provider": "openai",
+    "api_key_env": "OPENAI_API_KEY",
+    "model": "gpt-5",
+    "status": "missing_env",
+    "reason": "required env is not set",
+    "secret_value_saved": false
+  }
+],
+  "artifacts": {
+    "index": "index.md",
+    "summary": "summary.json",
+    "commands": "commands.sh",
+    "blocked_providers": "blocked-providers.txt"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "blocked",
+  "provider": "openai",
+  "provider_mode": "http-provider",
+  "http_preset": "openai",
+  "http_model": "gpt-5",
+  "api_key_env": "OPENAI_API_KEY",
+  "blocked_reason": "missing_api_key_env",
+  "setup_result_status": "blocked_missing_key",
+  "setup_checklist_item_count": 6,
+  "setup_artifacts_sha256": {"blocked.md": "7eb74b6ade3285bb8d23f44c7246a3f5fbba4bf3bc640c53afac79878ac11476", "commands.sh": "ae2e420a553e83f2d1635806dd7aef9d945275274a8d4c9cdda6e2905e9cdd8e", "env.template": "01b19dba878e57fd9eeed4a6a1839c2d77145368eac1acb3743a844680ef6445", "setup-checklist.md": "b0545fddc94063da8e115428cb36741eec42279aeca3ca4293630f3144915a90"},
+  "command_script_secret_policy": "no_secret_assignment",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md",
+    "blocked": "blocked.md",
+    "env_template": "env.template",
+    "commands": "commands.sh",
+    "checklist": "setup-checklist.md"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "blocked",
+  "provider": "moonshot",
+  "provider_mode": "http-provider",
+  "http_preset": "moonshot",
+  "http_model": "moonshot-v1-128k",
+  "api_key_env": "MOONSHOT_API_KEY",
+  "blocked_reason": "empty_api_key_env",
+  "setup_result_status": "blocked_empty_key",
+  "setup_checklist_item_count": 6,
+  "setup_artifacts_sha256": {"blocked.md": "238c8c02703ad61fd7702d6c0f8c727729b2e3014e1d3f57121a76dcffe867a8", "commands.sh": "023826cdf7fec0d5865e635f856d1080e971ea3f87d8056a0442318975a5bde4", "env.template": "a1bec21b733a53fd7c993ecfa1ad40dd032192775a39ef1d0f09c23e8b724176", "setup-checklist.md": "2d4d274da65e303d581cd79cf17676dbfc9ffade34b7b7f9fdf3aeb7ecfbe75d"},
+  "command_script_secret_policy": "no_secret_assignment",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md",
+    "blocked": "blocked.md",
+    "env_template": "env.template",
+    "commands": "commands.sh",
+    "checklist": "setup-checklist.md"
+  }
+}

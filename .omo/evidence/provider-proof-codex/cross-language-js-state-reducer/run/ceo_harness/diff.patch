@@ -1,0 +1,10 @@
+diff --git a/frontend/state.js b/frontend/state.js
+index 14078f5..164c931 100644
+--- a/frontend/state.js
++++ b/frontend/state.js
+@@ -1 +1,4 @@
+-module.exports = { benchmarkFixture: "TODO: update this benchmark fixture" };
++module.exports = {
++  benchmarkFixture:
++    "optimistic update keeps rollback evidence for the JavaScript state reducer fixture",
++};

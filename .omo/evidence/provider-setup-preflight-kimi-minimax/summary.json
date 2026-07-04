@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "status": "blocked",
+  "provider_count": 2,
+  "ready_count": 0,
+  "blocked_count": 2,
+  "blocked_providers": ["kimi-code", "minimax"],
+  "command_script_secret_policy": "no_secret_assignment",
+  "secret_value_saved": false,
+  "commands_sha256": "5f6a022617b459ce11fb20be50a8980c7f4f3f2b99aac98c07990cec70ff4516",
+  "results": [
+  {
+    "provider": "kimi-code",
+    "api_key_env": "KIMI_CODE_API_KEY",
+    "model": "kimi-for-coding",
+    "status": "missing_env",
+    "reason": "required env is not set",
+    "secret_value_saved": false
+  },
+  {
+    "provider": "minimax",
+    "api_key_env": "MINIMAX_API_KEY",
+    "model": "MiniMax-M3",
+    "status": "empty_env",
+    "reason": "required env is set but empty",
+    "secret_value_saved": false
+  }
+],
+  "artifacts": {
+    "index": "index.md",
+    "summary": "summary.json",
+    "commands": "commands.sh",
+    "blocked_providers": "blocked-providers.txt"
+  }
+}

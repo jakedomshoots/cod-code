@@ -1,0 +1,2 @@
+{"provider":"kimi-code","api_key_env":"KIMI_CODE_API_KEY","model":"kimi-for-coding","status":"missing_env","reason":"required env is not set","secret_value_saved":false}
+{"provider":"minimax","api_key_env":"MINIMAX_API_KEY","model":"MiniMax-M3","status":"empty_env","reason":"required env is set but empty","secret_value_saved":false}

@@ -14,14 +14,14 @@ api_key_env=""
 
 usage() {
   cat <<'USAGE'
-Usage: sh scripts/provider-proof.sh [--dry-run] [--provider kimi|codex|openai|openrouter|kimi-code|moonshot|minimax] [--timeout-seconds n] [--output-dir path]
+Usage: sh scripts/provider-proof.sh [--dry-run] [--provider kimi|codex|claude|opencode|goose|openai|openrouter|kimi-code|moonshot|minimax] [--timeout-seconds n] [--output-dir path]
 
 Runs real-provider benchmark proofs and writes durable evidence.
 
 Options:
   --dry-run            Write the provider proof plan without running commands.
-  --provider name      Provider bridge to use. Supported: kimi, codex, openai,
-                       openrouter, kimi-code, moonshot, minimax.
+  --provider name      Provider bridge to use. Supported: kimi, codex, claude,
+                       opencode, goose, openai, openrouter, kimi-code, moonshot, minimax.
   --http-model name    Override the default HTTP provider model.
   --api-key-env name   Override the default HTTP provider API key env var.
   --timeout-seconds n  Timeout for each benchmark command. Default: 600.
@@ -132,6 +132,24 @@ case "$provider" in
     provider_cli="codex"
     model_command_script="$root/scripts/codex-model-command.sh"
     model_command_display="scripts/codex-model-command.sh"
+    ;;
+  claude)
+    provider_mode="cli-model-command"
+    provider_cli="claude"
+    model_command_script="$root/scripts/claude-model-command.sh"
+    model_command_display="scripts/claude-model-command.sh"
+    ;;
+  opencode)
+    provider_mode="cli-model-command"
+    provider_cli="opencode"
+    model_command_script="$root/scripts/opencode-model-command.sh"
+    model_command_display="scripts/opencode-model-command.sh"
+    ;;
+  goose)
+    provider_mode="cli-model-command"
+    provider_cli="goose"
+    model_command_script="$root/scripts/goose-model-command.sh"
+    model_command_display="scripts/goose-model-command.sh"
     ;;
   openai)
     provider_mode="http-provider"

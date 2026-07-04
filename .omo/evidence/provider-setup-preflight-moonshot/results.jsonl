@@ -1,0 +1,1 @@
+{"provider":"moonshot","api_key_env":"MOONSHOT_API_KEY","model":"moonshot-v1-128k","status":"empty_env","reason":"required env is set but empty","secret_value_saved":false}

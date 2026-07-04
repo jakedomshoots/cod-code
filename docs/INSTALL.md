@@ -94,17 +94,22 @@ Codex/Kimi/OpenRouter missing key or missing login states are blocked setup, not
 Provider proof gates are available for both CLI-backed and HTTP-backed providers:
 
 ```sh
-sh scripts/provider-setup-preflight.sh --output-dir .omo/evidence/provider-setup-preflight
+sh scripts/provider-setup-preflight.sh --providers openai,openrouter,kimi-code,moonshot,minimax --output-dir .omo/evidence/provider-setup-preflight
 sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi
 sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex
+sh scripts/provider-proof.sh --provider claude --output-dir .omo/evidence/provider-proof-claude
+sh scripts/provider-proof.sh --provider opencode --output-dir .omo/evidence/provider-proof-opencode
+sh scripts/provider-proof.sh --provider goose --output-dir .omo/evidence/provider-proof-goose
+sh scripts/provider-proof.sh --provider openai --output-dir .omo/evidence/provider-proof-openai
 sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter
 sh scripts/provider-proof.sh --provider kimi-code --output-dir .omo/evidence/provider-proof-kimi-code
+sh scripts/provider-proof.sh --provider moonshot --output-dir .omo/evidence/provider-proof-moonshot
 sh scripts/provider-proof.sh --provider minimax --output-dir .omo/evidence/provider-proof-minimax
 ```
 
 `provider-setup-preflight` checks paid HTTP provider env vars without printing or saving secret values.
 
-HTTP proof gates require non-empty `OPENROUTER_API_KEY`, `KIMI_CODE_API_KEY`, or `MINIMAX_API_KEY` for the default public-readiness provider set. OpenAI and Moonshot remain available as explicit provider-proof targets. Missing keys are recorded as `blocked_missing_key`; blank keys are recorded as `blocked_empty_key`.
+HTTP proof gates require non-empty `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `KIMI_CODE_API_KEY`, `MOONSHOT_API_KEY`, or `MINIMAX_API_KEY` for the full public-readiness provider set. Missing keys are recorded as `blocked_missing_key`; blank keys are recorded as `blocked_empty_key`.
 When a key is missing, the proof gate also writes `summary.json`, `env.template`, `commands.sh`, and `setup-checklist.md` so setup blockers can be resolved without saving secret values. The summary records the setup checklist count, SHA-256 fingerprints for the setup artifacts, and a `no_secret_assignment` command-script policy.
 
 ## Market Gauntlet

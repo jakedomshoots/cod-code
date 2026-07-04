@@ -1,0 +1,25 @@
+{
+  "changed_files": null,
+  "check_results": [
+    {
+      "argv": [
+        "node",
+        "frontend/state.test.js"
+      ],
+      "status": "fail",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "node:internal/assert/utils:77\n    throw err;\n    ^\n\nAssertionError [ERR_ASSERTION]: benchmarkFixture should include optimistic update, got TODO: update this benchmark fixture\n    at Object.\u003canonymous\u003e (/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-claude/cross-language-js-state-reducer/run/ceo_harness/workspace/frontend/state.test.js:5:3)\n    at Module._compile (node:internal/modules/cjs/loader:1781:14)\n    at Object..js (node:internal/modules/cjs/loader:1913:10)\n    at Module.load (node:internal/modules/cjs/loader:1505:32)\n    at Function._load (node:internal/modules/cjs/loader:1309:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v22.22.3\n"
+    }
+  ],
+  "evidence_paths": [
+    ".omo/evidence/cross-language-js-state-reducer.md"
+  ],
+  "patch_results": [
+    {
+      "path": "frontend/state.js",
+      "diff": ""
+    }
+  ],
+  "task_id": "cross-language-js-state-reducer"
+}

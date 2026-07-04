@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "status": "fail",
+  "provider": "goose",
+  "provider_mode": "cli-model-command",
+  "model_command": "scripts/goose-model-command.sh",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md"
+  }
+}

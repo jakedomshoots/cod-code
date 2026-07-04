@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "provider": "codex",
+  "provider_mode": "cli-model-command",
+  "model_command": "scripts/codex-model-command.sh",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md"
+  }
+}

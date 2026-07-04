@@ -1,0 +1,29 @@
+{
+  "changed_files": [
+    "scripts/retry_policy.py",
+    ".omo/evidence/cross-language-python-retry-policy.md",
+    "scripts/__pycache__/retry_policy.cpython-313.pyc"
+  ],
+  "check_results": [
+    {
+      "argv": [
+        "python3",
+        "scripts/test_retry_policy.py"
+      ],
+      "status": "pass",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "evidence_paths": [
+    ".omo/evidence/cross-language-python-retry-policy.md"
+  ],
+  "patch_results": [
+    {
+      "path": "scripts/retry_policy.py",
+      "diff": "diff --git a/scripts/retry_policy.py b/scripts/retry_policy.py\nindex dc5ff7a..2d2a662 100644\n--- a/scripts/retry_policy.py\n+++ b/scripts/retry_policy.py\n@@ -1 +1,3 @@\n-benchmark_fixture = \"TODO: update this benchmark fixture\"\n+benchmark_fixture = (\n+    \"timeout retries use exponential backoff with jitter evidence for retry policy validation\"\n+)\n"
+    }
+  ],
+  "task_id": "cross-language-python-retry-policy"
+}

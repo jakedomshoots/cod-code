@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "status": "fail",
+  "provider": "opencode",
+  "provider_mode": "cli-model-command",
+  "model_command": "scripts/opencode-model-command.sh",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md"
+  }
+}

@@ -1,0 +1,7 @@
+diff --git a/scripts/retry_policy.py b/scripts/retry_policy.py
+index dc5ff7a..f57206c 100644
+--- a/scripts/retry_policy.py
++++ b/scripts/retry_policy.py
+@@ -1 +1 @@
+-benchmark_fixture = "TODO: update this benchmark fixture"
++benchmark_fixture = "timeout retries using exponential backoff and jitter"

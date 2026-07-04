@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "blocked",
+  "provider": "openrouter",
+  "provider_mode": "http-provider",
+  "http_preset": "openrouter",
+  "http_model": "openai/gpt-5",
+  "api_key_env": "OPENROUTER_API_KEY",
+  "blocked_reason": "empty_api_key_env",
+  "setup_result_status": "blocked_empty_key",
+  "setup_checklist_item_count": 6,
+  "setup_artifacts_sha256": {"blocked.md": "1349155c70332f6554526b2263c951e1395f22078cbad42d32486f19239931ea", "commands.sh": "49719a21c37fe3d4cefaa9511fafeb7959c88836eadf97635592a65b4c160736", "env.template": "318d62217ef9a4dfa648b7afabbede988a7423aa70d0d330206cba62e3439781", "setup-checklist.md": "47dbafda9f456b129f133be9a746e021bffbcc1902f186614f59cb027128c886"},
+  "command_script_secret_policy": "no_secret_assignment",
+  "secret_value_saved": false,
+  "artifacts": {
+    "index": "index.md",
+    "blocked": "blocked.md",
+    "env_template": "env.template",
+    "commands": "commands.sh",
+    "checklist": "setup-checklist.md"
+  }
+}
