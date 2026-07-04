@@ -339,6 +339,9 @@ func annotateReleaseProof(action map[string]any) {
 		SetupActions             string   `json:"setup_actions"`
 		SetupActionCount         int      `json:"setup_action_count"`
 		SetupActionsSHA256       string   `json:"setup_actions_sha256"`
+		SetupCommandPolicy       string   `json:"setup_command_policy"`
+		PublishActionsPerformed  bool     `json:"publish_actions_performed"`
+		SecretValueSaved         bool     `json:"secret_value_saved"`
 		OriginRemoteConfigured   bool     `json:"origin_remote_configured"`
 		GitHubAuthStatus         string   `json:"github_auth_status"`
 	}
@@ -356,6 +359,9 @@ func annotateReleaseProof(action map[string]any) {
 		"setup_actions":              summary.SetupActions,
 		"setup_action_count":         summary.SetupActionCount,
 		"setup_actions_sha256":       summary.SetupActionsSHA256,
+		"setup_command_policy":       summary.SetupCommandPolicy,
+		"publish_actions_performed":  summary.PublishActionsPerformed,
+		"secret_value_saved":         summary.SecretValueSaved,
 		"origin_remote_configured":   summary.OriginRemoteConfigured,
 		"github_auth_status":         summary.GitHubAuthStatus,
 	}
@@ -921,6 +927,15 @@ func writeReleaseProofText(builder *strings.Builder, action map[string]any) {
 	}
 	if sha := stringValue(summary["setup_actions_sha256"]); sha != "" {
 		fmt.Fprintf(builder, "  Setup actions sha256: %s\n", sha)
+	}
+	if policy := stringValue(summary["setup_command_policy"]); policy != "" {
+		fmt.Fprintf(builder, "  Setup command policy: %s\n", policy)
+	}
+	if publishActions, ok := summary["publish_actions_performed"].(bool); ok {
+		fmt.Fprintf(builder, "  Publish actions performed: %t\n", publishActions)
+	}
+	if secretSaved, ok := summary["secret_value_saved"].(bool); ok {
+		fmt.Fprintf(builder, "  Secret value saved: %t\n", secretSaved)
 	}
 	if items, _ := summary["setup_action_items"].([]map[string]string); len(items) > 0 {
 		fmt.Fprintf(builder, "  Setup action items:\n")
