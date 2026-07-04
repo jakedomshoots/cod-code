@@ -118,6 +118,7 @@ ceo-packet production-actions --workspace . --format text --action-kind release_
 ceo-packet production-actions --workspace . --format text --action-kind provider_proof
 ceo-packet production-actions --workspace . --format text --action-provider openai
 ceo-packet production-actions --workspace . --format text --env-ready-only
+ceo-packet production-actions --workspace . --format text --ready-only
 ceo-packet production-actions --workspace . --format text --action-kind competitor_setup
 ceo-packet production-actions --workspace . --format text --action-kind final_readiness
 ceo-packet production-actions --workspace . --action-id provider-openai --commands-only

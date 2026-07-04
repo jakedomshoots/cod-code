@@ -52,7 +52,7 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 		return productionActionsReport{}, fmt.Errorf("decode production actions: %w", err)
 	}
 	annotated := annotateProductionActions(raw.Actions, filepath.Dir(status.FinalizerNextActions.JSONPath))
-	actions := filterProductionActions(annotated, opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly)
+	actions := filterProductionActions(annotated, opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly)
 	return productionActionsReport{
 		Path:                status.FinalizerNextActions.JSONPath,
 		Status:              raw.Status,
@@ -60,7 +60,7 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 		EnvReadyActionCount: countEnvReadyProductionActions(actions),
 		ReadyActionCount:    countReadyProductionActions(actions),
 		CommandsOnly:        opts.productionActionsCommandsOnly,
-		Filter:              productionActionFilter(opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly),
+		Filter:              productionActionFilter(opts.productionActionID, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly, opts.productionActionsReadyOnly),
 		Actions:             actions,
 	}, nil
 }
@@ -290,8 +290,8 @@ func actionReady(action map[string]any) bool {
 	return envReady && len(stringSlice(action["blocked_by"])) == 0
 }
 
-func filterProductionActions(actions []map[string]any, id string, kind string, provider string, envReadyOnly bool) []map[string]any {
-	if id == "" && kind == "" && provider == "" && !envReadyOnly {
+func filterProductionActions(actions []map[string]any, id string, kind string, provider string, envReadyOnly bool, readyOnly bool) []map[string]any {
+	if id == "" && kind == "" && provider == "" && !envReadyOnly && !readyOnly {
 		return actions
 	}
 	filtered := make([]map[string]any, 0, len(actions))
@@ -311,12 +311,15 @@ func filterProductionActions(actions []map[string]any, id string, kind string, p
 				continue
 			}
 		}
+		if readyOnly && !actionReady(action) {
+			continue
+		}
 		filtered = append(filtered, action)
 	}
 	return filtered
 }
 
-func productionActionFilter(id string, kind string, provider string, envReadyOnly bool) map[string]string {
+func productionActionFilter(id string, kind string, provider string, envReadyOnly bool, readyOnly bool) map[string]string {
 	filter := map[string]string{}
 	if id != "" {
 		filter["id"] = id
@@ -329,6 +332,9 @@ func productionActionFilter(id string, kind string, provider string, envReadyOnl
 	}
 	if envReadyOnly {
 		filter["env_ready"] = "true"
+	}
+	if readyOnly {
+		filter["ready"] = "true"
 	}
 	if len(filter) == 0 {
 		return nil
@@ -387,6 +393,9 @@ func renderProductionActionsText(report productionActionsReport) string {
 		}
 		if report.Filter["env_ready"] != "" {
 			parts = append(parts, "env_ready="+report.Filter["env_ready"])
+		}
+		if report.Filter["ready"] != "" {
+			parts = append(parts, "ready="+report.Filter["ready"])
 		}
 		fmt.Fprintf(&builder, "Filter: %s\n", strings.Join(parts, " "))
 	}
