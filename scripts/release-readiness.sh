@@ -140,7 +140,7 @@ write_setup_action() {
   check="$1"
   case "$check" in
     git_remote)
-      printf '%s\n' "- git_remote: configure an origin remote for the public repo, for example \`git remote add origin git@github.com:<owner>/<repo>.git\`."
+      printf '%s\n' "- git_remote: configure an origin remote for the public repo, for example \`git remote add origin git@github.com:<owner>/<repo>.git\`, or set \`GH_REPO=owner/name\` for release-only verification."
       ;;
     remote_release_url)
       printf '%s\n' "- remote_release_url: set \`RELEASE_URL\` or \`PUBLIC_RELEASE_URL\` to the public HTTPS release page."
@@ -190,7 +190,7 @@ if [ "$blocked_count" -gt 0 ]; then
       [ -n "$check" ] || continue
       case "$check" in
         git_remote)
-          printf '%s\n' '# blocked git_remote: configure origin, for example: git remote add origin git@github.com:<owner>/<repo>.git'
+          printf '%s\n' '# blocked git_remote: configure origin, for example: git remote add origin git@github.com:<owner>/<repo>.git, or export GH_REPO=owner/name.'
           ;;
         remote_release_url)
           printf '%s\n' '# blocked remote_release_url: export RELEASE_URL=https://github.com/<owner>/<repo>/releases/tag/v<version>'

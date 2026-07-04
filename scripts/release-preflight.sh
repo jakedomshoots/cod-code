@@ -86,6 +86,24 @@ github_repo_from_remote() {
   esac
 }
 
+is_github_repo_name() {
+  case "$1" in
+    */*)
+      case "$1" in
+        *://*|*' '*|/*|*/|*//*)
+          return 1
+          ;;
+        *)
+          return 0
+          ;;
+      esac
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 verify_github_release_assets() {
   tag="$1"
   repo="$2"
@@ -155,8 +173,10 @@ if [ -n "$remote_url" ]; then
   if [ -z "$github_repo" ]; then
     github_repo=$(github_repo_from_remote "$remote_url" || true)
   fi
+elif is_github_repo_name "$github_repo"; then
+  row "git_remote" "pass" "GH_REPO=$github_repo"
 else
-  row "git_remote" "blocked" "no origin remote configured"
+  row "git_remote" "blocked" "no origin remote configured; set GH_REPO=owner/name for release-only verification"
 fi
 
 github_release_json="/tmp/ceo-release-preflight-gh-release.$$"

@@ -302,6 +302,7 @@ JSON
 	}
 	body := string(preflightOutput)
 	for _, want := range []string{
+		"| git_remote | pass | GH_REPO=jakedom/ceo-harness |",
 		"| remote_release_url | pass | https://github.com/jakedom/ceo-harness/releases/tag/v0.2.0-test |",
 		"| github_release_assets | pass | GitHub release v0.2.0-test has all archives, checksums.txt, and release-manifest.json |",
 	} {
