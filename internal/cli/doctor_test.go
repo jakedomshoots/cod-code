@@ -199,6 +199,31 @@ func Test_Run_prints_text_doctor_report_when_text_format_is_supplied(t *testing.
 	}
 }
 
+func Test_Run_textDoctorPassesFromBinaryOnlyInstallDir(t *testing.T) {
+	// Given
+	var out bytes.Buffer
+	t.Chdir(t.TempDir())
+
+	// When
+	err := Run(context.Background(), &out, []string{"--doctor", "--format", "text"})
+
+	// Then
+	if err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	body := out.String()
+	for _, want := range []string{
+		"Doctor: pass",
+		"- install_script [skipped]: requirement=optional",
+		"- release_script [skipped]: requirement=optional",
+		"binary-only install",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("doctor text missing %q:\n%s", want, body)
+		}
+	}
+}
+
 func Test_Run_doctor_reports_repair_guidance_for_corrupt_partial_job_artifact(t *testing.T) {
 	// Given
 	var out bytes.Buffer

@@ -196,13 +196,11 @@ fi
 rm -f /tmp/ceo-release-preflight-verify.$$
 
 remote_url=$(git -C "$root" remote get-url origin 2>/dev/null || true)
-if [ -n "$remote_url" ]; then
-  row "git_remote" "pass" "$remote_url"
-  if [ -z "$github_repo" ]; then
-    github_repo=$(github_repo_from_remote "$remote_url" || true)
-  fi
-elif is_github_repo_name "$github_repo"; then
+if is_github_repo_name "$github_repo"; then
   row "git_remote" "pass" "GH_REPO=$github_repo"
+elif [ -n "$remote_url" ]; then
+  row "git_remote" "pass" "$remote_url"
+  github_repo=$(github_repo_from_remote "$remote_url" || true)
 else
   row "git_remote" "blocked" "no origin remote configured; set GITHUB_REPOSITORY=owner/name for release-only verification"
 fi

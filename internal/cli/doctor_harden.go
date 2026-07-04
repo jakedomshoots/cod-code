@@ -89,6 +89,15 @@ func installScriptDoctorChecks() []doctorCheck {
 func scriptDoctorCheck(name string, relativePath string) doctorCheck {
 	path, err := findRepoFile(relativePath, name)
 	if err != nil {
+		if _, repoErr := findRepoFile("go.mod", "repo root"); repoErr != nil {
+			return doctorCheck{
+				Name:        name,
+				Status:      doctorStatusSkipped,
+				Requirement: doctorOptional,
+				Error:       err.Error(),
+				Guidance:    "source checkout script check skipped for binary-only install",
+			}
+		}
 		return doctorCheck{Name: name, Status: doctorStatusBlocked, Requirement: doctorRequired, Error: err.Error()}
 	}
 	info, err := os.Stat(path)
