@@ -62,6 +62,7 @@ type options struct {
 	productionActionID                         string
 	productionActionKind                       string
 	productionActionProvider                   string
+	productionActionState                      string
 	productionActionsEnvReadyOnly              bool
 	productionActionsReadyOnly                 bool
 	productionActionsNextOnly                  bool
