@@ -36,7 +36,7 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "next-actions.json"), `{
   "schema_version": 1,
   "status": "blocked",
-  "required_action_count": 2,
+  "required_action_count": 3,
   "actions": [
     {
       "id": "provider-openai",
@@ -51,7 +51,25 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
       "kind": "release_proof",
       "text": "Prove public release readiness",
       "command": ["sh", "scripts/release-readiness.sh"]
+    },
+    {
+      "id": "competitor-smoke",
+      "kind": "competitor_setup",
+      "inspect": "competitor-smoke/summary.json",
+      "text": "Fix competitor setup"
     }
+  ]
+}`)
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-finalize-r1", "competitor-smoke", "summary.json"), `{
+  "competitors": 3,
+  "smoke_passed": 1,
+  "smoke_failed": 0,
+  "setup_blocked": 1,
+  "skipped": 1,
+  "results": [
+    {"id": "codex_cli", "name": "Codex CLI", "status": "smoke_pass"},
+    {"id": "opencode", "name": "OpenCode", "status": "setup_blocked", "note": "provider setup is blocked"},
+    {"id": "aider", "name": "Aider", "status": "skipped_missing_binary", "setup_hint": "Install Aider"}
   ]
 }`)
 
@@ -62,11 +80,15 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	text := out.String()
 	for _, want := range []string{
 		"Production actions: blocked",
-		"Required actions: 2",
-		"Env ready: 1",
+		"Required actions: 3",
+		"Env ready: 2",
 		"provider-openai [provider_proof]: Prove OpenAI HTTP provider",
 		"(missing env: OPENAI_API_KEY)",
 		"release-readiness [release_proof]: Prove public release readiness",
+		"competitor-smoke [competitor_setup]: Fix competitor setup",
+		"Competitor setup: 1 pass, 1 blocked, 1 skipped, 0 failed",
+		"opencode: setup_blocked - provider setup is blocked",
+		"aider: skipped_missing_binary - Install Aider",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("production actions text missing %q:\n%s", want, text)
@@ -81,8 +103,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &body); err != nil {
 		t.Fatalf("decode production actions: %v\n%s", err, out.String())
 	}
-	if body.RequiredActionCount != 2 || body.EnvReadyActionCount != 1 || len(body.Actions) != 2 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
-		t.Fatalf("body = %+v, want two actions starting with provider-openai", body)
+	if body.RequiredActionCount != 3 || body.EnvReadyActionCount != 2 || len(body.Actions) != 3 || body.Actions[0]["id"] != "provider-openai" || body.Actions[0]["env_ready"] != false {
+		t.Fatalf("body = %+v, want three actions starting with provider-openai", body)
 	}
 
 	out.Reset()
@@ -121,8 +143,8 @@ func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	}
 	text = out.String()
 	for _, want := range []string{
-		"Required actions: 1",
-		"Env ready: 1",
+		"Required actions: 2",
+		"Env ready: 2",
 		"Filter: env_ready=true",
 		"release-readiness [release_proof]: Prove public release readiness",
 	} {
@@ -160,7 +182,7 @@ func TestProductionActionsDoesNotReadSecretValuesIntoReport(t *testing.T) {
 	actions := annotateProductionActions([]map[string]any{{
 		"id":           "provider-openai",
 		"required_env": "OPENAI_API_KEY",
-	}})
+	}}, "")
 	encoded, err := json.Marshal(actions)
 	if err != nil {
 		t.Fatalf("marshal actions: %v", err)

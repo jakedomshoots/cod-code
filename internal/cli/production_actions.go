@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -48,7 +49,7 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 	if err := json.Unmarshal(content, &raw); err != nil {
 		return productionActionsReport{}, fmt.Errorf("decode production actions: %w", err)
 	}
-	annotated := annotateProductionActions(raw.Actions)
+	annotated := annotateProductionActions(raw.Actions, filepath.Dir(status.FinalizerNextActions.JSONPath))
 	actions := filterProductionActions(annotated, opts.productionActionKind, opts.productionActionProvider, opts.productionActionsEnvReadyOnly)
 	return productionActionsReport{
 		Path:                status.FinalizerNextActions.JSONPath,
@@ -60,7 +61,7 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 	}, nil
 }
 
-func annotateProductionActions(actions []map[string]any) []map[string]any {
+func annotateProductionActions(actions []map[string]any, sourceDir string) []map[string]any {
 	annotated := make([]map[string]any, 0, len(actions))
 	for _, action := range actions {
 		next := make(map[string]any, len(action)+3)
@@ -77,9 +78,82 @@ func annotateProductionActions(actions []map[string]any) []map[string]any {
 			}
 		}
 		next["env_ready"] = envReady
+		annotateCompetitorSetup(next, sourceDir)
 		annotated = append(annotated, next)
 	}
 	return annotated
+}
+
+func annotateCompetitorSetup(action map[string]any, sourceDir string) {
+	if actionString(action, "kind") != "competitor_setup" {
+		return
+	}
+	inspectPath := actionString(action, "inspect")
+	if inspectPath == "" {
+		return
+	}
+	if !filepath.IsAbs(inspectPath) {
+		inspectPath = filepath.Join(sourceDir, inspectPath)
+	}
+	content, err := os.ReadFile(inspectPath)
+	if err != nil {
+		action["competitor_summary_error"] = err.Error()
+		return
+	}
+	var summary struct {
+		Competitors  int `json:"competitors"`
+		SmokePassed  int `json:"smoke_passed"`
+		SmokeFailed  int `json:"smoke_failed"`
+		SetupBlocked int `json:"setup_blocked"`
+		Skipped      int `json:"skipped"`
+		Results      []struct {
+			ID        string `json:"id"`
+			Name      string `json:"name"`
+			Status    string `json:"status"`
+			SetupHint string `json:"setup_hint"`
+			Note      string `json:"note"`
+			Version   struct {
+				Error string `json:"error"`
+			} `json:"version"`
+			DryRun struct {
+				Error string `json:"error"`
+			} `json:"dry_run"`
+		} `json:"results"`
+	}
+	if err := json.Unmarshal(content, &summary); err != nil {
+		action["competitor_summary_error"] = err.Error()
+		return
+	}
+	blockers := []map[string]string{}
+	for _, result := range summary.Results {
+		if result.Status == "smoke_pass" {
+			continue
+		}
+		reason := result.SetupHint
+		if reason == "" {
+			reason = result.Note
+		}
+		if reason == "" {
+			reason = result.DryRun.Error
+		}
+		if reason == "" {
+			reason = result.Version.Error
+		}
+		blockers = append(blockers, map[string]string{
+			"id":     result.ID,
+			"name":   result.Name,
+			"status": result.Status,
+			"reason": reason,
+		})
+	}
+	action["competitor_summary"] = map[string]any{
+		"competitors":   summary.Competitors,
+		"smoke_passed":  summary.SmokePassed,
+		"smoke_failed":  summary.SmokeFailed,
+		"setup_blocked": summary.SetupBlocked,
+		"skipped":       summary.Skipped,
+		"blockers":      blockers,
+	}
 }
 
 func countEnvReadyProductionActions(actions []map[string]any) int {
@@ -191,6 +265,42 @@ func renderProductionActionsText(report productionActionsReport) string {
 		} else {
 			fmt.Fprintf(&builder, "- %s: %s%s\n", id, text, suffix)
 		}
+		writeCompetitorSetupText(&builder, action)
 	}
 	return builder.String()
+}
+
+func writeCompetitorSetupText(builder *strings.Builder, action map[string]any) {
+	summary, _ := action["competitor_summary"].(map[string]any)
+	if summary == nil {
+		return
+	}
+	fmt.Fprintf(
+		builder,
+		"  Competitor setup: %.0f pass, %.0f blocked, %.0f skipped, %.0f failed\n",
+		numberValue(summary["smoke_passed"]),
+		numberValue(summary["setup_blocked"]),
+		numberValue(summary["skipped"]),
+		numberValue(summary["smoke_failed"]),
+	)
+	blockers, _ := summary["blockers"].([]map[string]string)
+	for _, blocker := range blockers {
+		reason := blocker["reason"]
+		if reason != "" {
+			fmt.Fprintf(builder, "  - %s: %s - %s\n", blocker["id"], blocker["status"], reason)
+		} else {
+			fmt.Fprintf(builder, "  - %s: %s\n", blocker["id"], blocker["status"])
+		}
+	}
+}
+
+func numberValue(value any) float64 {
+	switch typed := value.(type) {
+	case int:
+		return float64(typed)
+	case float64:
+		return typed
+	default:
+		return 0
+	}
 }
