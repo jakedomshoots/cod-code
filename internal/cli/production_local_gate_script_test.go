@@ -67,6 +67,16 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 	if !strings.Contains(commands, "# blocked command:") {
 		t.Fatalf("production action command artifact should comment blocked commands:\n%s", commands)
 	}
+	actions := readTextFile(t, filepath.Join(outputDir, "production-actions.json"))
+	for _, want := range []string{
+		`"path":`,
+		`"runnable_command_count":`,
+		`"blocked_command_count":`,
+	} {
+		if !strings.Contains(actions, want) {
+			t.Fatalf("production action artifact missing %q:\n%s", want, actions)
+		}
+	}
 }
 
 func Test_ProductionLocalGateScript_failsWhenLocalReadinessIsFalse(t *testing.T) {

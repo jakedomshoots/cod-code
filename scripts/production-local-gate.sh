@@ -112,23 +112,35 @@ go run "$root/cmd/ceo-packet" production-actions --workspace "$root" --commands-
 commands_status=$?
 set -e
 
-python3 - "$output_dir/production-actions.json" "$output_dir/production-actions.commands.sh" "$actions_status" "$commands_status" <<'PY'
+python3 - "$output_dir/summary.json" "$output_dir/production-actions.json" "$output_dir/production-actions.commands.sh" "$actions_status" "$commands_status" <<'PY'
 import json
+import os
 import sys
 
-actions_path, commands_path = sys.argv[1], sys.argv[2]
-actions_status, commands_status = int(sys.argv[3]), int(sys.argv[4])
+summary_path, actions_path, commands_path = sys.argv[1], sys.argv[2], sys.argv[3]
+actions_status, commands_status = int(sys.argv[4]), int(sys.argv[5])
 if actions_status != 0 or commands_status != 0:
     print("production-local-gate: fail production-actions command failed")
     raise SystemExit(1)
+
+with open(summary_path, "r", encoding="utf-8") as handle:
+    readiness = json.load(handle)
 
 with open(actions_path, "r", encoding="utf-8") as handle:
     actions = json.load(handle)
 
 status = actions.get("status")
 if status == "missing":
+    if not bool(readiness.get("public_production_ready")):
+        print("production-local-gate: fail production actions missing while public blockers remain")
+        raise SystemExit(1)
     print("production-local-gate: production_actions=missing")
     raise SystemExit(0)
+
+source_path = actions.get("path")
+if not source_path or not os.path.exists(source_path):
+    print("production-local-gate: fail production action source missing")
+    raise SystemExit(1)
 
 runnable = int(actions.get("runnable_command_count", 0) or 0)
 blocked = int(actions.get("blocked_command_count", 0) or 0)
