@@ -202,6 +202,8 @@ func localAgentBenchmarkPrompt(task Task) string {
 	}
 	fmt.Fprintf(&builder, "Required diff terms: %s.\n", strings.Join(task.RequiredDiffTerms, ", "))
 	fmt.Fprintf(&builder, "Required commands to satisfy after the edit: %s.\n", strings.Join(task.RequiredCommands, "; "))
+	fmt.Fprintf(&builder, "Do not inspect unrelated files or run broad test suites; run only the required commands for verification.\n")
+	fmt.Fprintf(&builder, "Stop as soon as the required files, evidence artifacts, diff terms, and commands are satisfied.\n")
 	fmt.Fprintf(&builder, "Keep the change minimal and do not remove the Go fixture files.")
 	return builder.String()
 }

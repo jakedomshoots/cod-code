@@ -173,6 +173,8 @@ func Test_LocalAgentBenchmarkPrompt_names_required_artifact_contract(t *testing.
 		"Required evidence artifacts: .omo/evidence/docs-roadmap-cli-first.md.",
 		"Create every required evidence artifact as a non-empty markdown file inside the workspace.",
 		"must summarize the change, commands run, and verification result",
+		"Do not inspect unrelated files or run broad test suites",
+		"Stop as soon as the required files, evidence artifacts, diff terms, and commands are satisfied.",
 	} {
 		if !strings.Contains(prompt, want) {
 			t.Fatalf("prompt = %q, want %q", prompt, want)
