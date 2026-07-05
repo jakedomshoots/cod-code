@@ -104,7 +104,7 @@ func Test_RunLocalAgentBenchmark_marks_provider_quota_as_setup_blocked(t *testin
 	binDir := t.TempDir()
 	writeExecutableContent(t, filepath.Join(binDir, "opencode"), `#!/bin/sh
 printf 'AI_APICallError: Token Plan usage limit reached\n' >&2
-sleep 5
+exit 1
 `)
 	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	root := t.TempDir()
