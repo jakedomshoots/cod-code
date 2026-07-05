@@ -48,7 +48,7 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 		"production-local-gate: pass local_production_ready=true public_production_ready=false",
 		"production-local-gate: blocked_count=",
 		"production-local-gate: checklist_actions=",
-		"production-local-gate: production_actions=missing",
+		"production-local-gate: production_actions=pass",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("production-local-gate output missing %q:\n%s", want, body)
@@ -73,7 +73,7 @@ func Test_ProductionLocalGateScript_passesWhenOnlyPublicBlockersRemain(t *testin
 	actions := readTextFile(t, filepath.Join(outputDir, "production-actions.json"))
 	for _, want := range []string{
 		`"path": ""`,
-		`"status": "missing"`,
+		`"status": "pass"`,
 		`"required_action_count": 0`,
 		`"runnable_command_count": 0`,
 		`"blocked_command_count": 0`,

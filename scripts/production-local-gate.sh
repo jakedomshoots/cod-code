@@ -162,6 +162,9 @@ status = actions.get("status")
 if status == "missing":
     print("production-local-gate: production_actions=missing")
     raise SystemExit(0)
+if status == "pass" and int(actions.get("required_action_count", 0) or 0) == 0:
+    print("production-local-gate: production_actions=pass")
+    raise SystemExit(0)
 
 source_path = actions.get("path")
 if not source_path or not os.path.exists(source_path):
