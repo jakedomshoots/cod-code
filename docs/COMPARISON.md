@@ -74,8 +74,8 @@ Latest saved starter-suite results:
 
 | Suite | Claude Code | Aider | Goose | Oh My Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| Readiness ping | setup-blocked: `claude` reports `Not logged in` | pass, 3093ms | pass, 5332ms | pass, 2110ms | `.omo/evidence/expanded-runners-20260704T231533Z/local-agent-readiness/summary.md` |
-| Edit file | setup-blocked: `claude` reports `Not logged in` | pass, 3740ms | pass, 17548ms | pass, 20138ms | `.omo/evidence/expanded-runners-20260704T231533Z/local-agent-edit-file/summary.md` |
+| Readiness ping | setup-blocked: Claude auth works, but provider reports `Credit balance is too low` | pass, 4549ms | pass, 4739ms | pass, 3888ms | `.omo/evidence/expanded-runners-20260704T231533Z/local-agent-readiness-r2/summary.md`; Claude-only rerun: `.omo/evidence/expanded-runners-20260704T231533Z/claude-readiness-r3/summary.md` |
+| Edit file | setup-blocked: Claude auth works, but provider reports `Credit balance is too low` | pass, 5296ms | previous pass, 17548ms; latest 4-agent smoke timed out at 240s | pass, 27435ms | `.omo/evidence/expanded-runners-20260704T231533Z/local-agent-edit-file-r2/summary.md`; Claude-only rerun: `.omo/evidence/expanded-runners-20260704T231533Z/claude-edit-file-r3/summary.md` |
 
 The local-agent suite is still a starter comparison, not a full product benchmark. Exact-content scoring stays strict because previous runs caught newline mismatches and Aider path drift before clean reruns passed.
 
@@ -116,9 +116,9 @@ Latest expanded-runner scored slice:
 
 | Benchmark | Claude Code | Aider | Goose | Oh My Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| `docs-roadmap-cli-first` | setup-blocked: `claude` reports `Not logged in` | pass 5/5 | pass 5/5 | pass 5/5 | `.omo/evidence/expanded-runners-20260704T231533Z/benchmark-docs-roadmap-r2/summary.json` |
+| `docs-roadmap-cli-first` | setup-blocked: Claude auth works, but provider reports `Credit balance is too low` | pass 5/5 | pass 5/5 | pass 5/5 | `.omo/evidence/expanded-runners-20260704T231533Z/benchmark-docs-roadmap-r3/summary.json` |
 
-The latest stable 29-task run is a clean comparison pass after enabling one timeout retry and one result retry. Expanded full-runner support is wired, but the expanded matrix is not clean until Claude Code is logged in and the full production-core suite reruns with `claude_code,aider,goose,oh_my_pi` included.
+The latest stable 29-task run is a clean comparison pass after enabling one timeout retry and one result retry. Expanded full-runner support is wired, but the expanded matrix is not clean until the Claude Code account has usable provider credit/quota and the full production-core suite reruns with `claude_code,aider,goose,oh_my_pi` included.
 
 Latest CEO-only production-core result:
 

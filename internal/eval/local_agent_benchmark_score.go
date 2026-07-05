@@ -191,6 +191,9 @@ func localAgentSetupBlocked(run localAgentRunResult) bool {
 		"not logged in",
 		"please run /login",
 		"quota",
+		"credit balance is too low",
+		"insufficient balance",
+		"insufficient_quota",
 		"usage limit",
 	} {
 		if strings.Contains(body, marker) {

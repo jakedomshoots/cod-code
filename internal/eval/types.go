@@ -169,6 +169,7 @@ type LocalAgentSuiteSummary struct {
 	Passed           int                   `json:"passed"`
 	Failed           int                   `json:"failed"`
 	TimedOut         int                   `json:"timed_out"`
+	SetupBlocked     int                   `json:"setup_blocked,omitempty"`
 	Skipped          int                   `json:"skipped"`
 	Results          []LocalAgentResult    `json:"results"`
 	IterationBacklog []LocalAgentIteration `json:"iteration_backlog"`

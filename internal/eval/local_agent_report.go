@@ -13,6 +13,8 @@ func accumulateLocalAgentStatus(summary *LocalAgentSuiteSummary, status string) 
 		summary.Passed++
 	case localAgentStatusTimeout:
 		summary.TimedOut++
+	case localAgentStatusSetupBlocked:
+		summary.SetupBlocked++
 	case localAgentStatusSkipped:
 		summary.Skipped++
 	default:
@@ -62,6 +64,8 @@ func localAgentFinding(result LocalAgentResult) string {
 	switch result.Status {
 	case localAgentStatusTimeout:
 		return result.Name + " timed out in the non-interactive readiness probe"
+	case localAgentStatusSetupBlocked:
+		return result.Name + " setup is blocked by provider auth, quota, or credential state"
 	case localAgentStatusSkipped:
 		return result.Name + " binary was not found"
 	default:
@@ -79,6 +83,8 @@ func localAgentNextStep(result LocalAgentResult) string {
 	switch result.Status {
 	case localAgentStatusTimeout:
 		return "add a provider/auth preflight or shorter safe-mode command before live task comparison"
+	case localAgentStatusSetupBlocked:
+		return "repair the provider login, quota, or selected model, then rerun with saved stderr/stdout evidence"
 	case localAgentStatusSkipped:
 		return result.SetupHint
 	default:
@@ -113,6 +119,7 @@ func writeLocalAgentMarkdown(path string, summary LocalAgentSuiteSummary) error 
 	fmt.Fprintf(&builder, "\nPassed: %d\n", summary.Passed)
 	fmt.Fprintf(&builder, "Failed: %d\n", summary.Failed)
 	fmt.Fprintf(&builder, "Timed out: %d\n", summary.TimedOut)
+	fmt.Fprintf(&builder, "Setup blocked: %d\n", summary.SetupBlocked)
 	fmt.Fprintf(&builder, "Skipped: %d\n", summary.Skipped)
 	return writeTextFile(path, builder.String())
 }

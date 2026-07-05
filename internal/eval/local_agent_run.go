@@ -70,6 +70,9 @@ func localAgentStatus(run localAgentRunResult, outputMatched bool, fileMatched b
 	if run.timedOut {
 		return localAgentStatusTimeout
 	}
+	if localAgentSetupBlocked(run) {
+		return localAgentStatusSetupBlocked
+	}
 	if run.exitCode == 0 && run.errText == "" && outputMatched && fileMatched {
 		return localAgentStatusPass
 	}
@@ -82,6 +85,8 @@ func localAgentNote(status string, expectedOutput string) string {
 		return "non-interactive command exited 0 and matched expected evidence"
 	case localAgentStatusTimeout:
 		return "non-interactive command timed out; process tree was canceled"
+	case localAgentStatusSetupBlocked:
+		return "non-interactive command setup is blocked; stdout/stderr captured the auth, quota, or credential issue"
 	default:
 		if expectedOutput == "" {
 			return "non-interactive command did not produce the expected file state"
