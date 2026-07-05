@@ -218,7 +218,7 @@ func Test_Run_opens_cod_chat_when_no_args_are_supplied(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
 	}
-	if body := out.String(); !strings.Contains(body, "Cod Code Chat") || !strings.Contains(body, "Shortcuts") {
+	if body := out.String(); !strings.Contains(body, "╭─ Cod Code") || !strings.Contains(body, "Composer") {
 		t.Fatalf("cod chat output missing expected TUI markers:\n%s", body)
 	}
 }

@@ -7,6 +7,8 @@ import (
 	"ceoharness/internal/history"
 )
 
+const tuiRuleWidth = 76
+
 type tuiQueueGroup struct {
 	title string
 	tag   string
@@ -22,15 +24,16 @@ func (m tuiModel) render() string {
 	var builder strings.Builder
 	writeTUIHeader(&builder, m)
 	if len(m.jobs) == 0 {
-		writeTUIEmpty(&builder, m.workspace)
-		writeTUIProviderHealth(&builder, m.providerSummary)
-		writeTUICommandHints(&builder, m.workspace)
+		writeTUIEmptyConversation(&builder, m.workspace)
+		writeTUIActivity(&builder, m)
+		writeTUIStatus(&builder, m.providerSummary)
+		writeTUIComposer(&builder, m.workspace)
 		return builder.String()
 	}
-	writeTUIQueue(&builder, m)
-	writeTUISelectedJob(&builder, m)
-	writeTUIProviderHealth(&builder, m.providerSummary)
-	writeTUICommandHints(&builder, m.workspace)
+	writeTUIConversation(&builder, m)
+	writeTUIActivity(&builder, m)
+	writeTUIStatus(&builder, m.providerSummary)
+	writeTUIComposer(&builder, m.workspace)
 	return builder.String()
 }
 
@@ -52,37 +55,83 @@ func (m tuiModel) selectedJob() tuiJob {
 }
 
 func writeTUIHeader(builder *strings.Builder, model tuiModel) {
-	builder.WriteString("Cod Code Chat\n")
-	writeTUILine(builder, "Workspace", model.workspace)
-	writeTUILine(builder, "Queue", fmt.Sprintf("%d %s", len(model.jobs), pluralize("job", len(model.jobs))))
-	writeTUILine(builder, "Needs", fmt.Sprintf("%d action%s", model.inboxCount(), pluralSuffix(model.inboxCount())))
-	builder.WriteString("------------------------------------------------------------\n")
+	writeTUISection(builder, "Cod Code")
+	writeTUIBoxLine(builder, "", "Chat-first coding terminal for tasks, diffs, approvals, and proof.")
+	writeTUIBoxLine(builder, "Workspace", model.workspace)
+	writeTUIBoxLine(builder, "Session", fmt.Sprintf("%d %s · %d action%s waiting", len(model.jobs), pluralize("job", len(model.jobs)), model.inboxCount(), pluralSuffix(model.inboxCount())))
+	writeTUISectionEnd(builder)
 }
 
-func writeTUIQueue(builder *strings.Builder, model tuiModel) {
-	builder.WriteString("Queue\n")
+func writeTUIConversation(builder *strings.Builder, model tuiModel) {
+	job := model.selectedJob()
+	writeTUISection(builder, "Conversation")
+	writeTUIBoxLine(builder, "You", job.task)
+	writeTUIBoxLine(builder, "Cod", selectedJobSummary(job))
+	if strings.TrimSpace(job.patchPreview) != "" {
+		writeTUIBoxLine(builder, "Diff", job.patchPreview)
+	}
+	if strings.TrimSpace(job.checkOutput) != "" {
+		writeTUIBoxLine(builder, "Check", job.checkOutput)
+	}
+	if strings.TrimSpace(job.snapshotNote) != "" {
+		writeTUIBoxLine(builder, "Proof", job.snapshotNote)
+	}
+	if strings.TrimSpace(job.patchPreview) == "" && strings.TrimSpace(job.checkOutput) == "" && strings.TrimSpace(job.snapshotNote) == "" {
+		writeTUIBoxLine(builder, "Proof", "No saved report details yet. Open the job report for the full transcript.")
+	}
+	writeTUIBoxLine(builder, "Action", selectedJobAction(model, job))
+	writeTUIBoxLine(builder, "Rerun", tuiRetryCommand(model.workspace, job.id))
+	writeTUISectionEnd(builder)
+}
+
+func selectedJobSummary(job tuiJob) string {
+	state := tuiJobState(job)
+	if job.inboxReason != "" {
+		return state + " · waiting on you"
+	}
+	if strings.TrimSpace(job.verdict) != "" {
+		return "verdict " + state
+	}
+	return "running or awaiting saved verdict"
+}
+
+func selectedJobAction(model tuiModel, job tuiJob) string {
+	if job.actionCommand == "" {
+		return "none"
+	}
+	return job.action + " · " + job.actionCommand
+}
+
+func writeTUIEmptyConversation(builder *strings.Builder, workspace string) {
+	writeTUISection(builder, "Conversation")
+	writeTUIBoxLine(builder, "Cod", "No chat yet. Start with a real task, then return here for the transcript, diff, and verdict.")
+	writeTUIBoxLine(builder, "Run", "cod run --workspace "+workspaceArg(workspace)+" -- \"Fix one real task\"")
+	writeTUIBoxLine(builder, "Setup", "cod start "+workspaceArg(workspace)+" · cod doctor --workspace "+workspaceArg(workspace)+" --format text")
+	writeTUISectionEnd(builder)
+}
+
+func writeTUIActivity(builder *strings.Builder, model tuiModel) {
+	writeTUISection(builder, "Activity")
+	if len(model.jobs) == 0 {
+		writeTUIBoxLine(builder, "Inbox", "No saved jobs yet.")
+		writeTUIBoxLine(builder, "Next", "Start a task; approvals, questions, and reruns will land here.")
+		writeTUISectionEnd(builder)
+		return
+	}
 	for _, group := range model.queueGroups() {
 		if len(group.items) == 0 {
 			continue
 		}
-		builder.WriteString("[")
-		builder.WriteString(group.tag)
-		builder.WriteString("] ")
-		builder.WriteString(group.title)
-		builder.WriteString(fmt.Sprintf(" (%d)\n", len(group.items)))
+		writeTUIBoxLine(builder, group.tag, fmt.Sprintf("%s (%d)", group.title, len(group.items)))
 		for _, item := range group.items {
-			prefix := "  "
+			marker := " "
 			if item.index == model.selected {
-				prefix = "> "
+				marker = "›"
 			}
-			builder.WriteString(prefix)
-			builder.WriteString(padRight(item.job.id, 12))
-			builder.WriteString(padRight(tuiJobState(item.job), 24))
-			builder.WriteString(trimText(oneLine(item.job.task), 64))
-			builder.WriteString("\n")
+			writeTUIBoxLine(builder, "", fmt.Sprintf("%s %-11s %-21s %s", marker, item.job.id, tuiJobState(item.job), trimText(oneLine(item.job.task), 46)))
 		}
 	}
-	builder.WriteString("\n")
+	writeTUISectionEnd(builder)
 }
 
 func (m tuiModel) queueGroups() []tuiQueueGroup {
@@ -132,59 +181,15 @@ func tuiJobState(job tuiJob) string {
 	return "unknown"
 }
 
-func writeTUISelectedJob(builder *strings.Builder, model tuiModel) {
-	job := model.selectedJob()
-	builder.WriteString("Selected\n")
-	writeTUILine(builder, "Job", job.id)
-	writeTUILine(builder, "Task", job.task)
-	writeTUILine(builder, "Verdict", job.verdict)
-	if job.inboxReason == "" {
-		writeTUILine(builder, "Inbox", "clear")
-	} else {
-		writeTUILine(builder, "Inbox", job.inboxReason)
-	}
-	builder.WriteString("\n")
-
-	builder.WriteString("Evidence\n")
-	writeTUILine(builder, "Patch", job.patchPreview)
-	writeTUILine(builder, "Check", job.checkOutput)
-	writeTUILine(builder, "Snapshot", job.snapshotNote)
-	if strings.TrimSpace(job.patchPreview) == "" && strings.TrimSpace(job.checkOutput) == "" && strings.TrimSpace(job.snapshotNote) == "" {
-		writeTUILine(builder, "Status", "no saved report details yet")
-	}
-	builder.WriteString("\n")
-
-	builder.WriteString("Actions\n")
-	if job.actionCommand != "" {
-		writeTUILine(builder, "Primary", job.action)
-		writeTUILine(builder, "Command", job.actionCommand)
-	} else {
-		writeTUILine(builder, "Primary", "none")
-	}
-	writeTUILine(builder, "Rerun", tuiRetryCommand(model.workspace, job.id))
-	builder.WriteString("\n")
-}
-
-func writeTUIEmpty(builder *strings.Builder, workspace string) {
-	builder.WriteString("Queue\n")
-	builder.WriteString("No saved jobs yet.\n")
-	builder.WriteString("Start a real task, then come back here to review chat turns, verdicts, and proof.\n\n")
-	builder.WriteString("Start\n")
-	writeTUICommandAction(builder, "Open chat", "cod")
-	writeTUICommandAction(builder, "Quickstart", "cod start "+workspaceArg(workspace))
-	writeTUICommandAction(builder, "Check setup", "cod doctor --workspace "+workspaceArg(workspace)+" --format text")
-	builder.WriteString("\n")
-}
-
-func writeTUIProviderHealth(builder *strings.Builder, summary history.ProviderHealthSummary) {
-	builder.WriteString("Systems\n")
+func writeTUIStatus(builder *strings.Builder, summary history.ProviderHealthSummary) {
+	writeTUISection(builder, "Status")
 	if summary.ProviderCount == 0 && summary.AttemptCount == 0 {
-		writeTUILine(builder, "Providers", "no evidence yet; run provider proof or config-check.")
-		builder.WriteString("\n")
+		writeTUIBoxLine(builder, "Providers", "no evidence yet; run cod doctor or provider proof.")
+		writeTUISectionEnd(builder)
 		return
 	}
-	writeTUILine(builder, "Providers", fmt.Sprintf(
-		"%d %s | %d %s | %d pass | %d fail",
+	writeTUIBoxLine(builder, "Providers", fmt.Sprintf(
+		"%d %s · %d %s · %d pass · %d fail",
 		summary.ProviderCount,
 		pluralize("provider", summary.ProviderCount),
 		summary.AttemptCount,
@@ -192,33 +197,43 @@ func writeTUIProviderHealth(builder *strings.Builder, summary history.ProviderHe
 		summary.PassCount,
 		summary.FailCount,
 	))
-	builder.WriteString("\n")
+	writeTUISectionEnd(builder)
 }
 
-func writeTUICommandHints(builder *strings.Builder, workspace string) {
-	builder.WriteString("Shortcuts\n")
-	writeTUILine(builder, "Navigate", "j/down next | k/up previous")
-	writeTUILine(builder, "Primary", "enter/a dispatch selected action")
-	writeTUILine(builder, "Rerun", "r print rerun command")
-	writeTUILine(builder, "Quit", "q")
-	builder.WriteString("Next\n")
-	writeTUICommandAction(builder, "Review inbox", "cod inbox --workspace "+workspaceArg(workspace))
-	writeTUICommandAction(builder, "Check setup", "cod doctor --workspace "+workspaceArg(workspace)+" --format text")
-	writeTUICommandAction(builder, "Tool map", "cod tools manifest --format json")
+func writeTUIComposer(builder *strings.Builder, workspace string) {
+	writeTUISection(builder, "Composer")
+	writeTUIBoxLine(builder, "Prompt", "cod run --workspace "+workspaceArg(workspace)+" -- \"Describe the change...\"")
+	writeTUIBoxLine(builder, "Slash", "/status · /inbox · /doctor · /tools")
+	writeTUIBoxLine(builder, "Context", "@path for files · !cmd for shell output · approvals appear inline above")
+	writeTUIBoxLine(builder, "Keys", "j/k move · enter/a act · r rerun · q quit")
+	writeTUIBoxLine(builder, "Inbox", "cod inbox --workspace "+workspaceArg(workspace))
+	writeTUIBoxLine(builder, "Doctor", "cod doctor --workspace "+workspaceArg(workspace)+" --format text")
+	writeTUISectionEnd(builder)
 }
 
-func writeTUILine(builder *strings.Builder, label string, value string) {
+func writeTUISection(builder *strings.Builder, title string) {
+	builder.WriteString("╭─ ")
+	builder.WriteString(title)
+	builder.WriteString(" ")
+	builder.WriteString(strings.Repeat("─", max(1, tuiRuleWidth-len(title))))
+	builder.WriteString("╮\n")
+}
+
+func writeTUISectionEnd(builder *strings.Builder) {
+	builder.WriteString("╰")
+	builder.WriteString(strings.Repeat("─", tuiRuleWidth+4))
+	builder.WriteString("╯\n")
+}
+
+func writeTUIBoxLine(builder *strings.Builder, label string, value string) {
 	if strings.TrimSpace(value) == "" {
 		return
 	}
-	builder.WriteString(padRight(label, 12))
-	builder.WriteString(trimText(oneLine(value), 96))
-	builder.WriteString("\n")
-}
-
-func writeTUICommandAction(builder *strings.Builder, label string, command string) {
-	builder.WriteString(padRight(label, 14))
-	builder.WriteString(command)
+	builder.WriteString("│ ")
+	if label != "" {
+		builder.WriteString(padRight(label, 10))
+	}
+	builder.WriteString(trimText(oneLine(value), 104))
 	builder.WriteString("\n")
 }
 

@@ -120,23 +120,20 @@ func Test_Run_tui_prints_operator_dashboard(t *testing.T) {
 	}
 	text := out.String()
 	for _, want := range []string{
-		"Cod Code Chat",
-		"Queue",
-		"[INPUT] Needs input (1)",
-		"Needs       1 action",
-		"Selected",
-		"Evidence",
-		"Actions",
-		"Primary     answer",
-		"Command     cod --workspace",
-		"Rerun       cod --workspace",
-		"Systems",
+		"╭─ Cod Code",
+		"Chat-first coding terminal",
+		"Session   1 job · 1 action waiting",
+		"Conversation",
+		"Activity",
+		"INPUT",
+		"Needs input (1)",
+		"Action    answer · cod --workspace",
+		"Rerun     cod --workspace",
+		"Status",
 		"Providers",
-		"Shortcuts",
-		"Primary     enter/a dispatch selected action",
-		"Rerun       r print rerun command",
-		"Next",
-		"cod tools manifest --format json",
+		"Composer",
+		"Keys      j/k move · enter/a act · r rerun · q quit",
+		"Inbox     cod inbox --workspace",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("tui output missing %q:\n%s", want, text)

@@ -88,28 +88,27 @@ func Test_Run_tui_snapshot_shows_dashboard_when_jobs_exist(t *testing.T) {
 	}
 	text := out.String()
 	for _, want := range []string{
-		"Cod Code Chat",
-		"Queue",
-		"[INPUT] Needs input (1)",
-		"[REVIEW] Needs decision (1)",
-		"> job-000002",
-		"needs_input",
-		"Needs customer input",
-		"Selected",
-		"Evidence",
-		"Patch       app.txt",
-		"Check       go test ./... pass",
-		"Actions",
-		"Primary     answer",
-		"Command     cod --workspace",
-		"Rerun       cod --workspace",
-		"Providers   1 provider | 1 attempt | 1 pass | 0 fail",
-		"Systems",
-		"Shortcuts",
-		"Primary     enter/a dispatch selected action",
-		"Rerun       r print rerun command",
-		"Next",
-		"cod tools manifest --format json",
+		"╭─ Cod Code",
+		"Chat-first coding terminal",
+		"Session",
+		"Conversation",
+		"You       Needs customer input",
+		"Cod       needs_input · waiting on you",
+		"Diff      app.txt",
+		"Check     go test ./... pass",
+		"Action    answer · cod --workspace",
+		"Rerun     cod --workspace",
+		"Activity",
+		"INPUT",
+		"Needs input (1)",
+		"REVIEW",
+		"Needs decision (1)",
+		"› job-000002",
+		"Status",
+		"Providers 1 provider · 1 attempt · 1 pass · 0 fail",
+		"Composer",
+		"Keys      j/k move · enter/a act · r rerun · q quit",
+		"Inbox     cod inbox --workspace",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("snapshot missing %q:\n%s", want, text)
@@ -133,14 +132,14 @@ func Test_Run_tui_snapshot_uses_provider_zero_state_guidance_when_no_provider_hi
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
 	}
 	text := out.String()
-	if !strings.Contains(text, "Providers   no evidence yet; run provider proof or config-check.") {
+	if !strings.Contains(text, "Providers no evidence yet; run cod doctor or provider proof.") {
 		t.Fatalf("snapshot must surface provider zero-state guidance when no provider history exists:\n%s", text)
 	}
-	if !strings.Contains(text, "Systems") {
-		t.Fatalf("snapshot must surface Systems block above provider zero-state guidance:\n%s", text)
+	if !strings.Contains(text, "Status") {
+		t.Fatalf("snapshot must surface Status block above provider zero-state guidance:\n%s", text)
 	}
-	if !strings.Contains(text, "Shortcuts") {
-		t.Fatalf("snapshot must surface Shortcuts block on provider zero state:\n%s", text)
+	if !strings.Contains(text, "Composer") {
+		t.Fatalf("snapshot must surface Composer block on provider zero state:\n%s", text)
 	}
 	if strings.Contains(text, "0 providers") {
 		t.Fatalf("snapshot must not surface legacy '0 providers' fallback in provider health block:\n%s", text)
@@ -160,15 +159,16 @@ func Test_Run_tui_snapshot_shows_setup_guidance_when_workspace_empty(t *testing.
 	}
 	text := out.String()
 	for _, want := range []string{
-		"Cod Code Chat",
-		"Queue",
+		"╭─ Cod Code",
+		"Conversation",
+		"No chat yet.",
 		"No saved jobs yet.",
 		"cod start",
 		"cod doctor --workspace",
-		"Providers   no evidence yet; run provider proof or config-check.",
-		"Systems",
-		"Shortcuts",
-		"Next",
+		"Providers no evidence yet; run cod doctor or provider proof.",
+		"Status",
+		"Composer",
+		"Inbox     cod inbox --workspace",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("empty snapshot missing %q:\n%s", want, text)
@@ -184,7 +184,7 @@ func Test_Run_chat_and_dev_aliases_open_tui(t *testing.T) {
 		if err := Run(context.Background(), &out, []string{verb, "--workspace", root, "--snapshot"}); err != nil {
 			t.Fatalf("Run %s returned error: %v\n%s", verb, err, out.String())
 		}
-		if body := out.String(); !strings.Contains(body, "Cod Code Chat") || !strings.Contains(body, "Shortcuts") {
+		if body := out.String(); !strings.Contains(body, "╭─ Cod Code") || !strings.Contains(body, "Composer") {
 			t.Fatalf("%s output missing TUI markers:\n%s", verb, body)
 		}
 	}
@@ -211,21 +211,19 @@ func Test_RunWithIO_tui_processes_navigation_and_dispatches_action(t *testing.T)
 	}
 	text := out.String()
 	for _, want := range []string{
-		"Cod Code Chat",
-		"Queue",
-		"[INPUT] Needs input (1)",
-		"[REVIEW] Needs decision (1)",
-		"> job-000002",
+		"╭─ Cod Code",
+		"Conversation",
+		"Activity",
+		"INPUT",
+		"Needs input (1)",
+		"REVIEW",
+		"Needs decision (1)",
+		"› job-000002",
 		"Needs customer input",
-		"Selected",
-		"Evidence",
-		"Actions",
-		"Primary     answer",
-		"Command     cod --workspace",
-		"Rerun       cod --workspace",
-		"Shortcuts",
-		"Primary     enter/a dispatch selected action",
-		"Rerun       r print rerun command",
+		"Action    answer · cod --workspace",
+		"Rerun     cod --workspace",
+		"Composer",
+		"Keys      j/k move · enter/a act · r rerun · q quit",
 		"Action dispatched: cod --workspace",
 		"--resume job-000002 --answer \"...\"",
 		"Action dispatched: cod --workspace",
