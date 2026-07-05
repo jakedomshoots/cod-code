@@ -87,6 +87,15 @@ type options struct {
 	showInbox                                  bool
 	oauthCommand                               string
 	oauthProvider                              string
+	browserCommand                             string
+	browserPolicy                              string
+	browserURL                                 string
+	browserBackendCommand                      []string
+	computerCommand                            string
+	computerPolicy                             string
+	computerApp                                string
+	computerBackendCommand                     []string
+	showToolManifest                           bool
 	providerWizardPreset                       string
 	repairPreset                               string
 	initDemoRepoDir                            string

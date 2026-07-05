@@ -46,7 +46,7 @@ func Test_LoadRubric_accepts_artifact_first_rubric_when_required_sections_exist(
 	// Given
 	root := t.TempDir()
 	rubricPath := filepath.Join(root, "rubric.md")
-	rubric := `# CEO Harness Evaluation Rubric
+	rubric := `# Cod Code Evaluation Rubric
 
 ## Artifact-first scoring
 Score only saved reports, diffs, command results, and artifacts.

@@ -49,11 +49,23 @@ func completionForShell(shell string) (completionFile, error) {
 }
 
 func completionWords() string {
-	return "start run gauntlet doctor inbox status oauth production-status production-actions production-finalize resume retry rollback explain-failure review context config eval"
+	return "start run gauntlet doctor inbox status oauth browser computer tools production-status production-actions production-finalize resume retry rollback explain-failure review context config eval"
 }
 
 func oauthCommandWords() string {
 	return "list doctor init"
+}
+
+func browserCommandWords() string {
+	return "doctor manifest read"
+}
+
+func computerCommandWords() string {
+	return "doctor manifest snapshot"
+}
+
+func toolsCommandWords() string {
+	return "manifest"
 }
 
 func oauthProviderWords() string {
@@ -73,7 +85,7 @@ func zshCompletion() string {
 local -a commands
 commands=(` + completionWords() + `)
 _arguments \
-  '1:command:((start run gauntlet doctor inbox status oauth production-status production-actions production-finalize resume retry rollback explain-failure review context config eval))' \
+  '1:command:((start run gauntlet doctor inbox status oauth browser computer tools production-status production-actions production-finalize resume retry rollback explain-failure review context config eval))' \
   '*::arg:->args'
 case $words[2] in
   config)
@@ -92,6 +104,20 @@ case $words[2] in
     _arguments '2:oauth command:((` + oauthCommandWords() + `))' \
       '3:oauth provider:((` + oauthProviderWords() + `))' \
       '--workspace[workspace directory]:directory:_files -/' \
+      '--format[output format]:format:(json text)'
+    ;;
+  browser)
+    _arguments '2:browser command:((` + browserCommandWords() + `))' \
+      '--browser-policy[policy]:policy:(deny ask allow-localhost allow)' \
+      '--format[output format]:format:(json text)'
+    ;;
+  computer)
+    _arguments '2:computer command:((` + computerCommandWords() + `))' \
+      '--computer-policy[policy]:policy:(deny ask allow)' \
+      '--format[output format]:format:(json text)'
+    ;;
+  tools)
+    _arguments '2:tools command:((` + toolsCommandWords() + `))' \
       '--format[output format]:format:(json text)'
     ;;
 esac
@@ -118,6 +144,18 @@ func bashCompletion() string {
   fi
   if [[ "${COMP_WORDS[1]}" == oauth && "${COMP_CWORD}" == 3 ]]; then
     COMPREPLY=( $(compgen -W "` + oauthProviderWords() + `" -- "$cur") )
+    return 0
+  fi
+  if [[ "${COMP_WORDS[1]}" == browser && "${COMP_CWORD}" == 2 ]]; then
+    COMPREPLY=( $(compgen -W "` + browserCommandWords() + `" -- "$cur") )
+    return 0
+  fi
+  if [[ "${COMP_WORDS[1]}" == computer && "${COMP_CWORD}" == 2 ]]; then
+    COMPREPLY=( $(compgen -W "` + computerCommandWords() + `" -- "$cur") )
+    return 0
+  fi
+  if [[ "${COMP_WORDS[1]}" == tools && "${COMP_CWORD}" == 2 ]]; then
+    COMPREPLY=( $(compgen -W "` + toolsCommandWords() + `" -- "$cur") )
     return 0
   fi
   if [[ "${COMP_WORDS[1]}" == gauntlet && "$prev" == --agents ]]; then
@@ -150,6 +188,9 @@ func fishCompletion() string {
 complete -c ceo-packet -f -n "__fish_seen_subcommand_from config" -a "check doctor explain completions init"
 complete -c ceo-packet -f -n "__fish_seen_subcommand_from oauth" -a "` + oauthCommandWords() + `"
 complete -c ceo-packet -n "__fish_seen_subcommand_from oauth" -a "` + oauthProviderWords() + `"
+complete -c ceo-packet -f -n "__fish_seen_subcommand_from browser" -a "` + browserCommandWords() + `"
+complete -c ceo-packet -f -n "__fish_seen_subcommand_from computer" -a "` + computerCommandWords() + `"
+complete -c ceo-packet -f -n "__fish_seen_subcommand_from tools" -a "` + toolsCommandWords() + `"
 complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l agents -a "ceo_harness codex_cli claude_code aider opencode goose pi oh_my_pi"
 complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l output-dir -r
 complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-state -a "` + productionActionStateWords() + `"

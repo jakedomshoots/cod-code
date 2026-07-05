@@ -45,7 +45,7 @@ func Test_WriteLocalAgentComparisonReport_includes_artifact_derived_details(t *t
 		Results: []LocalAgentBenchmarkResult{
 			{
 				ID:             "ceo_harness",
-				Name:           "CEO Harness",
+				Name:           "Cod Code",
 				TaskID:         "docs-roadmap-cli-first",
 				Attempt:        1,
 				Status:         localAgentStatusPass,
@@ -60,7 +60,7 @@ func Test_WriteLocalAgentComparisonReport_includes_artifact_derived_details(t *t
 			},
 			{
 				ID:             "ceo_harness",
-				Name:           "CEO Harness",
+				Name:           "Cod Code",
 				TaskID:         "docs-roadmap-cli-first",
 				Attempt:        2,
 				Status:         localAgentStatusPartial,
@@ -95,12 +95,12 @@ func Test_WriteLocalAgentComparisonReport_includes_artifact_derived_details(t *t
 		"## Aggregate Counts",
 		"## Readiness Decision",
 		"Overall comparison: blocked",
-		"CEO Harness result: needs attention",
+		"Cod Code result: needs attention",
 		"Concurrency: 2",
 		"Passed: 1",
 		"Partial: 1",
 		"## Per-Agent Status",
-		"CEO Harness",
+		"Cod Code",
 		"## Run Artifact Detail",
 		"artifact:.omo/evidence/docs-roadmap-cli-first.md",
 		"docs/ROADMAP.md",
@@ -127,7 +127,7 @@ func Test_WriteLocalAgentComparisonReport_separatesCleanCEOFromExternalBlockers(
 		Results: []LocalAgentBenchmarkResult{
 			{
 				ID:             "ceo_harness",
-				Name:           "CEO Harness",
+				Name:           "Cod Code",
 				TaskID:         "docs-roadmap-cli-first",
 				Attempt:        1,
 				Status:         localAgentStatusPass,
@@ -161,7 +161,7 @@ func Test_WriteLocalAgentComparisonReport_separatesCleanCEOFromExternalBlockers(
 	text := string(content)
 	for _, want := range []string{
 		"Overall comparison: blocked",
-		"CEO Harness result: clean",
+		"Cod Code result: clean",
 		"External blockers: OpenCode partial=0 fail=0 timeout=0 setup_blocked=1 incomplete=0",
 	} {
 		if !strings.Contains(text, want) {
@@ -182,7 +182,7 @@ func Test_WriteLocalAgentBenchmarkMarkdown_includes_concurrency(t *testing.T) {
 		Passed:      2,
 		Results: []LocalAgentBenchmarkResult{
 			{
-				Name:           "CEO Harness",
+				Name:           "Cod Code",
 				TaskID:         "docs-one",
 				Attempt:        1,
 				Status:         localAgentStatusPass,

@@ -47,7 +47,7 @@ func runInteractiveTUI(in io.Reader, out io.Writer, model tuiModel) error {
 		var action string
 		model, action = model.applyKey(command)
 		if action != "" {
-			if _, err := fmt.Fprintf(out, "Dispatched action: %s\n", action); err != nil {
+			if _, err := fmt.Fprintf(out, "Action dispatched: %s\n", action); err != nil {
 				return err
 			}
 			continue

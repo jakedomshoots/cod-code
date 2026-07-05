@@ -33,6 +33,21 @@ func validateOptions(opts options) error {
 	if opts.oauthCommand == "init" && strings.TrimSpace(opts.oauthProvider) == "" {
 		return errors.New("oauth init requires a provider name")
 	}
+	if opts.browserCommand != "" && strings.TrimSpace(opts.task) != "" {
+		return errors.New("browser cannot be combined with task text")
+	}
+	if opts.browserCommand == "read" && strings.TrimSpace(opts.browserURL) == "" {
+		return errors.New("browser read requires a URL")
+	}
+	if opts.computerCommand != "" && strings.TrimSpace(opts.task) != "" {
+		return errors.New("computer cannot be combined with task text")
+	}
+	if opts.computerCommand == "snapshot" && strings.TrimSpace(opts.computerApp) == "" {
+		return errors.New("computer snapshot requires an app name")
+	}
+	if opts.showToolManifest && strings.TrimSpace(opts.task) != "" {
+		return errors.New("tools manifest cannot be combined with task text")
+	}
 	if opts.adapterName != "" && !opts.initConfig {
 		return errors.New("--adapter requires --init-config")
 	}

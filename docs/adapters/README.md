@@ -1,6 +1,6 @@
 # External Adapters
 
-CEO Harness treats external coding tools as adapter wrapper commands. The harness does not call vendor SDKs and does not require the real tool to be installed for tests.
+Cod Code treats external coding tools as adapter wrapper commands. The harness does not call vendor SDKs and does not require the real tool to be installed for tests.
 
 `ceo-packet --config-check` reports all supported adapters:
 

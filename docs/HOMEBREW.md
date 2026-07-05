@@ -6,11 +6,11 @@ Cod Code does not have a published Homebrew tap yet. This is the draft formula s
 
 ```ruby
 class CeoPacket < Formula
-  desc "Local Alpha Cod/swimmer coding harness"
-  homepage "https://example.invalid/cod-code"
-  url "https://example.invalid/ceo-packet_0.1.0_darwin_arm64.tar.gz"
+  desc "Cod Code local agentic coding CLI"
+  homepage "https://github.com/jakedomshoots/cod-code"
+  url "https://github.com/jakedomshoots/cod-code/releases/download/v0.1.1/ceo-packet_0.1.1_darwin_arm64.tar.gz"
   sha256 "<replace-with-release-checksum>"
-  version "0.1.0"
+  version "0.1.1"
 
   def install
     bin.install "ceo-packet"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract and normalize CEO Harness model-command JSON output."""
+"""Extract and normalize Cod Code model-command JSON output."""
 
 import json
 import os

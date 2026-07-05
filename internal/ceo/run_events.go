@@ -27,6 +27,10 @@ type RunEvent struct {
 	Action                 string         `json:"action,omitempty"`
 	Path                   string         `json:"path,omitempty"`
 	Query                  string         `json:"query,omitempty"`
+	URL                    string         `json:"url,omitempty"`
+	App                    string         `json:"app,omitempty"`
+	Tool                   string         `json:"tool,omitempty"`
+	Permission             string         `json:"permission,omitempty"`
 	CheckIndex             int            `json:"check_index,omitempty"`
 	Attempt                int            `json:"attempt,omitempty"`
 	Source                 string         `json:"source,omitempty"`

@@ -28,6 +28,7 @@ func optionsWithWorkspaceDefaults(ctx context.Context, opts options) (options, e
 	opts = optionsWithCostPolicyDefaults(opts, cfg)
 	opts = optionsWithContextPolicyDefaults(opts, cfg)
 	opts = optionsWithWritePolicyDefaults(opts, cfg)
+	opts = optionsWithToolSurfaceDefaults(opts, cfg)
 	opts = optionsWithWorkspaceBriefDefaults(opts, cfg)
 	opts = optionsWithVerificationPolicyDefaults(opts, cfg)
 	opts = optionsWithModelCommandDefaults(opts, cfg)
@@ -69,6 +70,22 @@ func optionsWithWorkspaceDefaults(ctx context.Context, opts options) (options, e
 func optionsWithWritePolicyDefaults(opts options, cfg config.Config) options {
 	if strings.TrimSpace(opts.writePolicy) == "" {
 		opts.writePolicy = cfg.WritePolicy
+	}
+	return opts
+}
+
+func optionsWithToolSurfaceDefaults(opts options, cfg config.Config) options {
+	if strings.TrimSpace(opts.browserPolicy) == "" {
+		opts.browserPolicy = cfg.BrowserPolicy
+	}
+	if len(opts.browserBackendCommand) == 0 {
+		opts.browserBackendCommand = append([]string(nil), cfg.BrowserCommand...)
+	}
+	if strings.TrimSpace(opts.computerPolicy) == "" {
+		opts.computerPolicy = cfg.ComputerPolicy
+	}
+	if len(opts.computerBackendCommand) == 0 {
+		opts.computerBackendCommand = append([]string(nil), cfg.ComputerCommand...)
 	}
 	return opts
 }

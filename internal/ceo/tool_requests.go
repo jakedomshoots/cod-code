@@ -70,6 +70,9 @@ func toolLimitResult(request subagent.ToolRequest) subagent.ToolResult {
 		Action: strings.TrimSpace(request.Action),
 		Path:   strings.TrimSpace(request.Path),
 		Query:  strings.TrimSpace(request.Query),
+		URL:    strings.TrimSpace(request.URL),
+		App:    strings.TrimSpace(request.App),
+		Tool:   strings.TrimSpace(request.Tool),
 		Status: "skipped",
 		Error:  "tool request limit reached",
 	}
@@ -81,6 +84,9 @@ func (r Runtime) runSubagentToolRequest(ctx context.Context, result subagent.Res
 		Action: action,
 		Path:   strings.TrimSpace(request.Path),
 		Query:  strings.TrimSpace(request.Query),
+		URL:    strings.TrimSpace(request.URL),
+		App:    strings.TrimSpace(request.App),
+		Tool:   strings.TrimSpace(request.Tool),
 	}
 	if action == "" || !jobpacket.IsKnownAction(jobpacket.Action(action)) {
 		toolResult.Status = "invalid"
@@ -99,6 +105,12 @@ func (r Runtime) runSubagentToolRequest(ctx context.Context, result subagent.Res
 		return runSearchWorkspaceTool(ctx, state, request, toolResult)
 	case jobpacket.ActionNetworkResearch:
 		return runNetworkResearchTool(ctx, state, request, toolResult)
+	case jobpacket.ActionBrowserRead:
+		return runBrowserReadTool(ctx, state, request, toolResult)
+	case jobpacket.ActionComputerSnapshot:
+		return runComputerSnapshotTool(ctx, state, request, toolResult)
+	case jobpacket.ActionToolManifest:
+		return runToolManifestTool(toolResult)
 	case jobpacket.ActionRunChecks:
 		return r.runChecksTool(ctx, state, toolResult)
 	case jobpacket.ActionVerifyEvidence:
@@ -201,72 +213,4 @@ func writeSmallWorkspaceContents(ctx context.Context, state toolRequestState, re
 			return
 		}
 	}
-}
-
-func runSearchWorkspaceTool(ctx context.Context, state toolRequestState, request subagent.ToolRequest, result subagent.ToolResult) subagent.ToolResult {
-	if !state.HasWorkspace {
-		result.Status = "skipped"
-		result.Error = "workspace is required"
-		return result
-	}
-	searchResult, err := state.Space.SearchText(ctx, workspace.SearchTextRequest{
-		Query:      request.Query,
-		MaxMatches: request.MaxMatches,
-	})
-	if err != nil {
-		result.Status = "error"
-		result.Error = err.Error()
-		return result
-	}
-	result.Status = "pass"
-	result.Query = searchResult.Query
-	result.MatchCount = len(searchResult.Matches)
-	result.Matches = workspaceMatches(searchResult.Matches)
-	return result
-}
-
-func (r Runtime) runChecksTool(ctx context.Context, state toolRequestState, result subagent.ToolResult) subagent.ToolResult {
-	if len(checkCommands(state.Request)) == 0 {
-		result.Status = "skipped"
-		result.Error = "check command is required"
-		return result
-	}
-	checks, err := r.runChecks(ctx, state.Request)
-	if err != nil {
-		result.Status = "error"
-		result.Error = err.Error()
-		return result
-	}
-	if len(checks) == 0 {
-		result.Status = "skipped"
-		result.Error = "check command is required"
-		return result
-	}
-	last := checks[len(checks)-1]
-	result.Status = last.Status
-	result.Output = last.Stdout
-	result.Error = last.Stderr
-	result.ExitCode = last.ExitCode
-	return result
-}
-
-func workspaceMatches(matches []workspace.SearchTextMatch) []subagent.ToolMatch {
-	converted := make([]subagent.ToolMatch, 0, len(matches))
-	for _, match := range matches {
-		converted = append(converted, subagent.ToolMatch{
-			Path: match.Path,
-			Line: match.Line,
-			Text: match.Text,
-		})
-	}
-	return converted
-}
-
-func subagentCanRunAction(result subagent.Result, action string) bool {
-	for _, allowedAction := range result.AllowedActions {
-		if allowedAction == action {
-			return true
-		}
-	}
-	return false
 }

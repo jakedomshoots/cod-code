@@ -190,7 +190,7 @@ else
 fi
 
 if json_check "$evidence_root/production-core-29-ceo-r1/summary.json" "int(data.get('passed', 0)) >= 29 and int(data.get('failed', 0)) == 0 and int(data.get('partial', 0)) == 0 and int(data.get('timed_out', 0)) == 0 and int(data.get('incomplete_evidence', 0)) == 0"; then
-  add_check "eval" "ceo_29_task_production_core" "pass" "$evidence_root/production-core-29-ceo-r1/summary.json" "CEO Harness passed the current 29-task suite"
+  add_check "eval" "ceo_29_task_production_core" "pass" "$evidence_root/production-core-29-ceo-r1/summary.json" "Cod Code passed the current 29-task suite"
 else
   add_check "eval" "ceo_29_task_production_core" "blocked" "$evidence_root/production-core-29-ceo-r1/summary.json" "Current CEO 29-task proof is missing or not clean"
 fi

@@ -307,9 +307,9 @@ write_plan() {
     printf '%s\n' '1. Build `bin/ceo-packet`.'
     printf '%s\n' "2. Run \`ceo-eval --local-agent-benchmark\` for \`$task_id\`."
     if [ "$provider_mode" = "cli-model-command" ]; then
-      printf '%s\n' "3. Route CEO Harness subagent and CEO review through \`$model_command_display\`."
+      printf '%s\n' "3. Route Cod Code subagent and CEO review through \`$model_command_display\`."
     else
-      printf '%s\n' "3. Route CEO Harness subagent and CEO review through \`$http_preset\` HTTP provider model \`$http_model\`."
+      printf '%s\n' "3. Route Cod Code subagent and CEO review through \`$http_preset\` HTTP provider model \`$http_model\`."
       printf '%s\n' "4. Require \`$api_key_env\` to be present without printing the key value."
     fi
     printf '%s\n' "5. Save command output, score JSON, report JSON, diff, and changed-files evidence."

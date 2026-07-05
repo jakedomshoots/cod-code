@@ -94,6 +94,10 @@ type JobRequest struct {
 	CheckEnv                        []string
 	ResearchCommand                 []string
 	ToolCommandTimeoutMS            int
+	BrowserPolicy                   string
+	BrowserCommand                  []string
+	ComputerPolicy                  string
+	ComputerCommand                 []string
 	CheckAttempts                   int
 	CheckBackoffMS                  int
 	CheckFixAttempts                int

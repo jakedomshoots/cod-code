@@ -85,7 +85,7 @@ ceo-packet config completions --shell zsh --output-dir /tmp/ceo-completions
 Install a named local build into `~/.local/bin`:
 
 ```sh
-VERSION=0.1.0 COMMIT=local sh scripts/install-local.sh
+VERSION=0.1.1 COMMIT=local sh scripts/install-local.sh
 ceo-packet --version
 ```
 
@@ -119,7 +119,7 @@ make eval-endurance
 Build local release archives:
 
 ```sh
-VERSION=0.1.0 sh scripts/release-local.sh
+VERSION=0.1.1 sh scripts/release-local.sh
 (cd dist && shasum -a 256 -c checksums.txt)
 sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
 sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness
@@ -202,7 +202,7 @@ Build a named local binary with version metadata:
 
 ```sh
 go build \
-  -ldflags "-X ceoharness/internal/cli.Version=0.1.0 -X ceoharness/internal/cli.Commit=local" \
+  -ldflags "-X ceoharness/internal/cli.Version=0.1.1 -X ceoharness/internal/cli.Commit=local" \
   -o ./bin/ceo-packet \
   ./cmd/ceo-packet
 ./bin/ceo-packet --version

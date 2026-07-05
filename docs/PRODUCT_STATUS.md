@@ -52,10 +52,10 @@ Cod Code is not trying to beat mature tools at editor polish today. Its wedge is
 ## Current Weak Spots
 
 - Public production readiness is green in the final evidence set.
-- Public release proof is complete for GitHub release `v0.1.0` with release assets, checksums, release manifest, and checksum-only release notes.
+- Public release proof is complete for GitHub release `v0.1.1` with release assets, checksums, release manifest, and checksum-only release notes.
 - HTTP provider proof passes for the default public-readiness set: `OPENROUTER_API_KEY`, `KIMI_CODE_API_KEY`, and `MINIMAX_API_KEY`, with secret values omitted from evidence.
 - The secure OpenAI key setup app still requires reauthentication before Codex can create/write an OpenAI key from this workspace, but OpenAI HTTP is not part of the default public-readiness gate.
-- Expanded full competitor runner support is wired for Claude Code, Aider, Goose, and Oh My Pi; the scored expanded slice passes for Aider, Goose, and Oh My Pi, while Claude Code is setup-blocked by provider credit/quota (`Credit balance is too low`) after login.
+- Expanded full competitor runner support is wired for Claude Code, Aider, Goose, Oh My Pi, Codex CLI, OpenCode, Pi, and Cod Code; the scored expanded slice passes for 7/8 runners, while Claude Code is setup-blocked by provider credit/quota (`Credit balance is too low`) after login.
 - `production-status` currently reports `Production status: pass`, `Local ready: true`, `Public ready: true`, and zero blocked checks.
 - Public 10/10 production status is tracked in `docs/PRODUCTION_10_10.md`; release, provider, comparison, finalizer, and readiness gates are green.
 
@@ -63,7 +63,7 @@ Cod Code is not trying to beat mature tools at editor polish today. Its wedge is
 
 - Completed the market CLI roadmap implementation through doctor, release, docs, recovery UX, gauntlet/reporting, and local proof gates.
 - Full repo gates passed: `go test ./... -count=1`, `go vet ./...`, `go test -race -shuffle=on -count=1 ./...`, smoke, dogfood, release-local, and doctor.
-- The first 10-task `market-parity-core` CEO Harness gauntlet produced partial results while required task evidence artifacts were being enforced. The current rerun passes 10/10 with complete evidence at `.omo/evidence/market-parity-core-ceo-r2/summary.json`.
+- The first 10-task `market-parity-core` Cod Code gauntlet produced partial results while required task evidence artifacts were being enforced. The current rerun passes 10/10 with complete evidence at `.omo/evidence/market-parity-core-ceo-r2/summary.json`.
 - Early bounded cross-agent and real-model path-safety comparisons exposed missing-evidence gaps. Later runs now have complete saved evidence for focused, four-task, production-core, Kimi, and current multi-file comparisons.
 - This is local-release ready with honest limitations; it is not yet a public market-win claim.
 
@@ -88,24 +88,24 @@ Cod Code is not trying to beat mature tools at editor polish today. Its wedge is
 - First-class HTTP provider proof gates are now wired for `openrouter`, `kimi-code`, and `minimax` as the default public-readiness set, with `openai` and `moonshot` still available explicitly; `scripts/provider-setup-preflight.sh` checks paid-provider env readiness without printing or saving secret values, and missing API keys are saved as blocked setup evidence with `summary.json`, `env.template`, `commands.sh`, and `setup-checklist.md` instead of failed benchmark results, with setup checklist count, SHA-256 fingerprints, and a `no_secret_assignment` command-script policy recorded in `summary.json`.
 - Competitor smoke now covers all six required competitors and passes after local setup: Codex CLI 0.142.4, Claude Code 2.1.201, Aider 0.86.2, OpenCode 1.17.13, Goose 1.41.0, and Pi 0.80.3 at `.omo/evidence/competitor-smoke-after-installs-r1/summary.json`.
 - Competitor smoke treats Pi as a required competitor, matching the final all-agent comparison set instead of checking only Codex CLI, Claude Code, Aider, OpenCode, and Goose.
-- Bounded external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` with complete evidence at `.omo/evidence/external-agent-one-r1/summary.json`.
-- Two-task external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` and `bugfix-cli-timeout` with complete evidence at `.omo/evidence/external-agent-2task-r1/summary.json`.
-- Four-task external-agent comparison result: CEO Harness, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first`, `bugfix-cli-timeout`, `safety-policy-path-escape`, and `recovery-resume-retry` with complete evidence at `.omo/evidence/external-agent-4task-r2/summary.json`.
+- Bounded external-agent comparison result: Cod Code, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` with complete evidence at `.omo/evidence/external-agent-one-r1/summary.json`.
+- Two-task external-agent comparison result: Cod Code, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first` and `bugfix-cli-timeout` with complete evidence at `.omo/evidence/external-agent-2task-r1/summary.json`.
+- Four-task external-agent comparison result: Cod Code, Codex CLI, OpenCode, and Pi all passed `docs-roadmap-cli-first`, `bugfix-cli-timeout`, `safety-policy-path-escape`, and `recovery-resume-retry` with complete evidence at `.omo/evidence/external-agent-4task-r2/summary.json`.
 - Full expanded production-core external-agent comparison result: 25 tasks x 4 agents = 100 live runs completed at `.omo/evidence/external-agent-production-core-25-r1/summary.json`.
-  - CEO Harness: 25 pass / 0 partial / 0 timeout / 0 fail / 0 incomplete evidence.
+  - Cod Code: 25 pass / 0 partial / 0 timeout / 0 fail / 0 incomplete evidence.
   - Codex CLI: 25 pass / 0 partial / 0 timeout / 0 fail / 0 incomplete evidence.
   - OpenCode: 25 pass / 0 partial / 0 timeout / 0 fail / 0 incomplete evidence.
   - Pi: 24 pass / 0 partial / 1 timeout / 0 fail / 1 incomplete evidence.
   - Overall: 99 pass / 0 partial / 1 timeout / 0 fail / 1 incomplete evidence.
-- Focused current-suite external-agent comparison for the 26th multi-file operator safety task: CEO Harness, Codex CLI, OpenCode, and Pi all passed with complete evidence at `.omo/evidence/external-agent-operator-safety-flow-r1/summary.json`.
-- Current 29-task external-agent comparison result: 29 tasks x 4 agents = 116 live runs completed at `.omo/evidence/external-agent-production-core-29-r1/summary.json`; CEO Harness stayed clean, overall result was 115 pass / 1 partial / 0 timeout / 0 incomplete evidence.
+- Focused current-suite external-agent comparison for the 26th multi-file operator safety task: Cod Code, Codex CLI, OpenCode, and Pi all passed with complete evidence at `.omo/evidence/external-agent-operator-safety-flow-r1/summary.json`.
+- Current 29-task external-agent comparison result: 29 tasks x 4 agents = 116 live runs completed at `.omo/evidence/external-agent-production-core-29-r1/summary.json`; Cod Code stayed clean, overall result was 115 pass / 1 partial / 0 timeout / 0 incomplete evidence.
 - The one partial was a brittle path-safety diff-term rubric on Codex CLI, not a behavior failure; the rubric now accepts the fixture's actual `ErrPathEscapesWorkspace` addition, and the focused all-agent rerun passed 4/4 at `.omo/evidence/external-agent-path-escape-rubric-r1/summary.json`.
-- A fresh 29-task all-agent rerun with the corrected rubric completed at `.omo/evidence/external-agent-production-core-29-r2/summary.json`; CEO Harness again stayed clean, but external tools produced 6 timeouts, so the all-agent comparison gate stayed blocked at that point.
+- A fresh 29-task all-agent rerun with the corrected rubric completed at `.omo/evidence/external-agent-production-core-29-r2/summary.json`; Cod Code again stayed clean, but external tools produced 6 timeouts, so the all-agent comparison gate stayed blocked at that point.
 - Latest final 29-task all-agent comparison with timeout/result retries completed at `.omo/evidence/external-agent-production-core-29-final-result-retry-r1/summary.json`: 116 runs / 116 pass / 0 partial / 0 fail / 0 timeout / 0 incomplete evidence. One OpenCode partial was retried once and then passed with the prior attempt preserved.
 - Added bounded timeout retries for local-agent benchmark runs through `--local-agent-benchmark-timeout-retries`; prior timed-out attempts are kept in `prior_attempts` and separate `attempt-XX` evidence folders.
-- Focused retry proof over five timeout-heavy current-suite tasks completed at `.omo/evidence/external-agent-timeout-retry-r1/summary.json`: CEO Harness 5/5 pass, Codex CLI 5/5 pass, Pi 5/5 pass, OpenCode 0/5 pass after exhausting both attempts.
+- Focused retry proof over five timeout-heavy current-suite tasks completed at `.omo/evidence/external-agent-timeout-retry-r1/summary.json`: Cod Code 5/5 pass, Codex CLI 5/5 pass, Pi 5/5 pass, OpenCode 0/5 pass after exhausting both attempts.
 - Added per-agent timeout overrides through `--local-agent-benchmark-agent-timeouts`; focused OpenCode proof with `opencode=600` still timed out at `.omo/evidence/opencode-agent-timeout-r1/summary.json`, proving the current blocker is OpenCode execution behavior rather than the harness timeout ceiling.
-- Local-agent comparison reports now include a readiness decision that separates a clean CEO Harness result from external-agent blockers such as competitor timeouts or incomplete evidence.
+- Local-agent comparison reports now include a readiness decision that separates a clean Cod Code result from external-agent blockers such as competitor timeouts or incomplete evidence.
 - Tightened local-agent benchmark prompts to tell competitors to avoid unrelated file inspection and broad test suites, then reran the five timeout-heavy tasks at `.omo/evidence/external-agent-timeout-prompt-discipline-r1/summary.json`: Codex CLI passed 5/5 and Pi passed 5/5, while OpenCode still timed out 5/5.
 - Added per-agent model overrides through `--local-agent-benchmark-agent-models` and enabled OpenCode provider logs in benchmark evidence; short OpenCode proof at `.omo/evidence/opencode-setup-blocked-r1/summary.json` now reports `setup_blocked` with complete evidence and exposes the blocker as MiniMax token-plan quota in `stderr.log`.
 - Benchmark gauntlets now support bounded parallelism with `--local-agent-benchmark-concurrency` and the product alias `ceo-packet gauntlet --concurrency`.
@@ -161,7 +161,7 @@ Cod Code is not trying to beat mature tools at editor polish today. Its wedge is
 - Rollback now covers created-file model patches as well as normal replacement patches; created-file rollback refuses to delete if the file content changed after creation.
 - Default `--help` is now compact and points advanced users to `--help-advanced`; the full reference remains available without loading the first screen with every flag.
 - Latest verification: `go test ./... -count=1`, `go vet ./...`, `sh scripts/smoke.sh`, `sh scripts/dogfood.sh`, `sh scripts/release-local.sh`, `task ci`, `golangci-lint run ./...`, `nilaway ./...`, and `sh scripts/strict-checks.sh`.
-- First product baseline commit: `8509a4b Initial CEO Harness production baseline`.
+- First product baseline commit: `8509a4b Initial Cod Code production baseline`.
 - Remaining evidence gap: add deeper task-specific real-repo jobs with real writes, more provider families, and overnight or truly long-duration endurance runs before making broad market-win claims.
 
 ## Additions Completed 2026-07-02

@@ -101,7 +101,7 @@ func writeNewFile(path string, content string) (err error) {
 }
 
 func demoReadme() string {
-	return "# CEO Harness Golden Demo\n\nThis repo is intentionally tiny. Patch `app.txt` from `hello old` to `hello new`, then run `make test`.\n"
+	return "# Cod Code Golden Demo\n\nThis repo is intentionally tiny. Patch `app.txt` from `hello old` to `hello new`, then run `make test`.\n"
 }
 
 func writeDemoRepoReport(out io.Writer, report demoRepoReport, format reportFormat) error {

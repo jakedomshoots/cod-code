@@ -1,8 +1,8 @@
-# CEO Harness Production 10/10 Implementation Plan
+# Cod Code Production 10/10 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Move CEO Harness from locally production-ready to a public, reliable, installable, provider-proven agentic coding harness that can be used in a real production environment.
+**Goal:** Move Cod Code from locally production-ready to a public, reliable, installable, provider-proven agentic coding harness that can be used in a real production environment.
 
 **Architecture:** Keep the product local-first and CLI-first. Production readiness is proven by repeatable release artifacts, provider/auth evidence, real-repo coding evals, security gates, and operator docs, all surfaced through the existing `production-status`, `production-actions`, and finalizer evidence flow.
 
@@ -22,7 +22,7 @@ As of 2026-07-04, the harness is locally strong but not public-production comple
 
 ## 10/10 Definition
 
-CEO Harness reaches 10/10 production only when all of these are true:
+Cod Code reaches 10/10 production only when all of these are true:
 
 - A clean user can install it from a public release and run `ceo-packet doctor` successfully.
 - `production-status --workspace . --format text` prints `Production status: pass`.
@@ -66,7 +66,7 @@ CEO Harness reaches 10/10 production only when all of these are true:
 Create `docs/PRODUCTION_10_10.md` with these sections:
 
 ```markdown
-# CEO Harness Production 10/10 Scoreboard
+# Cod Code Production 10/10 Scoreboard
 
 Status date: 2026-07-04
 
@@ -446,7 +446,7 @@ Add to `docs/TRUST.md`:
 ```markdown
 ## OAuth Boundary
 
-CEO Harness does not store OAuth tokens. CLI OAuth providers use local vendor CLIs and whatever login state those tools already manage. Harness config stores only command paths such as `scripts/kimi-model-command.sh`.
+Cod Code does not store OAuth tokens. CLI OAuth providers use local vendor CLIs and whatever login state those tools already manage. Harness config stores only command paths such as `scripts/kimi-model-command.sh`.
 
 ## Evidence Boundary
 
@@ -698,7 +698,7 @@ all checks pass
 Run:
 
 ```sh
-git tag -a v0.1.0 -m "CEO Harness v0.1.0"
+git tag -a v0.1.0 -m "Cod Code v0.1.0"
 git push origin main
 git push origin v0.1.0
 ```
@@ -791,7 +791,7 @@ OAuth doctor reports providers without token storage
 Use this exact claim style in `README.md` and `docs/PRODUCT_STATUS.md`:
 
 ```markdown
-CEO Harness is production-ready for local-first CLI agentic coding workflows. It has public release artifacts, reproducible install verification, provider proof evidence, real-repo dogfood evidence, CI production gates, and secret-safe evidence handling.
+Cod Code is production-ready for local-first CLI agentic coding workflows. It has public release artifacts, reproducible install verification, provider proof evidence, real-repo dogfood evidence, CI production gates, and secret-safe evidence handling.
 ```
 
 - [ ] **Step 4: Commit**

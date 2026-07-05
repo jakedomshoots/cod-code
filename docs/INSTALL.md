@@ -28,7 +28,7 @@ Use this path only after a `v*` tag has published GitHub release assets:
 
 ```sh
 test -n "${GITHUB_REPOSITORY:-}" || { echo "set GITHUB_REPOSITORY, for example owner/repo"; exit 1; }
-export RELEASE_VERSION=0.1.0
+export RELEASE_VERSION=0.1.1
 curl -L -o ceo-packet.tar.gz "https://github.com/${GITHUB_REPOSITORY}/releases/download/v${RELEASE_VERSION}/ceo-packet_${RELEASE_VERSION}_darwin_arm64.tar.gz"
 tar -xzf ceo-packet.tar.gz
 ./ceo-packet --version
@@ -163,7 +163,7 @@ ceo-packet production-actions --workspace . --action-id provider-kimi-code --com
 
 `--commands-only` is paste-safe: actions that are missing environment variables, setup-blocked, or waiting on another action are emitted as commented `# blocked command:` lines. Use `--ready-only --commands-only` when you want only immediately runnable commands.
 
-`rollback` supports saved JSON reports for normal replacements and created files produced by CEO Harness. It refuses to remove a created file if the file content no longer matches the saved report.
+`rollback` supports saved JSON reports for normal replacements and created files produced by Cod Code. It refuses to remove a created file if the file content no longer matches the saved report.
 
 ## Requirements
 

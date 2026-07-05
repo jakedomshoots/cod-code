@@ -10,7 +10,7 @@ Status date: 2026-07-04
   - `sh scripts/secret-scan.sh`
   - `sh scripts/smoke.sh`
   - `sh scripts/dogfood.sh`
-  - `VERSION=0.1.0-dev sh scripts/release-local.sh --dist dist`
+  - `VERSION=0.1.1 sh scripts/release-local.sh --dist dist`
   - `sh scripts/production-local-gate.sh --workspace . --dist dist --output-dir .omo/evidence/ci-production-local-gate`
   - `task ci`
 - Latest strict gate:
@@ -82,7 +82,7 @@ Status date: 2026-07-04
 - Latest live external-agent comparison:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-25-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 100 runs / 99 pass / 0 partial / 0 fail / 1 timed out / 0 skipped / 1 incomplete evidence.
-  - CEO Harness result: 25 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
+  - Cod Code result: 25 pass / 0 partial / 0 fail / 0 timed out / 0 incomplete evidence.
   - Agent totals: Codex CLI 25 pass; OpenCode 25 pass; Pi 24 pass and 1 timed out.
 - Latest current-suite external-agent comparison:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task production-core --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --local-agent-benchmark-timeout-retries 1 --local-agent-benchmark-result-retries 1 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-production-core-29-final-result-retry-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
@@ -94,7 +94,7 @@ Status date: 2026-07-04
 - Latest timeout-retry comparison proof:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task docs-product-status-weak-spots,safety-policy-observe-no-write,multi-file-lean-context-autonomy,multi-file-secret-safe-provider-proof,report-quality-evidence-summary --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --local-agent-benchmark-timeout-retries 1 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-timeout-retry-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 20 planned runs / 15 pass / 0 partial / 0 fail / 5 timed out / 5 incomplete evidence.
-  - CEO Harness, Codex CLI, and Pi each passed 5/5; OpenCode exhausted both attempts on all five focused tasks.
+  - Cod Code, Codex CLI, and Pi each passed 5/5; OpenCode exhausted both attempts on all five focused tasks.
 - Latest prompt-discipline comparison proof:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents codex_cli,opencode,pi --local-agent-benchmark-task docs-product-status-weak-spots,safety-policy-observe-no-write,multi-file-lean-context-autonomy,multi-file-secret-safe-provider-proof,report-quality-evidence-summary --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 3 --tasks evals/tasks --output-dir .omo/evidence/external-agent-timeout-prompt-discipline-r1 --timeout-seconds 300`
   - Result: 15 planned runs / 10 pass / 0 partial / 0 fail / 5 timed out / 5 incomplete evidence. Codex CLI and Pi each passed 5/5; OpenCode timed out 5/5.
@@ -109,7 +109,7 @@ Status date: 2026-07-04
   - Result: six configured competitors passed smoke: Codex CLI 0.142.4, Claude Code 2.1.201, Aider 0.86.2, OpenCode 1.17.13, Goose 1.41.0, and Pi 0.80.3. This is still a version/dry-run smoke, not the full head-to-head task comparison.
 - Latest comparison report decision smoke:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness --local-agent-benchmark-task docs-roadmap-cli-first --output-dir .omo/evidence/comparison-report-decision-smoke-r1 ...`
-  - Result: comparison report includes `Overall comparison: pass`, `CEO Harness result: clean`, and `External blockers: none`.
+  - Result: comparison report includes `Overall comparison: pass`, `Cod Code result: clean`, and `External blockers: none`.
 - Latest focused external-agent comparison for the newest multi-file task:
   - `go run ./cmd/ceo-eval --local-agent-benchmark --local-agents ceo_harness,codex_cli,opencode,pi --local-agent-benchmark-task multi-file-operator-safety-flow --local-agent-benchmark-repeat 1 --local-agent-benchmark-concurrency 4 --ceo-binary ./bin/ceo-packet --tasks evals/tasks --output-dir .omo/evidence/external-agent-operator-safety-flow-r1 --timeout-seconds 240 --ceo-benchmark-mode model-command --ceo-benchmark-model-command-json '["sh","/Users/jakedom/Documents/Codex/2026-06-30/new-chat/work/ceo-harness/scripts/benchmark-model-command.sh"]'`
   - Result: 4 runs / 4 pass / 0 partial / 0 fail / 0 timed out / 0 skipped / 0 incomplete evidence.
@@ -142,10 +142,10 @@ Status date: 2026-07-04
   - Result: 1 run / 1 pass / 6 scored checks / 0 incomplete evidence. Kimi changed `frontend/state.js`, created `.omo/evidence/cross-language-js-state-reducer.md`, and passed `node frontend/state.test.js`.
 - Latest first-class Kimi provider proof gate:
   - `sh scripts/provider-proof.sh --provider kimi --output-dir .omo/evidence/provider-proof-kimi-r2`
-  - Result: pass. JS reducer scored 6/6 and Python retry policy scored 7/7; both changed required source files, created required evidence artifacts, and passed their task commands through Kimi-backed CEO Harness.
+  - Result: pass. JS reducer scored 6/6 and Python retry policy scored 7/7; both changed required source files, created required evidence artifacts, and passed their task commands through Kimi-backed Cod Code.
 - Latest first-class Codex provider proof gate:
   - `sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provider-proof-codex-r1`
-  - Result: pass. JS reducer scored 6/6 and Python retry policy scored 7/7; both changed required source files, created required evidence artifacts, and passed their task commands through Codex-backed CEO Harness.
+  - Result: pass. JS reducer scored 6/6 and Python retry policy scored 7/7; both changed required source files, created required evidence artifacts, and passed their task commands through Codex-backed Cod Code.
 - Latest HTTP provider proof setup gate:
   - `sh scripts/provider-setup-preflight.sh --output-dir .omo/evidence/provider-setup-preflight`
   - Result: writes secret-safe provider readiness evidence before paid HTTP provider proofs; missing or empty env vars are setup blockers, not benchmark failures.
@@ -220,7 +220,7 @@ Status date: 2026-07-04
   - `sh scripts/dogfood.sh`
   - `go build ... ./cmd/ceo-packet`
 - `go test -race -shuffle=on -count=1 ./...`
-- `VERSION=0.1.0-dev sh scripts/release-local.sh --dist dist`
+- `VERSION=0.1.1 sh scripts/release-local.sh --dist dist`
 - `sh scripts/verify-release.sh --dist dist`
   - Release workflow also runs `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-ci` after GitHub release assets are published and verified.
 - `sh scripts/release-bootstrap.sh --dist dist --output-dir .omo/evidence/release-bootstrap` writes a blocked/pass public-release bootstrap packet without publishing anything; `summary.json` records the checklist item count and SHA-256 fingerprints for the bootstrap files.
@@ -252,9 +252,9 @@ Status date: 2026-07-04
 
 ## Release Artifacts Verified
 
-- `dist/ceo-packet_0.1.0-dev_darwin_arm64.tar.gz`
-- `dist/ceo-packet_0.1.0-dev_linux_amd64.tar.gz`
-- `dist/ceo-packet_0.1.0-dev_linux_arm64.tar.gz`
+- `dist/ceo-packet_0.1.1_darwin_arm64.tar.gz`
+- `dist/ceo-packet_0.1.1_linux_amd64.tar.gz`
+- `dist/ceo-packet_0.1.1_linux_arm64.tar.gz`
 - `dist/checksums.txt`
 - `dist/release-manifest.json`
 

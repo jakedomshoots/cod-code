@@ -102,7 +102,7 @@ func selectModelCommand(ctx context.Context, opts options) (modelCommandSelectio
 	if opts.minSubagentConfidence > 0 {
 		minSubagentConfidence = opts.minSubagentConfidence
 	}
-	if len(cfg.ModelCommand) > 0 || cfg.ModelCommandTimeoutMS > 0 || cfg.ToolCommandTimeoutMS > 0 || cfg.HasJobPolicy() || len(cfg.Subagents) > 0 || len(agentCommands) > 0 || len(agentHTTPProviders) > 0 || len(cfg.Providers) > 0 || len(checkCommands) > 0 || len(cfg.CheckSets) > 0 || len(cfg.AutoCheckSets) > 0 || cfg.HasRetryPolicy() || cfg.HasVerificationPolicy() || cfg.HasToolPolicy() || cfg.HasSubagentBudget() || cfg.HasSubagentOutputPolicy() || cfg.HasConfidencePolicy() || cfg.HasCostPolicy() || cfg.HasContextPolicy() || cfg.HasProviderHealthPolicy() || cfg.HasProviderPolicy() {
+	if len(cfg.ModelCommand) > 0 || cfg.ModelCommandTimeoutMS > 0 || cfg.ToolCommandTimeoutMS > 0 || cfg.HasJobPolicy() || len(cfg.Subagents) > 0 || len(agentCommands) > 0 || len(agentHTTPProviders) > 0 || len(cfg.Providers) > 0 || len(checkCommands) > 0 || len(cfg.CheckSets) > 0 || len(cfg.AutoCheckSets) > 0 || cfg.HasRetryPolicy() || cfg.HasVerificationPolicy() || cfg.HasToolPolicy() || cfg.HasSubagentBudget() || cfg.HasSubagentOutputPolicy() || cfg.HasConfidencePolicy() || cfg.HasCostPolicy() || cfg.HasContextPolicy() || cfg.HasProviderHealthPolicy() || cfg.HasProviderPolicy() || cfg.HasBrowserToolPolicy() || cfg.HasComputerToolPolicy() || cfg.HasExtensions() {
 		return modelCommandSelection{
 			argv:                           cfg.ModelCommand,
 			agentArgv:                      agentCommands,

@@ -102,7 +102,7 @@ PY
 )
 
 run_prompt=$(printf '%s\n' \
-  "You are a real model backend for CEO Harness, not the outer coding agent." \
+  "You are a real model backend for Cod Code, not the outer coding agent." \
   "You are running in an isolated temporary directory. The workspace snippets below are the authoritative file contents." \
   "Return one JSON object only. Do not include markdown unless you cannot avoid it." \
   "Do not edit files directly. If an edit is needed, propose it in the JSON patches array." \

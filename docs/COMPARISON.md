@@ -92,7 +92,7 @@ go run ./cmd/ceo-eval \
   --timeout-seconds 240
 ```
 
-Run the full 30-task production suite against CEO Harness:
+Run the full 30-task production suite against Cod Code:
 
 ```sh
 go run ./cmd/ceo-packet gauntlet \
@@ -107,7 +107,7 @@ go run ./cmd/ceo-packet gauntlet \
 
 Latest production-core all-agent result:
 
-| Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| Benchmark | Cod Code | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | 25-task `production-core` | 25/25 pass | 25/25 pass | 25/25 pass | 24/25 pass, 1 timeout | `.omo/evidence/external-agent-production-core-25-r1/summary.json` |
 | 29-task `production-core` | 29/29 pass | 29/29 pass | 29/29 pass | 29/29 pass | `.omo/evidence/external-agent-production-core-29-final-result-retry-r1/summary.json` |
@@ -122,7 +122,7 @@ The latest stable 29-task run is a clean comparison pass after enabling one time
 
 Latest CEO-only production-core result:
 
-| Benchmark | CEO Harness | Evidence |
+| Benchmark | Cod Code | Evidence |
 | --- | --- | --- |
 | 30-task `production-core` | 30/30 pass, 0 incomplete evidence | `.omo/evidence/production-core-final/summary.json` |
 
@@ -176,7 +176,7 @@ go run ./cmd/ceo-eval \
 
 The selected model is recorded in `summary.json` as `agent_models`. OpenCode benchmark runs also include `--print-logs --log-level INFO` so provider quota/auth failures are visible in `stderr.log`. When those logs show quota, token refresh, or invalid-key errors, the benchmark records `setup_blocked` instead of treating the run as a silent timeout.
 
-Run the focused cross-language suite against CEO Harness:
+Run the focused cross-language suite against Cod Code:
 
 ```sh
 go run ./cmd/ceo-packet gauntlet \
@@ -191,13 +191,13 @@ go run ./cmd/ceo-packet gauntlet \
 
 Latest cross-language result:
 
-| Benchmark | CEO Harness | Evidence |
+| Benchmark | Cod Code | Evidence |
 | --- | --- | --- |
 | 2-task `cross-language-core` | 2/2 pass, 0 incomplete evidence | `.omo/evidence/cross-language-core-ceo-r1/summary.json` |
 
 Latest real-provider result:
 
-| Benchmark | Provider Path | CEO Harness | Evidence |
+| Benchmark | Provider Path | Cod Code | Evidence |
 | --- | --- | --- | --- |
 | `safety-policy-path-escape` | Kimi CLI OAuth via `scripts/kimi-model-command.sh` | 3/3 pass, 18/18 scored checks, 0 partial, 0 fail, 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json` |
 | `cross-language-js-state-reducer` + `cross-language-python-retry-policy` | Kimi CLI via `scripts/provider-proof.sh --provider kimi` | JS 6/6 pass; Python 7/7 pass; 0 incomplete evidence | `.omo/evidence/provider-proof-kimi-r2/index.md` |
@@ -205,24 +205,24 @@ Latest real-provider result:
 
 Latest focused multi-file external result:
 
-| Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| Benchmark | Cod Code | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | `multi-file-operator-safety-flow` | pass 13/13 | pass 13/13 | pass 13/13 | pass 13/13 | `.omo/evidence/external-agent-operator-safety-flow-r1/summary.json` |
 
 Latest timeout-retry evidence:
 
-| Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| Benchmark | Cod Code | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | 5 timeout-heavy current-suite tasks with 1 retry | 5/5 pass | 5/5 pass | 0/5 pass, 5 exhausted timeouts | 5/5 pass | `.omo/evidence/external-agent-timeout-retry-r1/summary.json` |
 | OpenCode focused docs task with 600s timeout | n/a | n/a | 0/1 pass, timed out at 600s | n/a | `.omo/evidence/opencode-agent-timeout-r1/summary.json` |
 
 Latest saved benchmark result:
 
-| Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| Benchmark | Cod Code | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | `docs-roadmap-cli-first` | pass 5/5, 275ms, 0 extra files | pass 5/5, 23726ms, 0 extra files | pass 5/5, 27447ms, 0 extra files | pass 5/5, 94567ms, 0 extra files | `.omo/evidence/local-agent-benchmark-docs-roadmap-2026-07-02-r3/summary.md` |
 
-The first benchmark loop exposed a concrete CEO Harness gap: runtime artifacts were polluting the scored workspace. That is now fixed by running CEO Harness benchmarks with an external `--artifact-root`, so `ceo-artifacts` remain auditable without counting as task changes.
+The first benchmark loop exposed a concrete Cod Code gap: runtime artifacts were polluting the scored workspace. That is now fixed by running Cod Code benchmarks with an external `--artifact-root`, so `ceo-artifacts` remain auditable without counting as task changes.
 
 Run a repeated multi-task benchmark:
 
@@ -240,7 +240,7 @@ go run ./cmd/ceo-eval \
 
 Latest expanded benchmark aggregate:
 
-| Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| Benchmark | Cod Code | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | 2 docs tasks x 2 repeats | 4/4 pass, avg 81ms, 0 extra files | 4/4 pass, avg 50444ms, 0 extra files | 4/4 pass, avg 19939ms, 0 extra files | 4/4 pass, avg 78689ms, 0 extra files | `.omo/evidence/local-agent-benchmark-expanded-2026-07-02-r1/summary.md` |
 
@@ -259,13 +259,13 @@ go run ./cmd/ceo-eval \
 
 Latest Go-file benchmark result:
 
-| Benchmark | CEO Harness | Codex CLI | OpenCode | Pi | Evidence |
+| Benchmark | Cod Code | Codex CLI | OpenCode | Pi | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | `bugfix-cli-timeout` | pass 8/8, 255ms, 0 extra files | pass 8/8, 97392ms, 0 extra files | pass 8/8, 36754ms, 0 extra files | pass 8/8, 142473ms, 0 extra files | `.omo/evidence/local-agent-benchmark-go-bugfix-2026-07-02-r2/summary.md` |
 
 The second benchmark loop exposed two runner gaps and closed both: repeated task coverage now writes separate evidence folders, and Go-file fixtures now compile before agents edit them. Dirty-worktree evidence is also included in local-agent reports, so dirty-sensitive tasks score from saved git status rather than partial reports.
 
-Run the strengthened path-safety benchmark against CEO Harness only:
+Run the strengthened path-safety benchmark against Cod Code only:
 
 ```sh
 go run ./cmd/ceo-eval \
@@ -280,11 +280,11 @@ go run ./cmd/ceo-eval \
 
 Latest path-safety result:
 
-| Benchmark | CEO Harness | Evidence |
+| Benchmark | Cod Code | Evidence |
 | --- | --- | --- |
 | `safety-policy-path-escape` | pass 6/6, 141ms, 0 extra files | `.omo/evidence/local-agent-benchmark-safety-path-escape-2026-07-02-r1/summary.md` |
 
-This is a CEO Harness proof run, not a cross-agent comparison. The fixture now includes real path-escape tests, and the score requires the forbidden `../outside.txt` path to stay absent.
+This is a Cod Code proof run, not a cross-agent comparison. The fixture now includes real path-escape tests, and the score requires the forbidden `../outside.txt` path to stay absent.
 
 Run the same path-safety task through the real CEO model-command patch path:
 
@@ -303,7 +303,7 @@ Run the same path-safety task through the real CEO model-command patch path:
 
 Latest model-command path result:
 
-| Benchmark | CEO Harness | Evidence |
+| Benchmark | Cod Code | Evidence |
 | --- | --- | --- |
 | `safety-policy-path-escape` via `--model-command` + CEO check | pass 6/6, 1194ms, 0 extra files | `.omo/evidence/local-agent-benchmark-safety-path-escape-model-command-verified-2026-07-02-r1/summary.md` |
 
@@ -326,11 +326,11 @@ Run the same path-safety task through a real Codex CLI model command:
 
 Latest real-model path result:
 
-| Benchmark | CEO Harness | Evidence |
+| Benchmark | Cod Code | Evidence |
 | --- | --- | --- |
 | `safety-policy-path-escape` via Codex CLI real model + CEO model command | pass 6/6, 27387ms, 0 extra files | `.omo/evidence/local-agent-benchmark-safety-path-escape-codex-real-2026-07-02-r2/summary.md` |
 
-This is the first saved real-provider proof for the CEO Harness path. The benchmark command wired the real model into both `--model-command` and `--ceo-model-command`. The CEO model selected only `coder`, the coder proposed a patch to `internal/workspace/workspace.go`, the harness applied it, the required Go path test passed, the CEO model returned `recommended_verdict=pass`, and the external scorer passed 6/6.
+This is the first saved real-provider proof for the Cod Code path. The benchmark command wired the real model into both `--model-command` and `--ceo-model-command`. The CEO model selected only `coder`, the coder proposed a patch to `internal/workspace/workspace.go`, the harness applied it, the required Go path test passed, the CEO model returned `recommended_verdict=pass`, and the external scorer passed 6/6.
 
 Run the same path-safety task through the OAuth-backed Kimi CLI:
 
@@ -350,15 +350,15 @@ Run the same path-safety task through the OAuth-backed Kimi CLI:
 
 Latest Kimi CLI real-model result:
 
-| Benchmark | CEO Harness | Evidence |
+| Benchmark | Cod Code | Evidence |
 | --- | --- | --- |
 | `safety-policy-path-escape` via Kimi CLI OAuth + CEO model command | 3/3 pass, 18/18 scored checks, 0 partial, 0 fail, 0 incomplete evidence | `.omo/evidence/provider-kimi-path-safety-repeat-r7/summary.json` |
 
-The Kimi wrapper uses `kimi -p ... --output-format stream-json`, extracts the assistant JSON, isolates Kimi in a temporary directory so it cannot mutate the scored workspace directly, normalizes common patch/tool-request shorthand, and feeds strict JSON into CEO Harness. The repeated passing run wired Kimi into both subagent patching and CEO delegation/review.
+The Kimi wrapper uses `kimi -p ... --output-format stream-json`, extracts the assistant JSON, isolates Kimi in a temporary directory so it cannot mutate the scored workspace directly, normalizes common patch/tool-request shorthand, and feeds strict JSON into Cod Code. The repeated passing run wired Kimi into both subagent patching and CEO delegation/review.
 
 HTTP provider mode is also wired for OpenAI-compatible providers, but the local shell did not have a real API key available during the first OpenRouter attempt. The saved blocked run is `.omo/evidence/local-agent-benchmark-safety-path-escape-openrouter-gpt5mini-2026-07-02-r1/summary.md`, with stderr reporting that `OPENROUTER_API_KEY` was required.
 
-Current comparison reports include a `Readiness Decision` section. This keeps the market claim honest: the report can show `CEO Harness result: clean` while still marking `Overall comparison: blocked` when external CLIs time out or leave incomplete evidence.
+Current comparison reports include a `Readiness Decision` section. This keeps the market claim honest: the report can show `Cod Code result: clean` while still marking `Overall comparison: blocked` when external CLIs time out or leave incomplete evidence.
 
 Operator setup shorthand:
 

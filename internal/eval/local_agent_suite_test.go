@@ -210,7 +210,7 @@ func Test_BuildLocalAgentBenchmarkIterations_reports_extra_changed_files(t *test
 	// Given
 	result := LocalAgentBenchmarkResult{
 		ID:                "ceo_harness",
-		Name:              "CEO Harness",
+		Name:              "Cod Code",
 		Status:            localAgentStatusPass,
 		ChangedFilesPath:  "evidence/ceo/changed-files.txt",
 		ExtraChangedFiles: []string{"ceo-artifacts/jobs.jsonl"},

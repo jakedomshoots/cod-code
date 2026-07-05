@@ -72,6 +72,12 @@ type configCheckReport struct {
 	CheckSetCount                             int              `json:"check_set_count"`
 	AutoCheckSetCount                         int              `json:"auto_check_set_count"`
 	DefaultCheckSet                           string           `json:"default_check_set"`
+	BrowserPolicy                             string           `json:"browser_policy,omitempty"`
+	BrowserCommandArgc                        int              `json:"browser_command_argc"`
+	ComputerPolicy                            string           `json:"computer_policy,omitempty"`
+	ComputerCommandArgc                       int              `json:"computer_command_argc"`
+	SkillCount                                int              `json:"skill_count"`
+	MCPServerCount                            int              `json:"mcp_server_count"`
 }
 
 func runConfigCheck(ctx context.Context, out io.Writer, opts options) error {
@@ -83,6 +89,15 @@ func runConfigCheck(ctx context.Context, out io.Writer, opts options) error {
 }
 
 func buildConfigCheckReport(ctx context.Context, opts options) (configCheckReport, error) {
+	var err error
+	opts, err = optionsWithWorkspaceDefaults(ctx, opts)
+	if err != nil {
+		return configCheckReport{}, err
+	}
+	cfg, err := config.LoadWorkspace(ctx, opts.workspaceDir)
+	if err != nil {
+		return configCheckReport{}, err
+	}
 	selection, err := selectModelCommand(ctx, opts)
 	if err != nil {
 		return configCheckReport{}, err
@@ -157,6 +172,12 @@ func buildConfigCheckReport(ctx context.Context, opts options) (configCheckRepor
 		CheckSetCount:                             selection.checkSetCount,
 		AutoCheckSetCount:                         selection.autoCheckCount,
 		DefaultCheckSet:                           selection.defaultCheckSet,
+		BrowserPolicy:                             strings.TrimSpace(opts.browserPolicy),
+		BrowserCommandArgc:                        len(opts.browserBackendCommand),
+		ComputerPolicy:                            strings.TrimSpace(opts.computerPolicy),
+		ComputerCommandArgc:                       len(opts.computerBackendCommand),
+		SkillCount:                                len(cfg.Skills),
+		MCPServerCount:                            len(cfg.MCPServers),
 	}, nil
 }
 

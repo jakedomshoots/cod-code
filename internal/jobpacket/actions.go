@@ -5,12 +5,15 @@ import "strings"
 type Action string
 
 const (
-	ActionReadWorkspace   Action = "read_workspace"
-	ActionSearchWorkspace Action = "search_workspace"
-	ActionNetworkResearch Action = "network_research"
-	ActionProposePatch    Action = "propose_patch"
-	ActionRunChecks       Action = "run_checks"
-	ActionVerifyEvidence  Action = "verify_evidence"
+	ActionReadWorkspace    Action = "read_workspace"
+	ActionSearchWorkspace  Action = "search_workspace"
+	ActionNetworkResearch  Action = "network_research"
+	ActionBrowserRead      Action = "browser_read"
+	ActionComputerSnapshot Action = "computer_snapshot"
+	ActionToolManifest     Action = "tool_manifest"
+	ActionProposePatch     Action = "propose_patch"
+	ActionRunChecks        Action = "run_checks"
+	ActionVerifyEvidence   Action = "verify_evidence"
 )
 
 func DefaultActionsForAgent(name string) []Action {
@@ -53,6 +56,9 @@ func IsKnownAction(action Action) bool {
 	case ActionReadWorkspace,
 		ActionSearchWorkspace,
 		ActionNetworkResearch,
+		ActionBrowserRead,
+		ActionComputerSnapshot,
+		ActionToolManifest,
 		ActionProposePatch,
 		ActionRunChecks,
 		ActionVerifyEvidence:

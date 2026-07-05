@@ -16,44 +16,50 @@ var (
 )
 
 type Config struct {
-	ModelCommand                              []string              `json:"model_command"`
-	CEOModelCommand                           []string              `json:"ceo_model_command"`
-	ResearchCommand                           []string              `json:"research_command"`
-	ModelCommandTimeoutMS                     int                   `json:"model_command_timeout_ms"`
-	ToolCommandTimeoutMS                      int                   `json:"tool_command_timeout_ms"`
-	JobTimeoutMS                              int                   `json:"job_timeout_ms"`
-	Subagents                                 []jobpacket.Subagent  `json:"subagents"`
-	AgentModelCommands                        map[string][]string   `json:"agent_model_commands"`
-	Providers                                 map[string]Provider   `json:"providers"`
-	CEOProvider                               string                `json:"ceo_provider"`
-	AgentProviders                            map[string]string     `json:"agent_providers"`
-	ProviderPolicy                            ProviderPolicy        `json:"provider_policy"`
-	CheckCommand                              []string              `json:"check_command"`
-	CheckCommands                             [][]string            `json:"check_commands"`
-	CheckSets                                 map[string][][]string `json:"check_sets"`
-	DefaultCheckSet                           string                `json:"default_check_set"`
-	AutoCheckSets                             []AutoCheckSet        `json:"auto_check_sets"`
-	RequireChecks                             bool                  `json:"require_checks,omitempty"`
-	CheckAttempts                             int                   `json:"check_attempts"`
-	CheckBackoffMS                            int                   `json:"check_backoff_ms"`
-	CEORevisionAttempts                       int                   `json:"ceo_revision_attempts"`
-	MaxCEOIterations                          int                   `json:"max_ceo_iterations"`
-	MaxSubagents                              int                   `json:"max_subagents"`
-	SubagentConcurrency                       int                   `json:"subagent_concurrency"`
-	MaxToolRequests                           int                   `json:"max_tool_requests"`
-	SubagentAttempts                          int                   `json:"subagent_attempts"`
-	SubagentBackoffMS                         int                   `json:"subagent_backoff_ms"`
-	NoProgressStop                            int                   `json:"no_progress_stop"`
-	MaxContextBytes                           int                   `json:"max_context_bytes"`
-	MaxSubagentOutputBytes                    int                   `json:"max_subagent_output_bytes"`
-	MinSubagentConfidence                     float64               `json:"min_subagent_confidence"`
-	WorkspaceBriefMaxFiles                    int                   `json:"workspace_brief_max_files"`
-	WorkspaceBriefExcludes                    []string              `json:"workspace_brief_excludes"`
-	WritePolicy                               string                `json:"write_policy,omitempty"`
-	ProviderCostBudgetMicroUSD                int64                 `json:"provider_cost_budget_microusd"`
-	ProviderHealthAvoidFailureRate            float64               `json:"provider_health_avoid_failure_rate"`
-	ProviderHealthWatchFailureRate            float64               `json:"provider_health_watch_failure_rate"`
-	ProviderHealthWatchCostPerAttemptMicroUSD int64                 `json:"provider_health_watch_cost_per_attempt_microusd"`
+	ModelCommand                              []string                   `json:"model_command"`
+	CEOModelCommand                           []string                   `json:"ceo_model_command"`
+	ResearchCommand                           []string                   `json:"research_command"`
+	ModelCommandTimeoutMS                     int                        `json:"model_command_timeout_ms"`
+	ToolCommandTimeoutMS                      int                        `json:"tool_command_timeout_ms"`
+	JobTimeoutMS                              int                        `json:"job_timeout_ms"`
+	Subagents                                 []jobpacket.Subagent       `json:"subagents"`
+	AgentModelCommands                        map[string][]string        `json:"agent_model_commands"`
+	Providers                                 map[string]Provider        `json:"providers"`
+	CEOProvider                               string                     `json:"ceo_provider"`
+	AgentProviders                            map[string]string          `json:"agent_providers"`
+	ProviderPolicy                            ProviderPolicy             `json:"provider_policy"`
+	CheckCommand                              []string                   `json:"check_command"`
+	CheckCommands                             [][]string                 `json:"check_commands"`
+	CheckSets                                 map[string][][]string      `json:"check_sets"`
+	DefaultCheckSet                           string                     `json:"default_check_set"`
+	AutoCheckSets                             []AutoCheckSet             `json:"auto_check_sets"`
+	RequireChecks                             bool                       `json:"require_checks,omitempty"`
+	CheckAttempts                             int                        `json:"check_attempts"`
+	CheckBackoffMS                            int                        `json:"check_backoff_ms"`
+	CEORevisionAttempts                       int                        `json:"ceo_revision_attempts"`
+	MaxCEOIterations                          int                        `json:"max_ceo_iterations"`
+	MaxSubagents                              int                        `json:"max_subagents"`
+	SubagentConcurrency                       int                        `json:"subagent_concurrency"`
+	MaxToolRequests                           int                        `json:"max_tool_requests"`
+	SubagentAttempts                          int                        `json:"subagent_attempts"`
+	SubagentBackoffMS                         int                        `json:"subagent_backoff_ms"`
+	NoProgressStop                            int                        `json:"no_progress_stop"`
+	MaxContextBytes                           int                        `json:"max_context_bytes"`
+	MaxSubagentOutputBytes                    int                        `json:"max_subagent_output_bytes"`
+	MinSubagentConfidence                     float64                    `json:"min_subagent_confidence"`
+	WorkspaceBriefMaxFiles                    int                        `json:"workspace_brief_max_files"`
+	WorkspaceBriefExcludes                    []string                   `json:"workspace_brief_excludes"`
+	WritePolicy                               string                     `json:"write_policy,omitempty"`
+	BrowserPolicy                             string                     `json:"browser_policy,omitempty"`
+	BrowserCommand                            []string                   `json:"browser_command,omitempty"`
+	ComputerPolicy                            string                     `json:"computer_policy,omitempty"`
+	ComputerCommand                           []string                   `json:"computer_command,omitempty"`
+	Skills                                    map[string]SkillConfig     `json:"skills,omitempty"`
+	MCPServers                                map[string]MCPServerConfig `json:"mcp_servers,omitempty"`
+	ProviderCostBudgetMicroUSD                int64                      `json:"provider_cost_budget_microusd"`
+	ProviderHealthAvoidFailureRate            float64                    `json:"provider_health_avoid_failure_rate"`
+	ProviderHealthWatchFailureRate            float64                    `json:"provider_health_watch_failure_rate"`
+	ProviderHealthWatchCostPerAttemptMicroUSD int64                      `json:"provider_health_watch_cost_per_attempt_microusd"`
 }
 
 func (cfg Config) Validate() error {
@@ -125,6 +131,15 @@ func (cfg Config) Validate() error {
 	if err := validateWritePolicy(cfg); err != nil {
 		return err
 	}
+	if err := validateBrowserToolPolicy(cfg); err != nil {
+		return err
+	}
+	if err := validateComputerToolPolicy(cfg); err != nil {
+		return err
+	}
+	if err := validateExtensions(cfg); err != nil {
+		return err
+	}
 	if err := validateCostPolicy(cfg); err != nil {
 		return err
 	}
@@ -168,4 +183,16 @@ func (cfg Config) HasSubagentBudget() bool {
 
 func (cfg Config) HasVerificationPolicy() bool {
 	return cfg.RequireChecks
+}
+
+func (cfg Config) HasBrowserToolPolicy() bool {
+	return strings.TrimSpace(cfg.BrowserPolicy) != "" || len(cfg.BrowserCommand) > 0
+}
+
+func (cfg Config) HasComputerToolPolicy() bool {
+	return strings.TrimSpace(cfg.ComputerPolicy) != "" || len(cfg.ComputerCommand) > 0
+}
+
+func (cfg Config) HasExtensions() bool {
+	return len(cfg.Skills) > 0 || len(cfg.MCPServers) > 0
 }

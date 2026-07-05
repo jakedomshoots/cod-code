@@ -116,8 +116,8 @@ darwin_archive="ceo-packet_${version}_darwin_arm64.tar.gz"
 darwin_sha=$(awk -v archive="$darwin_archive" '$2 == archive {print $1}' "$dist/checksums.txt")
 cat >"$formula_dir/ceo-packet.rb" <<EOF
 class CeoPacket < Formula
-  desc "Local Alpha Cod/swimmer coding harness"
-  homepage "https://example.invalid/cod-code"
+  desc "Cod Code local agentic coding CLI"
+  homepage "https://github.com/jakedomshoots/cod-code"
   url "file://$dist/$darwin_archive"
   sha256 "$darwin_sha"
   version "$version"

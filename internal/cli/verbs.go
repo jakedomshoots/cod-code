@@ -38,6 +38,12 @@ func normalizeVerbArgs(args []string) ([]string, error) {
 		return normalizeContextVerb(rest)
 	case "oauth":
 		return normalizeOAuthVerb(rest)
+	case "browser":
+		return normalizeBrowserVerb(rest)
+	case "computer":
+		return normalizeComputerVerb(rest)
+	case "tools":
+		return normalizeToolsVerb(rest)
 	case "config":
 		return normalizeConfigVerb(rest)
 	case "doctor":
@@ -86,7 +92,7 @@ func firstValueIndex(args []string) int {
 
 func verbFlagConsumesValue(flag string) bool {
 	switch flag {
-	case "--workspace", "--format", "--answer":
+	case "--workspace", "--format", "--answer", "--browser-policy", "--computer-policy", "--browser-url", "--computer-app":
 		return true
 	default:
 		return false
@@ -136,10 +142,70 @@ func contextVerbJobIndex(args []string) int {
 
 func isKnownVerb(verb string) bool {
 	switch verb {
-	case "start", "run", "gauntlet", "doctor", "inbox", "status", "production-status", "production-actions", "production-finalize", "resume", "retry", "rollback", "explain-failure", "review", "context", "oauth", "tui", "eval":
+	case "start", "run", "gauntlet", "doctor", "inbox", "status", "production-status", "production-actions", "production-finalize", "resume", "retry", "rollback", "explain-failure", "review", "context", "oauth", "browser", "computer", "tools", "tui", "eval":
 		return true
 	default:
 		return false
+	}
+}
+
+func normalizeBrowserVerb(args []string) ([]string, error) {
+	if len(args) == 0 {
+		return nil, fmt.Errorf("browser requires doctor, manifest, or read; run ceo-packet --help")
+	}
+	subcommand := args[0]
+	rest := args[1:]
+	switch subcommand {
+	case "doctor", "manifest":
+		return append([]string{"--browser", subcommand}, rest...), nil
+	case "read":
+		urlIndex := firstValueIndex(rest)
+		if urlIndex < 0 {
+			return nil, fmt.Errorf("browser read requires a URL")
+		}
+		normalized := []string{"--browser", "read"}
+		normalized = append(normalized, rest[:urlIndex]...)
+		normalized = append(normalized, "--browser-url", rest[urlIndex])
+		normalized = append(normalized, rest[urlIndex+1:]...)
+		return normalized, nil
+	default:
+		return nil, fmt.Errorf("unknown browser command %q; run ceo-packet --help", subcommand)
+	}
+}
+
+func normalizeComputerVerb(args []string) ([]string, error) {
+	if len(args) == 0 {
+		return nil, fmt.Errorf("computer requires doctor, manifest, or snapshot; run ceo-packet --help")
+	}
+	subcommand := args[0]
+	rest := args[1:]
+	switch subcommand {
+	case "doctor", "manifest":
+		return append([]string{"--computer", subcommand}, rest...), nil
+	case "snapshot":
+		appIndex := firstValueIndex(rest)
+		if appIndex < 0 {
+			return nil, fmt.Errorf("computer snapshot requires an app name")
+		}
+		normalized := []string{"--computer", "snapshot"}
+		normalized = append(normalized, rest[:appIndex]...)
+		normalized = append(normalized, "--computer-app", rest[appIndex])
+		normalized = append(normalized, rest[appIndex+1:]...)
+		return normalized, nil
+	default:
+		return nil, fmt.Errorf("unknown computer command %q; run ceo-packet --help", subcommand)
+	}
+}
+
+func normalizeToolsVerb(args []string) ([]string, error) {
+	if len(args) == 0 {
+		return nil, fmt.Errorf("tools requires manifest; run ceo-packet --help")
+	}
+	switch args[0] {
+	case "manifest":
+		return append([]string{"--tools-manifest"}, args[1:]...), nil
+	default:
+		return nil, fmt.Errorf("unknown tools command %q; run ceo-packet --help", args[0])
 	}
 }
 
@@ -188,21 +254,4 @@ func verbHelpRequested(args []string) bool {
 
 func unknownVerbError(verb string) error {
 	return fmt.Errorf("unknown command %q; run ceo-packet --help", verb)
-}
-
-func gauntletEvalArgs(args []string) []string {
-	normalized := []string{"--local-agent-benchmark", "--local-agent-benchmark-task", "market-parity-core"}
-	for index := 0; index < len(args); index++ {
-		switch args[index] {
-		case "--agents":
-			normalized = append(normalized, "--local-agents")
-		case "--task", "--suite":
-			normalized = append(normalized, "--local-agent-benchmark-task")
-		case "--concurrency":
-			normalized = append(normalized, "--local-agent-benchmark-concurrency")
-		default:
-			normalized = append(normalized, args[index])
-		}
-	}
-	return normalized
 }

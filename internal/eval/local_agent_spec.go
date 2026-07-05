@@ -42,12 +42,12 @@ func buildCEOHarnessSpec(id string, ceoBinary string, task localAgentTaskSpec) l
 	}
 	return localAgentSpec{
 		id:             id,
-		name:           "CEO Harness",
+		name:           "Cod Code",
 		binary:         binary,
 		args:           args,
 		expectedOutput: expectedOutput,
 		expectedFile:   task.expectedFile,
-		setupHint:      "Build CEO Harness with `make build` before running local comparisons.",
+		setupHint:      "Build Cod Code with `make build` before running local comparisons.",
 	}
 }
 

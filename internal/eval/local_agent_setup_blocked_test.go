@@ -191,7 +191,7 @@ func Test_WriteLocalAgentMarkdown_includes_setup_blocked_count(t *testing.T) {
 		Failed:       1,
 		SetupBlocked: 1,
 		Results: []LocalAgentResult{
-			{ID: "ceo_harness", Name: "CEO Harness", Status: localAgentStatusPass, ExitCode: 0},
+			{ID: "ceo_harness", Name: "Cod Code", Status: localAgentStatusPass, ExitCode: 0},
 			{ID: "codex_cli", Name: "Codex CLI", Status: localAgentStatusFail, ExitCode: 1},
 			{ID: "opencode", Name: "OpenCode", Status: localAgentStatusSetupBlocked, ExitCode: 1},
 		},
@@ -215,5 +215,144 @@ func Test_WriteLocalAgentMarkdown_includes_setup_blocked_count(t *testing.T) {
 	wantPassed := "Passed: 1"
 	if !strings.Contains(text, wantPassed) {
 		t.Fatalf("markdown missing %q:\n%s", wantPassed, text)
+	}
+}
+
+
+// Test_recountLocalAgentBenchmarkSummary_resets_setup_blocked_before_recount
+// pins the load-bearing pre-recount reset contract for the parallel benchmark
+// accounting path. When a summary already has a non-zero SetupBlocked count
+// from an earlier recount (for example, a previous worker batch that finished
+// before the parallel scheduler swapped Results for a partial window), the
+// recount must zero SetupBlocked before counting the current Results set; a
+// regression that skipped the reset would leak stale setup-blocked runs into
+// every subsequent recount, overstating the provider-quota impact in the
+// markdown report and misrouting the failure to providers that did not even
+// run in the current window.
+func Test_recountLocalAgentBenchmarkSummary_resets_setup_blocked_before_recount(t *testing.T) {
+	// Given a summary carrying a STALE SetupBlocked count from a previous
+	// recount pass, plus Results that include fewer setup_blocked runs.
+	summary := LocalAgentBenchmarkSummary{
+		SetupBlocked: 3, // stale from an earlier recount
+		Passed:       1, // stale
+		Failed:       4, // stale
+		Results: []LocalAgentBenchmarkResult{
+			{ID: "provider-a", Status: localAgentStatusSetupBlocked},
+			{ID: "provider-b", Status: localAgentStatusSetupBlocked},
+			{ID: "codex_cli", Status: localAgentStatusPass},
+			{ID: "claude_code", Status: localAgentStatusFail},
+		},
+	}
+
+	// When
+	recountLocalAgentBenchmarkSummary(&summary)
+
+	// Then SetupBlocked must equal the number of setup_blocked Results
+	// (2), NOT the stale count plus the new count (3 + 2 = 5) which is the
+	// failure mode this test guards against.
+	if summary.SetupBlocked != 2 {
+		t.Fatalf("SetupBlocked = %d, want 2 (regression: recount did not reset stale SetupBlocked before recounting)", summary.SetupBlocked)
+	}
+	if summary.Passed != 1 {
+		t.Fatalf("Passed = %d, want 1 (summary=%+v)", summary.Passed, summary)
+	}
+	if summary.Failed != 1 {
+		t.Fatalf("Failed = %d, want 1 (summary=%+v)", summary.Failed, summary)
+	}
+}
+
+// Test_recountLocalAgentBenchmarkSummary_replaces_counts_when_results_change
+// guards the contract exercised by runLocalAgentBenchmarkParallel after a
+// worker batch finishes: the harness assigns a freshly ordered Results slice
+// to the same summary and recounts. Whatever the prior counters held must
+// vanish, and only the new Results set must be reflected — otherwise the
+// per-batch summary snapshots written between batches would compound the same
+// setup_blocked runs across every save, eventually burying the real failure
+// categories under phantom provider-quota noise.
+func Test_recountLocalAgentBenchmarkSummary_replaces_counts_when_results_change(t *testing.T) {
+	// Given a summary that previously accounted five setup_blocked runs.
+	summary := LocalAgentBenchmarkSummary{
+		SetupBlocked: 5,
+		Failed:       2,
+		Results: []LocalAgentBenchmarkResult{
+		{ID: "provider-a", Status: localAgentStatusSetupBlocked},
+		{ID: "provider-b", Status: localAgentStatusSetupBlocked},
+		{ID: "provider-c", Status: localAgentStatusSetupBlocked},
+		{ID: "provider-d", Status: localAgentStatusSetupBlocked},
+		{ID: "provider-e", Status: localAgentStatusSetupBlocked},
+		},
+	}
+
+	// Sanity: the first recount produces the expected baseline.
+	recountLocalAgentBenchmarkSummary(&summary)
+	if summary.SetupBlocked != 5 || summary.Failed != 0 {
+		t.Fatalf("baseline recount summary=%+v, want SetupBlocked=5 Failed=0", summary)
+	}
+
+	// When the parallel scheduler replaces Results with a different set
+	// (simulating the next worker batch landing) and recounts again.
+	summary.Results = []LocalAgentBenchmarkResult{
+		{ID: "codex_cli", Status: localAgentStatusPass},
+		{ID: "claude_code", Status: localAgentStatusPass},
+		{ID: "aider", Status: localAgentStatusPass},
+		{ID: "provider-f", Status: localAgentStatusSetupBlocked},
+		{ID: "provider-g", Status: localAgentStatusSetupBlocked},
+	}
+	recountLocalAgentBenchmarkSummary(&summary)
+
+	// Then the second recount reflects ONLY the new Results (2 setup_blocked,
+	// 3 passed). A regression that forgot to reset would report 7 setup_blocked
+	// (5 stale + 2 fresh) and 3 passed — both wrong.
+	if summary.SetupBlocked != 2 {
+		t.Fatalf("SetupBlocked = %d, want 2 (regression: stale count leaked into second recount)", summary.SetupBlocked)
+	}
+	if summary.Passed != 3 {
+		t.Fatalf("Passed = %d, want 3 (summary=%+v)", summary.Passed, summary)
+	}
+	if summary.Failed != 0 || summary.Partial != 0 || summary.TimedOut != 0 || summary.Skipped != 0 {
+		t.Fatalf("unrelated counters drifted: summary=%+v", summary)
+	}
+}
+
+// Test_recountLocalAgentBenchmarkSummary_counts_setup_blocked_exactly_once
+// pins the exact-once counting contract per Results walk: every
+// setup_blocked result contributes one increment and never two. A regression
+// that accumulated SetupBlocked inside the loop without first reading it
+// back from summary.SetupBlocked would still match the reset test above for
+// small inputs, so this case walks a larger batch and asserts the count
+// equals the number of matching results in Results — no more, no fewer — and
+// that the surrounding status buckets sum to len(summary.Results).
+func Test_recountLocalAgentBenchmarkSummary_counts_setup_blocked_exactly_once(t *testing.T) {
+	// Given
+	results := []LocalAgentBenchmarkResult{
+		{ID: "provider-a", Status: localAgentStatusSetupBlocked},
+		{ID: "codex_cli", Status: localAgentStatusPass},
+		{ID: "provider-b", Status: localAgentStatusSetupBlocked},
+		{ID: "claude_code", Status: localAgentStatusFail},
+		{ID: "provider-c", Status: localAgentStatusSetupBlocked},
+		{ID: "aider", Status: localAgentStatusTimeout},
+		{ID: "provider-d", Status: localAgentStatusSetupBlocked},
+		{ID: "opencode", Status: localAgentStatusPartial},
+		{ID: "provider-e", Status: localAgentStatusSetupBlocked},
+		{ID: "goose", Status: localAgentStatusPass},
+	}
+	const wantSetupBlocked = 5
+	summary := LocalAgentBenchmarkSummary{Results: results}
+
+	// When
+	recountLocalAgentBenchmarkSummary(&summary)
+
+	// Then SetupBlocked is exactly the count of setup_blocked Results,
+	// not double-counted, and the per-status buckets add up to the result
+	// batch so any silent drop or extra increment is caught.
+	if summary.SetupBlocked != wantSetupBlocked {
+		t.Fatalf("SetupBlocked = %d, want %d (summary=%+v)", summary.SetupBlocked, wantSetupBlocked, summary)
+	}
+	if summary.Passed != 2 || summary.Failed != 1 || summary.TimedOut != 1 || summary.Partial != 1 {
+		t.Fatalf("per-status buckets drifted: summary=%+v (want Passed=2 Failed=1 TimedOut=1 Partial=1)", summary)
+	}
+	totalAccounted := summary.Passed + summary.Partial + summary.Failed + summary.TimedOut + summary.SetupBlocked + summary.Skipped
+	if totalAccounted != len(results) {
+		t.Fatalf("accounted=%d, want %d (summary=%+v)", totalAccounted, len(results), summary)
 	}
 }

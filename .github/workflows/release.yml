@@ -29,7 +29,7 @@ jobs:
       - name: Write release notes
         run: |
           {
-            printf '# CEO Harness %s\n\n' "$GITHUB_REF_NAME"
+            printf '# Cod Code %s\n\n' "$GITHUB_REF_NAME"
             printf 'Archives, checksums, and release manifest are attached below.\n\n'
             printf 'Verify downloaded archives with:\n\n'
             printf '```sh\n'

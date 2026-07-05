@@ -100,10 +100,10 @@ func buildCEOBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, task Task,
 		args = append(args, prompt)
 		return localAgentSpec{
 			id:        id,
-			name:      "CEO Harness",
+			name:      "Cod Code",
 			binary:    binary,
 			args:      args,
-			setupHint: "Build CEO Harness with `make build` before benchmark runs.",
+			setupHint: "Build Cod Code with `make build` before benchmark runs.",
 		}, nil
 	}
 	if mode == ceoBenchmarkModeHTTPProvider {
@@ -114,11 +114,11 @@ func buildCEOBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, task Task,
 		args := appendCEORequiredCheckArgs([]string{"--write-policy", "trusted-local", "--apply-model-patches", "--check-fix-attempts", "2", "--max-subagents", "1", "--subagent-attempts", "2", "--no-progress-stop", "2", "--format", "json"}, task, prompt)
 		return localAgentSpec{
 			id:              id,
-			name:            "CEO Harness",
+			name:            "Cod Code",
 			binary:          binary,
 			args:            args,
 			workspaceConfig: workspaceConfig,
-			setupHint:       "Build CEO Harness with `make build` and configure the provider API key before benchmark runs.",
+			setupHint:       "Build Cod Code with `make build` and configure the provider API key before benchmark runs.",
 		}, nil
 	}
 	if mode != ceoBenchmarkModeSynthetic {
@@ -129,11 +129,11 @@ func buildCEOBenchmarkSpec(id string, req LocalAgentBenchmarkRequest, task Task,
 	args = appendCEORequiredCheckArgs(args, task, prompt)
 	return localAgentSpec{
 		id:                       id,
-		name:                     "CEO Harness",
+		name:                     "Cod Code",
 		binary:                   binary,
 		args:                     args,
 		benchmarkWritesArtifacts: true,
-		setupHint:                "Build CEO Harness with `make build` before benchmark runs.",
+		setupHint:                "Build Cod Code with `make build` before benchmark runs.",
 	}, nil
 }
 

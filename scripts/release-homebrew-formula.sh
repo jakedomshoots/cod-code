@@ -157,7 +157,7 @@ archive_base_url=$(slash_trim "$archive_base_url")
 mkdir -p "$(dirname "$output")"
 cat >"$output" <<EOF
 class CeoPacket < Formula
-  desc "Local Alpha Cod/swimmer coding harness"
+  desc "Cod Code local agentic coding CLI"
   homepage "$repo_url"
   url "$archive_base_url/$archive_name"
   sha256 "$archive_sha"

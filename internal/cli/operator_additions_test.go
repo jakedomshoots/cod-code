@@ -119,7 +119,25 @@ func Test_Run_tui_prints_operator_dashboard(t *testing.T) {
 		t.Fatalf("Run returned error: %v\n%s", err, out.String())
 	}
 	text := out.String()
-	for _, want := range []string{"CEO Harness TUI", "Inbox: 1", "Next:"} {
+	for _, want := range []string{
+		"Cod Code Mission Control",
+		"Queue",
+		"[INPUT] Needs input (1)",
+		"Needs       1 action",
+		"Selected",
+		"Evidence",
+		"Actions",
+		"Primary     answer",
+		"Command     ceo-packet --workspace",
+		"Rerun       ceo-packet --workspace",
+		"Systems",
+		"Providers",
+		"Shortcuts",
+		"Primary     enter/a dispatch selected action",
+		"Rerun       r print rerun command",
+		"Next",
+		"ceo-packet tools manifest --format json",
+	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("tui output missing %q:\n%s", want, text)
 		}

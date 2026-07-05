@@ -19,7 +19,7 @@ role="${CEO_AGENT_ROLE:-unknown}"
 context="${CEO_CONTEXT_MODE:-unknown}"
 
 run_prompt=$(printf '%s\n' \
-  "You are a real model backend for CEO Harness." \
+  "You are a real model backend for Cod Code." \
   "Return one JSON object only. Do not include markdown." \
   "The schema is strict: include every top-level key; use null, [], or {} for unused fields." \
   "Do not edit files directly. If an edit is needed, propose it in the JSON patches array." \

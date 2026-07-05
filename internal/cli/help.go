@@ -17,6 +17,9 @@ Primary flow:
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
   oauth list|doctor|init          Setup CLI-login model providers
+  browser doctor|manifest|read    Inspect local web pages through the browser tool gate
+  computer doctor|manifest|snapshot Inspect configured desktop accessibility tool gate
+  tools manifest                  Print built-in tool/MCP capability manifest
   production-status [flags]       Print local/public production readiness
   production-actions [flags]      Print remaining production action checklist
   production-finalize [flags]     Run guarded final production evidence
@@ -37,6 +40,10 @@ Usage:
   ceo-packet oauth list
   ceo-packet oauth doctor [provider]
   ceo-packet oauth init <provider> --workspace <path>
+  ceo-packet browser doctor
+  ceo-packet browser read http://localhost:3000 --format text
+  ceo-packet computer doctor
+  ceo-packet tools manifest
   ceo-packet production-status [flags]
   ceo-packet production-actions [flags]
   ceo-packet production-finalize --dry-run [flags]
@@ -62,6 +69,8 @@ Common flags:
   --adapter <name>                Use external worker adapter: codex, kimi, claude, opencode, aider, goose
   OAuth CLI: ceo-packet oauth init kimi --workspace .
   --format <json|text>            Print JSON or compact text
+  --browser-policy <policy>        deny, ask, allow-localhost, or allow
+  --computer-policy <policy>       deny, ask, or allow
   --version                       Print version
   --help, -h                      Print this compact help
   --help-advanced                 Print all commands, provider flags, model flags, and history tools
@@ -75,6 +84,8 @@ Recommended first run:
 Examples:
   ceo-packet oauth doctor --format text
   ceo-packet oauth init kimi --workspace . --format text
+  ceo-packet tools manifest --format json
+  ceo-packet browser read http://localhost:3000 --format text
   ceo-packet run --workspace . --check go test ./... -- "Fix one real task"
   ceo-packet production-status --workspace . --format text
   ceo-packet gauntlet --suite production-core --agents ceo_harness --output-dir .omo/evidence/production-gauntlet

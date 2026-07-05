@@ -418,7 +418,7 @@ write_index_header() {
     printf '%s\n' "| --- | --- | --- | --- |"
     printf '%s\n' "| scenario-01-doctor | Build and run the no-key doctor smoke | listed only | command output, report hash |"
     printf '%s\n' "| scenario-02-plan-only | Preview a bounded real-repo task packet | listed only | plan report, route metadata |"
-    printf '%s\n' "| scenario-03-observe-run | Run CEO Harness with a local deterministic model in observe mode | listed only | JSON report, pass/fail note |"
+    printf '%s\n' "| scenario-03-observe-run | Run Cod Code with a local deterministic model in observe mode | listed only | JSON report, pass/fail note |"
     printf '%s\n' "| scenario-04-patch-preview | Capture a patch approval digest on a controlled fixture | listed only | preview report and digest |"
     printf '%s\n' "| scenario-05-timeout-guard | Prove hung model commands do not look successful | listed only | expected-failure transcript |"
     printf '%s\n' "| scenario-06-write-probe | Prove preview plus approved write mutates only the copied workspace and can roll back | listed only | preview digest, apply report, rollback report, after-rollback git status |"

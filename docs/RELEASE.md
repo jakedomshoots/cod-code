@@ -5,7 +5,7 @@ Cod Code releases are built from the Go CLI directly. The first supported releas
 ## Local Release Build
 
 ```sh
-VERSION=0.1.0 sh scripts/release-local.sh
+VERSION=0.1.1 sh scripts/release-local.sh
 ```
 
 Artifacts are written to `dist/`:
@@ -25,7 +25,7 @@ Pushing a `v*` tag runs `.github/workflows/release.yml`.
 
 The workflow:
 
-- Derives the CLI version from the tag, for example `v0.1.0` builds `0.1.0`.
+- Derives the CLI version from the tag, for example `v0.1.1` builds `0.1.1`.
 - Runs `scripts/release-local.sh`.
 - Runs `scripts/verify-release.sh dist`.
 - Creates a GitHub Release for the existing tag.
@@ -41,7 +41,7 @@ Before cutting a tag, run:
 ```sh
 make ci
 make test-race
-VERSION=0.1.0 make release-local
+VERSION=0.1.1 make release-local
 sh scripts/verify-release.sh dist
 sh scripts/release-bootstrap.sh --dist dist --output-dir .omo/evidence/release-bootstrap
 sh scripts/release-preflight.sh dist
@@ -53,7 +53,7 @@ If `task` is installed, the equivalent commands are:
 ```sh
 task ci
 task test:race
-VERSION=0.1.0 task release:local
+VERSION=0.1.1 task release:local
 sh scripts/verify-release.sh dist
 task release:bootstrap
 task release:preflight
@@ -77,7 +77,7 @@ When `RELEASE_SIGNING_PUBLIC_KEY` or `SIGNING_PUBLIC_KEY` is set, `scripts/verif
 sh scripts/release-homebrew-formula.sh \
   --dist dist \
   --repo-url https://github.com/<owner>/<repo> \
-  --homebrew-archive-base-url https://github.com/<owner>/<repo>/releases/download/v0.1.0
+  --homebrew-archive-base-url https://github.com/<owner>/<repo>/releases/download/v0.1.1
 ```
 
 `scripts/release-preflight.sh` checks whether a release can honestly be called public. It verifies local artifacts, then blocks until a git remote, public release URL, remote Homebrew archive URL, and archive signatures or explicit checksum-only release notes are handled. If `RELEASE_SIGNING_PUBLIC_KEY` is set, signature sidecars must verify with that key. It does not tag, push, upload, or publish anything.
@@ -85,7 +85,7 @@ sh scripts/release-homebrew-formula.sh \
 After the GitHub Release exists, preflight can verify the real release assets:
 
 ```sh
-GH_RELEASE_TAG=v0.1.0 GH_REPO=<owner>/<repo> sh scripts/release-preflight.sh dist
+GH_RELEASE_TAG=v0.1.1 GH_REPO=<owner>/<repo> sh scripts/release-preflight.sh dist
 ```
 
 When `GH_RELEASE_TAG` is set, preflight uses `gh release view` to prove the public release has every archive from `release-manifest.json` plus `checksums.txt` and `release-manifest.json`. `GH_REPO` is optional when `origin` is a GitHub remote.
@@ -105,9 +105,9 @@ sh scripts/release-bootstrap.sh \
   --dist dist \
   --output-dir .omo/evidence/release-bootstrap \
   --repo-url https://github.com/<owner>/<repo> \
-  --release-url https://github.com/<owner>/<repo>/releases/tag/v0.1.0 \
-  --homebrew-archive-base-url https://github.com/<owner>/<repo>/releases/download/v0.1.0 \
-  --checksum-notes-url https://github.com/<owner>/<repo>/releases/tag/v0.1.0
+  --release-url https://github.com/<owner>/<repo>/releases/tag/v0.1.1 \
+  --homebrew-archive-base-url https://github.com/<owner>/<repo>/releases/download/v0.1.1 \
+  --checksum-notes-url https://github.com/<owner>/<repo>/releases/tag/v0.1.1
 ```
 
 ## Signing

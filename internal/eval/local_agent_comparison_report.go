@@ -113,9 +113,9 @@ func writeLocalAgentComparisonDecision(builder *strings.Builder, summary LocalAg
 		fmt.Fprintf(builder, "Overall comparison: blocked\n")
 	}
 	if ceoClean {
-		fmt.Fprintf(builder, "CEO Harness result: clean\n")
+		fmt.Fprintf(builder, "Cod Code result: clean\n")
 	} else {
-		fmt.Fprintf(builder, "CEO Harness result: needs attention\n")
+		fmt.Fprintf(builder, "Cod Code result: needs attention\n")
 	}
 	blockers := make([]string, 0)
 	for _, id := range agentOrder {

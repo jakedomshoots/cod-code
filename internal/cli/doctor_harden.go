@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"ceoharness/internal/browseruse"
+	"ceoharness/internal/computeruse"
 	"ceoharness/internal/config"
 )
 
@@ -75,6 +77,7 @@ func doctorToolCheck(checkName string, binName string, requirement string, looku
 func runLocalDoctorChecks(ctx context.Context, opts options) []doctorCheck {
 	checks := append([]doctorCheck{}, doctorToolChecks(exec.LookPath)...)
 	checks = append(checks, installScriptDoctorChecks()...)
+	checks = append(checks, toolSurfaceDoctorChecks(ctx, opts)...)
 	checks = append(checks, workspaceDoctorChecks(ctx, opts)...)
 	return checks
 }
@@ -140,6 +143,29 @@ func workspaceDoctorChecks(ctx context.Context, opts options) []doctorCheck {
 	checks = append(checks, doctorCheck{Name: "workspace_config", Status: doctorStatusPass, Requirement: doctorRequired, Path: configPath})
 	checks = append(checks, writePolicyDoctorCheck(ctx, opts))
 	return checks
+}
+
+func toolSurfaceDoctorChecks(ctx context.Context, opts options) []doctorCheck {
+	resolved, err := optionsWithWorkspaceDefaults(ctx, opts)
+	if err != nil {
+		return []doctorCheck{{Name: "tool_surfaces", Status: doctorStatusBlocked, Requirement: doctorRequired, Error: err.Error()}}
+	}
+	browserPolicy := browseruse.NormalizePolicy(resolved.browserPolicy)
+	browserCheck := doctorCheck{Name: "browser_tool", Status: doctorStatusPass, Requirement: doctorOptional, Source: "builtin", Guidance: "default browser reads are limited to localhost unless --browser-policy allow is set"}
+	if err := browseruse.ValidatePolicy(browserPolicy); err != nil {
+		browserCheck.Status = doctorStatusBlocked
+		browserCheck.Error = err.Error()
+	}
+	computerPolicy := computeruse.NormalizePolicy(resolved.computerPolicy)
+	computerCheck := doctorCheck{Name: "computer_tool", Status: doctorStatusSkipped, Requirement: doctorOptional, Source: "command", Guidance: "configure computer_command and computer_policy=allow only when desktop automation is needed"}
+	if err := computeruse.ValidatePolicy(computerPolicy); err != nil {
+		computerCheck.Status = doctorStatusBlocked
+		computerCheck.Error = err.Error()
+	} else if len(resolved.computerBackendCommand) > 0 {
+		computerCheck.Status = doctorStatusPass
+		computerCheck.Path = strings.Join(resolved.computerBackendCommand, " ")
+	}
+	return []doctorCheck{browserCheck, computerCheck}
 }
 
 func writePolicyDoctorCheck(ctx context.Context, opts options) doctorCheck {

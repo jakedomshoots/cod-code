@@ -42,6 +42,21 @@ func Test_TUIModel_navigates_jobs_and_dispatches_selected_action(t *testing.T) {
 	if gotAction != "ceo-packet --workspace /tmp/work --resume job-000002 --answer \"...\"" {
 		t.Fatalf("action = %q, want resume command", gotAction)
 	}
+
+	// When — the 'a' shortcut must dispatch the same primary action as enter on the selected job.
+	_, gotAction = gotModel.applyKey("a")
+
+	// Then
+	if gotAction != "ceo-packet --workspace /tmp/work --resume job-000002 --answer \"...\"" {
+		t.Fatalf("a action = %q, want primary action command", gotAction)
+	}
+
+	// When — the 'r' shortcut must surface the rerun command for the selected job.
+	_, gotAction = gotModel.applyKey("r")
+	// Then — rerun command quotes the workspace path through workspaceArg.
+	if gotAction != "ceo-packet --workspace \"/tmp/work\" --rerun job-000002" {
+		t.Fatalf("r action = %q, want rerun command for selected job", gotAction)
+	}
 }
 
 func Test_Run_tui_snapshot_shows_dashboard_when_jobs_exist(t *testing.T) {
@@ -73,18 +88,62 @@ func Test_Run_tui_snapshot_shows_dashboard_when_jobs_exist(t *testing.T) {
 	}
 	text := out.String()
 	for _, want := range []string{
-		"CEO Harness Dashboard",
-		"Jobs (2)",
-		"> job-000002 [needs_input] Needs customer input",
-		"Inbox: needs_input",
-		"Provider health: 1 provider, 1 attempt, 1 pass, 0 fail",
-		"Patch preview: app.txt",
-		"Check output: go test ./... pass",
-		"Action: answer -> ceo-packet --workspace",
+		"Cod Code Mission Control",
+		"Queue",
+		"[INPUT] Needs input (1)",
+		"[REVIEW] Needs decision (1)",
+		"> job-000002",
+		"needs_input",
+		"Needs customer input",
+		"Selected",
+		"Evidence",
+		"Patch       app.txt",
+		"Check       go test ./... pass",
+		"Actions",
+		"Primary     answer",
+		"Command     ceo-packet --workspace",
+		"Rerun       ceo-packet --workspace",
+		"Providers   1 provider | 1 attempt | 1 pass | 0 fail",
+		"Systems",
+		"Shortcuts",
+		"Primary     enter/a dispatch selected action",
+		"Rerun       r print rerun command",
+		"Next",
+		"ceo-packet tools manifest --format json",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("snapshot missing %q:\n%s", want, text)
 		}
+	}
+}
+
+func Test_Run_tui_snapshot_uses_provider_zero_state_guidance_when_no_provider_history(t *testing.T) {
+	// Given
+	root := t.TempDir()
+	saveTUIDashboardJob(t, root, history.Entry{
+		Task:    "Needs review",
+		Verdict: "needs_input",
+	})
+	var out bytes.Buffer
+
+	// When
+	err := Run(context.Background(), &out, []string{"--workspace", root, "--tui", "--snapshot"})
+	// Then
+	if err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	text := out.String()
+	if !strings.Contains(text, "Providers   no evidence yet; run provider proof or config-check.") {
+		t.Fatalf("snapshot must surface provider zero-state guidance when no provider history exists:\n%s", text)
+	}
+	if !strings.Contains(text, "Systems") {
+		t.Fatalf("snapshot must surface Systems block above provider zero-state guidance:\n%s", text)
+	}
+	if !strings.Contains(text, "Shortcuts") {
+		t.Fatalf("snapshot must surface Shortcuts block on provider zero state:\n%s", text)
+	}
+	if strings.Contains(text, "0 providers") {
+		t.Fatalf("snapshot must not surface legacy '0 providers' fallback in provider health block:\n%s", text)
 	}
 }
 
@@ -101,10 +160,15 @@ func Test_Run_tui_snapshot_shows_setup_guidance_when_workspace_empty(t *testing.
 	}
 	text := out.String()
 	for _, want := range []string{
-		"CEO Harness Dashboard",
+		"Cod Code Mission Control",
+		"Queue",
 		"No saved jobs yet.",
 		"ceo-packet --quickstart",
 		"ceo-packet --workspace",
+		"Providers   no evidence yet; run provider proof or config-check.",
+		"Systems",
+		"Shortcuts",
+		"Next",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("empty snapshot missing %q:\n%s", want, text)
@@ -125,18 +189,33 @@ func Test_RunWithIO_tui_processes_navigation_and_dispatches_action(t *testing.T)
 	})
 	var out bytes.Buffer
 
-	// When
-	err := RunWithIO(context.Background(), strings.NewReader("down\nup\nenter\nq\n"), &out, []string{"--workspace", root, "--tui"})
+	// When — exercise enter (primary action), a (alias for primary), and r (rerun).
+	err := RunWithIO(context.Background(), strings.NewReader("down\nup\nenter\na\nr\nq\n"), &out, []string{"--workspace", root, "--tui"})
 	// Then
 	if err != nil {
 		t.Fatalf("RunWithIO returned error: %v\n%s", err, out.String())
 	}
 	text := out.String()
 	for _, want := range []string{
-		"> job-000001 [pass] Passing checkout",
-		"> job-000002 [needs_input] Needs customer input",
-		"Dispatched action: ceo-packet --workspace",
+		"Cod Code Mission Control",
+		"Queue",
+		"[INPUT] Needs input (1)",
+		"[REVIEW] Needs decision (1)",
+		"> job-000002",
+		"Needs customer input",
+		"Selected",
+		"Evidence",
+		"Actions",
+		"Primary     answer",
+		"Command     ceo-packet --workspace",
+		"Rerun       ceo-packet --workspace",
+		"Shortcuts",
+		"Primary     enter/a dispatch selected action",
+		"Rerun       r print rerun command",
+		"Action dispatched: ceo-packet --workspace",
 		"--resume job-000002 --answer \"...\"",
+		"Action dispatched: ceo-packet --workspace",
+		"--rerun job-000002",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("interactive tui output missing %q:\n%s", want, text)

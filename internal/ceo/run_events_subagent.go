@@ -27,18 +27,26 @@ func (b *runEventBuilder) addSubagentEvents(result subagent.Result) {
 			Action:    request.Action,
 			Path:      request.Path,
 			Query:     request.Query,
+			URL:       request.URL,
+			App:       request.App,
+			Tool:      request.Tool,
 		})
 	}
 	for _, toolResult := range result.ToolResults {
 		b.add(RunEvent{
-			Kind:      "tool_result",
-			Status:    toolResult.Status,
-			AgentName: result.AgentName,
-			Stage:     result.Stage,
-			Action:    toolResult.Action,
-			Path:      toolResult.Path,
-			Query:     toolResult.Query,
-			Summary:   toolResultSummary(toolResult),
+			Kind:       "tool_result",
+			Status:     toolResult.Status,
+			AgentName:  result.AgentName,
+			Stage:      result.Stage,
+			Action:     toolResult.Action,
+			Path:       toolResult.Path,
+			Query:      toolResult.Query,
+			URL:        toolResult.URL,
+			App:        toolResult.App,
+			Tool:       toolResult.Tool,
+			Permission: toolResult.Permission,
+			Digest:     toolResult.ReceiptSHA256,
+			Summary:    toolResultSummary(toolResult),
 		})
 	}
 	if result.ToolFeedbackPasses > 0 {
