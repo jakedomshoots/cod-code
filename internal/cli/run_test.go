@@ -207,7 +207,7 @@ func Test_HelperProcess_cli_fail_check(t *testing.T) {
 	os.Exit(8)
 }
 
-func Test_Run_returns_usage_error_when_task_is_missing(t *testing.T) {
+func Test_Run_prints_help_when_no_args_are_supplied(t *testing.T) {
 	// Given
 	var out bytes.Buffer
 
@@ -215,11 +215,11 @@ func Test_Run_returns_usage_error_when_task_is_missing(t *testing.T) {
 	err := Run(context.Background(), &out, nil)
 
 	// Then
-	if err == nil {
-		t.Fatal("expected missing task error")
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
 	}
-	if !strings.Contains(err.Error(), "task is required") {
-		t.Fatalf("error = %q, want task is required", err.Error())
+	if body := out.String(); !strings.Contains(body, "ceo-packet — Cod Code CLI") || !strings.Contains(body, "ceo-packet run [flags] <task>") {
+		t.Fatalf("help output missing expected quick start:\n%s", body)
 	}
 }
 
