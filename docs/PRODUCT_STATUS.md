@@ -53,11 +53,11 @@ Cod Code is not trying to beat mature tools at editor polish today. Its wedge is
 
 - Public release proof is complete for GitHub release `v0.1.1` with release assets, checksums, release manifest, and checksum-only release notes.
 - Local production gates are green: tests, vet, race/shuffle, smoke, dogfood, secret scan, release artifact verification, and public-release readiness all passed.
-- HTTP provider proof is currently blocked in this shell because `OPENROUTER_API_KEY`, `MINIMAX_API_KEY`, and `MOONSHOT_API_KEY` are set but empty, while `KIMI_CODE_API_KEY` and `OPENAI_API_KEY` are missing. Secret values were not printed or saved.
+- Saved HTTP provider proof is green for the default public-readiness set: `OPENROUTER_API_KEY`, `KIMI_CODE_API_KEY`, and `MINIMAX_API_KEY`, with secret values omitted from evidence. A fresh rerun still requires those env vars to be exported non-empty in the shell.
 - The secure OpenAI key setup app still requires reauthentication before Codex can create/write an OpenAI key from this workspace, but OpenAI HTTP is not part of the default public-readiness gate.
 - Expanded full competitor runner support is wired for Claude Code, Aider, Goose, Oh My Pi, Codex CLI, OpenCode, Pi, and Cod Code; the scored expanded slice passes for 7/8 runners, while Claude Code is setup-blocked by provider credit/quota (`Credit balance is too low`) after login.
-- `production-status` currently reports `Production status: blocked`, `Local ready: true`, `Public ready: false`, and three provider blocked checks after the latest finalizer attempt.
-- Public 10/10 production status is tracked in `docs/PRODUCTION_10_10.md`; release, comparison, CI, install, and local gates are green, while provider/finalizer gates need non-empty HTTP provider env vars before the final pass claim.
+- `production-status` currently reports `Production status: pass`, `Local ready: true`, `Public ready: true`, and zero blocked checks from the saved final evidence.
+- Public 10/10 production status is tracked in `docs/PRODUCTION_10_10.md`; release, provider, comparison, finalizer, readiness, CI, install, and local gates are green from saved evidence.
 
 ## Market Roadmap Result 2026-07-03
 
