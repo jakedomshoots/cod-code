@@ -4,7 +4,7 @@ Status date: 2026-07-04
 
 ## Where It Stands
 
-CEO Harness is now a productized local CLI, not just a prototype folder. The core runtime is working and the repo has basic product infrastructure:
+Cod Code is now a productized local CLI, not just a prototype folder. The core runtime is working and the repo has basic product infrastructure; the v0.1 binary remains `ceo-packet` for compatibility.
 
 - Git repository initialized on `main`.
 - Local build, install, smoke, dogfood, and release scripts.
@@ -15,8 +15,8 @@ CEO Harness is now a productized local CLI, not just a prototype folder. The cor
 
 The core product loop already supports:
 
-- CEO final verdict ownership.
-- Bounded native subagents.
+- Alpha Cod final verdict ownership.
+- Bounded native swimmers (subagents).
 - Lean context packets and context budgets.
 - Local job history and review queue.
 - Resume, continue, rerun, and human final judgment.
@@ -29,25 +29,25 @@ The core product loop already supports:
 
 ## Positioning
 
-CEO Harness is not trying to beat mature tools at editor polish today. Its wedge is local orchestration discipline:
+Cod Code is not trying to beat mature tools at editor polish today. Its wedge is local orchestration discipline:
 
-- One CEO owns the final verdict.
-- One primary worker owns each job.
-- Subagents are bounded and role-specific.
+- One Alpha Cod owns the final verdict.
+- One primary swimmer owns each job.
+- Swimmers are bounded and role-specific.
 - Context is compact by default.
 - Routing can stay cheap for ordinary work and escalate only for risk.
 - Saved state is local and inspectable.
 
 ## Comparison Snapshot
 
-| Alternative | Strong At | CEO Harness Difference |
+| Alternative | Strong At | Cod Code Difference |
 |---|---|---|
-| Claude Code | Mature terminal coding agent with deep codebase workflow | CEO Harness is model/provider-agnostic and emphasizes bounded subagents plus lean saved context |
-| OpenAI Codex CLI | Fast local terminal coding agent, open source, Rust-based | CEO Harness is an orchestration layer pattern: CEO, subagents, route decisions, saved review queue |
-| Aider | Pair-programming edits with strong git workflow | CEO Harness is less pair-chat focused and more job-owner/review/verdict focused |
-| OpenCode | Open source terminal/desktop/IDE coding agent | CEO Harness stays smaller and CLI-first while tracking CEO/subagent state explicitly |
-| GitHub Copilot CLI | GitHub-native issue/PR workflow and agent modes | CEO Harness is independent of GitHub and local-first |
-| Goose | General-purpose local agent with desktop, CLI, and API | CEO Harness is narrower: coding harness first, final-verdict workflow first |
+| Claude Code | Mature terminal coding agent with deep codebase workflow | Cod Code is model/provider-agnostic and emphasizes bounded swimmers plus lean saved context |
+| OpenAI Codex CLI | Fast local terminal coding agent, open source, Rust-based | Cod Code is an orchestration layer pattern: Alpha Cod, swimmers, route decisions, saved review queue |
+| Aider | Pair-programming edits with strong git workflow | Cod Code is less pair-chat focused and more job-owner/review/verdict focused |
+| OpenCode | Open source terminal/desktop/IDE coding agent | Cod Code stays smaller and CLI-first while tracking Alpha Cod/swimmer state explicitly |
+| GitHub Copilot CLI | GitHub-native issue/PR workflow and agent modes | Cod Code is independent of GitHub and local-first |
+| Goose | General-purpose local agent with desktop, CLI, and API | Cod Code is narrower: coding harness first, final-verdict workflow first |
 
 ## Current Weak Spots
 

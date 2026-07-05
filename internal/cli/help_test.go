@@ -78,6 +78,24 @@ func Test_Run_prints_help_when_help_flag_is_supplied(t *testing.T) {
 	}
 }
 
+func Test_Run_compact_help_includes_cod_code_identity(t *testing.T) {
+	var out bytes.Buffer
+
+	if err := Run(context.Background(), &out, []string{"--help"}); err != nil {
+		t.Fatalf("Run --help: %v", err)
+	}
+
+	body := out.String()
+	for _, want := range []string{
+		"ceo-packet — Cod Code CLI",
+		"Alpha Cod delegates bounded swimmers",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("compact help missing identity marker %q:\n%s", want, body)
+		}
+	}
+}
+
 func Test_Run_prints_advanced_help_when_requested(t *testing.T) {
 	var out bytes.Buffer
 
@@ -103,6 +121,24 @@ func Test_Run_prints_advanced_help_when_requested(t *testing.T) {
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("advanced help missing %q:\n%s", want, body)
+		}
+	}
+}
+
+func Test_Run_advanced_help_includes_cod_code_identity(t *testing.T) {
+	var out bytes.Buffer
+
+	if err := Run(context.Background(), &out, []string{"--help-advanced"}); err != nil {
+		t.Fatalf("Run --help-advanced: %v", err)
+	}
+
+	body := out.String()
+	for _, want := range []string{
+		"ceo-packet — Cod Code CLI",
+		"Alpha Cod delegates bounded swimmers",
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("advanced help missing identity marker %q:\n%s", want, body)
 		}
 	}
 }

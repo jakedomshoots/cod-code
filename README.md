@@ -1,6 +1,6 @@
-# CEO Harness
+# Cod Code
 
-CEO Harness is a local Go CLI for coding work where one CEO loop owns the final verdict, delegates bounded work to lean subagents, keeps compact local job state, and makes every run reviewable.
+Cod Code is a local Go CLI for coding work where the Alpha Cod owns the final verdict, casts bounded swimmers at focused tasks, keeps compact local job state, and makes every run reviewable. The v0.1 binary is still `ceo-packet` for install and script compatibility.
 
 First command:
 
@@ -27,6 +27,7 @@ ceo-packet production-status --workspace . --format text
 ## Product Docs
 
 - [Install](docs/INSTALL.md)
+- [Lore and terminology](docs/LORE.md)
 - [Quick first task](docs/QUICK_FIRST_TASK.md)
 - [Trust and release proof](docs/TRUST.md)
 - [Terminal text snapshots](docs/TERMINAL_CASTS.md)

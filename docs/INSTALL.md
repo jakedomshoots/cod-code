@@ -1,6 +1,6 @@
 # Install
 
-CEO Harness currently supports verified local installs from this checkout. There is no published remote install URL yet.
+Cod Code currently supports verified local installs from this checkout. The v0.1 binary remains `ceo-packet`; there is no published remote install URL yet.
 
 ## One-Line Local Install
 

@@ -1,6 +1,6 @@
 # Dogfood Gate
 
-CEO Harness is not considered product-ready unless the real CLI passes the dogfood gate.
+Cod Code is not considered product-ready unless the real CLI passes the dogfood gate.
 
 Run it with:
 

@@ -1,13 +1,13 @@
 # Homebrew Tap Plan
 
-CEO Harness does not have a published Homebrew tap yet. This is the draft formula shape to use after a real release URL and checksum exist.
+Cod Code does not have a published Homebrew tap yet. This is the draft formula shape to use after a real release URL and checksum exist.
 
 `scripts/release-local.sh` also writes a local draft formula to `dist/homebrew/ceo-packet.rb`. That generated file uses the local Darwin archive and checksum so it can be inspected before a tap exists.
 
 ```ruby
-class CeoHarness < Formula
-  desc "Local CEO/subagent coding harness"
-  homepage "https://example.invalid/ceo-harness"
+class CeoPacket < Formula
+  desc "Local Alpha Cod/swimmer coding harness"
+  homepage "https://example.invalid/cod-code"
   url "https://example.invalid/ceo-packet_0.1.0_darwin_arm64.tar.gz"
   sha256 "<replace-with-release-checksum>"
   version "0.1.0"

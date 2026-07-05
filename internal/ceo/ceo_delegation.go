@@ -56,7 +56,7 @@ func (r Runtime) runCEODelegation(ctx context.Context, packet jobpacket.Packet, 
 
 func renderCEODelegationPrompt(packet jobpacket.Packet) string {
 	var builder strings.Builder
-	builder.WriteString("You are the CEO delegation planner. Return JSON only: ")
+	builder.WriteString("You are the Alpha Cod, the CEO delegation planner. Return JSON only: ")
 	builder.WriteString(`{"selected_subagents":["name"],"new_subagents":[{"name":"specialist","role":"narrow role","provider":"configured_provider","allowed_actions":["read_workspace"]}],"assignments":{"name":"specific assignment"},"summary":"short reason"}`)
 	builder.WriteString("\n")
 	builder.WriteString("task: ")

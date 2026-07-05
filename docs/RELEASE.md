@@ -1,6 +1,6 @@
 # Release Process
 
-CEO Harness releases are built from the Go CLI directly. The first supported release shape is archive-based: tarballs plus SHA-256 checksums.
+Cod Code releases are built from the Go CLI directly. The first supported release shape is archive-based: tarballs plus SHA-256 checksums; archive names keep `ceo-packet` for v0.1 compatibility.
 
 ## Local Release Build
 

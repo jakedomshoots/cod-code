@@ -1,10 +1,12 @@
 package cli
 
-const advancedHelpText = `ceo-packet
+const advancedHelpText = `ceo-packet — Cod Code CLI
+
+Alpha Cod delegates bounded swimmers, inspects catches, and owns the final verdict.
 
 Primary flow:
   start <path>                    Guided setup/check/doctor start flow
-  run [flags] <task>              Run the CEO packet loop
+  run [flags] <task>              Run the Alpha Cod packet loop
   gauntlet [flags]                Run market or production benchmark gauntlets
   doctor [flags]                  Run harness health checks
   inbox [flags]                   Review queue alias with text details

@@ -2,7 +2,7 @@
 
 ## Now: Productized CLI
 
-- Keep the CEO/subagent loop CLI-first.
+- Keep the Alpha Cod/swimmer loop CLI-first.
 - Keep local state compact and inspectable.
 - Make install, doctor, dogfood, release, and recovery paths boring.
 - Keep local release artifacts reproducible: archives, checksums, version output, and a Homebrew formula draft.

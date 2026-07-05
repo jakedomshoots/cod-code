@@ -1,6 +1,6 @@
-# CEO Harness Report Schema v1
+# Cod Code Report Schema v1
 
-This document defines the stable JSON report artifact saved under:
+This document defines the stable JSON report artifact saved by the `ceo-packet` CLI under:
 
 `ceo-artifacts/jobs/<job_id>.json`
 

@@ -1,6 +1,6 @@
-# Competitor Comparison
+# Comparison
 
-CEO Harness is compared as a local coding orchestration layer, not as an editor. The comparison set is Codex CLI, Claude Code, Aider, OpenCode, Goose, Pi CLI, and Oh My Pi.
+Cod Code is compared as a local coding orchestration layer, not as an editor. The comparison set is Codex CLI, Claude Code, Aider, OpenCode, Goose, Pi CLI, and Oh My Pi.
 
 ## No Result Without Evidence Rule
 

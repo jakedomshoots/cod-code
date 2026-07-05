@@ -1,6 +1,6 @@
 # Quick First Task
 
-Use this when trying CEO Harness in a real repo for the first time.
+Use this when trying Cod Code in a real repo for the first time.
 
 ```sh
 PREFIX="$PWD/.local" sh scripts/install-local.sh

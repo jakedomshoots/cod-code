@@ -1,6 +1,6 @@
 # Trust Surface
 
-CEO Harness should be installable, reviewable, and honest about what has actually shipped.
+Cod Code should be installable, reviewable, and honest about what has actually shipped. The Alpha Cod/swimmer terminology is operator-facing lore; release artifacts and JSON schemas keep stable `ceo-packet`/CEO/subagent names until a versioned migration exists.
 
 ## Verified Today
 
@@ -93,7 +93,7 @@ go run ./cmd/ceo-packet production-status --workspace . --format text
 
 ## OAuth Boundary
 
-CEO Harness does not store OAuth tokens. CLI OAuth providers use local vendor CLIs and whatever login state those tools already manage. Harness config stores only command paths such as `scripts/kimi-model-command.sh`.
+Cod Code does not store OAuth tokens. CLI OAuth providers use local vendor CLIs and whatever login state those tools already manage. Harness config stores only command paths such as `scripts/kimi-model-command.sh`.
 
 ## Evidence Boundary
 

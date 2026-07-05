@@ -91,7 +91,7 @@ func (r Runtime) annotateCEOReviewRoute(review *CEOReview) {
 
 func renderCEOReviewPrompt(input ceoReviewInput) string {
 	var builder strings.Builder
-	builder.WriteString("You are the CEO agent. Return JSON only: ")
+	builder.WriteString("You are the Alpha Cod, the CEO final reviewer. Return JSON only: ")
 	builder.WriteString(`{"recommended_verdict":"pass|fail","summary":"short reason"}`)
 	builder.WriteString("\n")
 	builder.WriteString("task: ")
