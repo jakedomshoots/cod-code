@@ -127,7 +127,7 @@ func renderJobContextCommand(args []string) string {
 	if len(args) == 0 {
 		return ""
 	}
-	parts := []string{"ceo-packet"}
+	parts := []string{"cod"}
 	for _, arg := range args {
 		if strings.ContainsAny(arg, " \t\n\"'<>") {
 			parts = append(parts, strconv.Quote(arg))

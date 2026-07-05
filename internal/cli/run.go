@@ -20,7 +20,7 @@ func Run(ctx context.Context, out io.Writer, args []string) error {
 
 func RunWithIO(ctx context.Context, in io.Reader, out io.Writer, args []string) error {
 	if len(args) == 0 {
-		return runHelp(out)
+		args = []string{"--tui"}
 	}
 	if len(args) > 0 && args[0] == "eval" {
 		return eval.RunCLI(ctx, out, out, args[1:])

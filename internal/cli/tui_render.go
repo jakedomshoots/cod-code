@@ -52,7 +52,7 @@ func (m tuiModel) selectedJob() tuiJob {
 }
 
 func writeTUIHeader(builder *strings.Builder, model tuiModel) {
-	builder.WriteString("Cod Code Mission Control\n")
+	builder.WriteString("Cod Code Chat\n")
 	writeTUILine(builder, "Workspace", model.workspace)
 	writeTUILine(builder, "Queue", fmt.Sprintf("%d %s", len(model.jobs), pluralize("job", len(model.jobs))))
 	writeTUILine(builder, "Needs", fmt.Sprintf("%d action%s", model.inboxCount(), pluralSuffix(model.inboxCount())))
@@ -168,10 +168,11 @@ func writeTUISelectedJob(builder *strings.Builder, model tuiModel) {
 func writeTUIEmpty(builder *strings.Builder, workspace string) {
 	builder.WriteString("Queue\n")
 	builder.WriteString("No saved jobs yet.\n")
-	builder.WriteString("Start a real task, then come back here to review verdicts and evidence.\n\n")
+	builder.WriteString("Start a real task, then come back here to review chat turns, verdicts, and proof.\n\n")
 	builder.WriteString("Start\n")
-	writeTUICommandAction(builder, "Quickstart", "ceo-packet --quickstart "+workspaceArg(workspace))
-	writeTUICommandAction(builder, "Check setup", "ceo-packet --workspace "+workspaceArg(workspace)+" --config-check --format text")
+	writeTUICommandAction(builder, "Open chat", "cod")
+	writeTUICommandAction(builder, "Quickstart", "cod start "+workspaceArg(workspace))
+	writeTUICommandAction(builder, "Check setup", "cod doctor --workspace "+workspaceArg(workspace)+" --format text")
 	builder.WriteString("\n")
 }
 
@@ -201,9 +202,9 @@ func writeTUICommandHints(builder *strings.Builder, workspace string) {
 	writeTUILine(builder, "Rerun", "r print rerun command")
 	writeTUILine(builder, "Quit", "q")
 	builder.WriteString("Next\n")
-	writeTUICommandAction(builder, "Review inbox", "ceo-packet --workspace "+workspaceArg(workspace)+" --inbox")
-	writeTUICommandAction(builder, "Check setup", "ceo-packet --workspace "+workspaceArg(workspace)+" --config-check --format text")
-	writeTUICommandAction(builder, "Tool manifest", "ceo-packet tools manifest --format json")
+	writeTUICommandAction(builder, "Review inbox", "cod inbox --workspace "+workspaceArg(workspace))
+	writeTUICommandAction(builder, "Check setup", "cod doctor --workspace "+workspaceArg(workspace)+" --format text")
+	writeTUICommandAction(builder, "Tool map", "cod tools manifest --format json")
 }
 
 func writeTUILine(builder *strings.Builder, label string, value string) {

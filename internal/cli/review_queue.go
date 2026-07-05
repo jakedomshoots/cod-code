@@ -179,7 +179,7 @@ func reviewQueueReason(entry history.Entry, judgment history.HumanJudgment) stri
 }
 
 func suggestedReviewCommand(jobID string, reason string, workspaceDir string) string {
-	prefix := fmt.Sprintf("ceo-packet --workspace %q", workspaceDir)
+	prefix := fmt.Sprintf("cod --workspace %q", workspaceDir)
 	switch reason {
 	case "needs_input":
 		return fmt.Sprintf("%s --resume %s --answer %q", prefix, jobID, "...")

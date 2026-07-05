@@ -133,8 +133,8 @@ func buildOAuthInitReport(ctx context.Context, opts options) (oauthReport, error
 		Providers:    oauthProviderStatuses([]oauthProviderSpec{spec}, map[string]string{spec.Name: "configured"}),
 		NextSteps: []string{
 			spec.LoginCommand,
-			"ceo-packet oauth doctor " + spec.Name + " --format text",
-			"ceo-packet --workspace " + shellQuote(opts.workspaceDir) + " --doctor-provider main --format text",
+			"cod oauth doctor " + spec.Name + " --format text",
+			"cod doctor --workspace " + shellQuote(opts.workspaceDir) + " --doctor-provider main --format text",
 		},
 	}, nil
 }

@@ -1,27 +1,27 @@
 # Cod Code
 
-Cod Code is a local Go CLI for coding work where the Alpha Cod owns the final verdict, casts bounded swimmers at focused tasks, keeps compact local job state, and makes every run reviewable. The v0.1 binary is still `ceo-packet` for install and script compatibility.
+Cod Code is a local Go CLI for coding work: open the terminal chat, send one task, review the catch, and keep proof close. The primary user command is `cod`; the legacy `ceo-packet` binary is still installed for script compatibility.
 
 First command:
 
 ```sh
-go run ./cmd/ceo-packet --help
+go run ./cmd/ceo-packet
 ```
 
 Verified local install:
 
 ```sh
-PREFIX=/tmp/ceo-harness sh scripts/install-local.sh
-/tmp/ceo-harness/bin/ceo-packet --version
+PREFIX=/tmp/cod-code sh scripts/install-local.sh
+/tmp/cod-code/bin/cod --version
 ```
 
 First boring run:
 
 ```sh
-ceo-packet oauth doctor --format text
-ceo-packet oauth init kimi --workspace . --format text
-ceo-packet run --workspace . --check go test ./... -- "Fix one real task"
-ceo-packet production-status --workspace . --format text
+cod
+cod oauth doctor --format text
+cod run --workspace . --check go test ./... -- "Fix one real task"
+cod production-status --workspace . --format text
 ```
 
 ## Product Docs
@@ -54,7 +54,7 @@ Install the local CLI binary:
 
 ```sh
 PREFIX="$PWD/.local" sh scripts/install-local.sh
-.local/bin/ceo-packet --version
+.local/bin/cod --version
 ```
 
 For Go's standard install path:
@@ -64,35 +64,35 @@ go install ./cmd/ceo-packet
 ceo-packet --version
 ```
 
-If `ceo-packet` is not found after install, add `$(go env GOPATH)/bin` to your `PATH`.
+`go install` keeps the module path binary name (`ceo-packet`). Use `scripts/install-local.sh` when you want the end-user `cod` command.
 
 Copy-paste first setup for a repo:
 
 ```sh
-ceo-packet oauth doctor --format text
-ceo-packet oauth init kimi --workspace . --format text
-ceo-packet run --workspace . --check go test ./... -- "Fix one real task"
-ceo-packet production-status --workspace . --format text
+cod
+cod oauth doctor --format text
+cod run --workspace . --check go test ./... -- "Fix one real task"
+cod production-status --workspace . --format text
 ```
 
 Generate shell completions:
 
 ```sh
-mkdir -p /tmp/ceo-completions
-ceo-packet config completions --shell zsh --output-dir /tmp/ceo-completions
+mkdir -p /tmp/cod-completions
+cod config completions --shell zsh --output-dir /tmp/cod-completions
 ```
 
 Install a named local build into `~/.local/bin`:
 
 ```sh
 VERSION=0.1.1 COMMIT=local sh scripts/install-local.sh
-ceo-packet --version
+cod --version
 ```
 
 For a temporary or custom install, set `PREFIX` or `BINDIR`:
 
 ```sh
-PREFIX=/tmp/ceo-harness sh scripts/install-local.sh
+PREFIX=/tmp/cod-code sh scripts/install-local.sh
 ```
 
 Run the local smoke check:
@@ -124,7 +124,7 @@ VERSION=0.1.1 sh scripts/release-local.sh
 sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness
 sh scripts/production-readiness.sh --dist dist --output-dir .omo/evidence/production-readiness
 sh scripts/production-local-gate.sh --dist dist --output-dir .omo/evidence/production-local-gate
-ceo-packet production-status --workspace . --format text
+cod production-status --workspace . --format text
 ```
 
 The release script writes tarballs, checksums, and a local Homebrew formula draft under `dist/homebrew/ceo-packet.rb`. The readiness scripts write pass/blocked evidence without publishing, tagging, pushing, or creating a remote release. `production-local-gate` fails only if local production readiness regresses; public release/provider blockers stay visible but do not fail source CI. `production-status` reads that evidence and prints local/public readiness, `External setup required: true` when only outside release/provider setup remains, plus the next action.
@@ -132,20 +132,20 @@ The release script writes tarballs, checksums, and a local Homebrew formula draf
 Recommended first run:
 
 ```sh
-ceo-packet oauth doctor --format text
-ceo-packet oauth init kimi --workspace . --format text
-ceo-packet run --workspace . --check go test ./... -- "Fix one real task"
-ceo-packet production-status --workspace . --format text
+cod oauth doctor --format text
+cod oauth init kimi --workspace . --format text
+cod run --workspace . --check go test ./... -- "Fix one real task"
+cod production-status --workspace . --format text
 ```
 
-`oauth init kimi` creates provider `main` from the local Kimi CLI login and stores no OAuth token in the harness. Use `ceo-packet oauth list --format text` to see the other CLI-backed providers.
+`oauth init kimi` creates provider `main` from the local Kimi CLI login and stores no OAuth token in the harness. Use `cod oauth list --format text` to see the other CLI-backed providers.
 
 Market gauntlet and recovery commands:
 
 ```sh
-ceo-packet gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
-ceo-packet gauntlet --suite production-core --agents ceo_harness --concurrency 4 --output-dir .omo/evidence/production-gauntlet
-ceo-packet gauntlet --suite cross-language-core --agents ceo_harness --concurrency 2 --output-dir .omo/evidence/cross-language-gauntlet
+cod gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
+cod gauntlet --suite production-core --agents ceo_harness --concurrency 4 --output-dir .omo/evidence/production-gauntlet
+cod gauntlet --suite cross-language-core --agents ceo_harness --concurrency 2 --output-dir .omo/evidence/cross-language-gauntlet
 sh scripts/dogfood-real.sh --repo "ceo-harness:$PWD" --repeat 3 --output-dir .omo/evidence/dogfood-real-repeat
 sh scripts/dogfood-real.sh --copy-workspace --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-copy
 sh scripts/dogfood-real.sh --copy-workspace --write-probe --repo "ceo-harness:$PWD" --output-dir .omo/evidence/dogfood-real-write-probe
@@ -159,9 +159,9 @@ sh scripts/provider-proof.sh --provider codex --output-dir .omo/evidence/provide
 sh scripts/provider-proof.sh --provider openrouter --output-dir .omo/evidence/provider-proof-openrouter
 sh scripts/provider-proof.sh --provider kimi-code --output-dir .omo/evidence/provider-proof-kimi-code
 sh scripts/provider-proof.sh --provider minimax --output-dir .omo/evidence/provider-proof-minimax
-ceo-packet explain-failure latest --workspace .
-ceo-packet retry latest --workspace .
-ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
+cod explain-failure latest --workspace .
+cod retry latest --workspace .
+cod rollback .ceo-harness/history/job-000001.json --workspace .
 ```
 
 Quickstart auto-detects Go, Rust, package.json, pytest Python, and Makefile workspaces (`go.mod`, `Cargo.toml`, a `scripts.test` entry, pytest config, or a `test` target), writes the default test command, and enables `require_checks` so coding runs cannot pass without verification. Package workspaces use `bun test`, `pnpm test`, `yarn test`, or `npm test` based on the lockfile. Python workspaces use `uv run pytest` when `uv.lock` is present, otherwise `python -m pytest`. Makefile workspaces use `make test`.
@@ -169,13 +169,13 @@ Quickstart auto-detects Go, Rust, package.json, pytest Python, and Makefile work
 Create a real-provider workspace config from an already logged-in local CLI. This stores no OAuth token in the harness:
 
 ```sh
-ceo-packet oauth list
-ceo-packet oauth doctor --format text
-ceo-packet oauth init kimi --workspace /path/to/repo --format text
-ceo-packet oauth init codex --workspace /path/to/repo --format text
-ceo-packet oauth init claude --workspace /path/to/repo --format text
-ceo-packet oauth init opencode --workspace /path/to/repo --format text
-ceo-packet oauth init goose --workspace /path/to/repo --format text
+cod oauth list
+cod oauth doctor --format text
+cod oauth init kimi --workspace /path/to/repo --format text
+cod oauth init codex --workspace /path/to/repo --format text
+cod oauth init claude --workspace /path/to/repo --format text
+cod oauth init opencode --workspace /path/to/repo --format text
+cod oauth init goose --workspace /path/to/repo --format text
 ```
 
 `oauth init` creates provider `main`, routes CEO/default/fallback work to it, and uses the local vendor CLI login. Kimi, Codex, Claude, OpenCode, and Goose have built-in model-command wrappers.
@@ -184,7 +184,7 @@ Create a real-provider workspace config where the CEO and default subagents use 
 
 ```sh
 export KIMI_CODE_API_KEY=...
-ceo-packet --workspace /path/to/repo \
+cod --workspace /path/to/repo \
   --provider-wizard kimi-code \
   --http-model kimi-for-coding \
   --format text
@@ -261,7 +261,7 @@ go run ./cmd/ceo-packet --doctor --research-command sh examples/research-command
 Check one configured provider without running the full doctor:
 
 ```sh
-ceo-packet --workspace /path/to/repo --doctor-provider main --format text
+cod --workspace /path/to/repo --doctor-provider main --format text
 ```
 
 Doctor adapter checks report their command `source` as `flag`, `env`, or `workspace`.
@@ -277,13 +277,13 @@ go run ./cmd/ceo-packet --format text Fix a failing test
 Preview the packet, provider routes, checks, and limits without running models:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --plan-only Fix a failing test
+go run ./cmd/cod --workspace /path/to/repo --plan-only Fix a failing test
 ```
 
 Print that preview as compact text:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --plan-only --format text Fix a failing test
+go run ./cmd/cod --workspace /path/to/repo --plan-only --format text Fix a failing test
 ```
 
 Patch writes preview by default. Preview patch writes without changing workspace files or saving run artifacts/history:
@@ -299,8 +299,8 @@ go run ./cmd/ceo-packet \
 Use write policy presets when a repo should be safer by default:
 
 ```sh
-ceo-packet --workspace /path/to/repo --write-policy dry-run --replace app.txt old new -- "Patch app text"
-ceo-packet --workspace /path/to/repo --write-policy approved-write --approve-preview <digest> --replace app.txt old new -- "Patch app text"
+cod --workspace /path/to/repo --write-policy dry-run --replace app.txt old new -- "Patch app text"
+cod --workspace /path/to/repo --write-policy approved-write --approve-preview <digest> --replace app.txt old new -- "Patch app text"
 ```
 
 Dry-run and default preview reports include `patch_approval.preview_digest`. To apply that exact preview, pass the digest back:
@@ -449,8 +449,8 @@ go run ./cmd/ceo-packet \
 Saved-job commands accept exact IDs or `latest`/`last`, so repeated local loops can stay short:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --job latest
-go run ./cmd/ceo-packet --workspace /path/to/repo --continue-job last
+go run ./cmd/cod --workspace /path/to/repo --job latest
+go run ./cmd/cod --workspace /path/to/repo --continue-job last
 ```
 
 Record your own final judgment without feeding it back into model context:
@@ -466,7 +466,7 @@ go run ./cmd/ceo-packet \
 Read it later with:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --judge-job latest
+go run ./cmd/cod --workspace /path/to/repo --judge-job latest
 ```
 
 `--job <id>` and `--history` include `human_judgment` when a judgment sidecar exists; `--history --summary-only` counts accepted and rejected human judgments.
@@ -476,8 +476,8 @@ Use `--review-queue --format text` for a compact terminal inbox.
 Use `--inbox` for the friendlier default: text output plus compact job details.
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --inbox
-go run ./cmd/ceo-packet --workspace /path/to/repo --tui
+go run ./cmd/cod --workspace /path/to/repo --inbox
+go run ./cmd/cod --workspace /path/to/repo --tui
 go run ./cmd/ceo-packet tui --workspace /path/to/repo --snapshot
 ```
 
@@ -573,7 +573,7 @@ This writes model, CEO, and research commands that point at the repo's `examples
 For external coding tools that do not have a built-in OAuth wrapper yet, initialize a thin command adapter:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --init-config --adapter codex
+go run ./cmd/cod --workspace /path/to/repo --init-config --adapter codex
 ```
 
 Supported adapter presets are `codex`, `claude`, `opencode`, `aider`, and `goose`. The bundled scripts live in `examples/adapters/` and delegate to env vars such as `CEO_CODEX_ADAPTER_COMMAND` or `CEO_CLAUDE_ADAPTER_COMMAND`.
@@ -742,7 +742,7 @@ Use `risk_area_providers` when you want normal work to stay on the cheap route w
 ## Config Check
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --config-check
+go run ./cmd/cod --workspace /path/to/repo --config-check
 ```
 
 `--config-check` reports counts and sources only. It does not print provider secret values. For provider-health routing, config-check and `run_manifest` include `provider_health_avoided_route_count` and `provider_health_avoided_providers`.
@@ -751,40 +751,40 @@ Use `--config-check --format text` for a short provider setup checklist; it prin
 Summarize provider health across stored job history:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --provider-health
+go run ./cmd/cod --workspace /path/to/repo --provider-health
 ```
 
 Filter that rollup to one provider:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --provider-health --provider fast
+go run ./cmd/cod --workspace /path/to/repo --provider-health --provider fast
 ```
 
 Filter that rollup to one recommendation label:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --provider-health --recommendation avoid
+go run ./cmd/cod --workspace /path/to/repo --provider-health --recommendation avoid
 ```
 
 Filter history or provider health to matching task text:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --history --task checkout
-go run ./cmd/ceo-packet --workspace /path/to/repo --provider-health --task checkout
+go run ./cmd/cod --workspace /path/to/repo --history --task checkout
+go run ./cmd/cod --workspace /path/to/repo --provider-health --task checkout
 ```
 
 Print one compact history row, a compact resume context packet, the saved full report, or saved JSONL events for a job:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --review-queue
-go run ./cmd/ceo-packet --workspace /path/to/repo --review-queue --review-details --format text
-go run ./cmd/ceo-packet --workspace /path/to/repo --job job-000001
-go run ./cmd/ceo-packet --workspace /path/to/repo --job-context job-000001
-go run ./cmd/ceo-packet --workspace /path/to/repo --job-context job-000001 --format text
+go run ./cmd/cod --workspace /path/to/repo --review-queue
+go run ./cmd/cod --workspace /path/to/repo --review-queue --review-details --format text
+go run ./cmd/cod --workspace /path/to/repo --job job-000001
+go run ./cmd/cod --workspace /path/to/repo --job-context job-000001
+go run ./cmd/cod --workspace /path/to/repo --job-context job-000001 --format text
 go run ./cmd/ceo-packet context --workspace /path/to/repo latest
-go run ./cmd/ceo-packet --workspace /path/to/repo --context-trace job-000001 --format text
-go run ./cmd/ceo-packet --workspace /path/to/repo --job-report job-000001
-go run ./cmd/ceo-packet --workspace /path/to/repo --job-events job-000001
+go run ./cmd/cod --workspace /path/to/repo --context-trace job-000001 --format text
+go run ./cmd/cod --workspace /path/to/repo --job-report job-000001
+go run ./cmd/cod --workspace /path/to/repo --job-events job-000001
 ```
 
 Use `--review-details` to include the compact job context directly in the review inbox: next action, questions, changed files, failed checks, and CEO review summary when a saved report snapshot is available.
@@ -793,44 +793,44 @@ Use `--job-context <id> --format text` for the same compact packet as a terminal
 Start a new task with a compact previous-job packet instead of pasting old chat:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --with-job-context job-000001 "Continue the checkout fix"
+go run ./cmd/cod --workspace /path/to/repo --with-job-context job-000001 "Continue the checkout fix"
 ```
 
 Rerun a saved job task with the current workspace config:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --rerun job-000001
+go run ./cmd/cod --workspace /path/to/repo --rerun job-000001
 ```
 
 Continue a saved job without rerunning matching passed subagents:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --continue-job job-000001
+go run ./cmd/cod --workspace /path/to/repo --continue-job job-000001
 ```
 
 Resume a saved `needs_input` job with your answer:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --resume job-000001 --answer "Use internal/cli."
+go run ./cmd/cod --workspace /path/to/repo --resume job-000001 --answer "Use internal/cli."
 ```
 
 Ask and resume from stdin in one command:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --interactive "Fix ambiguous package"
+go run ./cmd/cod --workspace /path/to/repo --interactive "Fix ambiguous package"
 ```
 
 Print compact history or provider-health counts without full rows. History summaries include verdict counts plus subagent, retry, no-progress stop, check, patch, provider failure, and provider cost totals.
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --history --summary-only
-go run ./cmd/ceo-packet --workspace /path/to/repo --provider-health --summary-only
+go run ./cmd/cod --workspace /path/to/repo --history --summary-only
+go run ./cmd/cod --workspace /path/to/repo --provider-health --summary-only
 ```
 
 Show only the worst provider-health rows:
 
 ```sh
-go run ./cmd/ceo-packet --workspace /path/to/repo --provider-health --top-providers 3
+go run ./cmd/cod --workspace /path/to/repo --provider-health --top-providers 3
 ```
 
 Provider-health rows include raw counts plus scan fields like `failure_rate`, `cost_per_attempt_microusd`, and `recommendation`. Recommendations are `avoid` for providers at or above 50% failures, `watch` for providers with lower failure/error signals, and `healthy` for clean providers. Rows sort worst-first by failure rate, error count, estimated cost, then provider name. The rollup also includes attempt/pass/fail/error/cost totals plus summary counts for avoid/watch/healthy/unknown providers. `--config-check` reports missing provider env var names and provider-health route avoidance without printing secret values. `--format events` and `--job-events` include a structured `provider_health_route` event when history reroutes work away from avoided providers.

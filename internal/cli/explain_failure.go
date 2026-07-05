@@ -45,7 +45,7 @@ func renderFailureExplanation(workspaceDir string, context compactJobContext) st
 	retryable := strings.TrimSpace(context.Task) != "" && context.Verdict == "fail"
 	builder.WriteString("Retryable: " + yesNo(retryable) + "\n")
 	if retryable {
-		builder.WriteString("Suggested retry: ceo-packet retry " + context.JobID)
+		builder.WriteString("Suggested retry: cod retry " + context.JobID)
 		if strings.TrimSpace(workspaceDir) != "" {
 			builder.WriteString(" --workspace " + workspaceDir)
 		}

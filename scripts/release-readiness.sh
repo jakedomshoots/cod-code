@@ -59,7 +59,9 @@ esac
 
 mkdir -p "$output_dir"
 
-if command -v ceo-packet >/dev/null 2>&1; then
+if command -v cod >/dev/null 2>&1; then
+  ceo_packet_cmd="cod"
+elif command -v ceo-packet >/dev/null 2>&1; then
   ceo_packet_cmd="ceo-packet"
 else
   ceo_packet_cmd="go run ./cmd/ceo-packet"

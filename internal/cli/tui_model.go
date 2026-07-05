@@ -95,7 +95,7 @@ func tuiActionLabel(reason string) string {
 }
 
 func tuiActionCommand(workspace string, jobID string, reason string) string {
-	prefix := "ceo-packet --workspace " + workspaceArg(workspace)
+	prefix := "cod --workspace " + workspaceArg(workspace)
 	switch reason {
 	case "needs_input":
 		return prefix + " --resume " + jobID + " --answer \"...\""
@@ -112,5 +112,5 @@ func tuiRetryCommand(workspace string, jobID string) string {
 	if jobID == "" {
 		return ""
 	}
-	return "ceo-packet --workspace " + workspaceArg(workspace) + " --rerun " + jobID
+	return "cod --workspace " + workspaceArg(workspace) + " --rerun " + jobID
 }

@@ -34,8 +34,8 @@ func Test_Run_config_check_reports_provider_setup_steps(t *testing.T) {
 	}
 	want := []string{
 		"export CEO_MISSING_TOKEN=...",
-		`ceo-packet --workspace "` + root + `" --doctor-provider "fast" --format text`,
-		`ceo-packet --workspace "` + root + `" --plan-only "Smoke provider routing"`,
+		`cod doctor --workspace "` + root + `" --doctor-provider "fast" --format text`,
+		`cod run --workspace "` + root + `" --plan-only "Smoke provider routing"`,
 	}
 	for _, step := range want {
 		if !containsString(body.ProviderSetupSteps, step) {

@@ -571,7 +571,7 @@ func Test_ReleaseBootstrapScript_passesWithPublicMetadata(t *testing.T) {
 		"`dist/checksums.txt`",
 		"`dist/release-manifest.json`",
 		"Publishing is intentionally manual",
-		"go run ./cmd/ceo-packet production-finalize --workspace . --dry-run",
+		"cod production-finalize --workspace . --dry-run",
 	} {
 		if !strings.Contains(handoff, want) {
 			t.Fatalf("release handoff missing %q:\n%s", want, handoff)

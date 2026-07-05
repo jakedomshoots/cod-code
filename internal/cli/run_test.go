@@ -207,7 +207,7 @@ func Test_HelperProcess_cli_fail_check(t *testing.T) {
 	os.Exit(8)
 }
 
-func Test_Run_prints_help_when_no_args_are_supplied(t *testing.T) {
+func Test_Run_opens_cod_chat_when_no_args_are_supplied(t *testing.T) {
 	// Given
 	var out bytes.Buffer
 
@@ -218,8 +218,8 @@ func Test_Run_prints_help_when_no_args_are_supplied(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
 	}
-	if body := out.String(); !strings.Contains(body, "ceo-packet — Cod Code CLI") || !strings.Contains(body, "ceo-packet run [flags] <task>") {
-		t.Fatalf("help output missing expected quick start:\n%s", body)
+	if body := out.String(); !strings.Contains(body, "Cod Code Chat") || !strings.Contains(body, "Shortcuts") {
+		t.Fatalf("cod chat output missing expected TUI markers:\n%s", body)
 	}
 }
 

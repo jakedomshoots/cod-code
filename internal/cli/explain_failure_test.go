@@ -57,7 +57,7 @@ func Test_ExplainFailure_latest_failed_report_prints_plain_text(t *testing.T) {
 		"Failed checks:",
 		"go test ./... [fail]: checkout test failed",
 		"Retryable: yes",
-		"Suggested retry: ceo-packet retry job-000002 --workspace",
+		"Suggested retry: cod retry job-000002 --workspace",
 		"Report path: ceo-artifacts/jobs/job-000002.json",
 	} {
 		if !strings.Contains(text, want) {

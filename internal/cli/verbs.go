@@ -18,6 +18,8 @@ func normalizeVerbArgs(args []string) ([]string, error) {
 		return nil, unknownVerbError(verb)
 	}
 	switch verb {
+	case "help":
+		return []string{"--help"}, nil
 	case "start":
 		return append([]string{"--start"}, rest...), nil
 	case "run":
@@ -56,7 +58,7 @@ func normalizeVerbArgs(args []string) ([]string, error) {
 		return normalizeIDVerb(rest, "--rollback-report", "rollback requires a saved report path")
 	case "explain-failure":
 		return normalizeIDVerb(rest, "--explain-failure", "explain-failure requires a job id; use latest or a saved job id")
-	case "tui":
+	case "tui", "chat", "dev":
 		return append([]string{"--tui"}, rest...), nil
 	case "eval":
 		return args, nil
@@ -101,7 +103,7 @@ func verbFlagConsumesValue(flag string) bool {
 
 func normalizeConfigVerb(args []string) ([]string, error) {
 	if len(args) == 0 {
-		return nil, fmt.Errorf("config requires check, doctor, explain, completions, or init; run ceo-packet --help")
+		return nil, fmt.Errorf("config requires check, doctor, explain, completions, or init; run cod --help")
 	}
 	subcommand := args[0]
 	rest := args[1:]
@@ -117,7 +119,7 @@ func normalizeConfigVerb(args []string) ([]string, error) {
 	case "init":
 		return append([]string{"--init-config"}, rest...), nil
 	default:
-		return nil, fmt.Errorf("unknown config command %q; run ceo-packet --help", subcommand)
+		return nil, fmt.Errorf("unknown config command %q; run cod --help", subcommand)
 	}
 }
 
@@ -142,7 +144,7 @@ func contextVerbJobIndex(args []string) int {
 
 func isKnownVerb(verb string) bool {
 	switch verb {
-	case "start", "run", "gauntlet", "doctor", "inbox", "status", "production-status", "production-actions", "production-finalize", "resume", "retry", "rollback", "explain-failure", "review", "context", "oauth", "browser", "computer", "tools", "tui", "eval":
+	case "help", "start", "run", "gauntlet", "doctor", "inbox", "status", "production-status", "production-actions", "production-finalize", "resume", "retry", "rollback", "explain-failure", "review", "context", "oauth", "browser", "computer", "tools", "tui", "chat", "dev", "eval":
 		return true
 	default:
 		return false
@@ -151,7 +153,7 @@ func isKnownVerb(verb string) bool {
 
 func normalizeBrowserVerb(args []string) ([]string, error) {
 	if len(args) == 0 {
-		return nil, fmt.Errorf("browser requires doctor, manifest, or read; run ceo-packet --help")
+		return nil, fmt.Errorf("browser requires doctor, manifest, or read; run cod --help")
 	}
 	subcommand := args[0]
 	rest := args[1:]
@@ -169,13 +171,13 @@ func normalizeBrowserVerb(args []string) ([]string, error) {
 		normalized = append(normalized, rest[urlIndex+1:]...)
 		return normalized, nil
 	default:
-		return nil, fmt.Errorf("unknown browser command %q; run ceo-packet --help", subcommand)
+		return nil, fmt.Errorf("unknown browser command %q; run cod --help", subcommand)
 	}
 }
 
 func normalizeComputerVerb(args []string) ([]string, error) {
 	if len(args) == 0 {
-		return nil, fmt.Errorf("computer requires doctor, manifest, or snapshot; run ceo-packet --help")
+		return nil, fmt.Errorf("computer requires doctor, manifest, or snapshot; run cod --help")
 	}
 	subcommand := args[0]
 	rest := args[1:]
@@ -193,25 +195,25 @@ func normalizeComputerVerb(args []string) ([]string, error) {
 		normalized = append(normalized, rest[appIndex+1:]...)
 		return normalized, nil
 	default:
-		return nil, fmt.Errorf("unknown computer command %q; run ceo-packet --help", subcommand)
+		return nil, fmt.Errorf("unknown computer command %q; run cod --help", subcommand)
 	}
 }
 
 func normalizeToolsVerb(args []string) ([]string, error) {
 	if len(args) == 0 {
-		return nil, fmt.Errorf("tools requires manifest; run ceo-packet --help")
+		return nil, fmt.Errorf("tools requires manifest; run cod --help")
 	}
 	switch args[0] {
 	case "manifest":
 		return append([]string{"--tools-manifest"}, args[1:]...), nil
 	default:
-		return nil, fmt.Errorf("unknown tools command %q; run ceo-packet --help", args[0])
+		return nil, fmt.Errorf("unknown tools command %q; run cod --help", args[0])
 	}
 }
 
 func normalizeOAuthVerb(args []string) ([]string, error) {
 	if len(args) == 0 {
-		return nil, fmt.Errorf("oauth requires list, doctor, or init; run ceo-packet --help")
+		return nil, fmt.Errorf("oauth requires list, doctor, or init; run cod --help")
 	}
 	subcommand := args[0]
 	rest := args[1:]
@@ -239,7 +241,7 @@ func normalizeOAuthVerb(args []string) ([]string, error) {
 		normalized = append(normalized, rest[providerIndex+1:]...)
 		return normalized, nil
 	default:
-		return nil, fmt.Errorf("unknown oauth command %q; run ceo-packet --help", subcommand)
+		return nil, fmt.Errorf("unknown oauth command %q; run cod --help", subcommand)
 	}
 }
 
@@ -253,5 +255,5 @@ func verbHelpRequested(args []string) bool {
 }
 
 func unknownVerbError(verb string) error {
-	return fmt.Errorf("unknown command %q; run ceo-packet --help", verb)
+	return fmt.Errorf("unknown command %q; run cod --help", verb)
 }

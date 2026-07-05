@@ -105,7 +105,7 @@ func writeTextQuestions(builder *strings.Builder, req reportOutputRequest) {
 		builder.WriteString("- " + question + "\n")
 	}
 	if req.Report.JobID != "" {
-		builder.WriteString("Resume: ceo-packet")
+		builder.WriteString("Resume: cod")
 		if strings.TrimSpace(req.WorkspaceDir) != "" {
 			builder.WriteString(" --workspace " + strconv.Quote(req.WorkspaceDir))
 		}

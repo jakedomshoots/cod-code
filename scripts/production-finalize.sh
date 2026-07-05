@@ -204,7 +204,10 @@ display_path() {
   esac
 }
 
-if command -v ceo-packet >/dev/null 2>&1; then
+if command -v cod >/dev/null 2>&1; then
+  ceo_packet_cmd="cod"
+  ceo_packet_words="cod"
+elif command -v ceo-packet >/dev/null 2>&1; then
   ceo_packet_cmd="ceo-packet"
   ceo_packet_words="ceo-packet"
 else

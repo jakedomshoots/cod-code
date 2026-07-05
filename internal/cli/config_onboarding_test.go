@@ -16,9 +16,9 @@ func Test_Run_config_completions_writes_shell_files_when_requested(t *testing.T)
 		fileName string
 		want     string
 	}{
-		{name: "zsh", shell: "zsh", fileName: "_ceo-packet", want: "#compdef ceo-packet"},
-		{name: "bash", shell: "bash", fileName: "ceo-packet.bash", want: "complete -F _ceo_packet ceo-packet"},
-		{name: "fish", shell: "fish", fileName: "ceo-packet.fish", want: "complete -c ceo-packet"},
+		{name: "zsh", shell: "zsh", fileName: "_cod", want: "#compdef cod"},
+		{name: "bash", shell: "bash", fileName: "cod.bash", want: "complete -F _cod cod"},
+		{name: "fish", shell: "fish", fileName: "cod.fish", want: "complete -c cod"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -37,7 +37,7 @@ func Test_Run_config_completions_writes_shell_files_when_requested(t *testing.T)
 			if readErr != nil {
 				t.Fatalf("read completion file: %v", readErr)
 			}
-			if !strings.Contains(string(content), tt.want) || !strings.Contains(string(content), "ceo-packet") {
+			if !strings.Contains(string(content), tt.want) || !strings.Contains(string(content), "cod") {
 				t.Fatalf("%s completion content missing expected command:\n%s", tt.shell, string(content))
 			}
 			for _, command := range []string{"start", "run", "gauntlet", "doctor", "inbox", "status", "oauth", "resume", "retry", "rollback", "explain-failure"} {

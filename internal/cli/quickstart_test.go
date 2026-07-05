@@ -62,10 +62,10 @@ func Test_Run_quickstart_prints_text_first_run_checklist_when_format_text_is_sup
 		"Config: " + filepath.Join(root, ".ceo-harness.json"),
 		"Doctor: pass",
 		"Next:",
-		`ceo-packet oauth doctor --format text`,
-		`ceo-packet oauth init kimi --workspace "` + root + `" --format text`,
-		`ceo-packet run --workspace "` + root + `" --check go test ./... -- "Fix one real task"`,
-		`ceo-packet production-status --workspace "` + root + `" --format text`,
+		`cod oauth doctor --format text`,
+		`cod oauth init kimi --workspace "` + root + `" --format text`,
+		`cod run --workspace "` + root + `" --check go test ./... -- "Fix one real task"`,
+		`cod production-status --workspace "` + root + `" --format text`,
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("quickstart text missing %q:\n%s", want, text)
@@ -105,11 +105,11 @@ func Test_Run_quickstart_text_includes_provider_setup_steps_when_provider_check_
 	for _, want := range []string{
 		"Quickstart: fail",
 		"export CEO_MISSING_TOKEN=...",
-		`ceo-packet --workspace "` + root + `" --doctor-provider "fast" --format text`,
-		`ceo-packet oauth doctor --format text`,
-		`ceo-packet oauth init kimi --workspace "` + root + `" --format text`,
-		`ceo-packet run --workspace "` + root + `" --check go test ./... -- "Fix one real task"`,
-		`ceo-packet production-status --workspace "` + root + `" --format text`,
+		`cod doctor --workspace "` + root + `" --doctor-provider "fast" --format text`,
+		`cod oauth doctor --format text`,
+		`cod oauth init kimi --workspace "` + root + `" --format text`,
+		`cod run --workspace "` + root + `" --check go test ./... -- "Fix one real task"`,
+		`cod production-status --workspace "` + root + `" --format text`,
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("quickstart text missing %q:\n%s", want, text)

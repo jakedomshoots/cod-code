@@ -16,8 +16,8 @@ func Test_TUIModel_navigates_jobs_and_dispatches_selected_action(t *testing.T) {
 	model := tuiModel{
 		workspace: "/tmp/work",
 		jobs: []tuiJob{
-			{id: "job-000001", task: "Passing job", verdict: "pass", action: "accept", actionCommand: "ceo-packet --workspace /tmp/work --judge-job job-000001 --human-verdict accept"},
-			{id: "job-000002", task: "Needs answer", verdict: "needs_input", inboxReason: "needs_input", action: "answer", actionCommand: "ceo-packet --workspace /tmp/work --resume job-000002 --answer \"...\""},
+			{id: "job-000001", task: "Passing job", verdict: "pass", action: "accept", actionCommand: "cod --workspace /tmp/work --judge-job job-000001 --human-verdict accept"},
+			{id: "job-000002", task: "Needs answer", verdict: "needs_input", inboxReason: "needs_input", action: "answer", actionCommand: "cod --workspace /tmp/work --resume job-000002 --answer \"...\""},
 		},
 	}
 
@@ -39,7 +39,7 @@ func Test_TUIModel_navigates_jobs_and_dispatches_selected_action(t *testing.T) {
 	if gotModel.selected != 1 {
 		t.Fatalf("selected changed = %d, want 1", gotModel.selected)
 	}
-	if gotAction != "ceo-packet --workspace /tmp/work --resume job-000002 --answer \"...\"" {
+	if gotAction != "cod --workspace /tmp/work --resume job-000002 --answer \"...\"" {
 		t.Fatalf("action = %q, want resume command", gotAction)
 	}
 
@@ -47,14 +47,14 @@ func Test_TUIModel_navigates_jobs_and_dispatches_selected_action(t *testing.T) {
 	_, gotAction = gotModel.applyKey("a")
 
 	// Then
-	if gotAction != "ceo-packet --workspace /tmp/work --resume job-000002 --answer \"...\"" {
+	if gotAction != "cod --workspace /tmp/work --resume job-000002 --answer \"...\"" {
 		t.Fatalf("a action = %q, want primary action command", gotAction)
 	}
 
 	// When — the 'r' shortcut must surface the rerun command for the selected job.
 	_, gotAction = gotModel.applyKey("r")
 	// Then — rerun command quotes the workspace path through workspaceArg.
-	if gotAction != "ceo-packet --workspace \"/tmp/work\" --rerun job-000002" {
+	if gotAction != "cod --workspace \"/tmp/work\" --rerun job-000002" {
 		t.Fatalf("r action = %q, want rerun command for selected job", gotAction)
 	}
 }
@@ -88,7 +88,7 @@ func Test_Run_tui_snapshot_shows_dashboard_when_jobs_exist(t *testing.T) {
 	}
 	text := out.String()
 	for _, want := range []string{
-		"Cod Code Mission Control",
+		"Cod Code Chat",
 		"Queue",
 		"[INPUT] Needs input (1)",
 		"[REVIEW] Needs decision (1)",
@@ -101,15 +101,15 @@ func Test_Run_tui_snapshot_shows_dashboard_when_jobs_exist(t *testing.T) {
 		"Check       go test ./... pass",
 		"Actions",
 		"Primary     answer",
-		"Command     ceo-packet --workspace",
-		"Rerun       ceo-packet --workspace",
+		"Command     cod --workspace",
+		"Rerun       cod --workspace",
 		"Providers   1 provider | 1 attempt | 1 pass | 0 fail",
 		"Systems",
 		"Shortcuts",
 		"Primary     enter/a dispatch selected action",
 		"Rerun       r print rerun command",
 		"Next",
-		"ceo-packet tools manifest --format json",
+		"cod tools manifest --format json",
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("snapshot missing %q:\n%s", want, text)
@@ -160,11 +160,11 @@ func Test_Run_tui_snapshot_shows_setup_guidance_when_workspace_empty(t *testing.
 	}
 	text := out.String()
 	for _, want := range []string{
-		"Cod Code Mission Control",
+		"Cod Code Chat",
 		"Queue",
 		"No saved jobs yet.",
-		"ceo-packet --quickstart",
-		"ceo-packet --workspace",
+		"cod start",
+		"cod doctor --workspace",
 		"Providers   no evidence yet; run provider proof or config-check.",
 		"Systems",
 		"Shortcuts",
@@ -172,6 +172,20 @@ func Test_Run_tui_snapshot_shows_setup_guidance_when_workspace_empty(t *testing.
 	} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("empty snapshot missing %q:\n%s", want, text)
+		}
+	}
+}
+
+func Test_Run_chat_and_dev_aliases_open_tui(t *testing.T) {
+	for _, verb := range []string{"chat", "dev"} {
+		var out bytes.Buffer
+		root := t.TempDir()
+
+		if err := Run(context.Background(), &out, []string{verb, "--workspace", root, "--snapshot"}); err != nil {
+			t.Fatalf("Run %s returned error: %v\n%s", verb, err, out.String())
+		}
+		if body := out.String(); !strings.Contains(body, "Cod Code Chat") || !strings.Contains(body, "Shortcuts") {
+			t.Fatalf("%s output missing TUI markers:\n%s", verb, body)
 		}
 	}
 }
@@ -197,7 +211,7 @@ func Test_RunWithIO_tui_processes_navigation_and_dispatches_action(t *testing.T)
 	}
 	text := out.String()
 	for _, want := range []string{
-		"Cod Code Mission Control",
+		"Cod Code Chat",
 		"Queue",
 		"[INPUT] Needs input (1)",
 		"[REVIEW] Needs decision (1)",
@@ -207,14 +221,14 @@ func Test_RunWithIO_tui_processes_navigation_and_dispatches_action(t *testing.T)
 		"Evidence",
 		"Actions",
 		"Primary     answer",
-		"Command     ceo-packet --workspace",
-		"Rerun       ceo-packet --workspace",
+		"Command     cod --workspace",
+		"Rerun       cod --workspace",
 		"Shortcuts",
 		"Primary     enter/a dispatch selected action",
 		"Rerun       r print rerun command",
-		"Action dispatched: ceo-packet --workspace",
+		"Action dispatched: cod --workspace",
 		"--resume job-000002 --answer \"...\"",
-		"Action dispatched: ceo-packet --workspace",
+		"Action dispatched: cod --workspace",
 		"--rerun job-000002",
 	} {
 		if !strings.Contains(text, want) {

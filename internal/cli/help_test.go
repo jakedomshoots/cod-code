@@ -16,40 +16,27 @@ func Test_Run_prints_help_when_help_flag_is_supplied(t *testing.T) {
 
 	body := out.String()
 	for _, want := range []string{
-		"ceo-packet",
-		"Primary flow:",
-		"ceo-packet start <path>",
-		"ceo-packet run [flags] <task>",
-		"ceo-packet gauntlet [flags]",
-		"ceo-packet doctor [flags]",
-		"ceo-packet inbox [flags]",
-		"ceo-packet status [flags]",
-		"ceo-packet oauth list",
-		"ceo-packet oauth init <provider>",
-		"ceo-packet resume <job> --answer <text>",
-		"ceo-packet retry <job>",
-		"ceo-packet rollback <report>",
-		"ceo-packet explain-failure <job>",
-		"gauntlet [flags]                Run market or production benchmark gauntlets",
-		"ceo-packet gauntlet --suite production-core [flags]",
-		"--doctor",
-		"--demo",
-		"--quickstart <path>",
-		"--start <path>",
-		"--inbox",
-		"--provider-wizard",
-		"--init-demo-repo",
+		"cod — Cod Code terminal",
+		"Simple commands:",
+		"cod                              Open the Cod Code TUI",
+		"cod chat                         Open the Cod Code TUI",
+		"cod dev                          Open the Cod Code TUI",
+		"cod run <task>",
+		"cod start .",
+		"cod doctor",
+		"cod status",
+		"cod inbox",
+		"cod oauth list",
+		"cod production-status [flags]",
+		"--workspace <path>",
+		"--check <command...> --",
 		"--write-policy <policy>",
-		"write intent previews by default",
 		"--adapter <name>",
-		"OAuth CLI: ceo-packet oauth init kimi --workspace .",
 		"--version",
 		"--format <json|text>",
 		"--help-advanced",
-		"ceo-packet oauth doctor --format text",
-		"ceo-packet oauth init kimi --workspace . --format text",
-		"ceo-packet run --workspace . --check go test ./... -- \"Fix one real task\"",
-		"ceo-packet production-status --workspace . --format text",
+		"cod run --workspace . --check go test ./... -- \"Fix one real task\"",
+		"cod production-status --workspace . --format text",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("help output missing %q:\n%s", want, body)
@@ -87,8 +74,8 @@ func Test_Run_compact_help_includes_cod_code_identity(t *testing.T) {
 
 	body := out.String()
 	for _, want := range []string{
-		"ceo-packet — Cod Code CLI",
-		"Alpha Cod delegates bounded swimmers",
+		"cod — Cod Code terminal",
+		"local agentic coding cockpit",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("compact help missing identity marker %q:\n%s", want, body)
@@ -115,8 +102,8 @@ func Test_Run_prints_advanced_help_when_requested(t *testing.T) {
 		"--provider-health-watch-cost-per-attempt-microusd",
 		"OAuth CLI setup:",
 		"CEO_RESEARCH_COMMAND_JSON",
-		"ceo-packet production-actions --workspace . --format text",
-		"ceo-packet production-actions --workspace . --action-state empty_env --commands-only",
+		"cod production-actions --workspace . --format text",
+		"cod production-actions --workspace . --action-state empty_env --commands-only",
 		`create patch JSON: {"patches":[{"path":"docs/notes.md","content":"# Notes\n"}]}`,
 	} {
 		if !strings.Contains(body, want) {
@@ -134,8 +121,8 @@ func Test_Run_advanced_help_includes_cod_code_identity(t *testing.T) {
 
 	body := out.String()
 	for _, want := range []string{
-		"ceo-packet — Cod Code CLI",
-		"Alpha Cod delegates bounded swimmers",
+		"cod — Cod Code terminal",
+		"local agentic coding cockpit",
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("advanced help missing identity marker %q:\n%s", want, body)

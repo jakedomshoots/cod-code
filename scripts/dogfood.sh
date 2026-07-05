@@ -58,6 +58,6 @@ if [ "$needs_input_status" -eq 0 ]; then
   exit 1
 fi
 
-"$bin" --workspace "$workspace" --job-context latest --format text | grep -q 'Resume: ceo-packet'
+"$bin" --workspace "$workspace" --job-context latest --format text | grep -q 'Resume: cod'
 
 printf '%s\n' "dogfood ok"

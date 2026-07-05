@@ -78,10 +78,10 @@ func providerSetupSteps(selection modelCommandSelection, workspaceDir string) []
 	}
 	workspace := workspaceArg(workspaceDir)
 	for _, providerName := range sortedDoctorProviderNames(selection.providerConfigs) {
-		steps = append(steps, "ceo-packet --workspace "+workspace+" --doctor-provider "+strconv.Quote(providerName)+" --format text")
+		steps = append(steps, "cod doctor --workspace "+workspace+" --doctor-provider "+strconv.Quote(providerName)+" --format text")
 	}
 	if selection.providerCount > 0 {
-		steps = append(steps, "ceo-packet --workspace "+workspace+" --plan-only "+strconv.Quote("Smoke provider routing"))
+		steps = append(steps, "cod run --workspace "+workspace+" --plan-only "+strconv.Quote("Smoke provider routing"))
 	}
 	return steps
 }

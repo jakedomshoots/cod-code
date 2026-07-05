@@ -27,10 +27,11 @@ trap 'rm -rf "$tmpdir"' EXIT
 cd "$root"
 go build \
 	-ldflags "-X ceoharness/internal/cli.Version=$version -X ceoharness/internal/cli.Commit=$commit" \
-	-o "$tmpdir/ceo-packet" \
+	-o "$tmpdir/cod" \
 	./cmd/ceo-packet
 
 mkdir -p "$bindir"
-install -m 0755 "$tmpdir/ceo-packet" "$bindir/ceo-packet"
-"$bindir/ceo-packet" --version
-printf 'installed %s\n' "$bindir/ceo-packet"
+install -m 0755 "$tmpdir/cod" "$bindir/cod"
+install -m 0755 "$tmpdir/cod" "$bindir/ceo-packet"
+"$bindir/cod" --version
+printf 'installed %s\n' "$bindir/cod"

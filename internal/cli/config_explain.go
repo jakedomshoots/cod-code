@@ -55,9 +55,9 @@ func renderConfigExplainText(report configExplainReport) string {
 func configExplainChecklist(workspaceDir string) []string {
 	workspace := workspaceArg(workspaceDir)
 	return []string{
-		"provider wizard: ceo-packet --workspace " + workspace + " --provider-wizard openai --http-model gpt-5 --format text",
-		"dogfood: ceo-packet --demo --format text",
+		"provider wizard: cod --workspace " + workspace + " --provider-wizard openai --http-model gpt-5 --format text",
+		"dogfood: cod --demo --format text",
 		"write policy: start with --write-policy dry-run",
-		"first task: ceo-packet run --workspace " + workspace + " --check go test ./... -- " + fmt.Sprintf("%q", "Fix one failing test"),
+		"first task: cod run --workspace " + workspace + " --check go test ./... -- " + fmt.Sprintf("%q", "Fix one failing test"),
 	}
 }

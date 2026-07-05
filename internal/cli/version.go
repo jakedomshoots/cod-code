@@ -13,7 +13,7 @@ var (
 )
 
 func runVersion(out io.Writer) error {
-	_, err := fmt.Fprintf(out, "ceo-packet %s\n", versionDetails())
+	_, err := fmt.Fprintf(out, "cod %s\n", versionDetails())
 	return err
 }
 

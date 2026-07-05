@@ -333,7 +333,7 @@ CHECKSUM_ONLY_RELEASE_NOTES_URL="$checksum_notes_url" \\
 RELEASE_URL="$release_url" \\
 sh scripts/release-preflight.sh dist
 sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness-final
-go run ./cmd/ceo-packet production-finalize --workspace . --dry-run
+cod production-finalize --workspace . --dry-run
 \`\`\`
 EOF
 

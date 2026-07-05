@@ -78,8 +78,8 @@ func buildDemoRepo(ctx context.Context, root string) (demoRepoReport, error) {
 		ConfigPath: configPath,
 		Files:      append(files, config.WorkspaceConfigName),
 		NextSteps: []string{
-			"ceo-packet --workspace " + workspaceArg(root) + " --dry-run --replace app.txt old new -- " + strconvQuote("Patch demo app"),
-			"ceo-packet --workspace " + workspaceArg(root) + " --approve-preview <digest> --replace app.txt old new -- " + strconvQuote("Patch demo app"),
+			"cod --workspace " + workspaceArg(root) + " --dry-run --replace app.txt old new -- " + strconvQuote("Patch demo app"),
+			"cod --workspace " + workspaceArg(root) + " --approve-preview <digest> --replace app.txt old new -- " + strconvQuote("Patch demo app"),
 		},
 	}, nil
 }

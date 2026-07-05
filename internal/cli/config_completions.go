@@ -38,18 +38,18 @@ func runConfigCompletions(out io.Writer, opts options) error {
 func completionForShell(shell string) (completionFile, error) {
 	switch strings.TrimSpace(shell) {
 	case "zsh":
-		return completionFile{name: "_ceo-packet", content: zshCompletion()}, nil
+		return completionFile{name: "_cod", content: zshCompletion()}, nil
 	case "bash":
-		return completionFile{name: "ceo-packet.bash", content: bashCompletion()}, nil
+		return completionFile{name: "cod.bash", content: bashCompletion()}, nil
 	case "fish":
-		return completionFile{name: "ceo-packet.fish", content: fishCompletion()}, nil
+		return completionFile{name: "cod.fish", content: fishCompletion()}, nil
 	default:
 		return completionFile{}, fmt.Errorf("--shell requires zsh, bash, or fish")
 	}
 }
 
 func completionWords() string {
-	return "start run gauntlet doctor inbox status oauth browser computer tools production-status production-actions production-finalize resume retry rollback explain-failure review context config eval"
+	return "help chat dev tui start run gauntlet doctor inbox status oauth browser computer tools production-status production-actions production-finalize resume retry rollback explain-failure review context config eval"
 }
 
 func oauthCommandWords() string {
@@ -81,11 +81,11 @@ func productionActionProviderWords() string {
 }
 
 func zshCompletion() string {
-	return `#compdef ceo-packet
+	return `#compdef cod
 local -a commands
 commands=(` + completionWords() + `)
 _arguments \
-  '1:command:((start run gauntlet doctor inbox status oauth browser computer tools production-status production-actions production-finalize resume retry rollback explain-failure review context config eval))' \
+  '1:command:((` + completionWords() + `))' \
   '*::arg:->args'
 case $words[2] in
   config)
@@ -125,7 +125,7 @@ esac
 }
 
 func bashCompletion() string {
-	return `_ceo_packet() {
+	return `_cod() {
   local cur prev
   COMPREPLY=()
   cur="${COMP_WORDS[COMP_CWORD]}"
@@ -179,24 +179,24 @@ func bashCompletion() string {
     return 0
   fi
 }
-complete -F _ceo_packet ceo-packet
+complete -F _cod cod
 `
 }
 
 func fishCompletion() string {
-	return `complete -c ceo-packet -f -n "__fish_use_subcommand" -a "` + completionWords() + `"
-complete -c ceo-packet -f -n "__fish_seen_subcommand_from config" -a "check doctor explain completions init"
-complete -c ceo-packet -f -n "__fish_seen_subcommand_from oauth" -a "` + oauthCommandWords() + `"
-complete -c ceo-packet -n "__fish_seen_subcommand_from oauth" -a "` + oauthProviderWords() + `"
-complete -c ceo-packet -f -n "__fish_seen_subcommand_from browser" -a "` + browserCommandWords() + `"
-complete -c ceo-packet -f -n "__fish_seen_subcommand_from computer" -a "` + computerCommandWords() + `"
-complete -c ceo-packet -f -n "__fish_seen_subcommand_from tools" -a "` + toolsCommandWords() + `"
-complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l agents -a "ceo_harness codex_cli claude_code aider opencode goose pi oh_my_pi"
-complete -c ceo-packet -n "__fish_seen_subcommand_from gauntlet" -l output-dir -r
-complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-state -a "` + productionActionStateWords() + `"
-complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-kind -a "release_proof provider_proof competitor_setup comparison final_readiness"
-complete -c ceo-packet -n "__fish_seen_subcommand_from production-actions" -l action-provider -a "` + productionActionProviderWords() + `"
-complete -c ceo-packet -n "__fish_seen_subcommand_from completions" -l shell -a "zsh bash fish"
-complete -c ceo-packet -n "__fish_seen_subcommand_from completions" -l output-dir -r
+	return `complete -c cod -f -n "__fish_use_subcommand" -a "` + completionWords() + `"
+complete -c cod -f -n "__fish_seen_subcommand_from config" -a "check doctor explain completions init"
+complete -c cod -f -n "__fish_seen_subcommand_from oauth" -a "` + oauthCommandWords() + `"
+complete -c cod -n "__fish_seen_subcommand_from oauth" -a "` + oauthProviderWords() + `"
+complete -c cod -f -n "__fish_seen_subcommand_from browser" -a "` + browserCommandWords() + `"
+complete -c cod -f -n "__fish_seen_subcommand_from computer" -a "` + computerCommandWords() + `"
+complete -c cod -f -n "__fish_seen_subcommand_from tools" -a "` + toolsCommandWords() + `"
+complete -c cod -n "__fish_seen_subcommand_from gauntlet" -l agents -a "ceo_harness codex_cli claude_code aider opencode goose pi oh_my_pi"
+complete -c cod -n "__fish_seen_subcommand_from gauntlet" -l output-dir -r
+complete -c cod -n "__fish_seen_subcommand_from production-actions" -l action-state -a "` + productionActionStateWords() + `"
+complete -c cod -n "__fish_seen_subcommand_from production-actions" -l action-kind -a "release_proof provider_proof competitor_setup comparison final_readiness"
+complete -c cod -n "__fish_seen_subcommand_from production-actions" -l action-provider -a "` + productionActionProviderWords() + `"
+complete -c cod -n "__fish_seen_subcommand_from completions" -l shell -a "zsh bash fish"
+complete -c cod -n "__fish_seen_subcommand_from completions" -l output-dir -r
 `
 }

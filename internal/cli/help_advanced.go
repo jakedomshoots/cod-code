@@ -1,14 +1,14 @@
 package cli
 
-const advancedHelpText = `ceo-packet — Cod Code CLI
+const advancedHelpText = `cod — Cod Code terminal
 
-Alpha Cod delegates bounded swimmers, inspects catches, and owns the final verdict.
+Cod Code is the local agentic coding cockpit: start a lane, send a task, review the catch, and keep proof close.
 
 Primary flow:
   start <path>                    Guided setup/check/doctor start flow
-  run [flags] <task>              Run the Alpha Cod packet loop
+  run [flags] <task>              Send one coding task through Cod Code
   gauntlet [flags]                Run market or production benchmark gauntlets
-  doctor [flags]                  Run harness health checks
+  doctor [flags]                  Check local Cod Code setup
   inbox [flags]                   Review queue alias with text details
   status [flags]                  Print summary job history
   oauth list|doctor|init          Setup CLI-login model providers
@@ -21,25 +21,25 @@ Primary flow:
   explain-failure <job>           Explain a failed job in plain language
 
 Usage:
-  ceo-packet start <path>
-  ceo-packet run [flags] <task>
-  ceo-packet gauntlet [flags]
-  ceo-packet gauntlet --suite production-core [flags]
-  ceo-packet gauntlet --suite production-core --concurrency 4 [flags]
-  ceo-packet doctor [flags]
-  ceo-packet inbox [flags]
-  ceo-packet status [flags]
-  ceo-packet oauth list
-  ceo-packet oauth doctor [provider]
-  ceo-packet oauth init <provider> --workspace <path>
-  ceo-packet production-status [flags]
-  ceo-packet production-actions [flags]
-  ceo-packet production-finalize --dry-run [flags]
-  ceo-packet resume <job> --answer <text>
-  ceo-packet retry <job>
-  ceo-packet rollback <report>
-  ceo-packet explain-failure <job>
-  ceo-packet [flags] <task>
+  cod start <path>
+  cod run [flags] <task>
+  cod gauntlet [flags]
+  cod gauntlet --suite production-core [flags]
+  cod gauntlet --suite production-core --concurrency 4 [flags]
+  cod doctor [flags]
+  cod inbox [flags]
+  cod status [flags]
+  cod oauth list
+  cod oauth doctor [provider]
+  cod oauth init <provider> --workspace <path>
+  cod production-status [flags]
+  cod production-actions [flags]
+  cod production-finalize --dry-run [flags]
+  cod resume <job> --answer <text>
+  cod retry <job>
+  cod rollback <report>
+  cod explain-failure <job>
+  cod [flags] <task>
 
 Advanced commands:
   review [flags]                  Print review queue with details
@@ -49,14 +49,14 @@ Advanced commands:
   config completions [flags]      Write zsh, bash, or fish completion file
   config init [flags]             Create workspace config
   eval [flags]                    Run eval catalog, rubric, scoring, and benchmark tools
-  tui [flags]                     Open stdin-driven operator dashboard
+  chat|dev|tui [flags]            Open the Cod Code TUI
 
 Common flags:
 	  --workspace <path>              Use a workspace directory
 	  --artifact-root <path>          Write runtime artifacts/history outside the workspace
 	  --quickstart <path>             Create example config and run doctor
 	  --start <path>                  Guided setup/check/doctor start flow
-	  --doctor                       Run harness health checks
+	  --doctor                       Check local Cod Code setup
 	  --demo                         Run the built-in golden coding demo
 	  --init-demo-repo <path>         Create a tiny golden demo repo
 	  --plan-only                     Preview packet/routes/checks without model calls
@@ -92,7 +92,7 @@ Common flags:
 	  --workspace-brief-exclude <glob> Omit path/glob from workspace brief
 	  --format <json|text|events>     Print JSON, compact text, or JSONL events
 	  --interactive                   Ask and resume when subagents need input
-	  --tui                           Open stdin-driven operator dashboard
+	  --tui                           Open the Cod Code TUI
 	  --snapshot                      Print deterministic TUI/dashboard text for CI
 	  --with-job-context <id>         Add compact previous-job context to task
 	  --version                       Print version
@@ -157,14 +157,14 @@ Advanced flags:
   --help, -h                      Print this help
 
 Provider quick start:
-  OAuth providers: ceo-packet oauth list
-  Kimi OAuth: ceo-packet oauth init kimi --workspace .
-  Codex OAuth: ceo-packet oauth init codex --workspace .
-  Claude OAuth: ceo-packet oauth init claude --workspace .
-  OpenCode OAuth: ceo-packet oauth init opencode --workspace .
-  Goose OAuth: ceo-packet oauth init goose --workspace .
-  Codex CLI: ceo-packet config init --adapter codex
-  Kimi CLI: ceo-packet config init --adapter kimi
+  OAuth providers: cod oauth list
+  Kimi OAuth: cod oauth init kimi --workspace .
+  Codex OAuth: cod oauth init codex --workspace .
+  Claude OAuth: cod oauth init claude --workspace .
+  OpenCode OAuth: cod oauth init opencode --workspace .
+  Goose OAuth: cod oauth init goose --workspace .
+  Codex CLI: cod config init --adapter codex
+  Kimi CLI: cod config init --adapter kimi
   OpenRouter: use --provider-wizard openrouter; missing OPENROUTER_API_KEY is blocked setup, not a failed benchmark
   Kimi Code API: use --provider-wizard kimi-code with KIMI_CODE_API_KEY, or use --adapter kimi for OAuth CLI
   MiniMax API: use --provider-wizard minimax with MINIMAX_API_KEY
@@ -180,13 +180,13 @@ Model:
 	  create patch JSON: {"patches":[{"path":"docs/notes.md","content":"# Notes\n"}]}
 
 OAuth CLI setup:
-  ceo-packet oauth list
-  ceo-packet oauth doctor --format text
-  ceo-packet oauth init kimi --workspace . --format text
-  ceo-packet oauth init codex --workspace . --format text
-  ceo-packet oauth init claude --workspace . --format text
-  ceo-packet oauth init opencode --workspace . --format text
-  ceo-packet oauth init goose --workspace . --format text
+  cod oauth list
+  cod oauth doctor --format text
+  cod oauth init kimi --workspace . --format text
+  cod oauth init codex --workspace . --format text
+  cod oauth init claude --workspace . --format text
+  cod oauth init opencode --workspace . --format text
+  cod oauth init goose --workspace . --format text
   Built-in OAuth init stores no tokens. It creates a command provider that uses the local CLI login.
 
 HTTP provider setup:
@@ -207,27 +207,27 @@ HTTP provider setup:
   --provider-health-watch-cost-per-attempt-microusd <n>  Watch cost threshold
 
 Examples:
-  ceo-packet "Add tests for checkout"
-  ceo-packet doctor
-  ceo-packet --demo
-  ceo-packet --quickstart .
-  ceo-packet start .
-  ceo-packet gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
-  ceo-packet gauntlet --suite production-core --agents ceo_harness --output-dir .omo/evidence/production-gauntlet
-  ceo-packet inbox --workspace .
-  ceo-packet retry latest --workspace .
-  ceo-packet rollback .ceo-harness/history/job-000001.json --workspace .
-  ceo-packet review --workspace .
-  ceo-packet config check --workspace .
-  ceo-packet config doctor --workspace . --format text
-  ceo-packet config explain --workspace . --format text
-  ceo-packet config completions --shell zsh --output-dir /tmp/ceo-completions
-  ceo-packet production-actions --workspace . --format text
-  ceo-packet production-actions --workspace . --action-state empty_env --commands-only
-  ceo-packet oauth list
-  ceo-packet oauth init kimi --workspace . --format text
-  ceo-packet --workspace . --provider-wizard openai --http-model gpt-5
-  ceo-packet --init-demo-repo /tmp/ceo-demo
-  ceo-packet run --workspace . --check go test ./... -- "Fix retry bug"
-  ceo-packet config init --workspace . --model-command llm run --
+  cod "Add tests for checkout"
+  cod doctor
+  cod --demo
+  cod --quickstart .
+  cod start .
+  cod gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
+  cod gauntlet --suite production-core --agents ceo_harness --output-dir .omo/evidence/production-gauntlet
+  cod inbox --workspace .
+  cod retry latest --workspace .
+  cod rollback .ceo-harness/history/job-000001.json --workspace .
+  cod review --workspace .
+  cod config check --workspace .
+  cod config doctor --workspace . --format text
+  cod config explain --workspace . --format text
+  cod config completions --shell zsh --output-dir /tmp/ceo-completions
+  cod production-actions --workspace . --format text
+  cod production-actions --workspace . --action-state empty_env --commands-only
+  cod oauth list
+  cod oauth init kimi --workspace . --format text
+  cod --workspace . --provider-wizard openai --http-model gpt-5
+  cod --init-demo-repo /tmp/ceo-demo
+  cod run --workspace . --check go test ./... -- "Fix retry bug"
+  cod config init --workspace . --model-command llm run --
 `

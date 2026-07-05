@@ -1,6 +1,6 @@
 # Install
 
-Cod Code currently supports verified local installs from this checkout. The v0.1 binary remains `ceo-packet`; there is no published remote install URL yet.
+Cod Code currently supports verified local installs from this checkout. The end-user binary is `cod`; the legacy `ceo-packet` name is installed beside it for script compatibility.
 
 ## One-Line Local Install
 
@@ -11,7 +11,7 @@ PREFIX="$PWD/.local" sh scripts/install-local.sh
 Then run:
 
 ```sh
-.local/bin/ceo-packet --version
+.local/bin/cod --version
 ```
 
 Use a temp prefix for QA:
@@ -20,7 +20,7 @@ Use a temp prefix for QA:
 PREFIX="$(mktemp -d)" sh scripts/install-local.sh
 ```
 
-The script builds `./cmd/ceo-packet`, installs only the `ceo-packet` binary, prints `ceo-packet <version> commit=<commit>`, and does not require Homebrew, Task, ShellCheck, golangci-lint, nilaway, or gofumpt.
+The script builds `./cmd/ceo-packet`, installs `cod` plus the compatibility `ceo-packet` binary, prints `cod <version> commit=<commit>`, and does not require Homebrew, Task, ShellCheck, golangci-lint, nilaway, or gofumpt.
 
 ## Public Release Install
 
@@ -32,7 +32,7 @@ export RELEASE_VERSION=0.1.1
 curl -L -o ceo-packet.tar.gz "https://github.com/${GITHUB_REPOSITORY}/releases/download/v${RELEASE_VERSION}/ceo-packet_${RELEASE_VERSION}_darwin_arm64.tar.gz"
 tar -xzf ceo-packet.tar.gz
 ./ceo-packet --version
-./ceo-packet oauth list --format text
+./cod oauth list --format text
 ./ceo-packet doctor --format text
 ```
 
@@ -51,10 +51,10 @@ ALLOW_CHECKSUM_ONLY_RELEASE=1 CHECKSUM_ONLY_RELEASE_NOTES_URL="$RELEASE_PUBLIC_U
 Use the boring path first. It proves login/provider setup, runs one checked task, then shows production readiness without hiding external blockers:
 
 ```sh
-ceo-packet oauth doctor --format text
-ceo-packet oauth init kimi --workspace . --format text
-ceo-packet run --workspace . --check go test ./... -- "Fix one real task"
-ceo-packet production-status --workspace . --format text
+cod
+cod oauth doctor --format text
+cod run --workspace . --check go test ./... -- "Fix one real task"
+cod production-status --workspace . --format text
 ```
 
 Use `/path/to/repo` instead of `.` when you are setting up another checkout. `oauth init kimi` stores command routing only; the Kimi CLI owns its local login state.
@@ -64,13 +64,13 @@ Use `/path/to/repo` instead of `.` when you are setting up another checkout. `oa
 Use OAuth-backed local CLIs when you want the harness to use an already logged-in tool without storing tokens:
 
 ```sh
-ceo-packet oauth list
-ceo-packet oauth doctor --format text
-ceo-packet oauth init kimi --workspace /path/to/repo --format text
-ceo-packet oauth init codex --workspace /path/to/repo --format text
-ceo-packet oauth init claude --workspace /path/to/repo --format text
-ceo-packet oauth init opencode --workspace /path/to/repo --format text
-ceo-packet oauth init goose --workspace /path/to/repo --format text
+cod oauth list
+cod oauth doctor --format text
+cod oauth init kimi --workspace /path/to/repo --format text
+cod oauth init codex --workspace /path/to/repo --format text
+cod oauth init claude --workspace /path/to/repo --format text
+cod oauth init opencode --workspace /path/to/repo --format text
+cod oauth init goose --workspace /path/to/repo --format text
 ```
 
 `oauth init` creates provider `main`, routes CEO/default/fallback work to it, and stores no OAuth token or API key. The local vendor CLI owns login state.
@@ -79,8 +79,8 @@ OpenRouter and other API-key providers use the HTTP provider wizard and need a r
 
 ```sh
 export OPENROUTER_API_KEY=...
-ceo-packet --workspace /path/to/repo --provider-wizard openrouter --format text
-ceo-packet config doctor --workspace /path/to/repo --format text
+cod --workspace /path/to/repo --provider-wizard openrouter --format text
+cod config doctor --workspace /path/to/repo --format text
 ```
 
 Codex/Kimi/OpenRouter missing key or missing login states are blocked setup, not proof that the harness failed a benchmark. Save the exact command output before scoring the run.
@@ -111,13 +111,13 @@ When a key is missing, the proof gate also writes `summary.json`, `env.template`
 Use the gauntlet command to create market evidence:
 
 ```sh
-ceo-packet gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
+cod gauntlet --agents ceo_harness --output-dir .omo/evidence/gauntlet
 ```
 
 Use the stricter 29-task production suite when you want production-readiness evidence instead of the faster 10-task market smoke:
 
 ```sh
-ceo-packet gauntlet --suite production-core --agents ceo_harness --concurrency 4 --output-dir .omo/evidence/production-gauntlet
+cod gauntlet --suite production-core --agents ceo_harness --concurrency 4 --output-dir .omo/evidence/production-gauntlet
 ```
 
 The gauntlet can report partial/incomplete evidence when an agent, key, login, timeout log, git status, or scorer artifact is missing. Treat that as a setup or evidence gap until the raw artifacts prove a pass or fail.
@@ -125,11 +125,11 @@ The gauntlet can report partial/incomplete evidence when an agent, key, login, t
 ## Recovery Commands
 
 ```sh
-ceo-packet status --workspace /path/to/repo
-ceo-packet production-status --workspace /path/to/repo --format text
-ceo-packet explain-failure latest --workspace /path/to/repo
-ceo-packet retry latest --workspace /path/to/repo
-ceo-packet rollback .ceo-harness/history/job-000001.json --workspace /path/to/repo
+cod status --workspace /path/to/repo
+cod production-status --workspace /path/to/repo --format text
+cod explain-failure latest --workspace /path/to/repo
+cod retry latest --workspace /path/to/repo
+cod rollback .ceo-harness/history/job-000001.json --workspace /path/to/repo
 ```
 
 `production-status` reads the latest `.omo/evidence/production-readiness*/summary.json` packet and reports local readiness, public readiness, whether only external setup remains, blockers, and the launch checklist next action.
@@ -137,7 +137,7 @@ ceo-packet rollback .ceo-harness/history/job-000001.json --workspace /path/to/re
 For the final public-production evidence sequence, run:
 
 ```sh
-ceo-packet production-finalize --workspace . --dry-run
+cod production-finalize --workspace . --dry-run
 ```
 
 Remove `--dry-run` after release metadata and provider key environment variables are ready. The script writes evidence and command files, but it does not publish, tag, upload, or save secret values.
@@ -145,20 +145,20 @@ Remove `--dry-run` after release metadata and provider key environment variables
 To list the remaining production actions without opening files:
 
 ```sh
-ceo-packet production-actions --workspace . --format text
-ceo-packet production-actions --workspace . --format text --action-id provider-kimi-code
-ceo-packet production-actions --workspace . --format text --action-kind release_proof
-ceo-packet production-actions --workspace . --format text --action-kind provider_proof
-ceo-packet production-actions --workspace . --format text --action-provider kimi-code
-ceo-packet production-actions --workspace . --format text --action-state missing_env
-ceo-packet production-actions --workspace . --format text --action-state empty_env
-ceo-packet production-actions --workspace . --format text --action-state setup_blocked
-ceo-packet production-actions --workspace . --format text --env-ready-only
-ceo-packet production-actions --workspace . --format text --ready-only
-ceo-packet production-actions --workspace . --format text --next
-ceo-packet production-actions --workspace . --format text --action-kind competitor_setup
-ceo-packet production-actions --workspace . --format text --action-kind final_readiness
-ceo-packet production-actions --workspace . --action-id provider-kimi-code --commands-only
+cod production-actions --workspace . --format text
+cod production-actions --workspace . --format text --action-id provider-kimi-code
+cod production-actions --workspace . --format text --action-kind release_proof
+cod production-actions --workspace . --format text --action-kind provider_proof
+cod production-actions --workspace . --format text --action-provider kimi-code
+cod production-actions --workspace . --format text --action-state missing_env
+cod production-actions --workspace . --format text --action-state empty_env
+cod production-actions --workspace . --format text --action-state setup_blocked
+cod production-actions --workspace . --format text --env-ready-only
+cod production-actions --workspace . --format text --ready-only
+cod production-actions --workspace . --format text --next
+cod production-actions --workspace . --format text --action-kind competitor_setup
+cod production-actions --workspace . --format text --action-kind final_readiness
+cod production-actions --workspace . --action-id provider-kimi-code --commands-only
 ```
 
 `--commands-only` is paste-safe: actions that are missing environment variables, setup-blocked, or waiting on another action are emitted as commented `# blocked command:` lines. Use `--ready-only --commands-only` when you want only immediately runnable commands.
@@ -185,6 +185,6 @@ If optional tools are missing, use the documented fallback commands in [Verifica
 - No remote install URL or Homebrew tap is published yet.
 - Local archives are checksum-only; they are not signed.
 - Public release readiness is tracked with `sh scripts/release-readiness.sh --dist dist --output-dir .omo/evidence/release-readiness`.
-- Public production readiness can be checked with `ceo-packet production-status --workspace . --format text` after running `scripts/production-readiness.sh`.
+- Public production readiness can be checked with `cod production-status --workspace . --format text` after running `scripts/production-readiness.sh`.
 - External provider quality depends on the configured provider, model, login, and key.
 - Current market comparison evidence is useful but still narrow. Do not describe prototype areas as proven unless the saved command logs and artifacts show it.

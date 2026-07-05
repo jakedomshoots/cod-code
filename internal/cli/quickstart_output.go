@@ -63,10 +63,10 @@ func quickstartNextSteps(workspaceDir string, providerSteps []string) []string {
 		steps = append(steps, step)
 	}
 	for _, step := range []string{
-		"ceo-packet oauth doctor --format text",
-		"ceo-packet oauth init kimi --workspace " + workspace + " --format text",
-		"ceo-packet run --workspace " + workspace + " --check go test ./... -- " + strconv.Quote("Fix one real task"),
-		"ceo-packet production-status --workspace " + workspace + " --format text",
+		"cod oauth doctor --format text",
+		"cod oauth init kimi --workspace " + workspace + " --format text",
+		"cod run --workspace " + workspace + " --check go test ./... -- " + strconv.Quote("Fix one real task"),
+		"cod production-status --workspace " + workspace + " --format text",
 	} {
 		if _, ok := seen[step]; ok {
 			continue

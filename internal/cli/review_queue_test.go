@@ -169,7 +169,7 @@ func Test_Run_review_queue_prints_text_when_format_text_is_supplied(t *testing.T
 		"Verdict: needs_input",
 		"Retryable: no",
 		"Evidence: ceo-artifacts/jobs/job-000001.json",
-		"Next: ceo-packet",
+		"Next: cod",
 		"--resume job-000001",
 	} {
 		if !strings.Contains(text, want) {

@@ -22,13 +22,13 @@ func Test_InstallLocalScript_installs_binary_to_prefix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("install script failed: %v\n%s", err, string(output))
 	}
-	binary := filepath.Join(prefix, "bin", "ceo-packet")
+	binary := filepath.Join(prefix, "bin", "cod")
 	versionOutput, err := exec.Command(binary, "--version").CombinedOutput()
 	if err != nil {
 		t.Fatalf("installed binary failed: %v\n%s", err, string(versionOutput))
 	}
 	versionText := string(versionOutput)
-	if !strings.Contains(versionText, "ceo-packet 0.2.0-test commit=script-test") {
+	if !strings.Contains(versionText, "cod 0.2.0-test commit=script-test") {
 		t.Fatalf("version output = %q, want installed metadata", versionText)
 	}
 }

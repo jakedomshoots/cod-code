@@ -34,10 +34,10 @@ func Test_Run_start_text_next_steps_expose_boring_first_run_path(t *testing.T) {
 	nextBlock := text[nextIndex:]
 
 	wantLines := []string{
-		"ceo-packet oauth doctor --format text",
-		"ceo-packet oauth init kimi --workspace " + workspace + " --format text",
-		"ceo-packet run --workspace " + workspace + " --check go test ./... -- \"Fix one real task\"",
-		"ceo-packet production-status --workspace " + workspace + " --format text",
+		"cod oauth doctor --format text",
+		"cod oauth init kimi --workspace " + workspace + " --format text",
+		"cod run --workspace " + workspace + " --check go test ./... -- \"Fix one real task\"",
+		"cod production-status --workspace " + workspace + " --format text",
 	}
 	for _, want := range wantLines {
 		if !strings.Contains(nextBlock, want) {
