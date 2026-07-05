@@ -11,7 +11,7 @@ Runs: 1
 
 | Task | Run | Retry | Agent | Status | Score | Exit | Duration ms | Extra files | Changed files | Evidence |
 | --- | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| `cross-language-js-state-reducer` | 1 | 1 | CEO Harness | `pass` | 6/6 | 0 | 26825 | 0 | `frontend/state.js, .omo/evidence/cross-language-js-state-reducer.md` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-js-state-reducer/run/ceo_harness/score.json` |
+| `cross-language-js-state-reducer` | 1 | 1 | Cod Code | `pass` | 6/6 | 0 | 50172 | 0 | `frontend/state.js, .omo/evidence/cross-language-js-state-reducer.md` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-js-state-reducer/run/ceo_harness/score.json` |
 
 Passed: 1
 Partial: 0

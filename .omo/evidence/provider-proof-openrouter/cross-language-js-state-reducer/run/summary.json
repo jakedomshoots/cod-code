@@ -21,7 +21,7 @@
   "results": [
     {
       "id": "ceo_harness",
-      "name": "CEO Harness",
+      "name": "Cod Code",
       "task_id": "cross-language-js-state-reducer",
       "task_title": "JS state reducer preserves rollback metadata",
       "attempt": 1,
@@ -57,7 +57,7 @@
       ],
       "workspace_dir": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-js-state-reducer/run/ceo_harness/workspace",
       "exit_code": 0,
-      "duration_ms": 26825,
+      "duration_ms": 50172,
       "score_verdict": "pass",
       "passed_checks": 6,
       "total_checks": 6,
@@ -76,7 +76,7 @@
       "git_status_before_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-js-state-reducer/run/ceo_harness/git-status-before.txt",
       "git_status_after_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-js-state-reducer/run/ceo_harness/git-status-after.txt",
       "timing_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-js-state-reducer/run/ceo_harness/timing.txt",
-      "note": "agent command exited 0 and scored pass on saved benchmark evidence"
+      "note": "agent scored pass on saved benchmark evidence"
     }
   ],
   "iteration_backlog": [

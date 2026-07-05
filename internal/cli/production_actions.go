@@ -45,9 +45,14 @@ func buildProductionActionsReport(opts options) (productionActionsReport, error)
 		return productionActionsReport{}, err
 	}
 	if status.FinalizerNextActions == nil || status.FinalizerNextActions.JSONPath == "" {
+		reportStatus := "missing"
+		if status.PublicProductionReady {
+			reportStatus = "pass"
+		}
 		return productionActionsReport{
-			Status: "missing",
-			Path:   "",
+			Status:  reportStatus,
+			Path:    "",
+			Actions: []map[string]any{},
 		}, nil
 	}
 	content, err := os.ReadFile(status.FinalizerNextActions.JSONPath)

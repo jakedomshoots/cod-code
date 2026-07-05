@@ -1,5 +1,5 @@
-ceo-packet_0.1.0_darwin_arm64.tar.gz: OK
-ceo-packet_0.1.0_linux_amd64.tar.gz: OK
-ceo-packet_0.1.0_linux_arm64.tar.gz: OK
+ceo-packet_0.1.1_darwin_arm64.tar.gz: OK
+ceo-packet_0.1.1_linux_amd64.tar.gz: OK
+ceo-packet_0.1.1_linux_arm64.tar.gz: OK
 release manifest ok
 release verify ok

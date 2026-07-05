@@ -20,17 +20,17 @@ Incomplete evidence: 0
 ## Readiness Decision
 
 Overall comparison: pass
-CEO Harness result: clean
+Cod Code result: clean
 External blockers: none
 
 ## Per-Agent Status
 
 | Agent | Runs | Pass | Partial | Fail | Timeout | Setup blocked | Skipped | Evidence complete | Evidence incomplete | Duration ms |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| CEO Harness | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 15944 |
+| Cod Code | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 84154 |
 
 ## Run Artifact Detail
 
 | Task | Run | Agent | Result | Evidence | Incomplete evidence reasons | Score | Changed files | Extra files | Duration ms | Timing | Report | Score artifact |
 | --- | ---: | --- | --- | --- | --- | ---: | --- | --- | ---: | --- | --- | --- |
-| `cross-language-js-state-reducer` | 1 | CEO Harness | `pass` | `complete` | - | 6/6 | `frontend/state.js, .omo/evidence/cross-language-js-state-reducer.md` | `-` | 15944 | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-js-state-reducer/run/ceo_harness/timing.txt` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-js-state-reducer/run/ceo_harness/report.json` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-js-state-reducer/run/ceo_harness/score.json` |
+| `cross-language-js-state-reducer` | 1 | Cod Code | `pass` | `complete` | - | 6/6 | `frontend/state.js, .omo/evidence/cross-language-js-state-reducer.md` | `-` | 84154 | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-js-state-reducer/run/ceo_harness/timing.txt` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-js-state-reducer/run/ceo_harness/report.json` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-js-state-reducer/run/ceo_harness/score.json` |

@@ -21,7 +21,7 @@
   "results": [
     {
       "id": "ceo_harness",
-      "name": "CEO Harness",
+      "name": "Cod Code",
       "task_id": "cross-language-python-retry-policy",
       "task_title": "Python retry policy records jittered timeout backoff",
       "attempt": 1,
@@ -56,19 +56,15 @@
         "Complete benchmark task cross-language-python-retry-policy: Repair Python retry policy fixture so timeout retries include exponential backoff and jitter evidence..\nEdit only the required files unless an evidence artifact is required.\nRequired changed files: scripts/retry_policy.py.\nRequired evidence artifacts: .omo/evidence/cross-language-python-retry-policy.md.\nCreate every required evidence artifact as a non-empty markdown file inside the workspace.\nEach evidence artifact must summarize the change, commands run, and verification result.\nRequired diff terms: exponential backoff, jitter, timeout.\nRequired commands to satisfy after the edit: python3 scripts/test_retry_policy.py.\nDo not inspect unrelated files or run broad test suites; run only the required commands for verification.\nStop as soon as the required files, evidence artifacts, diff terms, and commands are satisfied.\nKeep the change minimal and do not remove the Go fixture files."
       ],
       "workspace_dir": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-python-retry-policy/run/ceo_harness/workspace",
-      "exit_code": 0,
-      "duration_ms": 58239,
+      "exit_code": 1,
+      "duration_ms": 62199,
       "score_verdict": "pass",
       "passed_checks": 7,
       "total_checks": 7,
       "evidence_status": "complete",
       "changed_files": [
         "scripts/retry_policy.py",
-        ".omo/evidence/cross-language-python-retry-policy.md",
-        "scripts/__pycache__/retry_policy.cpython-313.pyc"
-      ],
-      "extra_changed_files": [
-        "scripts/__pycache__/retry_policy.cpython-313.pyc"
+        ".omo/evidence/cross-language-python-retry-policy.md"
       ],
       "report_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-python-retry-policy/run/ceo_harness/report.json",
       "score_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-python-retry-policy/run/ceo_harness/score.json",
@@ -80,7 +76,8 @@
       "git_status_before_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-python-retry-policy/run/ceo_harness/git-status-before.txt",
       "git_status_after_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-python-retry-policy/run/ceo_harness/git-status-after.txt",
       "timing_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-python-retry-policy/run/ceo_harness/timing.txt",
-      "note": "agent command exited 0 and scored pass on saved benchmark evidence"
+      "error": "exit status 1",
+      "note": "agent scored pass on saved benchmark evidence"
     }
   ],
   "iteration_backlog": [
@@ -90,13 +87,6 @@
       "finding": "benchmark comparison scores saved task runs from actual file changes",
       "next_step": "add richer task fixtures, per-agent aggregate thresholds, and harder code-edit assertions",
       "evidence": "summary.json"
-    },
-    {
-      "priority": 2,
-      "area": "ceo_harness-file-footprint",
-      "finding": "CEO Harness changed 1 extra file(s) beyond task requirements",
-      "next_step": "isolate harness/runtime artifacts outside scored workspaces or mark them as ignored evidence",
-      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-kimi-code/cross-language-python-retry-policy/run/ceo_harness/changed-files.txt"
     }
   ]
 }

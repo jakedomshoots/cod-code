@@ -1,7 +1,7 @@
 diff --git a/scripts/retry_policy.py b/scripts/retry_policy.py
-index dc5ff7a..6c666fc 100644
+index dc5ff7a..119b44a 100644
 --- a/scripts/retry_policy.py
 +++ b/scripts/retry_policy.py
 @@ -1 +1 @@
 -benchmark_fixture = "TODO: update this benchmark fixture"
-+benchmark_fixture = "retry policy with exponential backoff, jitter, and timeout"
++benchmark_fixture = "Retry policy: timeout retries include exponential backoff and jitter"

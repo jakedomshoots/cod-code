@@ -10,6 +10,32 @@ import (
 	"testing"
 )
 
+func Test_Run_production_actions_reportsPassWhenPublicGateIsGreen(t *testing.T) {
+	root := t.TempDir()
+	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-r1", "summary.json"), `{
+  "status": "pass",
+  "local_production_ready": true,
+  "public_production_ready": true,
+  "blocked_count": 0,
+  "blocked_checks": []
+}`)
+
+	var out bytes.Buffer
+	if err := Run(context.Background(), &out, []string{"production-actions", "--workspace", root, "--format", "text"}); err != nil {
+		t.Fatalf("Run returned error: %v\n%s", err, out.String())
+	}
+	text := out.String()
+	for _, want := range []string{
+		"Production actions: pass",
+		"Required actions: 0",
+		"Blocked commands: 0",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("production actions text missing %q:\n%s", want, text)
+		}
+	}
+}
+
 func Test_Run_production_actions_reads_finalizer_action_json(t *testing.T) {
 	root := t.TempDir()
 	writeProductionStatusSummary(t, filepath.Join(root, ".omo", "evidence", "production-readiness-r1", "summary.json"), `{

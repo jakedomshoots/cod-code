@@ -11,7 +11,7 @@ Runs: 1
 
 | Task | Run | Retry | Agent | Status | Score | Exit | Duration ms | Extra files | Changed files | Evidence |
 | --- | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
-| `cross-language-python-retry-policy` | 1 | 1 | CEO Harness | `pass` | 7/7 | 0 | 62241 | 1 | `scripts/retry_policy.py, .omo/evidence/cross-language-python-retry-policy.md, scripts/__pycache__/retry_policy.cpython-313.pyc` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-python-retry-policy/run/ceo_harness/score.json` |
+| `cross-language-python-retry-policy` | 1 | 1 | Cod Code | `pass` | 7/7 | 0 | 61009 | 0 | `scripts/retry_policy.py, .omo/evidence/cross-language-python-retry-policy.md` | `/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-python-retry-policy/run/ceo_harness/score.json` |
 
 Passed: 1
 Partial: 0

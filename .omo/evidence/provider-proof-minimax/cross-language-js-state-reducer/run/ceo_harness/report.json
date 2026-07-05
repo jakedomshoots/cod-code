@@ -21,7 +21,7 @@
   "patch_results": [
     {
       "path": "frontend/state.js",
-      "diff": "diff --git a/frontend/state.js b/frontend/state.js\nindex 14078f5..fa0b9c5 100644\n--- a/frontend/state.js\n+++ b/frontend/state.js\n@@ -1 +1,4 @@\n-module.exports = { benchmarkFixture: \"TODO: update this benchmark fixture\" };\n+module.exports = {\n+  benchmarkFixture:\n+    \"TODO: update this benchmark fixture: reducers must keep rollback evidence on failed optimistic update operations\",\n+};\n"
+      "diff": "diff --git a/frontend/state.js b/frontend/state.js\nindex 14078f5..f078fb6 100644\n--- a/frontend/state.js\n+++ b/frontend/state.js\n@@ -1 +1,4 @@\n-module.exports = { benchmarkFixture: \"TODO: update this benchmark fixture\" };\n+module.exports = {\n+  benchmarkFixture:\n+    \"JS reducer fixture: optimistic update applies a pending change immediately and keeps rollback evidence on failure.\",\n+};\n"
     }
   ],
   "task_id": "cross-language-js-state-reducer"

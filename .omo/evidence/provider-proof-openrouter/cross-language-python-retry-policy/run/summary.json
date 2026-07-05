@@ -21,7 +21,7 @@
   "results": [
     {
       "id": "ceo_harness",
-      "name": "CEO Harness",
+      "name": "Cod Code",
       "task_id": "cross-language-python-retry-policy",
       "task_title": "Python retry policy records jittered timeout backoff",
       "attempt": 1,
@@ -57,18 +57,14 @@
       ],
       "workspace_dir": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-python-retry-policy/run/ceo_harness/workspace",
       "exit_code": 0,
-      "duration_ms": 62241,
+      "duration_ms": 61009,
       "score_verdict": "pass",
       "passed_checks": 7,
       "total_checks": 7,
       "evidence_status": "complete",
       "changed_files": [
         "scripts/retry_policy.py",
-        ".omo/evidence/cross-language-python-retry-policy.md",
-        "scripts/__pycache__/retry_policy.cpython-313.pyc"
-      ],
-      "extra_changed_files": [
-        "scripts/__pycache__/retry_policy.cpython-313.pyc"
+        ".omo/evidence/cross-language-python-retry-policy.md"
       ],
       "report_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-python-retry-policy/run/ceo_harness/report.json",
       "score_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-python-retry-policy/run/ceo_harness/score.json",
@@ -80,7 +76,7 @@
       "git_status_before_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-python-retry-policy/run/ceo_harness/git-status-before.txt",
       "git_status_after_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-python-retry-policy/run/ceo_harness/git-status-after.txt",
       "timing_path": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-python-retry-policy/run/ceo_harness/timing.txt",
-      "note": "agent command exited 0 and scored pass on saved benchmark evidence"
+      "note": "agent scored pass on saved benchmark evidence"
     }
   ],
   "iteration_backlog": [
@@ -90,13 +86,6 @@
       "finding": "benchmark comparison scores saved task runs from actual file changes",
       "next_step": "add richer task fixtures, per-agent aggregate thresholds, and harder code-edit assertions",
       "evidence": "summary.json"
-    },
-    {
-      "priority": 2,
-      "area": "ceo_harness-file-footprint",
-      "finding": "CEO Harness changed 1 extra file(s) beyond task requirements",
-      "next_step": "isolate harness/runtime artifacts outside scored workspaces or mark them as ignored evidence",
-      "evidence": "/Users/jakedom/Documents/cod code/.omo/evidence/provider-proof-openrouter/cross-language-python-retry-policy/run/ceo_harness/changed-files.txt"
     }
   ]
 }

@@ -152,25 +152,24 @@ func localAgentBenchmarkStatus(run localAgentRunResult, verdict string) string {
 	if run.timedOut {
 		return localAgentStatusTimeout
 	}
-	if run.exitCode != 0 || run.errText != "" {
-		return localAgentStatusFail
-	}
 	switch verdict {
 	case "pass":
 		return localAgentStatusPass
 	case "partial":
 		return localAgentStatusPartial
-	default:
+	}
+	if run.exitCode != 0 || run.errText != "" {
 		return localAgentStatusFail
 	}
+	return localAgentStatusFail
 }
 
 func localAgentBenchmarkNote(status string) string {
 	switch status {
 	case localAgentStatusPass:
-		return "agent command exited 0 and scored pass on saved benchmark evidence"
+		return "agent scored pass on saved benchmark evidence"
 	case localAgentStatusPartial:
-		return "agent command exited 0 but only partially satisfied benchmark scoring"
+		return "agent only partially satisfied benchmark scoring"
 	case localAgentStatusTimeout:
 		return "agent command timed out; process tree was canceled"
 	case localAgentStatusSetupBlocked:

@@ -1,12 +1,10 @@
 diff --git a/frontend/state.js b/frontend/state.js
-index 14078f5..de01dc5 100644
+index 14078f5..4851fbc 100644
 --- a/frontend/state.js
 +++ b/frontend/state.js
-@@ -1 +1,6 @@
+@@ -1 +1,4 @@
 -module.exports = { benchmarkFixture: "TODO: update this benchmark fixture" };
-+// This fixture denotes a reducer that performs an optimistic update
-+// and retains the evidence required to support a future rollback on failure.
 +module.exports = {
 +  benchmarkFixture:
-+    "Reducer supports optimistic update and preserves evidence for rollback when a request fails.",
++    "This benchmark exercises a reducer that performs an optimistic update and retains rollback evidence so the UI can revert if the server rejects the change.",
 +};
